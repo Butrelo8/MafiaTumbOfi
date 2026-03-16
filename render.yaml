@@ -1,0 +1,40 @@
+# Mafia Tumbada Oficial — API on Render (Bun + SQLite)
+# Docs: https://docs.render.com/blueprint-spec
+# After connecting the repo, set secret env vars in the Render Dashboard (sync: false).
+
+services:
+  - type: web
+    name: mto-api
+    runtime: node
+    # Bun is available in Render's Node runtime; use BUN_VERSION env if needed
+
+    buildCommand: bun install --frozen-lockfile
+    # Migrations run at startup (disk is only available at runtime, not in preDeployCommand)
+    startCommand: bun run migrate && bun run start
+
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DB_PATH
+        value: /data/sqlite.db
+      - key: FRONTEND_URL
+        sync: false
+      - key: PRODUCTION_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: BOOKING_NOTIFICATION_EMAIL
+        sync: false
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+
+    healthCheckPath: /health

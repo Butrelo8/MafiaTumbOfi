@@ -86,3 +86,8 @@ MafiaTumbadaOfi/
 
 - **API:** See root `.env.example` (PORT, FRONTEND_URL, DB_PATH, RESEND_API_KEY, BOOKING_NOTIFICATION_EMAIL).
 - **Frontend:** See `web/.env.example` (PUBLIC_API_URL for the booking form).
+
+## Deploy
+
+- **API:** Render (Bun + SQLite on a persistent disk). See `render.yaml` and [DEPLOY.md](./DEPLOY.md).
+- **Frontend:** Vercel (Astro SSR with `@astrojs/vercel`). Set root directory to `web/` and env vars as in DEPLOY.md.

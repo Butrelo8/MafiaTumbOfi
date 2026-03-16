@@ -8,7 +8,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
-- (None)
+- Deploy: Render (API with Bun + SQLite on persistent disk), Vercel (Astro frontend with @astrojs/vercel)
+- `render.yaml` Blueprint: web service, disk at `/data`, DB_PATH=/data/sqlite.db, migrations at startup
+- `DEPLOY.md` with step-by-step and env checklist for Render and Vercel
+- `web/vercel.json` and Vercel serverless adapter in `web/astro.config.mjs` (`@astrojs/vercel/serverless` for Astro 4)
+- `migrate` script in root package.json (runs scripts/run-migration.ts) for Render start command
 
 ### Changed
 - (None)

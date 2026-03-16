@@ -5,6 +5,15 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-03-16 — Deploy: Render (API) + Vercel (frontend) + SQLite on disk
+
+**Context:** Need production deploy for API (Bun + Hono), Astro frontend (SSR), and SQLite without managed Postgres.
+**Decision:** API on Render as a Web Service with a persistent disk at `/data` for SQLite; migrations at startup (`bun run migrate && bun run start`). Frontend on Vercel with `@astrojs/vercel`; repo root for Vercel set to `web/`.
+**Alternatives considered:** Railway, Fly.io, single Vercel full-stack (Vercel serverless + external DB), Render Postgres.
+**Why not the others:** Render supports Bun and persistent disks; SQLite on disk keeps MVP simple. Vercel is a good fit for Astro SSR and is free tier friendly. Separate API and frontend allow independent scaling and clear CORS/production URL handling.
+
+---
+
 ## YYYY-MM-DD — Initial stack selection
 
 **Context:** Starting a new micro SaaS project as a solo developer
