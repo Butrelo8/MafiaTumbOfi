@@ -1,6 +1,6 @@
 {
-  "name": "hono-template",
-  "version": "0.1.0",
+  "name": "mafia-tumbada-ofi",
+  "version": "0.5.0",
   "private": true,
   "scripts": {
     "dev": "bun run --watch src/index.ts",
@@ -12,14 +12,19 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "hono": "^4.0.0",
+    "@clerk/backend": "^3.2.0",
     "drizzle-orm": "^0.30.0",
-    "postgres": "^3.4.0",
-    "stripe": "^14.0.0"
+    "hono": "^4.0.0",
+    "resend": "^4.0.0",
+    "stripe": "^14.0.0",
+    "zod": "^3.23.0"
   },
   "devDependencies": {
     "bun-types": "latest",
     "drizzle-kit": "^0.20.0",
     "typescript": "^5.0.0"
-  }
+  },
+  "trustedDependencies": [
+    "es5-ext"
+  ]
 }
