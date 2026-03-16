@@ -27,5 +27,7 @@ export type ApiResponse<T> = ApiSuccess<T> | ApiError
 export type Env = {
   Variables: {
     user: User
+    userId: string
+    sessionId: string
   }
 }
