@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview"
+    "build": "astro build && node scripts/patch-vercel-runtime.mjs",
+    "build:vercel": "bun run build",
+    "preview": "astro dev"
   },
   "dependencies": {
     "@astrojs/node": "9.0.0",

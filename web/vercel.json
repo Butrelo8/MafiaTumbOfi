@@ -1,5 +1,5 @@
 {
-  "buildCommand": "bun run build && node scripts/patch-vercel-runtime.mjs",
+  "buildCommand": "bun run build:vercel",
   "framework": "astro",
   "functions": {
     "**": {
