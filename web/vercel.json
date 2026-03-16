@@ -1,4 +1,9 @@
 {
-  "buildCommand": "bun run build",
-  "framework": "astro"
+  "buildCommand": "bun run build && node scripts/patch-vercel-runtime.mjs",
+  "framework": "astro",
+  "functions": {
+    "**": {
+      "runtime": "nodejs20.x"
+    }
+  }
 }

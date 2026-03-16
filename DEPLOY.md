@@ -76,3 +76,4 @@ Deploy order: **API first**, then frontend (so you can set `PUBLIC_API_URL` to t
 - **CORS errors:** Ensure `PRODUCTION_URL` on Render exactly matches the frontend origin (scheme + host, no trailing slash).
 - **Migrations:** They run at API startup. If you add new migrations, push and redeploy; the new instance will run `bun run migrate` then start.
 - **SQLite on Render:** The disk is only available at **runtime**. Do not run migrations in a pre-deploy or build step; the start command handles them.
+- **Vercel "invalid runtime: render (nodejs18.x)":** The Astro Vercel adapter writes `nodejs18.x`, which Vercel no longer accepts. The build runs `scripts/patch-vercel-runtime.mjs` after `astro build` to set runtime to `nodejs20.x`. If the error persists, ensure the patch script runs and check Project Settings → Functions → Node.js Version.
