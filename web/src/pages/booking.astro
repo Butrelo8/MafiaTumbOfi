@@ -1,0 +1,74 @@
+---
+import Layout from '../layouts/Layout.astro'
+const apiUrl = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:3001';
+---
+<Layout title="Contrataciones — Mafia Tumbada" description="Solicitar contratación — Mafia Tumbada">
+  <h2 class="mb-6 text-2xl font-semibold text-stone-900">Solicitar contratación</h2>
+  <form id="booking-form" class="space-y-4">
+    <div class="hidden" aria-hidden="true">
+      <label for="website">Website</label>
+      <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
+    </div>
+    <div>
+      <label for="name" class="mb-1 block text-sm font-medium text-stone-700">Nombre *</label>
+      <input id="name" name="name" required class="w-full rounded-md border border-stone-300 px-3 py-2 shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+    </div>
+    <div>
+      <label for="email" class="mb-1 block text-sm font-medium text-stone-700">Email *</label>
+      <input id="email" name="email" type="email" required class="w-full rounded-md border border-stone-300 px-3 py-2 shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+    </div>
+    <div>
+      <label for="phone" class="mb-1 block text-sm font-medium text-stone-700">Teléfono</label>
+      <input id="phone" name="phone" type="tel" class="w-full rounded-md border border-stone-300 px-3 py-2 shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+    </div>
+    <div>
+      <label for="eventDate" class="mb-1 block text-sm font-medium text-stone-700">Fecha / tipo de evento</label>
+      <input id="eventDate" name="eventDate" class="w-full rounded-md border border-stone-300 px-3 py-2 shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+    </div>
+    <div>
+      <label for="message" class="mb-1 block text-sm font-medium text-stone-700">Mensaje</label>
+      <textarea id="message" name="message" rows="4" class="w-full rounded-md border border-stone-300 px-3 py-2 shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"></textarea>
+    </div>
+    <button type="submit" class="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2">
+      Enviar
+    </button>
+  </form>
+  <p id="form-status" class="mt-4 text-sm" aria-live="polite"></p>
+  <script define:vars={{ apiUrl }}>
+    const form = document.getElementById('booking-form');
+    const status = document.getElementById('form-status');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.textContent = 'Enviando…';
+      status.style.color = '';
+      const fd = new FormData(form);
+      const body = {
+        name: fd.get('name'),
+        email: fd.get('email'),
+        phone: fd.get('phone') || undefined,
+        eventDate: fd.get('eventDate') || undefined,
+        message: fd.get('message') || undefined,
+        website: fd.get('website') || undefined,
+      };
+      try {
+        const res = await fetch(`${apiUrl}/api/booking`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          status.textContent = 'Mensaje enviado. Te contactaremos pronto.';
+          status.style.color = 'green';
+          form.reset();
+        } else {
+          status.textContent = data?.error?.message || `Error ${res.status}. Vuelve a intentar.`;
+          status.style.color = 'red';
+        }
+      } catch (err) {
+        status.textContent = 'Error de conexión. Revisa que la API esté en marcha.';
+        status.style.color = 'red';
+      }
+    });
+  </script>
+</Layout>

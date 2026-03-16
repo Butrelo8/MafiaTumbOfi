@@ -1,0 +1,18 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { Show } from '@clerk/astro/components'
+---
+<Layout title="Mafia Tumbada — Oficial" description="Mafia Tumbada — sitio oficial, press kit y contacto para contrataciones.">
+  <Show when="signed-out">
+    <p class="mb-4 text-stone-600">Inicia sesión para acceder al panel de admin o solicitar contratación.</p>
+  </Show>
+  <Show when="signed-in">
+    <p class="mb-4 text-stone-600">Estás conectado. Puedes ver solicitudes en <a href="/admin" class="text-brand hover:underline">Admin</a>.</p>
+  </Show>
+  <p class="mb-4 text-stone-600">Página oficial. Press kit y formulario de contrataciones en un solo lugar.</p>
+  <p>
+    <a href="/booking" class="inline-flex items-center rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark transition-colors">
+      Solicitar contratación
+    </a>
+  </p>
+</Layout>

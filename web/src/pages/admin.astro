@@ -1,0 +1,162 @@
+---
+import Layout from '../layouts/Layout.astro'
+
+const { isAuthenticated, redirectToSignIn } = Astro.locals.auth()
+
+if (!isAuthenticated) {
+  return redirectToSignIn({ returnBackUrl: '/admin' })
+}
+
+const apiUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001'
+let bookings: Array<{
+  id: number
+  name: string
+  email: string
+  phone: string | null
+  eventDate: string | null
+  message: string | null
+  status: string
+  createdAt: number | Date
+}> = []
+let error: string | null = null
+
+try {
+  const token = Astro.locals.authToken
+  const response = await fetch(`${apiUrl}/api/admin/bookings`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`)
+  }
+
+  const result = await response.json()
+  bookings = result.data ?? []
+} catch (e) {
+  error = e instanceof Error ? e.message : String(e)
+  console.error('Failed to fetch bookings:', e)
+}
+---
+
+<Layout title="Admin - Bookings" description="Panel de administración de solicitudes.">
+  <div class="admin-container">
+    <h1>Bookings Management</h1>
+
+    {error && (
+      <div class="error-message">
+        Error loading bookings: {error}
+      </div>
+    )}
+
+    {!error && bookings.length === 0 && (
+      <p>No bookings found.</p>
+    )}
+
+    {!error && bookings.length > 0 && (
+      <div class="table-container">
+        <table class="bookings-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Event Date</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bookings.map((booking) => (
+              <tr>
+                <td>{booking.id}</td>
+                <td>{booking.name}</td>
+                <td>{booking.email}</td>
+                <td>{booking.phone ?? '-'}</td>
+                <td>{booking.eventDate ?? '-'}</td>
+                <td>
+                  <span class={`status-badge status-${booking.status}`}>
+                    {booking.status}
+                  </span>
+                </td>
+                <td>
+                  {new Date(booking.createdAt).toLocaleDateString('es-MX')}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </div>
+</Layout>
+
+<style>
+  .admin-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    margin-bottom: 2rem;
+  }
+
+  .error-message {
+    background: var(--error-bg, #fee);
+    border: 1px solid var(--error-border, #fcc);
+    color: var(--error-text, #c00);
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .bookings-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .bookings-table th,
+  .bookings-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+
+  .bookings-table th {
+    background: #f9fafb;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    color: #666;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .status-pending {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .status-sent {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .status-failed {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+</style>
