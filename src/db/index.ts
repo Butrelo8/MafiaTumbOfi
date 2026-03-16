@@ -1,11 +1,14 @@
-import { drizzle } from 'drizzle-orm/postgres-js'
-import postgres from 'postgres'
+import { mkdirSync, existsSync } from 'fs'
+import { dirname } from 'path'
+import { drizzle } from 'drizzle-orm/bun-sqlite'
+import { Database } from 'bun:sqlite'
 import * as schema from './schema'
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL is required')
+const dbPath = process.env.DB_PATH ?? './data/sqlite.db'
+const dir = dirname(dbPath)
+if (!existsSync(dir)) {
+  mkdirSync(dir, { recursive: true })
 }
+const sqlite = new Database(dbPath)
 
-const client = postgres(process.env.DATABASE_URL)
-
-export const db = drizzle(client, { schema })
+export const db = drizzle(sqlite, { schema })
