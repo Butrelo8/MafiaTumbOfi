@@ -6,17 +6,7 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ## Open
 
-### Deploy — Ship API + frontend to production
-**What:** Deploy Hono API and Astro frontend to a live environment; set PRODUCTION_URL and hand URL to the band for real booking requests.
-**Why:** CEO-recommended next step: get real usage before building more (admin/Stripe/SEO). Current product is shippable; next priorities should be data-driven.
-**Context:** API: e.g. Railway, Render, or Fly (Bun + SQLite or provided DB). Frontend: e.g. Vercel or Netlify for Astro. Set NODE_ENV=production, PRODUCTION_URL for CORS; PUBLIC_API_URL in frontend to live API. After a handful of real requests, decide: Clerk admin vs Stripe vs content/SEO.
-**Effort:** M
-**Priority:** P1
-**Depends on:** None
-
----
-
-    ### Resend — Verify domain so confirmation emails reach any customer
+### Resend — Verify domain so confirmation emails reach any customer
 **What:** Verify a sending domain in Resend and set RESEND_FROM_EMAIL so the customer confirmation email is delivered to any address (not only the Resend account owner).
 **Why:** In test mode Resend only delivers to the account owner’s email; customers (e.g. getmula.butrensky@gmail.com) never receive the “Recibimos tu solicitud” email until a domain is verified.
 **Context:** Verify at resend.com/domains; use a From address on that domain (e.g. noreply@tudominio.com). See BUGS.md entry “Resend: no email delivered to customer”.
@@ -36,7 +26,34 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ---
 
+### Content / SEO — Homepage, press kit, meta
+**What:** Copy and structure for homepage, press kit, booking page; meta tags, Open Graph, optional sitemap so the site reads as the band’s official presence.
+**Why:** Makes the site feel like a real official site for promoters and SEO.
+**Context:** Astro pages in web/src/pages; add/expand content and meta in layouts or per-page.
+**Effort:** M
+**Priority:** P3
+**Depends on:** None
+
+---
+
+### Monitoring — Sentry or similar; check Render/Vercel logs after deploys
+**What:** Add Sentry (or similar) for error tracking; ensure Render and Vercel logs are checked after deploys.
+**Why:** Catch production errors and failed deploys early; avoid blind debugging.
+**Context:** .env.example has optional SENTRY_DSN. Wire Sentry in API (Hono) and/or frontend (Astro). Post-deploy: open Render Logs and Vercel deployment logs to confirm no errors.
+**Effort:** S
+**Priority:** P3
+**Depends on:** None
+
+---
+
 ## Completed
+
+### Deploy — Ship API + frontend to production (2026-03)
+- **API:** Render (Bun + SQLite on persistent disk at /data). Start: `bun run migrate && bun run check-db && bun run start`.
+- **Frontend:** Vercel (Astro SSR, @astrojs/vercel, Node 20 runtime patch).
+- **Auth:** Clerk (production allowed origins via Instance API for *.vercel.app).
+- **Email:** Resend (band notification + customer confirmation). See open todo: verify domain so customers receive to any address.
+- **Docs:** DEPLOY.md, render.yaml, env checklist.
 
 ### Auth — Implement login with Clerk (2025-03-16)
 - **Backend:** @clerk/backend, auth middleware with authenticateRequest, getClerkClient + setClerkClientForTesting for tests

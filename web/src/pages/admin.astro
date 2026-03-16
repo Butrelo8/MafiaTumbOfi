@@ -42,6 +42,10 @@ try {
   <div class="admin-container">
     <h1>Bookings Management</h1>
 
+    <p class="admin-actions">
+      <a href="/admin/export-bookings" class="export-link">Export for debugging (JSON)</a>
+    </p>
+
     {error && (
       <div class="error-message">
         Error loading bookings: {error}
@@ -98,7 +102,20 @@ try {
   }
 
   h1 {
-    margin-bottom: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .admin-actions {
+    margin-bottom: 1.5rem;
+  }
+
+  .export-link {
+    font-size: 0.875rem;
+    color: var(--brand, #6366f1);
+  }
+
+  .export-link:hover {
+    text-decoration: underline;
   }
 
   .error-message {

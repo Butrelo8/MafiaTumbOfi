@@ -79,8 +79,8 @@ MafiaTumbadaOfi/
 | Command | Description |
 |---|---|
 | `bun dev` | Start Astro dev server (port 4321) |
-| `bun build` | Build static site |
-| `bun preview` | Preview production build |
+| `bun build` | Build for Vercel (output in `.vercel/output/`) |
+| `bun preview` | Same as `dev` (Vercel adapter does not support `astro preview`; use `vercel dev` for production-like local) |
 
 ## Environment Variables
 

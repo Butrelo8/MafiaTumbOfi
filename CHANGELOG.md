@@ -15,7 +15,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `migrate` script in root package.json (runs scripts/run-migration.ts) for Render start command
 
 ### Changed
-- (None)
+- TODOS: Deploy marked completed (Render + Vercel + Clerk + Resend); added Content/SEO open todo; Resend domain verification remains P2
+- DEPLOY.md: Post-launch section (Resend domain, custom domain, monitoring); health-check note (use Render URL for /health)
 
 ### Fixed
 - Vercel: patch serverless runtime to nodejs20.x (adapter emits nodejs18.x, which Vercel rejects for new deployments); added `web/scripts/patch-vercel-runtime.mjs` and buildCommand post-step

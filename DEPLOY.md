@@ -73,10 +73,54 @@ Deploy order: **API first**, then frontend (so you can set `PUBLIC_API_URL` to t
 
 ---
 
-## 5. Troubleshooting
+## 5. Post-launch
+
+- **Resend — Verify sending domain:** In [Resend → Domains](https://resend.com/domains) verify a domain you own, then set **RESEND_FROM_EMAIL** (e.g. `noreply@tudominio.com`) in Render and in `.env`. Until then, Resend only delivers to the account owner; after verification, **customers** receive the “Recibimos tu solicitud” confirmation at any email.
+- **Custom domain:** Add your domain in Vercel (and optionally Render); set `PRODUCTION_URL` and Clerk allowed origins to that domain.
+- **Monitoring:** Optional: add Sentry or similar; ensure Render/Vercel logs are checked after deploys.
+
+---
+
+## 6. Troubleshooting
 
 - **CORS errors:** Ensure `PRODUCTION_URL` on Render exactly matches the frontend origin (scheme + host, no trailing slash).
 - **Migrations:** They run at API startup. If you add new migrations, push and redeploy; the new instance will run `bun run migrate` then start.
 - **SQLite on Render:** The disk is only available at **runtime**. Do not run migrations in a pre-deploy or build step; the start command handles them.
 - **"no such table: users" / admin 500:** The DB was not migrated. In Render → your API service → **Settings**: set **Start Command** to exactly `bun run migrate && bun run check-db && bun run start`, set **Environment** → **DB_PATH** to `/data/sqlite.db`. Then **Manual Deploy** → redeploy. Check **Logs** for `[migrate] DB_PATH:` to confirm the path.
 - **Vercel "invalid runtime: render (nodejs18.x)":** The Astro preset runs `astro build` only, so the patch never runs. **Fix:** In Vercel → Project → **Settings** → **Build & Development** → **Build Command**, set to **`bun run build`** (not the default). Then redeploy. The `build` script in `web/package.json` runs the patch after `astro build`.
+- **Health check:** Use the **Render** API URL for `/health`, e.g. `https://mto-api-xxxx.onrender.com/health`. The **Vercel** app (Astro) has no `/health` route and will return 404 for that path.
+
+---
+
+## 7. Accessing the production database
+
+The production DB is a **SQLite file** on Render’s persistent disk at `/data/sqlite.db`. There is no network connection string; you access it by reaching the Render instance or by exporting data through your app.
+
+### Option A: Render Shell (paid plans only)
+
+**SSH/Shell** is available only on **paid** Web Services (not free tier).
+
+1. In [Render Dashboard](https://dashboard.render.com/) → your **mto-api** service → **Shell** (or use [Render SSH](https://render.com/docs/ssh) from your terminal).
+2. In the shell you can:
+   - Inspect the file: `ls -la /data/sqlite.db`
+   - Query with Bun:  
+     `bun -e "const db = require('bun:sqlite').Database; const d = new db('/data/sqlite.db'); console.log(d.query('SELECT * FROM users').all());"`
+   - If `sqlite3` is available in the image: `sqlite3 /data/sqlite.db "SELECT * FROM users;"`
+
+### Option B: Download the DB file with SCP (paid plans only)
+
+With SSH enabled you can copy the file to your machine, then open it locally (e.g. Drizzle Studio or any SQLite client):
+
+- See [Render SSH docs](https://render.com/docs/ssh) for `render scp` or `scp` usage to copy from the service to your machine (e.g. `scp` from the instance to your laptop).
+
+### Option C: Export data via your API (any plan)
+
+Add a **Clerk-protected**, read-only admin endpoint (e.g. `GET /api/admin/export/bookings`) that returns bookings (and optionally users) as JSON or CSV. You “access” the DB through the API instead of the raw file. No SSH required; works on free tier.
+
+### Summary
+
+| Goal | Free tier | Paid (Shell/SSH) |
+|------|-----------|------------------|
+| Run one-off queries | Use Option C (API export) | Shell + `bun` or `sqlite3` |
+| Open DB in Drizzle Studio | Not possible (no direct access) | SCP the file, then `DB_PATH=./prod.db bun db:studio` |
+| Backup the DB | Option C or add backup job that uploads to S3/GCS | SCP or backup job |

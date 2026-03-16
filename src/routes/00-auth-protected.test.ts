@@ -81,6 +81,22 @@ describe('Admin Routes', () => {
     expect(body.data[0].name).toBe('Test Band')
     expect(body.total).toBe(1)
   })
+
+  test('GET /api/admin/export/bookings - returns export shape when authenticated', async () => {
+    const res = await app.request('/api/admin/export/bookings', {
+      headers: { Authorization: 'Bearer valid_token' },
+    })
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body).toHaveProperty('exportedAt')
+    expect(body).toHaveProperty('total', 1)
+    expect(body).toHaveProperty('last24hCount')
+    expect(typeof body.last24hCount).toBe('number')
+    expect(body).toHaveProperty('bookings')
+    expect(Array.isArray(body.bookings)).toBe(true)
+    expect(body.bookings).toHaveLength(1)
+    expect(body.bookings[0].name).toBe('Test Band')
+  })
 })
 
 describe('User Routes', () => {
