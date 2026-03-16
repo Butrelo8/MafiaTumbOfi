@@ -1,60 +1,88 @@
-# hono-template
+# mafia-tumbada-ofi
 
-> Starter for new projects: Hono + Bun + PostgreSQL (Drizzle) + Clerk + Stripe.
+> Professional web presence for Mafia Tumbada — official page, press kit, and booking form in one place.
 
-Use **Use this template** (green button on GitHub) to create a new repo from this template. The project name and Cursor rules expect the template to be used as **hono-template** so that rules and skills apply correctly.
+Built for regional Mexican bands who want to look serious to promoters without needing any tech knowledge.
 
 ## Stack
 
-- **Runtime:** Bun
-- **Framework:** Hono
-- **Database:** PostgreSQL + Drizzle ORM
-- **Auth:** Clerk
-- **Payments:** Stripe
+- **Frontend:** Astro (static site, SEO, fast load)
+- **API:** Hono + Bun
+- **Database:** SQLite + Drizzle ORM (MVP)
+- **Email:** Resend (booking form → email to band)
+
+Clerk (auth) and Stripe (payments) are available in the codebase if you add an admin panel or ticket sales later.
+
+## Booking flow
+
+Form on site → `POST /api/booking` → validate → insert into SQLite (status `pending`) → Resend to band → confirmation email to requester → update status to `sent` or `failed`. Bookings are stored in the `bookings` table; band can reply from inbox or use a future admin to view them.
 
 ## Getting Started
 
 ```bash
-# Install dependencies
+# API
 bun install
-
-# Copy env file and fill in values
 cp .env.example .env
+# Fill RESEND_API_KEY, BOOKING_NOTIFICATION_EMAIL
 
-# Run database migrations
+bun db:generate
 bun db:migrate
-
-# Start dev server
 bun dev
 ```
+
+In another terminal:
+
+```bash
+# Frontend (Astro)
+cd web
+bun install
+cp .env.example .env
+# PUBLIC_API_URL=http://localhost:3001 is the default (see root .env PORT)
+bun dev
+```
+
+- API: http://localhost:3001  
+- Site: http://localhost:4321  
+- Booking form: http://localhost:4321/booking  
+- Admin: http://localhost:4321/admin (Clerk sign-in required; the **first user to sign in** becomes admin and can view bookings).
 
 ## Project Structure
 
 ```
-src/
-├── index.ts          # Entry point
-├── routes/           # Route handlers
-├── middleware/       # Auth, error handling
-├── db/               # Drizzle schema and connection
-├── lib/              # Stripe, utilities
-└── types/            # Shared TypeScript types
+MafiaTumbadaOfi/
+├── src/                 # Hono API
+│   ├── index.ts
+│   ├── routes/          # auth, booking, users
+│   ├── middleware/
+│   ├── db/               # SQLite + Drizzle schema
+│   └── lib/
+├── web/                 # Astro frontend
+│   ├── src/pages/       # index, booking
+│   └── public/
+├── drizzle/             # Generated migrations
+└── data/                # SQLite file (created on first run)
 ```
 
-## Scripts
+## Scripts (root)
 
 | Command | Description |
 |---|---|
-| `bun dev` | Start dev server with hot reload |
-| `bun start` | Start production server |
+| `bun dev` | Start API with hot reload |
+| `bun start` | Start API (production) |
 | `bun test` | Run tests |
 | `bun db:generate` | Generate Drizzle migrations |
 | `bun db:migrate` | Run pending migrations |
 | `bun db:studio` | Open Drizzle Studio |
 
+## Scripts (web/)
+
+| Command | Description |
+|---|---|
+| `bun dev` | Start Astro dev server (port 4321) |
+| `bun build` | Build static site |
+| `bun preview` | Preview production build |
+
 ## Environment Variables
 
-See `.env.example` for all required variables.
-
-## Cursor
-
-This template includes `.cursor/rules/` for **hono-template**. When you create a new project from this repo, keep or rename the project so the hono-template rules and conventions apply.
+- **API:** See root `.env.example` (PORT, FRONTEND_URL, DB_PATH, RESEND_API_KEY, BOOKING_NOTIFICATION_EMAIL).
+- **Frontend:** See `web/.env.example` (PUBLIC_API_URL for the booking form).
