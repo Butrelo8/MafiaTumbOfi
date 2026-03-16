@@ -10,6 +10,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "migrate": "bun run scripts/run-migration.ts",
+    "check-db": "bun run scripts/check-db.ts",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {

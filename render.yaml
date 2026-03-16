@@ -9,8 +9,8 @@ services:
     # Bun is available in Render's Node runtime; use BUN_VERSION env if needed
 
     buildCommand: bun install --frozen-lockfile
-    # Migrations run at startup (disk is only available at runtime, not in preDeployCommand)
-    startCommand: bun run migrate && bun run start
+    # Migrations run at startup (disk only available at runtime). check-db fails fast if tables missing.
+    startCommand: bun run migrate && bun run check-db && bun run start
 
     disk:
       name: data

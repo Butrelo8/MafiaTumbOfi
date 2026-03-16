@@ -39,7 +39,9 @@ Deploy order: **API first**, then frontend (so you can set `PUBLIC_API_URL` to t
 
 2. **Root Directory:** set to `web` (the Astro app lives in `web/`).
 
-3. **Build:** Vercel should detect Astro; build command is `bun run build` (or `npm run build`). No override needed if you use `web/vercel.json`.
+3. **Build:** You **must** set the build command so the runtime patch runs:
+   - **Vercel** → your project → **Settings** → **Build & Development** → **Build Command** → set to **`bun run build`** (then Save).
+   - The repo’s `web/package.json` script `build` runs `astro build` then `node scripts/patch-vercel-runtime.mjs` to set the serverless runtime to Node 20. If you leave the default (e.g. `astro build`), the patch never runs and the deploy fails with "invalid runtime: render (nodejs18.x)".
 
 4. **Environment variables** (Vercel project → Settings → Environment Variables):
 
@@ -76,4 +78,5 @@ Deploy order: **API first**, then frontend (so you can set `PUBLIC_API_URL` to t
 - **CORS errors:** Ensure `PRODUCTION_URL` on Render exactly matches the frontend origin (scheme + host, no trailing slash).
 - **Migrations:** They run at API startup. If you add new migrations, push and redeploy; the new instance will run `bun run migrate` then start.
 - **SQLite on Render:** The disk is only available at **runtime**. Do not run migrations in a pre-deploy or build step; the start command handles them.
-- **Vercel "invalid runtime: render (nodejs18.x)":** The Astro Vercel adapter writes `nodejs18.x`, which Vercel no longer accepts. The build runs `scripts/patch-vercel-runtime.mjs` after `astro build` to set runtime to `nodejs20.x`. If the error persists, ensure the patch script runs and check Project Settings → Functions → Node.js Version.
+- **"no such table: users" / admin 500:** The DB was not migrated. In Render → your API service → **Settings**: set **Start Command** to exactly `bun run migrate && bun run check-db && bun run start`, set **Environment** → **DB_PATH** to `/data/sqlite.db`. Then **Manual Deploy** → redeploy. Check **Logs** for `[migrate] DB_PATH:` to confirm the path.
+- **Vercel "invalid runtime: render (nodejs18.x)":** The Astro preset runs `astro build` only, so the patch never runs. **Fix:** In Vercel → Project → **Settings** → **Build & Development** → **Build Command**, set to **`bun run build`** (not the default). Then redeploy. The `build` script in `web/package.json` runs the patch after `astro build`.

@@ -4,6 +4,7 @@ import { Database } from 'bun:sqlite'
 
 const root = join(import.meta.dir, '..')
 const dbPath = process.env.DB_PATH ?? join(root, 'data', 'sqlite.db')
+console.log('[migrate] DB_PATH:', dbPath)
 const dir = dirname(dbPath)
 if (!existsSync(dir)) {
   mkdirSync(dir, { recursive: true })
@@ -26,7 +27,10 @@ for (const file of files) {
       db.run(st)
     } catch (e: unknown) {
       const err = e as { message?: string }
-      if (!err.message?.includes('already exists')) throw e
+      const msg = err.message ?? ''
+      const isIdempotent =
+        msg.includes('already exists') || msg.includes('duplicate column name')
+      if (!isIdempotent) throw e
     }
   }
   console.log(`Applied ${file}`)
