@@ -3,7 +3,7 @@ import type { StatusCode } from 'hono/utils/http-status'
 
 export const errorHandler = (err: Error, c: Context) => {
   console.error(`[ERROR] ${err.message}`, {
-    stack: err.stack,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
     path: c.req.path,
     method: c.req.method,
   })
