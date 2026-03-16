@@ -1,9 +1,4 @@
 {
-  "buildCommand": "bun run build:vercel",
-  "framework": "astro",
-  "functions": {
-    "**": {
-      "runtime": "nodejs20.x"
-    }
-  }
+  "buildCommand": "bun run build",
+  "framework": "astro"
 }
