@@ -3,7 +3,7 @@
  * Admin-only: fetches GET /api/admin/export/bookings and returns JSON download.
  * Use for debugging (e.g. verify production DB has expected submissions).
  */
-import { isAuthenticated, redirectToSignIn, getToken } = Astro.locals.auth()
+const { isAuthenticated, redirectToSignIn, getToken } = Astro.locals.auth()
 
 if (!isAuthenticated) {
   return redirectToSignIn({ returnBackUrl: '/admin/export-bookings' })
