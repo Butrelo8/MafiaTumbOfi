@@ -2,17 +2,29 @@
 
 Track open work and completed items by version. See CHANGELOG.md for full release notes.
 
+**Roadmap (Hold Scope):** No first-paying-customer goal; no merch yet. **Primary milestone: deploy to VPS** (your domain + HTTPS). Resend, Monitoring, and Content/SEO are done as part of or right after that deploy — one place, one domain. Stripe webhook only when there is a product to sell.
+
 ---
 
 ## Open
 
-### Resend — Verify domain so confirmation emails reach any customer
-**What:** Verify a sending domain in Resend and set RESEND_FROM_EMAIL so the customer confirmation email is delivered to any address (not only the Resend account owner).
-**Why:** In test mode Resend only delivers to the account owner’s email; customers (e.g. getmula.butrensky@gmail.com) never receive the “Recibimos tu solicitud” email until a domain is verified.
-**Context:** Verify at resend.com/domains; use a From address on that domain (e.g. noreply@tudominio.com). See BUGS.md entry “Resend: no email delivered to customer”.
-**Effort:** S
+### Deploy — Acquire custom domain and migrate production to a VPS
+**What:** (1) Acquire a custom domain (e.g. for the band) and (2) move production to a VPS: provision server, point DNS at the VPS, reverse proxy (nginx or Caddy), SSL (e.g. Let’s Encrypt), run API (Bun + SQLite on persistent path) and optionally serve frontend (Astro build or Node); document in DEPLOY.md.
+**Why:** Full control, one bill, and your own HTTPS domain — which is when Resend domain verification, monitoring (VPS logs), and a proper “official” site (content/SEO) all land in one go.
+**Context:** Current prod: Render (Bun, SQLite at /data) + Vercel (Astro SSR). Steps: buy/register domain → provision VPS → DNS A/AAAA to VPS → reverse proxy + SSL → deploy app. Scope: (A) API only on VPS, frontend stays on Vercel — add VPS API URL to Clerk + CORS. (B) API + frontend on same VPS — one domain, update Clerk + CORS. Use a process manager (e.g. systemd), persistent disk for SQLite, backup strategy. **With or right after this:** Resend domain (same domain), Sentry + VPS log checks, Content/SEO.
+**Effort:** L
 **Priority:** P2
 **Depends on:** None
+
+---
+
+### Resend — Verify domain so confirmation emails reach any customer
+**What:** Verify a sending domain in Resend and set RESEND_FROM_EMAIL so the customer confirmation email is delivered to any address (not only the Resend account owner).
+**Why:** In test mode Resend only delivers to the account owner’s email; customers never receive the “Recibimos tu solicitud” email until a domain is verified.
+**Context:** Verify at resend.com/domains; use a From address on that domain (e.g. noreply@tudominio.com). See BUGS.md “Resend: no email delivered to customer”. **Do when you have your domain on the VPS (HTTPS)** — same deploy cycle.
+**Effort:** S
+**Priority:** P2
+**Depends on:** VPS (or any environment where you already use your custom domain with HTTPS)
 
 ---
 
@@ -29,20 +41,30 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 ### Content / SEO — Homepage, press kit, meta
 **What:** Copy and structure for homepage, press kit, booking page; meta tags, Open Graph, optional sitemap so the site reads as the band’s official presence.
 **Why:** Makes the site feel like a real official site for promoters and SEO.
-**Context:** Astro pages in web/src/pages; add/expand content and meta in layouts or per-page.
+**Context:** Astro pages in web/src/pages; add/expand content and meta in layouts or per-page. **Natural to do with or right after VPS** (one real domain, one “official” launch).
 **Effort:** M
 **Priority:** P3
 **Depends on:** None
 
 ---
 
-### Monitoring — Sentry or similar; check Render/Vercel logs after deploys
-**What:** Add Sentry (or similar) for error tracking; ensure Render and Vercel logs are checked after deploys.
+### Monitoring — Sentry or similar; check logs after deploys
+**What:** Add Sentry (or similar) for error tracking; ensure logs are checked after each deploy.
 **Why:** Catch production errors and failed deploys early; avoid blind debugging.
-**Context:** .env.example has optional SENTRY_DSN. Wire Sentry in API (Hono) and/or frontend (Astro). Post-deploy: open Render Logs and Vercel deployment logs to confirm no errors.
+**Context:** .env.example has optional SENTRY_DSN. Wire Sentry in API (Hono) and/or frontend (Astro). **On VPS:** check VPS logs (e.g. systemd/journald or your reverse proxy logs) after deploy. If still on Render/Vercel, check their logs. Same habit either way.
 **Effort:** S
 **Priority:** P3
 **Depends on:** None
+
+---
+
+### N8N — Run local instance on VPS for scheduled tasks and integrations
+**What:** Run N8N as a local instance on the VPS (Docker or systemd); use it for scheduled tasks, optional notifications, and external API workflows; keep booking and Stripe in the app.
+**Why:** One place for cron-like and integration workflows without adding cron or a queue to the app; webhooks, emails/notifications, and external API glue live in N8N.
+**Context:** Boundary: app = DB, auth, booking, Stripe, critical path; N8N = schedules, inbound webhooks from external systems, optional emails/notifications, API glue. Secure N8N (auth, no public exposure or admin-only). Document in DEPLOY.md.
+**Effort:** M
+**Priority:** P3
+**Depends on:** VPS deploy
 
 ---
 

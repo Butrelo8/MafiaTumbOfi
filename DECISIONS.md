@@ -5,6 +5,15 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-03-17 — Roadmap: Hold Scope, no merch / first-paying-customer goal
+
+**Context:** CEO roadmap review; need a locked execution order without scope creep or a revenue milestone.
+**Decision:** Hold Scope. Priority order: Resend domain (P2) first; then Content/SEO or Monitoring (P3); Stripe webhook only when there is a product (tickets/merch) to sell. No “first paying customer” milestone — we don’t have merch yet.
+**Alternatives considered:** Scope expansion (add first-revenue milestone, delight items); scope reduction (Resend + Content only, defer Stripe indefinitely).
+**Why not the others:** Keeps roadmap tight and achievable; Stripe stays in backlog until there’s something to sell; Resend and content/SEO deliver trust and official presence without revenue pressure.
+
+---
+
 ## 2026-03-16 — Deploy: Render (API) + Vercel (frontend) + SQLite on disk
 
 **Context:** Need production deploy for API (Bun + Hono), Astro frontend (SSR), and SQLite without managed Postgres.

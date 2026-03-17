@@ -124,3 +124,12 @@ Add a **Clerk-protected**, read-only admin endpoint (e.g. `GET /api/admin/export
 | Run one-off queries | Use Option C (API export) | Shell + `bun` or `sqlite3` |
 | Open DB in Drizzle Studio | Not possible (no direct access) | SCP the file, then `DB_PATH=./prod.db bun db:studio` |
 | Backup the DB | Option C or add backup job that uploads to S3/GCS | SCP or backup job |
+
+---
+
+## 8. N8N (local testing / VPS)
+
+N8N is used for scheduled tasks, optional notifications, and external API workflows; the app keeps booking and Stripe (critical path).
+
+- **Local testing:** Run N8N (e.g. `npx n8n` or Docker). See **`docs/n8n/README.md`** for the Option A test: Schedule (every 5 min) → GET app `/health`. Import `docs/n8n/schedule-to-health.json` or create the workflow manually.
+- **VPS:** Run the same N8N instance on the VPS (Docker or systemd); expose only behind auth or internal URL; document the URL and start command in this section or in a VPS-specific deploy doc.
