@@ -5,14 +5,14 @@ Proves N8N runs on a schedule and can call the app. The app stays the source of 
 ## Prerequisites
 
 - N8N running locally (e.g. `npx n8n` or Docker).
-- App API running (e.g. `bun run start` → `http://localhost:3001`), **or** use the production frontend health URL: `https://mafia-tumbada-oficial.vercel.app/health`.
+- App API running (e.g. `bun run start` → `http://localhost:3001`), **or** use the production frontend health URL: `https://mafia-tumbada-oficial.vercel.app/api/health` (or `/health`).
 
 ## Option 1: Import the workflow
 
 1. Open N8N (e.g. http://localhost:5678).
 2. **Workflows** → **Import from File** (or menu → Import).
 3. Select `docs/n8n/schedule-to-health.json`.
-4. Default URL in the workflow is `https://mafia-tumbada-oficial.vercel.app/health` (frontend health on Vercel). To ping the API instead, set **URL** to your API base + `/health` (e.g. `http://localhost:3001/health` or `http://host.docker.internal:3001/health` if N8N runs in Docker).
+4. Default URL in the workflow is `https://mafia-tumbada-oficial.vercel.app/api/health` (frontend health on Vercel; `/api/health` often works more reliably than `/health` on serverless). To ping the API instead, set **URL** to your API base + `/health` (e.g. `http://localhost:3001/health` or `http://host.docker.internal:3001/health` if N8N runs in Docker).
 5. **Save** and **Activate** the workflow (toggle in the top right). The schedule runs every 5 minutes.
 
 If import fails (version mismatch), use Option 2.
@@ -22,14 +22,14 @@ If import fails (version mismatch), use Option 2.
 1. **New workflow** → add node → search **Schedule Trigger**.
 2. In the Schedule Trigger: **Trigger Interval** = **Minutes**, **Minutes Between Triggers** = `5`.
 3. Add node → **HTTP Request**.
-4. In HTTP Request: **Method** = GET, **URL** = `https://mafia-tumbada-oficial.vercel.app/health` (or `http://localhost:3001/health` for local API).
+4. In HTTP Request: **Method** = GET, **URL** = `https://mafia-tumbada-oficial.vercel.app/api/health` (or `http://localhost:3001/health` for local API).
 5. Connect **Schedule Trigger** → **HTTP Request**.
 6. **Save** and **Activate**.
 
 ## Verify
 
 - Wait up to 5 minutes (or trigger once with **Execute workflow**).
-- In N8N, open the last run of **GET App Health** and confirm the response is `{ "status": "ok", "source": "frontend", "version": "0.4.0" }` (Vercel) or `{ "status": "ok", "version": "0.4.0" }` (API).
+- In N8N, open the last run of **GET App Health** and confirm the response is `{ "status": "ok", "source": "frontend", "version": "0.4.0" }` (Vercel `/api/health` or `/health`) or `{ "status": "ok", "version": "0.4.0" }` (API).
 - Optionally check app logs: each request will show in the Hono logger.
 
 ## URL when N8N runs in Docker
