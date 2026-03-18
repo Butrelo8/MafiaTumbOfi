@@ -106,4 +106,16 @@ Updated automatically by the AI agent when decisions are made.
 **Why not the others:** Single-band MVP with one or few admins; first sign-up as admin is zero-config and matches “band member signs up first” without extra env or Clerk org setup.
 
 ---
+## 2026-03-18 — Security hardening: body-size cap + HTTPS guard
+**Context:** Public endpoints are exposed to untrusted clients and reverse proxies may omit `Content-Length` or `x-forwarded-proto`. Header-dependent enforcement can create gaps (DoS via large/chunked bodies) or availability issues (redirect loops / broken health checks).
+**Decision:** Update `bodyLimit` to enforce the 100KB cap even when `Content-Length` is missing by streaming a cloned request body and canceling once the limit is exceeded. Update `enforceHttps` to redirect only when `x-forwarded-proto` is present and not `https` (and when `host` is available).
+**Alternatives considered:** Rely only on `Content-Length`; enforce limits purely at the reverse proxy/WAF; always redirect in production regardless of header presence; remove app-level HTTPS enforcement entirely.
+**Why not the others:** This keeps protection robust at the app boundary (defense-in-depth) without adding dependencies, and avoids redirect behavior when the proxy contract isn’t met.
+---
+## 2026-03-18 — Booking confirmations: explicit contract + throw safety
+**Context:** The booking form UX depends on the backend telling the truth about email delivery. If the customer confirmation email fails (or Resend throws), the API could still return a 2xx and the frontend would claim success, while DB status stays `pending`.
+**Decision:** In `POST /api/booking`, keep returning `201` when the band notification succeeds, but include `data.confirmation` (`sent` | `pending`) and ensure both “error returned” and “throw” cases for the customer confirmation send result in booking status `pending`.
+**Alternatives considered:** Change status codes to non-2xx on confirmation failure (forces client errors, risk of duplicates without idempotency); always return 2xx but hide confirmation outcome (reintroduces silent UX mismatch).
+**Why not the others:** Explicitly returning the confirmation outcome keeps the API contract consistent and avoids duplicate inserts/idempotency work while preventing misleading user messaging.
+---
 <!-- Add new decisions above this line -->

@@ -20,6 +20,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 - Vercel: patch serverless runtime to nodejs20.x (adapter emits nodejs18.x, which Vercel rejects for new deployments); added `web/scripts/patch-vercel-runtime.mjs` and buildCommand post-step
+- Security: harden request body size limit when `Content-Length` is missing and guard production HTTPS redirects to only act when `x-forwarded-proto` is present
+- Booking: expose explicit confirmation outcome (`sent` vs `pending`) and handle Resend confirmation throws consistently
 
 ---
 

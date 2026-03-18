@@ -58,7 +58,15 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:3001';
         });
         const data = await res.json().catch(() => ({}));
         if (res.ok) {
-          status.textContent = 'Mensaje enviado. Te contactaremos pronto.';
+          const confirmation = data?.data?.confirmation ?? data?.confirmation;
+          if (confirmation === 'sent') {
+            status.textContent = 'Mensaje enviado. Te contactaremos pronto.';
+          } else if (confirmation === 'pending') {
+            status.textContent =
+              'Recibimos tu solicitud. Te contactaremos pronto (la confirmación por correo no pudo enviarse).';
+          } else {
+            status.textContent = 'Recibimos tu solicitud. Te contactaremos pronto.';
+          }
           status.style.color = 'green';
           form.reset();
         } else {
