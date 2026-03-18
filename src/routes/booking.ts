@@ -87,18 +87,37 @@ bookingRoutes.post('/booking', async (c) => {
     .filter(Boolean)
     .join('\n')
 
-  const { error } = await getResend().emails.send({
-    from,
-    to: [to],
-    subject: `[Mafia Tumbada] Booking request from ${name}`,
-    text,
-  })
+  // Two independent email sends:
+  // 1) notify band (failure => booking becomes `failed` and endpoint returns 500)
+  // 2) notify customer confirmation (failure/throw => booking becomes `pending` but endpoint remains 201)
+  let confirmation: 'sent' | 'pending' = 'pending'
 
-  if (error) {
-    console.error('[booking] Resend error:', {
-      message: error.message,
-      name: error.name,
+  try {
+    const { error } = await getResend().emails.send({
+      from,
+      to: [to],
+      subject: `[Mafia Tumbada] Booking request from ${name}`,
+      text,
     })
+
+    if (error) {
+      console.error('[booking] Resend band notification error:', {
+        message: error.message,
+        name: error.name,
+      })
+      await db
+        .update(bookings)
+        .set({ status: 'failed' })
+        .where(eq(bookings.id, inserted.id))
+      return errorResponse(
+        c,
+        500,
+        'EMAIL_FAILED',
+        'Could not send booking request',
+      )
+    }
+  } catch (err) {
+    console.error('[booking] Resend band notification threw:', err)
     await db
       .update(bookings)
       .set({ status: 'failed' })
@@ -106,26 +125,31 @@ bookingRoutes.post('/booking', async (c) => {
     return errorResponse(c, 500, 'EMAIL_FAILED', 'Could not send booking request')
   }
 
-  const confirmResult = await getResend().emails.send({
-    from,
-    to: [email],
-    subject: 'Recibimos tu solicitud — Mafia Tumbada',
-    text: `Hola ${name},\n\nRecibimos tu solicitud de contratación. Te contactaremos pronto.\n\n— Mafia Tumbada`,
-  })
-  const confirmationSent = !confirmResult.error
-  if (!confirmationSent) {
-    console.error('[booking] Confirmation email failed:', {
-      message: confirmResult.error?.message,
-      name: confirmResult.error?.name,
+  try {
+    const confirmResult = await getResend().emails.send({
+      from,
+      to: [email],
+      subject: 'Recibimos tu solicitud — Mafia Tumbada',
+      text: `Hola ${name},\n\nRecibimos tu solicitud de contratación. Te contactaremos pronto.\n\n— Mafia Tumbada`,
     })
+
+    confirmation = confirmResult.error ? 'pending' : 'sent'
+    if (confirmation === 'pending') {
+      console.error('[booking] Confirmation email failed:', {
+        message: confirmResult.error?.message,
+        name: confirmResult.error?.name,
+      })
+    }
+  } catch (err) {
+    console.error('[booking] Confirmation email threw:', err)
+    confirmation = 'pending'
   }
 
-  // Status semantics: pending = initial or band OK but customer confirmation failed;
-  // sent = both band notification and customer confirmation succeeded; failed = band email failed (set earlier).
+  // Status semantics: pending = band OK but customer confirmation failed; sent = both succeeded; failed = band email failed.
   await db
     .update(bookings)
-    .set({ status: confirmationSent ? 'sent' : 'pending' })
+    .set({ status: confirmation === 'sent' ? 'sent' : 'pending' })
     .where(eq(bookings.id, inserted.id))
 
-  return successResponse(c, { ok: true }, 201)
+  return successResponse(c, { ok: true, bookingId: inserted.id, confirmation }, 201)
 })

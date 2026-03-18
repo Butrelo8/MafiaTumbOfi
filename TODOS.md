@@ -8,6 +8,7 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ## Open
 
+---
 ### Deploy — Acquire custom domain and migrate production to a VPS
 **What:** (1) Acquire a custom domain (e.g. for the band) and (2) move production to a VPS: provision server, point DNS at the VPS, reverse proxy (nginx or Caddy), SSL (e.g. Let’s Encrypt), run API (Bun + SQLite on persistent path) and optionally serve frontend (Astro build or Node); document in DEPLOY.md.
 **Why:** Full control, one bill, and your own HTTPS domain — which is when Resend domain verification, monitoring (VPS logs), and a proper “official” site (content/SEO) all land in one go.
@@ -69,6 +70,11 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 ---
 
 ## Completed
+
+### Booking — confirmation outcome contract (2026-03-18)
+- **API:** `POST /api/booking` now returns `data.confirmation` (`sent` | `pending`) alongside `bookingId`, and handles Resend throws for customer confirmation by keeping booking status as `pending`.
+- **Frontend:** `web/src/pages/booking.astro` now shows different messaging when confirmation is `pending` instead of always claiming the email was sent.
+- **Tests:** added regression tests covering confirmation “error return” and “throw” paths (`src/routes/booking.test.ts`).
 
 ### Deploy — Ship API + frontend to production (2026-03)
 - **API:** Render (Bun + SQLite on persistent disk at /data). Start: `bun run migrate && bun run check-db && bun run start`.

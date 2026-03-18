@@ -103,6 +103,8 @@ describe('POST /api/booking', () => {
     expect(res.status).toBe(201)
     const data = await res.json()
     expect(data.data?.ok).toBe(true)
+    expect(data.data?.confirmation).toBe('sent')
+    expect(data.data?.bookingId).toBe(1)
   })
 
   test('calls Resend twice on success (band notification + confirmation)', async () => {
@@ -192,5 +194,53 @@ describe('POST /api/booking', () => {
     })
     expect(res.status).toBe(201)
     expect(lastStatus).toBe('pending')
+    const data = await res.json()
+    expect(data.data?.confirmation).toBe('pending')
+  })
+
+  test('sets status to pending when confirmation send throws', async () => {
+    let callCount = 0
+    let lastStatus: string | undefined
+    const captureDb = {
+      insert: () => ({
+        values: () => ({
+          returning: async () => [{ id: 1 }],
+        }),
+      }),
+      update: () => ({
+        set: (obj: { status?: string }) => {
+          lastStatus = obj.status
+          return { where: async () => undefined }
+        },
+      }),
+    }
+
+    mock.module('../db', () => ({ db: captureDb }))
+    mock.module('../lib/resend', () => ({
+      getResend: () => ({
+        emails: {
+          send: async () => {
+            callCount += 1
+            if (callCount === 1) return { data: { id: 'ok' }, error: null }
+            throw new Error('Resend failure during confirmation')
+          },
+        },
+      }),
+    }))
+
+    const { bookingRoutes: routes } = await import('./booking')
+    const testApp = new Hono().route('/api', routes)
+    process.env.BOOKING_NOTIFICATION_EMAIL = 'band@example.com'
+
+    const res = await testApp.request('/api/booking', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Y', email: 'y@y.com' }),
+      headers: { 'Content-Type': 'application/json', 'x-forwarded-for': '127.0.0.2' },
+    })
+
+    expect(res.status).toBe(201)
+    expect(lastStatus).toBe('pending')
+    const data = await res.json()
+    expect(data.data?.confirmation).toBe('pending')
   })
 })
