@@ -8,17 +8,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- Security: production opt-in for `GET /api/admin/export/bookings` via `ALLOW_ADMIN_BOOKING_EXPORT=true`; structured audit log on successful export; docs in `.env.example` and DEPLOY.md; admin Astro page shows HTML guidance on 403.
 - Deploy: Render (API with Bun + SQLite on persistent disk), Vercel (Astro frontend with @astrojs/vercel)
 - `render.yaml` Blueprint: web service, disk at `/data`, DB_PATH=/data/sqlite.db, migrations at startup
 - `DEPLOY.md` with step-by-step and env checklist for Render and Vercel
 - `web/vercel.json` and Vercel serverless adapter in `web/astro.config.mjs` (`@astrojs/vercel/serverless` for Astro 4)
 - `migrate` script in root package.json (runs scripts/run-migration.ts) for Render start command
+- Booking deliverability observability: persist confirmation delivery last error + attempt count and expose it in admin UI; admins can re-send customer confirmation for `pending` bookings.
 
 ### Changed
 - TODOS: Deploy marked completed (Render + Vercel + Clerk + Resend); added Content/SEO open todo; Resend domain verification remains P2
 - DEPLOY.md: Post-launch section (Resend domain, custom domain, monitoring); health-check note (use Render URL for /health)
 
 ### Fixed
+- Auth: first-user admin bootstrap is atomic (single `INSERT` uses `EXISTS` subquery for `is_admin`) so parallel first signups cannot both become admin; optional `{ db }` on `getOrCreateUser` for isolated integration tests (`src/lib/users.test.ts`).
 - Vercel: patch serverless runtime to nodejs20.x (adapter emits nodejs18.x, which Vercel rejects for new deployments); added `web/scripts/patch-vercel-runtime.mjs` and buildCommand post-step
 - Security: harden request body size limit when `Content-Length` is missing and guard production HTTPS redirects to only act when `x-forwarded-proto` is present
 - Booking: expose explicit confirmation outcome (`sent` vs `pending`) and handle Resend confirmation throws consistently

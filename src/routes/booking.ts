@@ -66,6 +66,8 @@ bookingRoutes.post('/booking', async (c) => {
       eventDate: eventDate ?? null,
       message: message ?? null,
       status: 'pending',
+      confirmationLastError: null,
+      confirmationAttempts: 0,
     })
     .returning({ id: bookings.id })
 
@@ -91,6 +93,8 @@ bookingRoutes.post('/booking', async (c) => {
   // 1) notify band (failure => booking becomes `failed` and endpoint returns 500)
   // 2) notify customer confirmation (failure/throw => booking becomes `pending` but endpoint remains 201)
   let confirmation: 'sent' | 'pending' = 'pending'
+  let confirmationLastError: string | null = null
+  let confirmationAttempts = 0
 
   try {
     const { error } = await getResend().emails.send({
@@ -107,7 +111,7 @@ bookingRoutes.post('/booking', async (c) => {
       })
       await db
         .update(bookings)
-        .set({ status: 'failed' })
+        .set({ status: 'failed', confirmationLastError: null, confirmationAttempts: 0 })
         .where(eq(bookings.id, inserted.id))
       return errorResponse(
         c,
@@ -120,11 +124,12 @@ bookingRoutes.post('/booking', async (c) => {
     console.error('[booking] Resend band notification threw:', err)
     await db
       .update(bookings)
-      .set({ status: 'failed' })
+      .set({ status: 'failed', confirmationLastError: null, confirmationAttempts: 0 })
       .where(eq(bookings.id, inserted.id))
     return errorResponse(c, 500, 'EMAIL_FAILED', 'Could not send booking request')
   }
 
+  confirmationAttempts = 1
   try {
     const confirmResult = await getResend().emails.send({
       from,
@@ -134,21 +139,29 @@ bookingRoutes.post('/booking', async (c) => {
     })
 
     confirmation = confirmResult.error ? 'pending' : 'sent'
-    if (confirmation === 'pending') {
+    if (confirmResult.error) {
       console.error('[booking] Confirmation email failed:', {
         message: confirmResult.error?.message,
         name: confirmResult.error?.name,
       })
+      confirmationLastError = confirmResult.error.message ?? null
+    } else {
+      confirmationLastError = null
     }
   } catch (err) {
     console.error('[booking] Confirmation email threw:', err)
     confirmation = 'pending'
+    confirmationLastError = err instanceof Error ? err.message : String(err)
   }
 
   // Status semantics: pending = band OK but customer confirmation failed; sent = both succeeded; failed = band email failed.
   await db
     .update(bookings)
-    .set({ status: confirmation === 'sent' ? 'sent' : 'pending' })
+    .set({
+      status: confirmation === 'sent' ? 'sent' : 'pending',
+      confirmationLastError: confirmation === 'sent' ? null : confirmationLastError,
+      confirmationAttempts,
+    })
     .where(eq(bookings.id, inserted.id))
 
   return successResponse(c, { ok: true, bookingId: inserted.id, confirmation }, 201)

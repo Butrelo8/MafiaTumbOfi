@@ -18,5 +18,7 @@ export const bookings = sqliteTable('bookings', {
   eventDate: text('event_date'),
   message: text('message'),
   status: text('status').notNull().default('pending'),
+  confirmationLastError: text('confirmation_last_error'),
+  confirmationAttempts: integer('confirmation_attempts').notNull().default(1),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 })

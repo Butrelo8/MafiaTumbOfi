@@ -158,6 +158,8 @@ describe('POST /api/booking', () => {
   test('sets status to pending when band email succeeds but confirmation fails', async () => {
     let callCount = 0
     let lastStatus: string | undefined
+    let lastConfirmationLastError: string | null | undefined
+    let lastConfirmationAttempts: number | undefined
     const captureDb = {
       insert: () => ({
         values: () => ({
@@ -165,9 +167,15 @@ describe('POST /api/booking', () => {
         }),
       }),
       update: () => ({
-        set: (obj: { status?: string }) => {
+        set: (obj: {
+          status?: string
+          confirmationLastError?: string | null
+          confirmationAttempts?: number
+        }) => {
           callCount += 1
           lastStatus = obj.status
+          lastConfirmationLastError = obj.confirmationLastError
+          lastConfirmationAttempts = obj.confirmationAttempts
           return { where: async () => undefined }
         },
       }),
@@ -194,6 +202,8 @@ describe('POST /api/booking', () => {
     })
     expect(res.status).toBe(201)
     expect(lastStatus).toBe('pending')
+    expect(lastConfirmationLastError).toBe('Confirmation rejected')
+    expect(lastConfirmationAttempts).toBe(1)
     const data = await res.json()
     expect(data.data?.confirmation).toBe('pending')
   })
@@ -201,6 +211,8 @@ describe('POST /api/booking', () => {
   test('sets status to pending when confirmation send throws', async () => {
     let callCount = 0
     let lastStatus: string | undefined
+    let lastConfirmationLastError: string | null | undefined
+    let lastConfirmationAttempts: number | undefined
     const captureDb = {
       insert: () => ({
         values: () => ({
@@ -208,8 +220,14 @@ describe('POST /api/booking', () => {
         }),
       }),
       update: () => ({
-        set: (obj: { status?: string }) => {
+        set: (obj: {
+          status?: string
+          confirmationLastError?: string | null
+          confirmationAttempts?: number
+        }) => {
           lastStatus = obj.status
+          lastConfirmationLastError = obj.confirmationLastError
+          lastConfirmationAttempts = obj.confirmationAttempts
           return { where: async () => undefined }
         },
       }),
@@ -240,6 +258,8 @@ describe('POST /api/booking', () => {
 
     expect(res.status).toBe(201)
     expect(lastStatus).toBe('pending')
+    expect(lastConfirmationLastError).toBe('Resend failure during confirmation')
+    expect(lastConfirmationAttempts).toBe(1)
     const data = await res.json()
     expect(data.data?.confirmation).toBe('pending')
   })

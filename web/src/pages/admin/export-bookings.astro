@@ -17,6 +17,43 @@ const response = await fetch(`${apiUrl}/api/admin/export/bookings`, {
 })
 
 if (!response.ok) {
+  if (response.status === 403) {
+    let userMessage =
+      'La exportación está desactivada en producción. En el servicio de la API, define ALLOW_ADMIN_BOOKING_EXPORT=true solo mientras la necesites; revisa DEPLOY.md.'
+    try {
+      const errBody = await response.json()
+      const apiMsg = errBody?.error?.message
+      if (typeof apiMsg === 'string' && apiMsg.length > 0) {
+        userMessage = `${userMessage}\n\n${apiMsg}`
+      }
+    } catch {
+      /* keep default */
+    }
+    const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Exportación no disponible</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #1a1a1a; }
+    h1 { font-size: 1.25rem; }
+    pre { white-space: pre-wrap; background: #f4f4f5; padding: 1rem; border-radius: 6px; font-size: 0.9rem; }
+    a { color: #2563eb; }
+  </style>
+</head>
+<body>
+  <h1>Exportación no disponible</h1>
+  <p>El servidor rechazó la exportación (código <code>ADMIN_BOOKING_EXPORT_DISABLED</code>).</p>
+  <pre>${userMessage.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+  <p><a href="/admin">Volver al panel</a></p>
+</body>
+</html>`
+    return new Response(html, {
+      status: 403,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    })
+  }
   return new Response(
     JSON.stringify({ error: 'Export failed', status: response.status }),
     { status: response.status, headers: { 'Content-Type': 'application/json' } }

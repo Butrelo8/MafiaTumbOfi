@@ -5,6 +5,24 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-03-21 — Admin booking export: env gate in production + audit log
+
+**Context:** `GET /api/admin/export/bookings` returns full PII; admin-only but a leaked session or misconfig exposes everything at once.
+**Decision:** Keep the route for free-tier DB access (DEPLOY Option C). When `NODE_ENV=production`, deny with 403 and code `ADMIN_BOOKING_EXPORT_DISABLED` unless `ALLOW_ADMIN_BOOKING_EXPORT=true`. Non-production stays allowed for DX. On successful export, emit one JSON audit line to stdout (`type: audit`, `action: admin_booking_export`, `timestamp`, `userId`, `sessionId`).
+**Alternatives considered:** Remove the route; always allow with only audit logging.
+**Why not the others:** Removal breaks documented export workflow; logging alone does not reduce blast radius.
+
+---
+
+## 2026-03-21 — First admin bootstrap: atomic `INSERT` expression
+
+**Context:** `getOrCreateUser` used a separate “count admins” query then `insert`, so two concurrent first signups could both observe zero admins and both get `isAdmin: true`.
+**Decision:** Set `is_admin` in the same SQL statement as the insert using a scalar subquery: `CASE WHEN EXISTS (SELECT 1 FROM users WHERE is_admin = 1) THEN 0 ELSE 1 END`, via Drizzle `sql` on the insert values (no separate read before write for that flag).
+**Alternatives considered:** SQLite `BEGIN IMMEDIATE` transaction wrapping count+insert; dedicated bootstrap row / mutex table.
+**Why not the others:** Single-statement approach matches SQLite semantics, avoids extra schema, and keeps the hot path one insert with correct serialization of the EXISTS check relative to the new row.
+
+---
+
 ## 2026-03-17 — Roadmap: Hold Scope, no merch / first-paying-customer goal
 
 **Context:** CEO roadmap review; need a locked execution order without scope creep or a revenue milestone.
@@ -117,5 +135,11 @@ Updated automatically by the AI agent when decisions are made.
 **Decision:** In `POST /api/booking`, keep returning `201` when the band notification succeeds, but include `data.confirmation` (`sent` | `pending`) and ensure both “error returned” and “throw” cases for the customer confirmation send result in booking status `pending`.
 **Alternatives considered:** Change status codes to non-2xx on confirmation failure (forces client errors, risk of duplicates without idempotency); always return 2xx but hide confirmation outcome (reintroduces silent UX mismatch).
 **Why not the others:** Explicitly returning the confirmation outcome keeps the API contract consistent and avoids duplicate inserts/idempotency work while preventing misleading user messaging.
+---
+## 2026-03-18 — Operator resend: auth-safe frontend relay
+**Context:** Admin operators need to re-send customer confirmation, but the Clerk bearer token is server-only. A direct browser call to the backend admin endpoint would either expose credentials or require client-side token plumbing.
+**Decision:** Add `web/src/pages/admin/resend-confirmation.ts` as a server-side relay that reads the Clerk token server-side, calls `POST /api/admin/bookings/:id/resend-confirmation`, and then redirects back to `/admin`.
+**Alternatives considered:** Call backend admin endpoint directly from browser using a client token; make backend rely on cookies/session instead of bearer tokens.
+**Why not the others:** Browser-side bearer token access is unsafe and increases auth complexity; switching to cookie/session auth would change the auth boundary more than needed for this MVP operator workflow.
 ---
 <!-- Add new decisions above this line -->
