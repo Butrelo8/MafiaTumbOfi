@@ -21,6 +21,10 @@ bun.lockb
 *.db
 *.sqlite
 
+# Graph
+graph.db
+graph.html
+
 # OS
 .DS_Store
 Thumbs.db
