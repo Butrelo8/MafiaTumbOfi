@@ -1,16 +1,30 @@
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { db } from '../db'
 import { users } from '../db/schema'
 import { getClerkClient } from '../middleware/auth'
 
 export type UserRow = typeof users.$inferSelect
 
+/** First bootstrap admin: single-statement check + insert avoids count-then-insert races. */
+const firstBootstrapAdminIsAdmin = sql`(SELECT CASE WHEN EXISTS (SELECT 1 FROM ${users} WHERE ${users.isAdmin} = 1) THEN 0 ELSE 1 END)`
+
+export type GetOrCreateUserOptions = {
+  /**
+   * Tests: pass an isolated DB (e.g. :memory:) so integration tests do not use the app file DB.
+   */
+  db?: typeof db
+}
+
 /**
  * Get user by Clerk ID from DB, or create with first-user-is-admin logic.
  * Fetches email/name from Clerk when creating. Used by admin routes and /me.
  */
-export async function getOrCreateUser(clerkId: string): Promise<UserRow> {
-  const existing = await db
+export async function getOrCreateUser(
+  clerkId: string,
+  options?: GetOrCreateUserOptions,
+): Promise<UserRow> {
+  const database = options?.db ?? db
+  const existing = await database
     .select()
     .from(users)
     .where(eq(users.clerkId, clerkId))
@@ -25,19 +39,13 @@ export async function getOrCreateUser(clerkId: string): Promise<UserRow> {
   const name =
     [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || null
 
-  const adminUsers = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.isAdmin, true))
-  const isFirstUser = adminUsers.length === 0
-
-  const [inserted] = await db
+  const [inserted] = await database
     .insert(users)
     .values({
       clerkId,
       email,
       name,
-      isAdmin: isFirstUser,
+      isAdmin: firstBootstrapAdminIsAdmin,
     })
     .returning()
 

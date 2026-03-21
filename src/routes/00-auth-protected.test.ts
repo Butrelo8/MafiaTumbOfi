@@ -97,6 +97,110 @@ describe('Admin Routes', () => {
     expect(body.bookings).toHaveLength(1)
     expect(body.bookings[0].name).toBe('Test Band')
   })
+
+  test('GET /api/admin/export/bookings - 403 in production when export flag unset', async () => {
+    const prevNode = process.env.NODE_ENV
+    const prevAllow = process.env.ALLOW_ADMIN_BOOKING_EXPORT
+    try {
+      process.env.NODE_ENV = 'production'
+      delete process.env.ALLOW_ADMIN_BOOKING_EXPORT
+      const res = await app.request('/api/admin/export/bookings', {
+        headers: { Authorization: 'Bearer valid_token' },
+      })
+      expect(res.status).toBe(403)
+      const body = await res.json()
+      expect(body.error.code).toBe('ADMIN_BOOKING_EXPORT_DISABLED')
+      expect(body.error.status).toBe(403)
+    } finally {
+      process.env.NODE_ENV = prevNode
+      if (prevAllow === undefined) delete process.env.ALLOW_ADMIN_BOOKING_EXPORT
+      else process.env.ALLOW_ADMIN_BOOKING_EXPORT = prevAllow
+    }
+  })
+
+  test('GET /api/admin/export/bookings - 200 in production when ALLOW_ADMIN_BOOKING_EXPORT=true', async () => {
+    const prevNode = process.env.NODE_ENV
+    const prevAllow = process.env.ALLOW_ADMIN_BOOKING_EXPORT
+    try {
+      process.env.NODE_ENV = 'production'
+      process.env.ALLOW_ADMIN_BOOKING_EXPORT = 'true'
+      const res = await app.request('/api/admin/export/bookings', {
+        headers: { Authorization: 'Bearer valid_token' },
+      })
+      expect(res.status).toBe(200)
+      const body = await res.json()
+      expect(body.bookings).toHaveLength(1)
+    } finally {
+      process.env.NODE_ENV = prevNode
+      if (prevAllow === undefined) delete process.env.ALLOW_ADMIN_BOOKING_EXPORT
+      else process.env.ALLOW_ADMIN_BOOKING_EXPORT = prevAllow
+    }
+  })
+
+  test('GET /api/admin/export/bookings - writes audit log line on success', async () => {
+    const prevNode = process.env.NODE_ENV
+    const prevAllow = process.env.ALLOW_ADMIN_BOOKING_EXPORT
+    const lines: string[] = []
+    const origLog = console.log
+    console.log = (...args: unknown[]) => {
+      lines.push(
+        args
+          .map((a) => (typeof a === 'string' ? a : JSON.stringify(a)))
+          .join(' '),
+      )
+    }
+    try {
+      process.env.NODE_ENV = 'development'
+      delete process.env.ALLOW_ADMIN_BOOKING_EXPORT
+      await app.request('/api/admin/export/bookings', {
+        headers: { Authorization: 'Bearer valid_token' },
+      })
+    } finally {
+      console.log = origLog
+      process.env.NODE_ENV = prevNode
+      if (prevAllow === undefined) delete process.env.ALLOW_ADMIN_BOOKING_EXPORT
+      else process.env.ALLOW_ADMIN_BOOKING_EXPORT = prevAllow
+    }
+    const auditLine = lines.find((l) => l.includes('admin_booking_export'))
+    expect(auditLine).toBeDefined()
+    const parsed = JSON.parse(auditLine!) as {
+      type: string
+      action: string
+      userId: string
+      sessionId: string | null
+    }
+    expect(parsed.type).toBe('audit')
+    expect(parsed.action).toBe('admin_booking_export')
+    expect(parsed.userId).toBe('user_123')
+    expect(parsed.sessionId).toBe('sess_456')
+  })
+
+  test('GET /api/admin/export/bookings - no audit log when gated off', async () => {
+    const prevNode = process.env.NODE_ENV
+    const prevAllow = process.env.ALLOW_ADMIN_BOOKING_EXPORT
+    const lines: string[] = []
+    const origLog = console.log
+    console.log = (...args: unknown[]) => {
+      lines.push(
+        args
+          .map((a) => (typeof a === 'string' ? a : JSON.stringify(a)))
+          .join(' '),
+      )
+    }
+    try {
+      process.env.NODE_ENV = 'production'
+      delete process.env.ALLOW_ADMIN_BOOKING_EXPORT
+      await app.request('/api/admin/export/bookings', {
+        headers: { Authorization: 'Bearer valid_token' },
+      })
+    } finally {
+      console.log = origLog
+      process.env.NODE_ENV = prevNode
+      if (prevAllow === undefined) delete process.env.ALLOW_ADMIN_BOOKING_EXPORT
+      else process.env.ALLOW_ADMIN_BOOKING_EXPORT = prevAllow
+    }
+    expect(lines.some((l) => l.includes('admin_booking_export'))).toBe(false)
+  })
 })
 
 describe('User Routes', () => {
