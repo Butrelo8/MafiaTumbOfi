@@ -20,18 +20,6 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ---
 
-### Ops — Health version matches shipped release
-**What:** Drive `/health` `version` from `package.json`, env, or build-time inject instead of a hardcoded string.
-**Why:** Avoids drift (e.g. release branch vs `version: '0.4.0'` in code).
-**Context:** `src/index.ts` — `c.json({ status: 'ok', version: '0.4.0' })`.
-**Solution:** 
-**Done When:** 
-**Effort:** S
-**Priority:** P3
-**Depends on:** None
-
----
-
 ### Tests — Unit tests for Stripe webhook verification helper
 **What:** Add tests for `verifyWebhookSignature` / `getStripe` error paths (mock Stripe SDK) when the webhook route exists.
 **Why:** Payment boundary should be covered before production traffic; helper is currently unused until POST /api/webhooks/stripe ships.
@@ -80,15 +68,51 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ---
 
-### Content / SEO — Homepage, press kit, meta
-**What:** Copy and structure for homepage, press kit, booking page; meta tags, Open Graph, optional sitemap so the site reads as the band’s official presence.
-**Why:** Makes the site feel like a real official site for promoters and SEO.
-**Context:** Astro pages in web/src/pages; add/expand content and meta in layouts or per-page. **Natural to do with or right after VPS** (one real domain, one “official” launch).
+### Content / SEO — Global meta & Open Graph skeleton
+**What:** Extend `web/src/layouts/Layout.astro` (or a small `Seo.astro` partial) with Twitter/OG tags, default `og:image` (or per-page override), `theme-color`, and optional `robots` where needed. Per-page `title` / `description` stay props-driven.
+**Why:** Link previews and crawlers get consistent, professional signals without waiting on final copy.
+**Context:** Today only basic `<meta name="description">` and `<title>`. Use env like `PUBLIC_SITE_URL` only when stable; avoid wrong canonicals on preview URLs until domain todo ships.
+**Solution:** 
+**Done When:** 
+**Effort:** S
+**Priority:** P2
+**Depends on:** None
+
+---
+
+### Content / SEO — Press kit page
+**What:** Add a public route (e.g. `/prensa` or `/press`) with promoter-facing structure: short/long bio, approved photos/logos (or links to Drive/Dropbox), booking/contact CTA, optional tech rider PDF link.
+**Why:** One shareable URL for bookers and press; supports “official band” positioning.
+**Context:** New Astro page under `web/src/pages`; nav link from `Layout.astro`. Wire page-specific `title` / `description` / OG for that URL.
+**Solution:** 
+**Done When:** 
+**Effort:** M
+**Priority:** P2
+**Depends on:** None (asset hosting can be external links for v1)
+
+---
+
+### Content / SEO — Homepage & booking copy pass
+**What:** Rewrite/structure `index.astro` and `booking.astro` for promoters and fans: clear who the band is, what “contrataciones” means, trust signals, CTA flow; optional short FAQ block for SEO.
+**Why:** Current pages may be thin; this is the core conversion and clarity work separate from meta plumbing.
+**Context:** Keep existing booking form behavior; focus on headings, sections, and accessibility. Align tone with press kit when both exist.
 **Solution:** 
 **Done When:** 
 **Effort:** M
 **Priority:** P2
 **Depends on:** None
+
+---
+
+### Content / SEO — Canonical URLs & sitemap after custom domain
+**What:** Set canonical `<link rel="canonical">` and `og:url` from a single source of truth (e.g. `PUBLIC_SITE_URL` or build-time); add `sitemap.xml` (Astro `@astrojs/sitemap` or static route) and ensure it lists public routes only (exclude `/admin`).
+**Why:** Wrong canonicals on `*.vercel.app` / `*.onrender.com` hurt sharing and indexing; sitemap matters once the real domain is live.
+**Context:** Do when production URL is stable — same window as **Deploy — Acquire custom domain and migrate production to a VPS** (or at least when frontend serves from the final hostname).
+**Solution:** 
+**Done When:** 
+**Effort:** S
+**Priority:** P2
+**Depends on:** Deploy — Acquire custom domain and migrate production to a VPS (or equivalent stable production origin)
 
 ---
 
@@ -132,6 +156,12 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 ---
 
 ## Completed
+
+### Ops — Health version matches shipped release (2026-03-22)
+- **API:** `src/lib/appVersion.ts` — `getAppVersion()` reads root `package.json` once at startup; optional `APP_VERSION` or `RELEASE_VERSION` (trimmed) overrides for CI/deploy.
+- **Route:** `src/index.ts` — `GET /health` uses `getAppVersion()` instead of a hardcoded semver.
+- **Docs:** `.env.example` — commented `APP_VERSION` / `RELEASE_VERSION`.
+- **Tests:** `src/lib/appVersion.test.ts` (override precedence + trim); `src/health.test.ts` asserts `version` equals `package.json` and honors `APP_VERSION`.
 
 ### API — Consistent success JSON for admin list routes (2026-03-21)
 - **API:** `src/routes/admin.ts` — `GET /api/admin/bookings` returns `successResponse` with `data: { bookings, total }`; `GET /api/admin/export/bookings` returns `successResponse` with `data: { exportedAt, total, last24hCount, bookings }`.

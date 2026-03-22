@@ -1,10 +1,10 @@
 # Project State
 
 ## Current Position
-- Phase: Ship prep / API contract hygiene + infra backlog.
-- Branch: **`main`** (uncommitted: admin JSON + CHANGELOG/TODOS/DEPLOY — commit on a feature branch per policy before merge).
-- Last completed: **Admin list/export success JSON** — `GET /api/admin/bookings` and `GET /api/admin/export/bookings` use `successResponse`; payload under `data` (`bookings` + `total`, etc.); `web/src/pages/admin.astro` reads `data.bookings`; tests in `00-auth-protected.test.ts`; see TODOS Completed + CHANGELOG [Unreleased].
-- Next up: **P2** — distributed rate limiting (Redis on Coolify when multi-instance, or document single-instance in DEPLOY.md). **P3** — `/health` version from package.json; other open TODOS as prioritized.
+- Phase: Ship prep / backlog grooming + infra.
+- Branch: **`main`** — **uncommitted:** `TODOS.md` only (Content/SEO split into four items; Ops — Health version `Solution` / `Done When` filled). Confirm with `git status` / `git log` whether admin JSON work is already committed.
+- Last completed (this workstream): **Ops — Health version** — `getAppVersion()` from `package.json` + `APP_VERSION` / `RELEASE_VERSION`; tests in `appVersion.test.ts` + `health.test.ts`; `.env.example` updated; TODOS item closed.
+- Next up: **P2** rate limiting / deploy slice / Content/SEO; or commit doc + code changes on a feature branch per policy.
 
 ## Accumulated Decisions
 - 2026-03-17: Hold Scope — VPS deploy as primary milestone; Stripe webhook only when there is a product; no first-paying-customer / merch push yet.
@@ -17,6 +17,6 @@
 - Horizontal scaling: in-memory rate limits are per-process — resolve when deciding multi-instance API (Redis on Coolify vs documented single-instance).
 
 ## Session Notes
-Last session: 2026-03-22 — admin bookings/export `successResponse` alignment; `bun test` green (43 tests).
-Stopped at: Local changes not yet committed; ready to branch + commit or continue with next TODOS item.
-Resume with: **`git status`** → commit admin JSON work on a feature branch if desired → then **P2 rate limiting** (see `TODOS.md`) or **P3 health version**.
+Last session: Implemented `/health` version from `package.json` + env overrides; tests; CHANGELOG + TODOS completed entry.
+Stopped at: Ready to branch/commit (policy: not on `main`).
+Resume with: **`git checkout -b chore/health-version`** → `git add` / `git commit` → next open **P2** or **Content/SEO** task.

@@ -5,6 +5,7 @@ import { bodyLimit } from './middleware/bodyLimit'
 import { enforceHttps } from './middleware/https'
 import { securityHeaders } from './middleware/security'
 import { errorHandler } from './middleware/error'
+import { getAppVersion } from './lib/appVersion'
 import { routes } from './routes'
 
 const app = new Hono()
@@ -34,7 +35,9 @@ app.use('*', cors({
 app.route('/api', routes)
 
 // ─── Health Check ─────────────────────────────────────
-app.get('/health', (c) => c.json({ status: 'ok', version: '0.4.0' }))
+app.get('/health', (c) =>
+  c.json({ status: 'ok', version: getAppVersion() }),
+)
 
 // ─── Error Handler ────────────────────────────────────
 app.onError(errorHandler)
