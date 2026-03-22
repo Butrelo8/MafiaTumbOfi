@@ -263,4 +263,30 @@ describe('POST /api/booking', () => {
     const data = await res.json()
     expect(data.data?.confirmation).toBe('pending')
   })
+
+  test('returns 500 INTERNAL_ERROR when insert returns no row', async () => {
+    mock.module('../db', () => ({
+      db: {
+        insert: () => ({
+          values: () => ({
+            returning: async () => [] as { id: number }[],
+          }),
+        }),
+      },
+    }))
+    const { bookingRoutes: routesEmpty } = await import('./booking')
+    const appEmpty = new Hono().route('/api', routesEmpty)
+    process.env.BOOKING_NOTIFICATION_EMAIL = 'band@example.com'
+    const res = await appEmpty.request('/api/booking', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'X', email: 'x@y.com' }),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-forwarded-for': '10.99.0.1',
+      },
+    })
+    expect(res.status).toBe(500)
+    const data = await res.json()
+    expect(data.error?.code).toBe('INTERNAL_ERROR')
+  })
 })

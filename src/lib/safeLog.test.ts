@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test'
-import { logServerError, logServerErrorDetails, logServerWarning } from './safeLog'
+import {
+  logServerError,
+  logServerErrorDetails,
+  logServerInfo,
+  logServerWarning,
+} from './safeLog'
 
 describe('safeLog', () => {
   const lines: string[] = []
@@ -69,5 +74,37 @@ describe('safeLog', () => {
     const parsed = JSON.parse(lines[0]!) as Record<string, unknown>
     expect(parsed.level).toBe('warn')
     expect(parsed.message).toBe('missing env')
+  })
+})
+
+describe('logServerInfo', () => {
+  const lines: string[] = []
+  let origLog: typeof console.log
+
+  beforeEach(() => {
+    lines.length = 0
+    origLog = console.log
+    console.log = mock((msg: string) => {
+      lines.push(msg)
+    })
+  })
+
+  afterEach(() => {
+    console.log = origLog
+  })
+
+  test('emits single JSON line with info level on stdout', () => {
+    logServerInfo('booking', 'REQUEST_RECEIVED', {
+      bookingId: 1,
+      ip: '10.0.0.1',
+      hasMessage: false,
+    })
+    expect(lines).toHaveLength(1)
+    const parsed = JSON.parse(lines[0]!) as Record<string, unknown>
+    expect(parsed.level).toBe('info')
+    expect(parsed.scope).toBe('booking')
+    expect(parsed.code).toBe('REQUEST_RECEIVED')
+    expect(parsed.bookingId).toBe(1)
+    expect(parsed.ip).toBe('10.0.0.1')
   })
 })

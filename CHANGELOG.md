@@ -8,6 +8,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- `logServerInfo` in `src/lib/safeLog.ts` for structured JSON lines on stdout (`level: info`); test in `safeLog.test.ts`.
 - Security: `src/lib/safeLog.ts` for JSON error/warn logs (stacks only in `NODE_ENV=development`); `src/lib/forwardedProto.ts` for `X-Forwarded-Proto` + RFC 7239 `Forwarded` `proto=`; `rateLimitHealth` (120 GET `/health` per minute per client id); tests in `safeLog.test.ts`, `forwardedProto.test.ts`, extended `security.test.ts`.
 - Security: production opt-in for `GET /api/admin/export/bookings` via `ALLOW_ADMIN_BOOKING_EXPORT=true`; structured audit log on successful export; docs in `.env.example` and DEPLOY.md; admin Astro page shows HTML guidance on 403.
 - Deploy: Render (API with Bun + SQLite on persistent disk), Vercel (Astro frontend with @astrojs/vercel)
@@ -18,6 +19,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Booking deliverability observability: persist confirmation delivery last error + attempt count and expose it in admin UI; admins can re-send customer confirmation for `pending` bookings.
 
 ### Changed
+- API: booking route logs `REQUEST_RECEIVED` via `logServerInfo` (JSON line) instead of unstructured `console.log`; band-email failure path uses shared `markBandEmailFailed` helper; empty insert `.returning()` yields 500 `INTERNAL_ERROR`.
 - Admin booking export: default-deny unless `ALLOW_ADMIN_BOOKING_EXPORT=true` or `NODE_ENV=development` (unset/`test`/staging no longer implicitly allow export); user-facing 403 message and DEPLOY Option C text updated.
 - Docs: `DEPLOY.md` — reverse-proxy header table (`X-Forwarded-Proto`, `Forwarded`, `X-Forwarded-For`) and `/health` rate limit note.
 - Docs: full codebase security review (2026-03-22) — `BUGS.md` items addressed by post-review hardening; **TODOS — Security — Post-review hardening** completed.

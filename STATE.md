@@ -12,7 +12,6 @@
 - 2026-03-21: First admin — single INSERT with scalar subquery `EXISTS` for `is_admin` to avoid double-admin on concurrent first signups.
 - 2026-03-21: CORS — allowlist-only; return `undefined` from `cors` `origin` callback when `Origin` is not in `allowedOrigins` so reviewers see explicit deny (no misleading first-origin reflection).
 - 2026-03-22: Admin GET success bodies — align with global `{ data: T }` via `successResponse` so clients are not split between top-level `total` and wrapped payloads; export download includes the same envelope.
-- 2026-03-22: Post-review hardening — `safeLog` (no stacks in prod), `Forwarded` proto fallback for HTTPS, `/health` rate limit, admin export only via `ALLOW_*` or `NODE_ENV=development`.
 
 ## Blockers & Open Questions
 - Horizontal scaling: in-memory rate limits are per-process — resolve when deciding multi-instance API (Redis on Coolify vs documented single-instance).

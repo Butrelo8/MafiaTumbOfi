@@ -10,8 +10,16 @@ import { getClientId, rateLimitBooking } from '../middleware/rateLimit'
 import {
   logServerError,
   logServerErrorDetails,
+  logServerInfo,
   logServerWarning,
 } from '../lib/safeLog'
+
+async function markBandEmailFailed(bookingId: number) {
+  await db
+    .update(bookings)
+    .set({ status: 'failed', confirmationLastError: null, confirmationAttempts: 0 })
+    .where(eq(bookings.id, bookingId))
+}
 
 const bookingSchema = z.object({
   name: z.string().min(1).max(200),
@@ -62,7 +70,7 @@ bookingRoutes.post('/booking', async (c) => {
     return errorResponse(c, 500, 'CONFIG_ERROR', 'Booking email is not configured')
   }
 
-  const [inserted] = await db
+  const insertedRows = await db
     .insert(bookings)
     .values({
       name,
@@ -76,8 +84,14 @@ bookingRoutes.post('/booking', async (c) => {
     })
     .returning({ id: bookings.id })
 
-  console.log('[booking] Request received', {
-    id: inserted.id,
+  const inserted = insertedRows[0]
+  if (!inserted) {
+    logServerError('booking', 'INSERT_RETURN_EMPTY', new Error('insert returned no row'))
+    return errorResponse(c, 500, 'INTERNAL_ERROR', 'Could not create booking')
+  }
+
+  logServerInfo('booking', 'REQUEST_RECEIVED', {
+    bookingId: inserted.id,
     ip: getClientId(c),
     timestamp: new Date().toISOString(),
     hasMessage: !!message,
@@ -114,10 +128,7 @@ bookingRoutes.post('/booking', async (c) => {
         message: error.message,
         name: error.name,
       })
-      await db
-        .update(bookings)
-        .set({ status: 'failed', confirmationLastError: null, confirmationAttempts: 0 })
-        .where(eq(bookings.id, inserted.id))
+      await markBandEmailFailed(inserted.id)
       return errorResponse(
         c,
         500,
@@ -127,10 +138,7 @@ bookingRoutes.post('/booking', async (c) => {
     }
   } catch (err) {
     logServerError('booking', 'RESEND_BAND_THROW', err)
-    await db
-      .update(bookings)
-      .set({ status: 'failed', confirmationLastError: null, confirmationAttempts: 0 })
-      .where(eq(bookings.id, inserted.id))
+    await markBandEmailFailed(inserted.id)
     return errorResponse(c, 500, 'EMAIL_FAILED', 'Could not send booking request')
   }
 
