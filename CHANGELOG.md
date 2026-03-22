@@ -8,6 +8,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- Security: `src/lib/safeLog.ts` for JSON error/warn logs (stacks only in `NODE_ENV=development`); `src/lib/forwardedProto.ts` for `X-Forwarded-Proto` + RFC 7239 `Forwarded` `proto=`; `rateLimitHealth` (120 GET `/health` per minute per client id); tests in `safeLog.test.ts`, `forwardedProto.test.ts`, extended `security.test.ts`.
 - Security: production opt-in for `GET /api/admin/export/bookings` via `ALLOW_ADMIN_BOOKING_EXPORT=true`; structured audit log on successful export; docs in `.env.example` and DEPLOY.md; admin Astro page shows HTML guidance on 403.
 - Deploy: Render (API with Bun + SQLite on persistent disk), Vercel (Astro frontend with @astrojs/vercel)
 - `render.yaml` Blueprint: web service, disk at `/data`, DB_PATH=/data/sqlite.db, migrations at startup
@@ -17,13 +18,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Booking deliverability observability: persist confirmation delivery last error + attempt count and expose it in admin UI; admins can re-send customer confirmation for `pending` bookings.
 
 ### Changed
-- Docs: full codebase security review (2026-03-22) — new `BUGS.md` items (HTTPS proxy header, production logging, admin export env gate); open **TODOS — Security — Post-review hardening**; `STATE.md` updated for resume context.
+- Admin booking export: default-deny unless `ALLOW_ADMIN_BOOKING_EXPORT=true` or `NODE_ENV=development` (unset/`test`/staging no longer implicitly allow export); user-facing 403 message and DEPLOY Option C text updated.
+- Docs: `DEPLOY.md` — reverse-proxy header table (`X-Forwarded-Proto`, `Forwarded`, `X-Forwarded-For`) and `/health` rate limit note.
+- Docs: full codebase security review (2026-03-22) — `BUGS.md` items addressed by post-review hardening; **TODOS — Security — Post-review hardening** completed.
 - API: `GET /health` `version` comes from root `package.json`, with optional `APP_VERSION` or `RELEASE_VERSION` override (`src/lib/appVersion.ts`); documented in `.env.example`.
 - API: `GET /api/admin/bookings` and `GET /api/admin/export/bookings` success bodies use `successResponse` — payload is under `data` (e.g. `data.bookings` + `data.total` for the list; export fields under `data` as well). Admin Astro page reads `data.bookings`; JSON download from export includes the same envelope.
 - TODOS: Deploy marked completed (Render + Vercel + Clerk + Resend); added Content/SEO open todo; Resend domain verification remains P2
 - DEPLOY.md: Post-launch section (Resend domain, custom domain, monitoring); health-check note (use Render URL for /health)
 
 ### Fixed
+- Security (2026-03-22 review): verbose `console.error` with full errors replaced by `safeLog`; `enforceHttps` honors RFC 7239 `Forwarded` when `X-Forwarded-Proto` is missing; admin export no longer enabled for unset/non-`development` `NODE_ENV` without `ALLOW_ADMIN_BOOKING_EXPORT=true`.
 - API: CORS `origin` callback no longer falls back to the first allowlisted origin when `Origin` is not allowlisted; `Access-Control-Allow-Origin` is omitted instead (allowlist-only, easier to audit). Tests in `security.test.ts`.
 - Auth: first-user admin bootstrap is atomic (single `INSERT` uses `EXISTS` subquery for `is_admin`) so parallel first signups cannot both become admin; optional `{ db }` on `getOrCreateUser` for isolated integration tests (`src/lib/users.test.ts`).
 - Vercel: patch serverless runtime to nodejs20.x (adapter emits nodejs18.x, which Vercel rejects for new deployments); added `web/scripts/patch-vercel-runtime.mjs` and buildCommand post-step

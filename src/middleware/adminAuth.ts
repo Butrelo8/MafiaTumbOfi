@@ -1,6 +1,7 @@
 import type { Context, Next } from 'hono'
 import { errorResponse } from '../lib/errors'
 import { getOrCreateUser } from '../lib/users'
+import { logServerError } from '../lib/safeLog'
 
 /**
  * Requires authMiddleware to have run first (userId set).
@@ -20,7 +21,7 @@ export async function adminAuth(c: Context, next: Next) {
     c.set('user', user)
     return await next()
   } catch (err) {
-    console.error('[adminAuth]', err)
+    logServerError('adminAuth', 'GET_OR_CREATE_FAILED', err)
     return errorResponse(c, 500, 'INTERNAL_ERROR', 'Failed to verify admin access')
   }
 }

@@ -1,9 +1,9 @@
 import type { Context } from 'hono'
 import type { StatusCode } from 'hono/utils/http-status'
+import { logServerError } from '../lib/safeLog'
 
 export const errorHandler = (err: Error, c: Context) => {
-  console.error(`[ERROR] ${err.message}`, {
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+  logServerError('http', 'UNHANDLED', err, {
     path: c.req.path,
     method: c.req.method,
   })

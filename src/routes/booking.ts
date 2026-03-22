@@ -7,6 +7,11 @@ import { errorResponse, successResponse } from '../lib/errors'
 import { getResend } from '../lib/resend'
 import { spanishErrorMap } from '../lib/zod-es'
 import { getClientId, rateLimitBooking } from '../middleware/rateLimit'
+import {
+  logServerError,
+  logServerErrorDetails,
+  logServerWarning,
+} from '../lib/safeLog'
 
 const bookingSchema = z.object({
   name: z.string().min(1).max(200),
@@ -46,14 +51,14 @@ bookingRoutes.post('/booking', async (c) => {
 
   const to = process.env.BOOKING_NOTIFICATION_EMAIL
   if (!to) {
-    console.error('[booking] BOOKING_NOTIFICATION_EMAIL not set')
+    logServerWarning('booking', 'CONFIG', 'BOOKING_NOTIFICATION_EMAIL not set')
     return errorResponse(c, 500, 'CONFIG_ERROR', 'Booking is not configured')
   }
 
   try {
     getResend()
   } catch (err) {
-    console.error('[booking] Resend not configured:', err instanceof Error ? err.message : err)
+    logServerError('booking', 'RESEND_INIT', err)
     return errorResponse(c, 500, 'CONFIG_ERROR', 'Booking email is not configured')
   }
 
@@ -105,7 +110,7 @@ bookingRoutes.post('/booking', async (c) => {
     })
 
     if (error) {
-      console.error('[booking] Resend band notification error:', {
+      logServerErrorDetails('booking', 'RESEND_BAND_API', {
         message: error.message,
         name: error.name,
       })
@@ -121,7 +126,7 @@ bookingRoutes.post('/booking', async (c) => {
       )
     }
   } catch (err) {
-    console.error('[booking] Resend band notification threw:', err)
+    logServerError('booking', 'RESEND_BAND_THROW', err)
     await db
       .update(bookings)
       .set({ status: 'failed', confirmationLastError: null, confirmationAttempts: 0 })
@@ -140,7 +145,7 @@ bookingRoutes.post('/booking', async (c) => {
 
     confirmation = confirmResult.error ? 'pending' : 'sent'
     if (confirmResult.error) {
-      console.error('[booking] Confirmation email failed:', {
+      logServerErrorDetails('booking', 'RESEND_CONFIRM_CUSTOMER', {
         message: confirmResult.error?.message,
         name: confirmResult.error?.name,
       })
@@ -149,7 +154,7 @@ bookingRoutes.post('/booking', async (c) => {
       confirmationLastError = null
     }
   } catch (err) {
-    console.error('[booking] Confirmation email threw:', err)
+    logServerError('booking', 'RESEND_CONFIRM_THROW', err)
     confirmation = 'pending'
     confirmationLastError = err instanceof Error ? err.message : String(err)
   }
