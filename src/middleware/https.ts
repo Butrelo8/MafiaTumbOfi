@@ -1,10 +1,10 @@
 import type { Context, Next } from 'hono'
+import { getForwardedProtoFromRequest } from '../lib/forwardedProto'
 
 export async function enforceHttps(c: Context, next: Next) {
   if (process.env.NODE_ENV === 'production') {
-    const forwardedProto = c.req.header('x-forwarded-proto')
-    if (forwardedProto) {
-      const proto = forwardedProto.toLowerCase().trim()
+    const proto = getForwardedProtoFromRequest((name) => c.req.header(name))
+    if (proto) {
       if (proto !== 'https') {
         const host = c.req.header('host')
         if (host) {

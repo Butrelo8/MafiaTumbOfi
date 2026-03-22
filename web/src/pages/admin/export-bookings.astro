@@ -19,7 +19,7 @@ const response = await fetch(`${apiUrl}/api/admin/export/bookings`, {
 if (!response.ok) {
   if (response.status === 403) {
     let userMessage =
-      'La exportación está desactivada en producción. En el servicio de la API, define ALLOW_ADMIN_BOOKING_EXPORT=true solo mientras la necesites; revisa DEPLOY.md.'
+      'La exportación está desactivada por defecto. En la API: ALLOW_ADMIN_BOOKING_EXPORT=true solo mientras la necesites, o NODE_ENV=development en local. Revisa DEPLOY.md.'
     try {
       const errBody = await response.json()
       const apiMsg = errBody?.error?.message

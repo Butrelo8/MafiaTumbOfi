@@ -83,20 +83,30 @@ describe('Admin Routes', () => {
   })
 
   test('GET /api/admin/export/bookings - returns export shape when authenticated', async () => {
-    const res = await app.request('/api/admin/export/bookings', {
-      headers: { Authorization: 'Bearer valid_token' },
-    })
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body).toHaveProperty('data')
-    expect(body.data).toHaveProperty('exportedAt')
-    expect(body.data).toHaveProperty('total', 1)
-    expect(body.data).toHaveProperty('last24hCount')
-    expect(typeof body.data.last24hCount).toBe('number')
-    expect(body.data).toHaveProperty('bookings')
-    expect(Array.isArray(body.data.bookings)).toBe(true)
-    expect(body.data.bookings).toHaveLength(1)
-    expect(body.data.bookings[0].name).toBe('Test Band')
+    const prevNode = process.env.NODE_ENV
+    const prevAllow = process.env.ALLOW_ADMIN_BOOKING_EXPORT
+    try {
+      process.env.NODE_ENV = 'development'
+      delete process.env.ALLOW_ADMIN_BOOKING_EXPORT
+      const res = await app.request('/api/admin/export/bookings', {
+        headers: { Authorization: 'Bearer valid_token' },
+      })
+      expect(res.status).toBe(200)
+      const body = await res.json()
+      expect(body).toHaveProperty('data')
+      expect(body.data).toHaveProperty('exportedAt')
+      expect(body.data).toHaveProperty('total', 1)
+      expect(body.data).toHaveProperty('last24hCount')
+      expect(typeof body.data.last24hCount).toBe('number')
+      expect(body.data).toHaveProperty('bookings')
+      expect(Array.isArray(body.data.bookings)).toBe(true)
+      expect(body.data.bookings).toHaveLength(1)
+      expect(body.data.bookings[0].name).toBe('Test Band')
+    } finally {
+      process.env.NODE_ENV = prevNode
+      if (prevAllow === undefined) delete process.env.ALLOW_ADMIN_BOOKING_EXPORT
+      else process.env.ALLOW_ADMIN_BOOKING_EXPORT = prevAllow
+    }
   })
 
   test('GET /api/admin/export/bookings - 403 in production when export flag unset', async () => {

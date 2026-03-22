@@ -5,6 +5,15 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-03-22 — Security post-review hardening (logs, `Forwarded`, `/health` limit, export matrix)
+
+**Context:** Full-codebase security review (2026-03-22) produced BUGS entries on verbose error logging, HTTPS when `x-forwarded-proto` is absent, and admin export enabled for any non-`production` `NODE_ENV` (including unset).
+**Decision:** (1) `src/lib/safeLog.ts` — structured JSON logs; no stacks unless `NODE_ENV=development`. (2) `getForwardedProtoFromRequest` — use `X-Forwarded-Proto` or RFC 7239 `Forwarded` `proto=`; if both absent, still no redirect (avoid loops; document proxy setup in DEPLOY.md). (3) `rateLimitHealth` — 120 GET `/health` per minute per client id. (4) `isAdminBookingExportAllowed` — `true` only when `ALLOW_ADMIN_BOOKING_EXPORT=true` or `NODE_ENV=development`.
+**Alternatives considered:** Redirect to HTTPS when forwarded proto is missing (rejected: possible redirect loops); omit health rate limit and document only (rejected: trivial abuse / noisy monitoring); keep “any non-production allows export” (rejected: mis-set `NODE_ENV` risk).
+**Why not the others:** Prefer explicit, testable gates over implicit environment semantics.
+
+---
+
 ## 2026-03-21 — Admin booking export: env gate in production + audit log
 
 **Context:** `GET /api/admin/export/bookings` returns full PII; admin-only but a leaked session or misconfig exposes everything at once.
