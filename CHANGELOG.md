@@ -21,6 +21,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - DEPLOY.md: Post-launch section (Resend domain, custom domain, monitoring); health-check note (use Render URL for /health)
 
 ### Fixed
+- API: CORS `origin` callback no longer falls back to the first allowlisted origin when `Origin` is not allowlisted; `Access-Control-Allow-Origin` is omitted instead (allowlist-only, easier to audit). Tests in `security.test.ts`.
 - Auth: first-user admin bootstrap is atomic (single `INSERT` uses `EXISTS` subquery for `is_admin`) so parallel first signups cannot both become admin; optional `{ db }` on `getOrCreateUser` for isolated integration tests (`src/lib/users.test.ts`).
 - Vercel: patch serverless runtime to nodejs20.x (adapter emits nodejs18.x, which Vercel rejects for new deployments); added `web/scripts/patch-vercel-runtime.mjs` and buildCommand post-step
 - Security: harden request body size limit when `Content-Length` is missing and guard production HTTPS redirects to only act when `x-forwarded-proto` is present

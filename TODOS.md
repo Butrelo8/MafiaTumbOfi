@@ -8,20 +8,6 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ## Open
 
----
-
-### API — CORS: allowlist-only `Access-Control-Allow-Origin`
-**What:** When `Origin` is not in the allowlist, do not fall back to `allowedOrigins[0]`; omit or reject so behavior matches “only listed origins” and is easier to audit.
-**Why:** Current fallback is confusing and unnecessary; browsers still block mismatched credentialed origins, but explicit deny is clearer for reviewers and future changes.
-**Context:** `src/index.ts` — `cors({ origin: (origin) => { ... } })`.
-**Solution:** 
-**Done When:** 
-**Effort:** S
-**Priority:** P2
-**Depends on:** None
-
----
-
 ### Infra — Distributed rate limiting for multiple API instances
 **What:** Replace or back in-memory booking/auth rate limit stores with a shared limiter (e.g. Redis, Upstash) or document single-instance requirement in DEPLOY.md.
 **Why:** `Map`-based limits in `rateLimit.ts` / `rateLimitAuth.ts` reset per process; multiple workers = weaker protection.
@@ -158,6 +144,10 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 ---
 
 ## Completed
+
+### API — CORS allowlist-only `Access-Control-Allow-Origin` (2026-03-21)
+- **Implementation:** `src/index.ts` — disallowed `Origin` returns `undefined` from the `cors` callback so Hono omits `Access-Control-Allow-Origin` (no `allowedOrigins[0]` fallback).
+- **Tests:** `src/security.test.ts` — GET and OPTIONS on `/health` with unknown origin assert no `Access-Control-Allow-Origin`; existing allowlisted-origin test unchanged.
 
 ### Security — Harden admin booking export endpoint (2026-03-21)
 - **API:** `src/lib/adminBookingExport.ts` + guard on `GET /api/admin/export/bookings`; production requires `ALLOW_ADMIN_BOOKING_EXPORT=true`; error code `ADMIN_BOOKING_EXPORT_DISABLED`; no DB query when denied; success → one JSON audit line (`admin_booking_export`, `userId`, `sessionId`, `timestamp`).
