@@ -7,6 +7,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Documentation
+- Engineering lead codebase review (2026-03-22): recorded decision and follow-ups in `DECISIONS.md`; added **Open** items in `TODOS.md` (shared `allowedOrigins` for CORS + Clerk, `GET /api/users/me` via `successResponse`, optional Playwright booking smoke); updated `STATE.md` to point at those docs.
+
 ### Added
 - `logServerInfo` in `src/lib/safeLog.ts` for structured JSON lines on stdout (`level: info`); test in `safeLog.test.ts`.
 - Security: `src/lib/safeLog.ts` for JSON error/warn logs (stacks only in `NODE_ENV=development`); `src/lib/forwardedProto.ts` for `X-Forwarded-Proto` + RFC 7239 `Forwarded` `proto=`; `rateLimitHealth` (120 GET `/health` per minute per client id); tests in `safeLog.test.ts`, `forwardedProto.test.ts`, extended `security.test.ts`.
