@@ -20,8 +20,8 @@ adminRoutes.get('/bookings', async (c) => {
       .from(bookings)
       .orderBy(desc(bookings.createdAt))
 
-    return c.json({
-      data: allBookings,
+    return successResponse(c, {
+      bookings: allBookings,
       total: allBookings.length,
     })
   } catch (error) {
@@ -145,7 +145,7 @@ adminRoutes.get('/export/bookings', async (c) => {
       }),
     )
 
-    return c.json({
+    return successResponse(c, {
       exportedAt: new Date().toISOString(),
       total: allBookings.length,
       last24hCount: last24h.length,

@@ -12,23 +12,11 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **What:** Replace or back in-memory booking/auth rate limit stores with a shared limiter (e.g. Redis, Upstash) or document single-instance requirement in DEPLOY.md.
 **Why:** `Map`-based limits in `rateLimit.ts` / `rateLimitAuth.ts` reset per process; multiple workers = weaker protection.
 **Context:** Comments already warn about trusted `x-forwarded-for`; scaling horizontally adds a new gap.
-**Solution:**  
-**Done When:** 
+**Solution:** Run a single Redis service in Coolify (same host/VPC as your apps). Add REDIS_URL (or host/port/password) to the API app’s env. Refactor booking + auth rate limiting to use a shared Redis-backed fixed window (or sliding window) with distinct key prefixes (e.g. rl:booking:, rl:auth:) so limits are consistent across all API replicas. Use INCR + EXPIRE (or a small Lua script for atomic window reset) keyed by the same client id logic as today (x-forwarded-for / x-real-ip behind a trusted proxy). Keep in-memory limiter as a dev fallback when REDIS_URL is unset so local dev stays simple. Document Coolify Redis wiring, env vars, and “single-instance API + SQLite vs multi-instance + Redis” in DEPLOY.md.
+**Done When:** Production/staging API uses Redis when REDIS_URL is set; dev works without it. Booking and auth routes still enforce their intended limits across processes (verified by tests with a mock Redis or testcontainer, not a live network). DEPLOY.md / .env.example describe Coolify Redis and the trust requirement for forwarded IP headers.
 **Effort:** M
 **Priority:** P2
-**Depends on:** Decision to run more than one API instance/process
-
----
-
-### API — Consistent success JSON for admin list routes
-**What:** Align `GET /api/admin/bookings` (and export if kept) with `successResponse` / the same `{ data: ... }` conventions as other routes.
-**Why:** Clients see mixed shapes (`{ data, total }` at top level vs `{ data: T }` wrapper elsewhere).
-**Context:** `src/routes/admin.ts` vs `src/lib/errors.ts` `successResponse`.
-**Solution:** 
-**Done When:** 
-**Effort:** S
-**Priority:** P3
-**Depends on:** None
+**Depends on:** Decision to run more than one API instance/process, will do when migratin to more robust work.
 
 ---
 
@@ -88,7 +76,7 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **Done When:** 
 **Effort:** M
 **Priority:** P3
-**Depends on:** STRIPE_WEBHOOK_SECRET in .env
+**Depends on:** If we ever do a shop. STRIPE_WEBHOOK_SECRET in .env
 
 ---
 
@@ -99,7 +87,7 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **Solution:** 
 **Done When:** 
 **Effort:** M
-**Priority:** P3
+**Priority:** P2
 **Depends on:** None
 
 ---
@@ -139,11 +127,16 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **Done When:** 
 **Effort:** L
 **Priority:** P2
-**Depends on:** VPS is provisioned with a working Postgres instance.
+**Depends on:** “Postgres when we need multi-instance writes or ops wants a managed DB,” and keep SQLite as the default VPS path until then.
 
 ---
 
 ## Completed
+
+### API — Consistent success JSON for admin list routes (2026-03-21)
+- **API:** `src/routes/admin.ts` — `GET /api/admin/bookings` returns `successResponse` with `data: { bookings, total }`; `GET /api/admin/export/bookings` returns `successResponse` with `data: { exportedAt, total, last24hCount, bookings }`.
+- **Frontend:** `web/src/pages/admin.astro` reads `result.data.bookings`.
+- **Tests:** `src/routes/00-auth-protected.test.ts` assertions updated for nested `data`.
 
 ### API — CORS allowlist-only `Access-Control-Allow-Origin` (2026-03-21)
 - **Implementation:** `src/index.ts` — disallowed `Origin` returns `undefined` from the `cors` callback so Hono omits `Access-Control-Allow-Origin` (no `allowedOrigins[0]` fallback).

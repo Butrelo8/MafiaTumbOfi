@@ -115,7 +115,7 @@ With SSH enabled you can copy the file to your machine, then open it locally (e.
 
 ### Option C: Export data via your API (any plan)
 
-The app exposes a **Clerk-protected**, read-only admin endpoint `GET /api/admin/export/bookings` that returns bookings as JSON (used from `/admin/export-bookings` on the frontend). **In production** (`NODE_ENV=production`), this route returns **403** unless you set **`ALLOW_ADMIN_BOOKING_EXPORT=true`** on the API service. Leave it unset in normal operation; turn it on only for short debugging windows. Successful exports emit a structured **audit** line to the API logs (`action: admin_booking_export`, `userId`, `sessionId`, `timestamp`). No SSH required; works on free tier.
+The app exposes a **Clerk-protected**, read-only admin endpoint `GET /api/admin/export/bookings` that returns bookings as JSON inside the standard success envelope `{ "data": { "exportedAt", "total", "last24hCount", "bookings" } }` (same shape as other API successes; used from `/admin/export-bookings` on the frontend). **In production** (`NODE_ENV=production`), this route returns **403** unless you set **`ALLOW_ADMIN_BOOKING_EXPORT=true`** on the API service. Leave it unset in normal operation; turn it on only for short debugging windows. Successful exports emit a structured **audit** line to the API logs (`action: admin_booking_export`, `userId`, `sessionId`, `timestamp`). No SSH required; works on free tier.
 
 ### Summary
 

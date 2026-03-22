@@ -75,11 +75,11 @@ describe('Admin Routes', () => {
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body).toHaveProperty('data')
-    expect(body).toHaveProperty('total')
-    expect(Array.isArray(body.data)).toBe(true)
-    expect(body.data).toHaveLength(1)
-    expect(body.data[0].name).toBe('Test Band')
-    expect(body.total).toBe(1)
+    expect(body.data).toHaveProperty('bookings')
+    expect(body.data).toHaveProperty('total', 1)
+    expect(Array.isArray(body.data.bookings)).toBe(true)
+    expect(body.data.bookings).toHaveLength(1)
+    expect(body.data.bookings[0].name).toBe('Test Band')
   })
 
   test('GET /api/admin/export/bookings - returns export shape when authenticated', async () => {
@@ -88,14 +88,15 @@ describe('Admin Routes', () => {
     })
     expect(res.status).toBe(200)
     const body = await res.json()
-    expect(body).toHaveProperty('exportedAt')
-    expect(body).toHaveProperty('total', 1)
-    expect(body).toHaveProperty('last24hCount')
-    expect(typeof body.last24hCount).toBe('number')
-    expect(body).toHaveProperty('bookings')
-    expect(Array.isArray(body.bookings)).toBe(true)
-    expect(body.bookings).toHaveLength(1)
-    expect(body.bookings[0].name).toBe('Test Band')
+    expect(body).toHaveProperty('data')
+    expect(body.data).toHaveProperty('exportedAt')
+    expect(body.data).toHaveProperty('total', 1)
+    expect(body.data).toHaveProperty('last24hCount')
+    expect(typeof body.data.last24hCount).toBe('number')
+    expect(body.data).toHaveProperty('bookings')
+    expect(Array.isArray(body.data.bookings)).toBe(true)
+    expect(body.data.bookings).toHaveLength(1)
+    expect(body.data.bookings[0].name).toBe('Test Band')
   })
 
   test('GET /api/admin/export/bookings - 403 in production when export flag unset', async () => {
@@ -129,7 +130,7 @@ describe('Admin Routes', () => {
       })
       expect(res.status).toBe(200)
       const body = await res.json()
-      expect(body.bookings).toHaveLength(1)
+      expect(body.data.bookings).toHaveLength(1)
     } finally {
       process.env.NODE_ENV = prevNode
       if (prevAllow === undefined) delete process.env.ALLOW_ADMIN_BOOKING_EXPORT
