@@ -14,6 +14,15 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-03-22 — Engineering lead codebase review (findings + backlog, ship path unchanged)
+
+**Context:** Full-pass eng lead review of architecture, data flow, code quality, tests, and performance across the Hono API (`src/`), Astro app (`web/`), SQLite + Drizzle, Clerk, and Resend. Review confirmed MVP boundaries, called out DRY and test gaps, and reiterated ops limits (single SQLite file, in-memory rate limits per process).
+**Decision:** Keep **Hold Scope** execution order: prioritize VPS deploy, Resend domain verification, and Content/SEO per `TODOS.md` and `STATE.md`. Capture hygiene work as explicit open TODOs instead of blocking ship: (1) single source of truth for `allowedOrigins` shared by CORS (`src/index.ts`) and Clerk `authorizedParties` (`src/middleware/auth.ts`); (2) align `GET /api/users/me` with `successResponse` / `{ data: T }` like admin list routes; (3) optional Playwright smoke for the public booking flow when E2E maintenance cost is acceptable. Document operational risks already tracked: distributed rate limiting (`TODOS`), unpaginated admin booking list at scale, SQLite writer contention under spike load.
+**Alternatives considered:** Block release until DRY origins + Playwright land; fix `/me` and shared origins in the same day as the review without filing TODOs.
+**Why not the others:** Origins and response-envelope changes are small, normal feature-branch work; Playwright adds value for UI+boundary regressions but is not a prerequisite for a thin booking form if deploy QA covers it; launch-critical path stays domain, email deliverability, and hosting.
+
+---
+
 ## 2026-03-21 — Admin booking export: env gate in production + audit log
 
 **Context:** `GET /api/admin/export/bookings` returns full PII; admin-only but a leaked session or misconfig exposes everything at once.

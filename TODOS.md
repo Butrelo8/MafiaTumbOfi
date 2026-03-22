@@ -8,6 +8,42 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ## Open
 
+### API — DRY shared allowlist for CORS and Clerk `authorizedParties`
+**What:** Move the duplicated `allowedOrigins` array (localhost dev ports + `FRONTEND_URL` / `STAGING_URL` / `PRODUCTION_URL`) into a small shared module (e.g. `src/lib/allowedOrigins.ts`) and import it from `src/index.ts` and `src/middleware/auth.ts`.
+**Why:** CORS and Clerk session validation must stay in lockstep; two copies risk drift when URLs change.
+**Context:** Engineering lead codebase review (2026-03-22). Same list is built in both files today.
+**Solution:** Export a helper or constant (filter `Boolean` as today); use in the Hono `cors` `origin` callback and in `authenticateRequest({ authorizedParties })`.
+**Done When:** Both call sites use the shared module; `bun test` green; CORS and auth-related tests unchanged in behavior.
+**Effort:** S
+**Priority:** P2
+**Depends on:** None
+
+---
+
+### API — `GET /users/me` uses `successResponse`
+**What:** Change `src/routes/users.ts` to return `successResponse(c, user)` instead of hand-rolled `c.json({ data: user })` so successful JSON matches `src/lib/errors.ts` and admin routes.
+**Why:** One consistent success envelope and helper path for clients and future middleware.
+**Context:** Admin list/export routes already use `successResponse` (`DECISIONS.md` 2026-03-22); `/me` is shape-compatible but bypasses the helper.
+**Solution:** Swap to `successResponse`; update tests/assertions if any expect the raw `c.json` path.
+**Done When:** `/me` uses `successResponse`; Astro or any client still reads `data` as today.
+**Effort:** S
+**Priority:** P2
+**Depends on:** None
+
+---
+
+### Tests — Playwright smoke: public booking flow
+**What:** Add Playwright under `web/` (or repo root) with a minimal smoke: open booking page, fill required fields, submit, assert expected success or error UI (mock API or point at test/staging per convention).
+**Why:** Crosses UI + API boundary; catches form and confirmation-message regressions.
+**Context:** No Playwright in `web/package.json` today; workspace standards prefer Playwright for boundary-crossing flows. Keep deterministic: no live Resend/network in CI.
+**Solution:** Add `@playwright/test`, one spec (e.g. `web/e2e/booking.spec.ts`), document browser install in README or DEPLOY.md.
+**Done When:** One smoke passes locally; CI runs it when feasible; tests do not depend on third-party APIs without mocks.
+**Effort:** M
+**Priority:** P3
+**Depends on:** None (optional: stable staging URL for real API)
+
+---
+
 ### Infra — Distributed rate limiting for multiple API instances
 **What:** Replace or back in-memory booking/auth rate limit stores with a shared limiter (e.g. Redis, Upstash) or document single-instance requirement in DEPLOY.md.
 **Why:** `Map`-based limits in `rateLimit.ts` / `rateLimitAuth.ts` reset per process; multiple workers = weaker protection.
@@ -16,7 +52,7 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **Done When:** Production/staging API uses Redis when REDIS_URL is set; dev works without it. Booking and auth routes still enforce their intended limits across processes (verified by tests with a mock Redis or testcontainer, not a live network). DEPLOY.md / .env.example describe Coolify Redis and the trust requirement for forwarded IP headers.
 **Effort:** M
 **Priority:** P2
-**Depends on:** Decision to run more than one API instance/process, will do when migratin to more robust work.
+**Depends on:** Decision to run more than one API instance/process; do when migrating to more robust hosting.
 
 ---
 
