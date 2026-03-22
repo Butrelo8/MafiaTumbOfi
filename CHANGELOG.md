@@ -17,6 +17,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Booking deliverability observability: persist confirmation delivery last error + attempt count and expose it in admin UI; admins can re-send customer confirmation for `pending` bookings.
 
 ### Changed
+- Docs: full codebase security review (2026-03-22) — new `BUGS.md` items (HTTPS proxy header, production logging, admin export env gate); open **TODOS — Security — Post-review hardening**; `STATE.md` updated for resume context.
 - API: `GET /health` `version` comes from root `package.json`, with optional `APP_VERSION` or `RELEASE_VERSION` override (`src/lib/appVersion.ts`); documented in `.env.example`.
 - API: `GET /api/admin/bookings` and `GET /api/admin/export/bookings` success bodies use `successResponse` — payload is under `data` (e.g. `data.bookings` + `data.total` for the list; export fields under `data` as well). Admin Astro page reads `data.bookings`; JSON download from export includes the same envelope.
 - TODOS: Deploy marked completed (Render + Vercel + Clerk + Resend); added Content/SEO open todo; Resend domain verification remains P2
