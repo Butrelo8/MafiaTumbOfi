@@ -17,6 +17,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Booking deliverability observability: persist confirmation delivery last error + attempt count and expose it in admin UI; admins can re-send customer confirmation for `pending` bookings.
 
 ### Changed
+- API: `GET /api/admin/bookings` and `GET /api/admin/export/bookings` success bodies use `successResponse` — payload is under `data` (e.g. `data.bookings` + `data.total` for the list; export fields under `data` as well). Admin Astro page reads `data.bookings`; JSON download from export includes the same envelope.
 - TODOS: Deploy marked completed (Render + Vercel + Clerk + Resend); added Content/SEO open todo; Resend domain verification remains P2
 - DEPLOY.md: Post-launch section (Resend domain, custom domain, monitoring); health-check note (use Render URL for /health)
 

@@ -50,7 +50,7 @@ try {
   }
 
   const result = await response.json()
-  bookings = result.data ?? []
+  bookings = result.data?.bookings ?? []
 } catch (e) {
   error = e instanceof Error ? e.message : String(e)
   console.error('Failed to fetch bookings:', e)
