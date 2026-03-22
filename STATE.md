@@ -1,10 +1,10 @@
 # Project State
 
 ## Current Position
-- Phase: Ship prep / backlog grooming + infra; **security review (2026-03-22)** logged in `BUGS.md`, follow-up captured in **TODOS — Security — Post-review hardening**.
-- Branch: **`main`** — confirm dirty files with `git status` before committing doc updates.
-- Last completed (this workstream): **Ops — Health version** — `getAppVersion()` from `package.json` + `APP_VERSION` / `RELEASE_VERSION`; tests in `appVersion.test.ts` + `health.test.ts`; `.env.example` updated; TODOS item closed.
-- Next up: **P2** — **Security — Post-review hardening** (logs, proxy docs, optional `/health` limit, export gate); or distributed rate limiting / deploy / Content-SEO; use a feature branch for any commit per policy.
+- Phase: Ship prep / backlog grooming + infra. Security review findings live in `BUGS.md` (2026-03-22); follow-up work is **TODOS — Security — Post-review hardening** (P2).
+- Branch: **`main`** (`main...origin/main`). **Uncommitted:** `TODOS.md` only — review diff before commit; use a feature branch per policy (not direct to `main`).
+- Last completed (code): **Ops — Health version** — `getAppVersion()`, tests, `.env.example`; TODOS item closed.
+- Next up: Commit or discard `TODOS.md` changes on a **`chore/*`** branch → then **Security — Post-review hardening** or next P2 (rate limiting / deploy / Content-SEO).
 
 ## Accumulated Decisions
 - 2026-03-17: Hold Scope — VPS deploy as primary milestone; Stripe webhook only when there is a product; no first-paying-customer / merch push yet.
@@ -15,9 +15,9 @@
 
 ## Blockers & Open Questions
 - Horizontal scaling: in-memory rate limits are per-process — resolve when deciding multi-instance API (Redis on Coolify vs documented single-instance).
-- Security follow-ups (non-blocking): production log redaction; proxy `x-forwarded-proto` contract; optional `/health` rate limit; stricter admin-export env matrix — see `BUGS.md` + TODOS **Security — Post-review hardening**.
+- Security follow-ups (non-blocking): see `BUGS.md` (2026-03-22) + TODOS **Security — Post-review hardening**.
 
 ## Session Notes
-Last session: Full codebase security review; findings recorded in `BUGS.md`, actionable slice in `TODOS.md`, state synced here.
-Stopped at: Documentation-only updates; commit on a feature branch when ready.
-Resume with: **`git checkout -b chore/security-review-followups`** (or similar) → commit `BUGS.md`, `TODOS.md`, `STATE.md` → implement **Security — Post-review hardening** or next **P2**.
+Last session: `code-review-graph` full build + visualize (local `.code-review-graph/graph.db` + `graph.html`); **save state** pause.
+Stopped at: Working tree dirty — **`TODOS.md`** only (`git status`).
+Resume with: **`git diff TODOS.md`** → **`git checkout -b chore/todos-…`** (or similar) → `git add` / `git commit` if keeping edits → implement **Security — Post-review hardening** or next **P2**.

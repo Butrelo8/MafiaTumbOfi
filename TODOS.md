@@ -162,7 +162,7 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **Solution:** 
 **Done When:** 
 **Effort:** L
-**Priority:** P2
+**Priority:** P4
 **Depends on:** “Postgres when we need multi-instance writes or ops wants a managed DB,” and keep SQLite as the default VPS path until then.
 
 ---
