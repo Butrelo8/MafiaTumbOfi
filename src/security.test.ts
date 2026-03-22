@@ -113,6 +113,37 @@ describe('Security middleware', () => {
     }
   })
 
+  test('HTTPS: in production, treats Forwarded: proto=https like secure when x-forwarded-proto absent', async () => {
+    const prev = process.env.NODE_ENV
+    process.env.NODE_ENV = 'production'
+
+    try {
+      const res = await app.request('/health', {
+        headers: { Forwarded: 'for=1.2.3.4;proto=https' },
+      })
+      expect(res.status).toBe(200)
+      expect(res.headers.get('location')).toBeNull()
+    } finally {
+      process.env.NODE_ENV = prev
+    }
+  })
+
+  test('health: returns 429 after rate limit per IP (120/min)', async () => {
+    const ip = '192.168.77.88'
+    for (let i = 0; i < 120; i++) {
+      const res = await app.request('/health', {
+        headers: { 'x-forwarded-for': ip },
+      })
+      expect(res.status).toBe(200)
+    }
+    const limited = await app.request('/health', {
+      headers: { 'x-forwarded-for': ip },
+    })
+    expect(limited.status).toBe(429)
+    const data = await limited.json()
+    expect(data.error?.code).toBe('RATE_LIMITED')
+  })
+
   test('HTTPS: in production, redirects when x-forwarded-proto is http', async () => {
     const prev = process.env.NODE_ENV
     process.env.NODE_ENV = 'production'

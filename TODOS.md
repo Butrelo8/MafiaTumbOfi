@@ -8,18 +8,6 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ## Open
 
-### Security — Post-review hardening (logs, proxy, optional limits)
-**What:** Address findings from the 2026-03-22 full-codebase security review: (1) replace raw `console.error(..., error)` with structured, redacted logging in API routes and middleware; (2) document and verify reverse-proxy headers (`x-forwarded-proto`, trusted `x-forwarded-for`) in DEPLOY.md and align `enforceHttps` behavior with how Render/VPS terminates TLS; (3) optionally add a light rate limit on `GET /health` to reduce trivial abuse; (4) tighten admin export gate so export is not implicitly “on” when `NODE_ENV` is missing or non-production (e.g. default-deny unless `ALLOW_ADMIN_BOOKING_EXPORT=true` **or** explicit `NODE_ENV=development` for local DX).
-**Why:** Reduces leak of internal errors to log sinks, closes HTTPS/proxy footguns, and prevents accidental PII export if `NODE_ENV` is mis-set.
-**Context:** Details and file references: BUGS.md entries reported 2026-03-22; related open item “Infra — Distributed rate limiting” for multi-instance `Map` limits and `x-forwarded-for` trust.
-**Solution:** Implement safe log helper (code + message only in prod, stack in dev); extend `src/security.test.ts` / integration tests as needed; DEPLOY.md checklist; small middleware or env-matrix change for export + tests in `adminBookingExport.test.ts`.
-**Done When:** No production code path logs full `Error` stacks/objects by default; DEPLOY.md states required proxy headers; health limiter or explicit “won’t fix” note in DECISIONS; admin export behavior matches tests and BUGS for `NODE_ENV`/ALLOW matrix.
-**Effort:** S / M
-**Priority:** P2
-**Depends on:** None
-
----
-
 ### Infra — Distributed rate limiting for multiple API instances
 **What:** Replace or back in-memory booking/auth rate limit stores with a shared limiter (e.g. Redis, Upstash) or document single-instance requirement in DEPLOY.md.
 **Why:** `Map`-based limits in `rateLimit.ts` / `rateLimitAuth.ts` reset per process; multiple workers = weaker protection.
@@ -168,6 +156,14 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 ---
 
 ## Completed
+
+### Security — Post-review hardening (logs, proxy, health limit, export gate) (2026-03-22)
+- **Logging:** `src/lib/safeLog.ts` — JSON lines with `scope`/`code`/`message`; stacks only when `NODE_ENV=development`. Wired in `admin.ts`, `booking.ts`, `users.ts`, `middleware/error.ts`, `middleware/adminAuth.ts`.
+- **HTTPS:** `src/lib/forwardedProto.ts` — `enforceHttps` uses `X-Forwarded-Proto` or RFC 7239 `Forwarded` `proto=` when the former is absent.
+- **Health:** `src/middleware/rateLimitHealth.ts` — 120 GET `/health` requests/min per client id (same IP extraction as booking limiter).
+- **Export:** `isAdminBookingExportAllowed` — allow only `ALLOW_ADMIN_BOOKING_EXPORT=true` or `NODE_ENV=development` (deny unset/`test`/other).
+- **Docs:** DEPLOY.md — reverse-proxy header expectations; `.env.example` — admin export wording.
+- **Tests:** `safeLog.test.ts`, `forwardedProto.test.ts`, `security.test.ts` (Forwarded + health limit), `adminBookingExport.test.ts`, `00-auth-protected.test.ts` (export under `development`).
 
 ### Ops — Health version matches shipped release (2026-03-22)
 - **API:** `src/lib/appVersion.ts` — `getAppVersion()` reads root `package.json` once at startup; optional `APP_VERSION` or `RELEASE_VERSION` (trimmed) overrides for CI/deploy.

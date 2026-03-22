@@ -31,6 +31,20 @@ Deploy order: **API first**, then frontend (so you can set `PUBLIC_API_URL` to t
 
 6. In **Clerk Dashboard** → your application → **Paths** / **Allowed redirect URLs**: add your production frontend URL and, if needed, the API URL. Add the frontend origin to **CORS** if Clerk uses it.
 
+### Reverse proxy headers (TLS and rate limits)
+
+The API expects a **trusted** edge that terminates TLS and sets forwarding metadata:
+
+| Header | Role |
+|--------|------|
+| **`X-Forwarded-Proto`** | Scheme seen by the client (`https` when the browser used HTTPS). **Render sets this** for Web Services. |
+| **`Forwarded`** (RFC 7239) | Optional fallback: if `X-Forwarded-Proto` is missing, HTTPS enforcement reads `proto=` from the first segment (e.g. `Forwarded: for=…;proto=https`). |
+| **`X-Forwarded-For` / `X-Real-IP`** | Used for **rate limiting** (booking, auth, **`GET /health`**). Configure the proxy to **append** the real client IP and avoid trusting raw client-supplied values from the open internet. |
+
+If **neither** `X-Forwarded-Proto` nor `Forwarded: proto=` is present, the app **does not** redirect to HTTPS (avoids redirect loops when the edge is misconfigured). Fix the proxy instead.
+
+**`GET /health`** is limited to **120 requests per minute** per client id (derived from the same forwarded-IP logic). N8N or uptime checks should poll at a sane interval.
+
 ---
 
 ## 2. Deploy Frontend on Vercel
@@ -115,7 +129,7 @@ With SSH enabled you can copy the file to your machine, then open it locally (e.
 
 ### Option C: Export data via your API (any plan)
 
-The app exposes a **Clerk-protected**, read-only admin endpoint `GET /api/admin/export/bookings` that returns bookings as JSON inside the standard success envelope `{ "data": { "exportedAt", "total", "last24hCount", "bookings" } }` (same shape as other API successes; used from `/admin/export-bookings` on the frontend). **In production** (`NODE_ENV=production`), this route returns **403** unless you set **`ALLOW_ADMIN_BOOKING_EXPORT=true`** on the API service. Leave it unset in normal operation; turn it on only for short debugging windows. Successful exports emit a structured **audit** line to the API logs (`action: admin_booking_export`, `userId`, `sessionId`, `timestamp`). No SSH required; works on free tier.
+The app exposes a **Clerk-protected**, read-only admin endpoint `GET /api/admin/export/bookings` that returns bookings as JSON inside the standard success envelope `{ "data": { "exportedAt", "total", "last24hCount", "bookings" } }` (same shape as other API successes; used from `/admin/export-bookings` on the frontend). The route is **default-deny**: it returns **403** unless **`ALLOW_ADMIN_BOOKING_EXPORT=true`** on the API **or** the API runs with **`NODE_ENV=development`** (local). On real hosts set **`NODE_ENV=production`** and enable export only via **`ALLOW_ADMIN_BOOKING_EXPORT=true`** for short debugging windows. Successful exports emit a structured **audit** line to the API logs (`action: admin_booking_export`, `userId`, `sessionId`, `timestamp`). No SSH required; works on free tier.
 
 ### Summary
 

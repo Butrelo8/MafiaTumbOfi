@@ -3,6 +3,7 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { bodyLimit } from './middleware/bodyLimit'
 import { enforceHttps } from './middleware/https'
+import { rateLimitHealth } from './middleware/rateLimitHealth'
 import { securityHeaders } from './middleware/security'
 import { errorHandler } from './middleware/error'
 import { getAppVersion } from './lib/appVersion'
@@ -35,6 +36,7 @@ app.use('*', cors({
 app.route('/api', routes)
 
 // ─── Health Check ─────────────────────────────────────
+app.use('/health', rateLimitHealth)
 app.get('/health', (c) =>
   c.json({ status: 'ok', version: getAppVersion() }),
 )

@@ -7,6 +7,7 @@ import { db } from '../db'
 import { bookings } from '../db/schema'
 import { getResend } from '../lib/resend'
 import { isAdminBookingExportAllowed } from '../lib/adminBookingExport'
+import { logServerError, logServerErrorDetails } from '../lib/safeLog'
 
 export const adminRoutes = new Hono()
 
@@ -25,7 +26,7 @@ adminRoutes.get('/bookings', async (c) => {
       total: allBookings.length,
     })
   } catch (error) {
-    console.error('Failed to fetch bookings:', error)
+    logServerError('admin', 'FETCH_BOOKINGS_FAILED', error)
     return errorResponse(c, 500, 'INTERNAL_ERROR', 'Failed to fetch bookings')
   }
 })
@@ -74,7 +75,7 @@ adminRoutes.post('/bookings/:id/resend-confirmation', async (c) => {
       })
 
       if (error) {
-        console.error('[admin] Resend confirmation error:', {
+        logServerErrorDetails('admin', 'RESEND_CONFIRMATION_API', {
           message: error.message,
           name: error.name,
         })
@@ -85,7 +86,7 @@ adminRoutes.post('/bookings/:id/resend-confirmation', async (c) => {
         confirmationLastError = null
       }
     } catch (err) {
-      console.error('[admin] Resend confirmation threw:', err)
+      logServerError('admin', 'RESEND_CONFIRMATION_THROW', err)
       status = 'pending'
       confirmationLastError = err instanceof Error ? err.message : String(err)
     }
@@ -110,7 +111,7 @@ adminRoutes.post('/bookings/:id/resend-confirmation', async (c) => {
       200,
     )
   } catch (error) {
-    console.error('[admin] Resend confirmation failed:', error)
+    logServerError('admin', 'RESEND_CONFIRMATION_OUTER', error)
     return errorResponse(c, 500, 'INTERNAL_ERROR', 'Failed to resend confirmation')
   }
 })
@@ -122,7 +123,7 @@ adminRoutes.get('/export/bookings', async (c) => {
       c,
       403,
       'ADMIN_BOOKING_EXPORT_DISABLED',
-      'Admin booking export is disabled in production unless ALLOW_ADMIN_BOOKING_EXPORT=true is set on the API.',
+      'Admin booking export is disabled. Set ALLOW_ADMIN_BOOKING_EXPORT=true on the API, or NODE_ENV=development for local use.',
     )
   }
 
@@ -152,7 +153,7 @@ adminRoutes.get('/export/bookings', async (c) => {
       bookings: allBookings,
     })
   } catch (error) {
-    console.error('Failed to export bookings:', error)
+    logServerError('admin', 'EXPORT_BOOKINGS_FAILED', error)
     return errorResponse(c, 500, 'INTERNAL_ERROR', 'Failed to export bookings')
   }
 })
