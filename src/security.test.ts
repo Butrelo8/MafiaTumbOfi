@@ -65,6 +65,26 @@ describe('Security middleware', () => {
     expect(res.headers.get('access-control-allow-origin')).toBe('http://localhost:4321')
   })
 
+  test('CORS: does not set Access-Control-Allow-Origin for unknown origins', async () => {
+    const res = await app.request('/health', {
+      headers: { Origin: 'https://malicious.example' },
+    })
+    expect(res.status).toBe(200)
+    expect(res.headers.get('access-control-allow-origin')).toBeNull()
+  })
+
+  test('CORS preflight: unknown origin does not get Access-Control-Allow-Origin', async () => {
+    const res = await app.request('/health', {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'https://malicious.example',
+        'Access-Control-Request-Method': 'GET',
+      },
+    })
+    expect(res.status).toBe(204)
+    expect(res.headers.get('access-control-allow-origin')).toBeNull()
+  })
+
   test('HTTPS: does not redirect when not in production', async () => {
     const prev = process.env.NODE_ENV
     process.env.NODE_ENV = 'development'

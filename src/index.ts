@@ -25,7 +25,7 @@ app.use('*', bodyLimit)
 app.use('*', cors({
   origin: (origin) => {
     if (!origin || allowedOrigins.includes(origin)) return origin
-    return allowedOrigins[0]
+    return undefined
   },
   credentials: true,
 }))
