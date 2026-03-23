@@ -7,6 +7,8 @@ if (!isAuthenticated) {
   return redirectToSignIn({ returnBackUrl: '/admin' })
 }
 
+export const prerender = false
+
 const apiUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001'
 const resendParam = Astro.url.searchParams.get('resend')
 let resendMessage: string | null = null
@@ -44,6 +46,17 @@ try {
   const response = await fetch(`${apiUrl}/api/admin/bookings`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   })
+
+  if (response.status === 401) {
+    return redirectToSignIn({ returnBackUrl: '/admin' })
+  }
+
+  if (response.status === 403) {
+    return new Response('', {
+      status: 303,
+      headers: { Location: '/' },
+    })
+  }
 
   if (!response.ok) {
     throw new Error(`API error: ${response.status}`)
