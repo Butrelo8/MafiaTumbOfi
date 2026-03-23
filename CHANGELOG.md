@@ -7,6 +7,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- Web: public press kit at `/press-kit` (`web/src/pages/press-kit.astro`) with `MarketingLayout.astro` and `web/src/styles/marketing-press.css`; nav link on `Layout.astro` and CTA on `index.astro`. Optional env vars in `web/.env.example` (`PUBLIC_SITE_URL`, `PUBLIC_WHATSAPP_URL`, asset URLs). `pressKitCanonical` helper + `web/src/lib/publicSiteUrl.test.ts`.
+
 ### Documentation
 - Engineering lead codebase review (2026-03-22): recorded decision and follow-ups in `DECISIONS.md`; added **Open** items in `TODOS.md` (shared `allowedOrigins` for CORS + Clerk, `GET /api/users/me` via `successResponse`, optional Playwright booking smoke); updated `STATE.md` to point at those docs.
 

@@ -5,6 +5,13 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-03-23 — Press kit: dedicated marketing layout and `/press-kit`
+
+**Context:** The main app layout (`Layout.astro`) is light-themed, max-width content, and tuned for booking/admin. A promoter-facing press page needs a distinct visual treatment and full-width sections without rewriting the whole site theme.
+**Decision:** Add `MarketingLayout.astro` plus `marketing-press.css` for the dark “press kit” aesthetic and full-bleed sections; expose the page at `/press-kit`. Keep Clerk header affordances on that layout. Canonical and `og:url` use `PUBLIC_SITE_URL` when set, otherwise the request origin (dev/preview-safe). Optional `PUBLIC_*` env vars gate WhatsApp and downloadable asset links; missing links show a non-clickable “Próximamente” state.
+**Alternatives considered:** Reuse `Layout.astro` only (rejected: would fight Tailwind/global light body styles and narrow main column); route only `/prensa` (deferred: can add redirect/alias later).
+**Why not the others:** A second layout isolates marketing CSS from app pages and avoids conditional theme branching in one file.
+
 ## 2026-03-22 — Security post-review hardening (logs, `Forwarded`, `/health` limit, export matrix)
 
 **Context:** Full-codebase security review (2026-03-22) produced BUGS entries on verbose error logging, HTTPS when `x-forwarded-proto` is absent, and admin export enabled for any non-`production` `NODE_ENV` (including unset).

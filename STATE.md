@@ -4,8 +4,8 @@
 - Phase: Ship prep / backlog grooming + infra; **security post-review hardening** done in tree (see `DECISIONS.md` 2026-03-22, `BUGS.md` fixed entries); **booking** uses structured `logServerInfo` + `markBandEmailFailed` + empty-insert guard (`CHANGELOG` [Unreleased]).
 - **Eng lead codebase review (2026-03-22):** Findings and deferred hygiene are in `DECISIONS.md` (same date, “Engineering lead codebase review”) and new **Open** items in `TODOS.md`: shared `allowedOrigins`, `/users/me` → `successResponse`, optional Playwright booking smoke. Ship order unchanged: VPS, Resend domain, Content/SEO first.
 - Branch: **`main`** — run `git status` before assuming a clean tree; use a feature branch for new work (not direct to `main`).
-- Last completed (this workstream): **Security — Post-review hardening** (safeLog, `Forwarded` proto fallback, `/health` rate limit, admin export matrix) + **booking observability** (`logServerInfo`, DRY failed-band update, `INSERT_RETURN_EMPTY` path + tests).
-- Next up: **P2** open in `TODOS.md` — **Deploy — VPS**, **Resend domain**, **Content/SEO**; **API** hygiene todos (shared origins, `/me` envelope) when convenient; **Infra — Distributed rate limiting** when multi-instance; pick one vertical slice per branch.
+- Last completed (this workstream): **Press kit** — public `/press-kit` (`MarketingLayout` + dark CSS), nav + home CTA, `publicSiteUrl` helper + tests, env documented in `web/.env.example`.
+- Next up: **P2** open in `TODOS.md` — **Deploy — VPS**, **Resend domain**, **Content/SEO** (press kit shipped 2026-03-23 at `/press-kit`); **API** hygiene todos (shared origins, `/me` envelope) when convenient; **Infra — Distributed rate limiting** when multi-instance; pick one vertical slice per branch.
 
 ## Accumulated Decisions
 - 2026-03-17: Hold Scope — VPS deploy as primary milestone; Stripe webhook only when there is a product; no first-paying-customer / merch push yet.
@@ -16,11 +16,12 @@
 - 2026-03-22: Post-review hardening — `safeLog` (no stacks in prod), `Forwarded` + `X-Forwarded-Proto` for HTTPS, `/health` rate limit, admin export only via `ALLOW_*` or `NODE_ENV=development` (see `DECISIONS.md`).
 - 2026-03-22: Booking `REQUEST_RECEIVED` — JSON info line via `logServerInfo` (stdout); band-email failure uses `markBandEmailFailed`; empty `.returning()` → 500 `INTERNAL_ERROR`.
 - 2026-03-22: Eng lead review — document follow-ups in `TODOS.md` (DRY origins, `/me` `successResponse`, Playwright smoke); do not reorder launch priorities.
+- 2026-03-23: Press kit — `/press-kit` with `MarketingLayout` + dark `marketing-press.css`; canonical via `PUBLIC_SITE_URL` or origin; optional env for WhatsApp + asset downloads (`DECISIONS.md`).
 
 ## Blockers & Open Questions
 - Horizontal scaling: in-memory rate limits are per-process — resolve when deciding multi-instance API (Redis on Coolify vs documented single-instance); see **TODOS — Infra — Distributed rate limiting**.
 
 ## Session Notes
-Last session: **Docs — eng lead review** — added `DECISIONS.md` entry, three **Open** `TODOS.md` items (shared allowlist, `/me` `successResponse`, Playwright smoke), `STATE.md` + `CHANGELOG` [Unreleased] pointers.
-Stopped at: Resume from **Next up** above.
-Resume with: Pick next **P2** from `TODOS.md` Open → **`git checkout -b feat/…`** → implement → `bun test` → commit / PR.
+Last session: **Press kit shipped** — `web/src/pages/press-kit.astro`, `MarketingLayout.astro`, `marketing-press.css`, `publicSiteUrl` + tests; `Layout`/`index` links; `TODOS` + `CHANGELOG` + `DECISIONS` updated.
+Stopped at: Ready for next **P2** slice (e.g. homepage copy pass, shared CORS origins, `/me` envelope).
+Resume with: **`git checkout -b feat/…`** → next open item from `TODOS.md` → `bun test` → commit / PR (not on `main`).
