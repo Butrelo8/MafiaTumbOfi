@@ -1,0 +1,62 @@
+---
+import '../styles/global.css'
+import '../styles/marketing-press.css'
+import { Show, UserButton, SignInButton, SignUpButton } from '@clerk/astro/components'
+
+interface Props {
+  title: string
+  description: string
+  canonicalUrl: string
+}
+
+const { title, description, canonicalUrl } = Astro.props
+const ogUrl = canonicalUrl
+---
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={ogUrl} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300&family=Jost:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="marketing-body">
+    <header class="marketing-header">
+      <div class="marketing-header-inner">
+        <a href="/" class="marketing-brand">Mafia Tumbada</a>
+        <nav class="marketing-nav" aria-label="Principal">
+          <a href="/" class="nav-link">Inicio</a>
+          <a href="/press-kit" class="nav-link">Press kit</a>
+          <a href="/booking" class="nav-link">Contrataciones</a>
+          <Show when="signed-in">
+            <a href="/admin" class="nav-link">Admin</a>
+          </Show>
+        </nav>
+        <div class="marketing-auth">
+          <Show when="signed-out">
+            <SignInButton mode="modal" />
+            <SignUpButton mode="modal" />
+          </Show>
+          <Show when="signed-in">
+            <UserButton />
+          </Show>
+        </div>
+      </div>
+    </header>
+    <main class="marketing-main">
+      <slot />
+    </main>
+  </body>
+</html>

@@ -116,18 +116,6 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ---
 
-### Content / SEO — Press kit page
-**What:** Add a public route (e.g. `/prensa` or `/press`) with promoter-facing structure: short/long bio, approved photos/logos (or links to Drive/Dropbox), booking/contact CTA, optional tech rider PDF link.
-**Why:** One shareable URL for bookers and press; supports “official band” positioning.
-**Context:** New Astro page under `web/src/pages`; nav link from `Layout.astro`. Wire page-specific `title` / `description` / OG for that URL.
-**Solution:** 
-**Done When:** 
-**Effort:** M
-**Priority:** P2
-**Depends on:** None (asset hosting can be external links for v1)
-
----
-
 ### Content / SEO — Homepage & booking copy pass
 **What:** Rewrite/structure `index.astro` and `booking.astro` for promoters and fans: clear who the band is, what “contrataciones” means, trust signals, CTA flow; optional short FAQ block for SEO.
 **Why:** Current pages may be thin; this is the core conversion and clarity work separate from meta plumbing.
@@ -192,6 +180,13 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 ---
 
 ## Completed
+
+### Content / SEO — Press kit page (2026-03-23)
+- **Route:** `GET /press-kit` — `web/src/pages/press-kit.astro` (public; no auth).
+- **Layout:** `web/src/layouts/MarketingLayout.astro` + `web/src/styles/marketing-press.css` — full-bleed dark theme; Clerk nav/auth preserved.
+- **URLs:** `pressKitCanonical()` in `web/src/lib/publicSiteUrl.ts` uses `PUBLIC_SITE_URL` or request origin; tests in `web/src/lib/publicSiteUrl.test.ts`.
+- **Env (documented in `web/.env.example`):** optional `PUBLIC_WHATSAPP_URL`, `PUBLIC_PRESS_PHOTOS_URL`, `PUBLIC_PRESS_LOGO_URL`, `PUBLIC_PRESS_BIO_URL`.
+- **Nav:** links from `web/src/layouts/Layout.astro` and home CTA in `web/src/pages/index.astro`.
 
 ### Security — Post-review hardening (logs, proxy, health limit, export gate) (2026-03-22)
 - **Logging:** `src/lib/safeLog.ts` — JSON lines with `scope`/`code`/`message`; stacks only when `NODE_ENV=development`. Wired in `admin.ts`, `booking.ts`, `users.ts`, `middleware/error.ts`, `middleware/adminAuth.ts`.
