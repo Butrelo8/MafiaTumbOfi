@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro'
 
-const { isAuthenticated, redirectToSignIn } = Astro.locals.auth()
+const { isAuthenticated, redirectToSignIn, getToken } = Astro.locals.auth()
 
 if (!isAuthenticated) {
   return redirectToSignIn({ returnBackUrl: '/admin' })
@@ -42,7 +42,7 @@ let bookings: Array<{
 let error: string | null = null
 
 try {
-  const token = Astro.locals.authToken
+  const token = await getToken()
   const response = await fetch(`${apiUrl}/api/admin/bookings`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   })
