@@ -26,6 +26,12 @@ const bookingSchema = z.object({
   email: z.string().email(),
   phone: z.string().max(50).optional(),
   eventDate: z.string().max(100).optional(),
+  city: z.string().max(200).optional(),
+  eventType: z.string().max(50).optional(),
+  duration: z.string().max(30).optional(),
+  showType: z.string().max(50).optional(),
+  attendees: z.string().max(30).optional(),
+  venueSound: z.string().max(10).optional(),
   message: z.string().max(2000).optional(),
   website: z.string().max(100).optional(),
 })
@@ -52,7 +58,20 @@ bookingRoutes.post('/booking', async (c) => {
     return errorResponse(c, 400, 'VALIDATION_ERROR', message)
   }
 
-  const { name, email, phone, eventDate, message, website } = parsed.data
+  const {
+    name,
+    email,
+    phone,
+    eventDate,
+    city,
+    eventType,
+    duration,
+    showType,
+    attendees,
+    venueSound,
+    message,
+    website,
+  } = parsed.data
   if (website) {
     return errorResponse(c, 400, 'SPAM_DETECTED', 'Solicitud rechazada')
   }
@@ -77,6 +96,12 @@ bookingRoutes.post('/booking', async (c) => {
       email,
       phone: phone ?? null,
       eventDate: eventDate ?? null,
+      city: city ?? null,
+      eventType: eventType ?? null,
+      duration: duration ?? null,
+      showType: showType ?? null,
+      attendees: attendees ?? null,
+      venueSound: venueSound ?? null,
       message: message ?? null,
       status: 'pending',
       confirmationLastError: null,
@@ -103,6 +128,12 @@ bookingRoutes.post('/booking', async (c) => {
     `Email: ${email}`,
     phone ? `Phone: ${phone}` : null,
     eventDate ? `Event date: ${eventDate}` : null,
+    city ? `City: ${city}` : null,
+    eventType ? `Event type: ${eventType}` : null,
+    duration ? `Duration: ${duration}` : null,
+    showType ? `Show type: ${showType}` : null,
+    attendees ? `Attendees: ${attendees}` : null,
+    venueSound ? `Venue sound: ${venueSound}` : null,
     message ? `Message:\n${message}` : null,
   ]
     .filter(Boolean)

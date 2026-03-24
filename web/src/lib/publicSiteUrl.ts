@@ -26,3 +26,11 @@ export function pressKitCanonical(
 ): string {
   return `${resolvePublicBaseUrl(publicSiteUrl, fallbackOrigin)}/press-kit`
 }
+
+/** Canonical URL for the booking (contrataciones) page. */
+export function bookingCanonical(
+  publicSiteUrl: string | undefined,
+  fallbackOrigin: string
+): string {
+  return `${resolvePublicBaseUrl(publicSiteUrl, fallbackOrigin)}/booking`
+}
