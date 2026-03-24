@@ -8,7 +8,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
-- Web: public press kit at `/press-kit` (`web/src/pages/press-kit.astro`) with `MarketingLayout.astro` and `web/src/styles/marketing-press.css`; nav link on `Layout.astro` and CTA on `index.astro`. Optional env vars in `web/.env.example` (`PUBLIC_SITE_URL`, `PUBLIC_WHATSAPP_URL`, asset URLs). `pressKitCanonical` helper + `web/src/lib/publicSiteUrl.test.ts`.
+- Web: combined homepage and press kit into single-scroll page at `/` (`web/src/pages/index.astro`) using `MarketingLayout.astro` and `web/src/styles/marketing-press.css`; includes hero, stats, bio, social links, discography, members, shows, press assets, and booking CTA with anchor navigation. Old `/press-kit` route redirects to `/` via `web/vercel.json`. `homeCanonical` helper in `web/src/lib/publicSiteUrl.ts` for base-domain canonical URL; `pressKitCanonical` retained for tests/back-compat. Optional env vars in `web/.env.example` (`PUBLIC_SITE_URL`, `PUBLIC_WHATSAPP_URL`, asset URLs). Tests in `web/src/lib/publicSiteUrl.test.ts`.
+
+### Changed
+- Web: removed standalone `web/src/pages/press-kit.astro`; nav “Press kit” links point to `/#press` on `Layout.astro` and `MarketingLayout.astro`.
 
 ### Documentation
 - Engineering lead codebase review (2026-03-22): recorded decision and follow-ups in `DECISIONS.md`; added **Open** items in `TODOS.md` (shared `allowedOrigins` for CORS + Clerk, `GET /api/users/me` via `successResponse`, optional Playwright booking smoke); updated `STATE.md` to point at those docs.

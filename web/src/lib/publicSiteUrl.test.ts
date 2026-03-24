@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { pressKitCanonical, resolvePublicBaseUrl } from './publicSiteUrl'
+import { homeCanonical, pressKitCanonical, resolvePublicBaseUrl } from './publicSiteUrl'
 
 describe('resolvePublicBaseUrl', () => {
   test('trims and strips trailing slash from PUBLIC_SITE_URL', () => {
@@ -18,6 +18,12 @@ describe('resolvePublicBaseUrl', () => {
     expect(resolvePublicBaseUrl('   ', 'https://preview.vercel.app')).toBe(
       'https://preview.vercel.app'
     )
+  })
+})
+
+describe('homeCanonical', () => {
+  test('returns base URL without suffix', () => {
+    expect(homeCanonical('https://example.com/', 'http://local')).toBe('https://example.com')
   })
 })
 
