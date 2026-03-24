@@ -11,6 +11,14 @@ export function resolvePublicBaseUrl(
   return fallbackOrigin.trim().replace(/\/$/, '')
 }
 
+/** Canonical URL for the homepage (no trailing slash on base). */
+export function homeCanonical(
+  publicSiteUrl: string | undefined,
+  fallbackOrigin: string
+): string {
+  return resolvePublicBaseUrl(publicSiteUrl, fallbackOrigin)
+}
+
 /** Canonical URL for the press kit page (no trailing slash on base). */
 export function pressKitCanonical(
   publicSiteUrl: string | undefined,

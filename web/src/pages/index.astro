@@ -1,21 +1,527 @@
 ---
-import Layout from '../layouts/Layout.astro'
+import MarketingLayout from '../layouts/MarketingLayout.astro'
 import { Show } from '@clerk/astro/components'
+import { homeCanonical } from '../lib/publicSiteUrl'
+
+const title = 'La Mafia Tumbada — Oficial'
+const description =
+  'Sitio oficial de La Mafia Tumbada. Bio, discografía, material de prensa y contacto para contrataciones. Corridos tumbados y regional mexicano desde Xalapa, Veracruz.'
+const canonicalUrl = homeCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)
+
+const photosUrl  = import.meta.env.PUBLIC_PRESS_PHOTOS_URL
+const logoUrl    = import.meta.env.PUBLIC_PRESS_LOGO_URL
+const bioUrl     = import.meta.env.PUBLIC_PRESS_BIO_URL
+const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
+
+const spotifyUrl   = 'https://open.spotify.com/intl-es/artist/3pc90hxACiSUahZmmfYjcI'
+const tiktokUrl    = 'https://www.tiktok.com/@mafia_tumbada_oficial'
+const youtubeUrl   = 'https://www.youtube.com/@mafiatumbada'
+const instagramUrl = 'https://www.instagram.com/mafia_tumbada_oficial/'
 ---
-<Layout title="Mafia Tumbada — Oficial" description="Mafia Tumbada — sitio oficial, press kit y contacto para contrataciones.">
-  <Show when="signed-out">
-    <p class="mb-4 text-stone-600">Inicia sesión para acceder al panel de admin o solicitar contratación.</p>
-  </Show>
+
+<MarketingLayout title={title} description={description} canonicalUrl={canonicalUrl}>
+
+  <!-- Admin notice (solo visible si hay sesión) -->
   <Show when="signed-in">
-    <p class="mb-4 text-stone-600">Estás conectado. Puedes ver solicitudes en <a href="/admin" class="text-brand hover:underline">Admin</a>.</p>
+    <div class="admin-notice">
+      <span>Panel de admin:</span>
+      <a href="/admin">Ver solicitudes</a>
+    </div>
   </Show>
-  <p class="mb-4 text-stone-600">Página oficial. Press kit y formulario de contrataciones en un solo lugar.</p>
-  <p class="mb-4 flex flex-wrap gap-3">
-    <a href="/press-kit" class="inline-flex items-center rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-800 hover:border-brand hover:text-brand transition-colors">
-      Ver press kit
-    </a>
-    <a href="/booking" class="inline-flex items-center rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark transition-colors">
-      Solicitar contratación
-    </a>
-  </p>
-</Layout>
+
+  <!-- ─── HERO ─────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="container hero-content">
+      <p class="hero-eyebrow">Sitio Oficial</p>
+      <h1 class="hero-title">
+        La Mafia<br />
+        <em>Tumbada</em>
+      </h1>
+      <div class="hero-meta">
+        <span>Xalapa, Veracruz</span>
+        <span>Corridos Tumbados</span>
+        <span>Regional Mexicano</span>
+        <span>Desde 2021</span>
+      </div>
+      <div class="hero-actions">
+        <a href="#booking" class="btn-primary">Solicitar contratación</a>
+        <a href="#press" class="btn-secondary">Material de prensa</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── STATS ─────────────────────────────────────────────── -->
+  <div class="stats-bar">
+    <div class="container">
+      <div class="stat-item">
+        <span class="stat-number">4</span>
+        <span class="stat-label">Años activos</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">7</span>
+        <span class="stat-label">Singles en Spotify</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">+</span>
+        <span class="stat-label">Presentaciones locales &amp; foráneas</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">Ver.</span>
+        <span class="stat-label">Base: Veracruz, Méx.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── BIO ───────────────────────────────────────────────── -->
+  <section class="section">
+    <div class="container">
+      <div class="bio-grid">
+        <div class="bio-sidebar">
+          <span class="section-label">Quiénes somos</span>
+          <h2>El sonido de<br /> <em>Xalapa</em></h2>
+          <div class="bio-tags">
+            <span class="tag">Corridos Tumbados</span>
+            <span class="tag">Norteño</span>
+            <span class="tag">Regional Mx</span>
+            <span class="tag">Covers</span>
+            <span class="tag">Canciones propias</span>
+          </div>
+        </div>
+
+        <div class="bio-body">
+          <p>
+            La Mafia Tumbada es un grupo de Xalapa, Veracruz que lleva cuatro años construyendo su propio espacio
+            dentro del regional mexicano contemporáneo. Con raíces en el corrido tumbado y el norteño, y sin perder el
+            pulso del regional clásico, el grupo mezcla canciones propias con covers ejecutados con honestidad y actitud.
+          </p>
+          <p>
+            Tres singles originales acumulados en su catálogo son la muestra de un proyecto que toma en serio la
+            composición propia. Al mismo tiempo, su versatilidad en tarima los ha llevado a barras y escenarios tanto en
+            Veracruz como fuera del estado, consolidando un nombre que los promotores ya reconocen.
+          </p>
+          <p>
+            El grupo está disponible para presentaciones, festivales, eventos privados y giras regionales. Cuentan con
+            equipo propio y experiencia para adaptarse a diferentes formatos de producción.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <hr class="divider" />
+
+  <!-- ─── REDES SOCIALES ────────────────────────────────────── -->
+  <section class="section" id="redes">
+    <div class="container">
+      <span class="section-label">Síguenos</span>
+      <h2 class="section-heading">Redes sociales</h2>
+
+      <div class="socials-grid">
+        <a
+          href={spotifyUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="social-card"
+          aria-label="Spotify"
+        >
+          <span class="social-icon" aria-hidden="true">
+            <!-- Spotify -->
+            <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.516 17.318a.75.75 0 01-1.032.244c-2.827-1.727-6.387-2.117-10.578-1.16a.75.75 0 01-.336-1.462c4.587-1.05 8.52-.598 11.702 1.346a.75.75 0 01.244 1.032zm1.472-3.272a.938.938 0 01-1.29.308c-3.234-1.988-8.163-2.563-11.986-1.403a.937.937 0 11-.546-1.793c4.37-1.328 9.8-.685 13.514 1.598a.938.938 0 01.308 1.29zm.127-3.41C15.365 8.39 9.2 8.185 5.8 9.215a1.125 1.125 0 11-.653-2.153c3.96-1.2 10.545-.968 14.7 1.57a1.125 1.125 0 01-1.132 1.004z"/>
+            </svg>
+          </span>
+          <span class="social-name">Spotify</span>
+          <span class="social-handle">Escuchar música</span>
+        </a>
+
+        <a
+          href={instagramUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="social-card"
+          aria-label="Instagram"
+        >
+          <span class="social-icon" aria-hidden="true">
+            <!-- Instagram -->
+            <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+            </svg>
+          </span>
+          <span class="social-name">Instagram</span>
+          <span class="social-handle">@mafia_tumbada_oficial</span>
+        </a>
+
+        <a
+          href={tiktokUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="social-card"
+          aria-label="TikTok"
+        >
+          <span class="social-icon" aria-hidden="true">
+            <!-- TikTok -->
+            <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+              <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.17 8.17 0 004.77 1.52V6.74a4.85 4.85 0 01-1-.05z"/>
+            </svg>
+          </span>
+          <span class="social-name">TikTok</span>
+          <span class="social-handle">@mafia_tumbada_oficial</span>
+        </a>
+
+        <a
+          href={youtubeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="social-card"
+          aria-label="YouTube"
+        >
+          <span class="social-icon" aria-hidden="true">
+            <!-- YouTube -->
+            <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+              <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+          </span>
+          <span class="social-name">YouTube</span>
+          <span class="social-handle">@mafiatumbada</span>
+        </a>
+      </div>
+    </div>
+  </section>
+  <hr class="divider" />
+
+  <!-- ─── DISCOGRAFÍA ───────────────────────────────────────── -->
+  <section class="section" id="musica">
+    <div class="container">
+      <span class="section-label">Discografía</span>
+      <h2 class="section-heading">Material original</h2>
+
+      <div class="singles-grid">
+        <div class="single-card">
+          <span class="single-number">01</span>
+          <div>
+            <p class="single-title">L.A. BUBU</p>
+            <p class="single-meta">Single · Corrido Tumbado</p>
+          </div>
+        </div>
+        <div class="single-card">
+          <span class="single-number">02</span>
+          <div>
+            <p class="single-title">No Te He Olvidado</p>
+            <p class="single-meta">Single · Regional Mexicano</p>
+          </div>
+        </div>
+        <div class="single-card">
+          <span class="single-number">03</span>
+          <div>
+            <p class="single-title">Tal Vez</p>
+            <p class="single-meta">Single · Corrido Tumbado</p>
+          </div>
+        </div>
+        <div class="single-card">
+          <span class="single-number">04</span>
+          <div>
+            <p class="single-title">Corazón</p>
+            <p class="single-meta">Single · Regional Mexicano</p>
+          </div>
+        </div>
+        <div class="single-card">
+          <span class="single-number">05</span>
+          <div>
+            <p class="single-title">Besos</p>
+            <p class="single-meta">Single · Corrido Tumbado</p>
+          </div>
+        </div>
+        <div class="single-card">
+          <span class="single-number">06</span>
+          <div>
+            <p class="single-title">Mírame</p>
+            <p class="single-meta">Single · Regional Mexicano</p>
+          </div>
+        </div>
+        <div class="single-card">
+          <span class="single-number">07</span>
+          <div>
+            <p class="single-title">Sd</p>
+            <p class="single-meta">Single · Corrido Tumbado</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="spotify-cta-wrap">
+        <a
+          href={spotifyUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-secondary spotify-cta"
+        >
+          Ver discografía completa en Spotify
+        </a>
+      </div>
+    </div>
+  </section>
+  <hr class="divider" />
+
+  <!-- ─── INTEGRANTES ───────────────────────────────────────── -->
+  <section class="section" id="grupo">
+    <div class="container">
+      <span class="section-label">El grupo</span>
+      <h2 class="section-heading">Integrantes</h2>
+
+      <div class="members-grid">
+        <div class="member-card">
+          <span class="member-role">Vocal Principal</span>
+          <p class="member-name">Héctor Báez</p>
+        </div>
+        <div class="member-card">
+          <span class="member-role">Requintista &amp; Vocal</span>
+          <p class="member-name">Alexandro Montal</p>
+        </div>
+        <div class="member-card">
+          <span class="member-role">Guitarra</span>
+          <p class="member-name">Diego Cerecer</p>
+        </div>
+        <div class="member-card">
+          <span class="member-role">Trombón</span>
+          <p class="member-name">Dimora</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <hr class="divider" />
+
+  <!-- ─── PRESENTACIONES ────────────────────────────────────── -->
+  <section class="section" id="shows">
+    <div class="container">
+      <span class="section-label">En tarima</span>
+      <h2 class="section-heading">Presentaciones</h2>
+      <p class="shows-intro">
+        Desde los bares de Xalapa hasta plazas fuera del estado, La Mafia Tumbada ha construido su reputación tocando
+        en vivo. Cada fecha suma al historial de un grupo que trabaja en serio.
+      </p>
+
+      <div class="shows-list">
+        <div class="show-item">
+          <span class="show-dot"></span>
+          <div>
+            <p class="show-name">La Bohemia</p>
+            <p class="show-loc">Misantla, Veracruz</p>
+          </div>
+        </div>
+        <div class="show-item">
+          <span class="show-dot"></span>
+          <div>
+            <p class="show-name">San Benito</p>
+            <p class="show-loc">Xalapa, Veracruz</p>
+          </div>
+        </div>
+        <div class="show-item">
+          <span class="show-dot"></span>
+          <div>
+            <p class="show-name">Jala la Jarra</p>
+            <p class="show-loc">Xalapa, Veracruz</p>
+          </div>
+        </div>
+        <div class="show-item show-item--placeholder">
+          <span class="show-dot show-dot--muted"></span>
+          <div>
+            <p class="show-name show-name--muted">+ más fechas</p>
+            <p class="show-loc">Historial completo bajo solicitud</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="shows-note">
+        * El historial completo de presentaciones se comparte bajo solicitud de booking.
+      </p>
+    </div>
+  </section>
+  <hr class="divider" />
+
+  <!-- ─── ASSETS DE PRENSA ──────────────────────────────────── -->
+  <section class="section" id="press">
+    <div class="container">
+      <span class="section-label">Material de prensa</span>
+      <h2 class="section-heading">Descarga assets</h2>
+
+      <div class="assets-grid">
+        <div class="asset-card">
+          <span class="asset-icon" aria-hidden="true">🖼</span>
+          <p class="asset-name">Fotografías oficiales</p>
+          <p class="asset-desc">
+            Fotos de alta resolución para imprenta y medios digitales. Uso libre con crédito al grupo.
+          </p>
+          {
+            photosUrl ? (
+              <a href={photosUrl} class="asset-btn" target="_blank" rel="noopener noreferrer">
+                ↓ Descargar
+              </a>
+            ) : (
+              <span class="asset-btn--pending" aria-disabled="true">Próximamente</span>
+            )
+          }
+        </div>
+        <div class="asset-card">
+          <span class="asset-icon" aria-hidden="true">◈</span>
+          <p class="asset-name">Logotipo</p>
+          <p class="asset-desc">PNG y SVG en versión oscura, clara y monocromática. Fondo transparente incluido.</p>
+          {
+            logoUrl ? (
+              <a href={logoUrl} class="asset-btn" target="_blank" rel="noopener noreferrer">
+                ↓ Descargar
+              </a>
+            ) : (
+              <span class="asset-btn--pending" aria-disabled="true">Próximamente</span>
+            )
+          }
+        </div>
+        <div class="asset-card">
+          <span class="asset-icon" aria-hidden="true">📄</span>
+          <p class="asset-name">Bio corta (texto)</p>
+          <p class="asset-desc">
+            Versión de 80 palabras lista para programas, redes y comunicados de prensa.
+          </p>
+          {
+            bioUrl ? (
+              <a href={bioUrl} class="asset-btn" target="_blank" rel="noopener noreferrer">
+                ↓ Descargar
+              </a>
+            ) : (
+              <span class="asset-btn--pending" aria-disabled="true">Próximamente</span>
+            )
+          }
+        </div>
+        <div class="asset-card">
+          <span class="asset-icon" aria-hidden="true">🎵</span>
+          <p class="asset-name">Singles en streaming</p>
+          <p class="asset-desc">
+            Spotify, Apple Music y YouTube. También disponibles stems para radio bajo solicitud.
+          </p>
+          <a href={spotifyUrl} target="_blank" rel="noopener noreferrer" class="asset-btn">→ Escuchar</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── BOOKING CTA ───────────────────────────────────────── -->
+  <section class="booking section" id="booking">
+    <div class="container">
+      <div>
+        <p class="section-label">Contratar al grupo</p>
+        <h2 class="booking-headline">
+          ¿Tienes una<br /> <em>fecha disponible?</em>
+        </h2>
+        <p class="booking-sub">
+          Respondemos cotizaciones en menos de 24 horas. Incluye fecha, ciudad y tipo de evento para agilizar la
+          respuesta.
+        </p>
+      </div>
+      <div class="booking-actions">
+        <a href="/booking" class="btn-primary">Solicitar cotización</a>
+        {
+          whatsappUrl ? (
+            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" class="btn-secondary">
+              WhatsApp directo
+            </a>
+          ) : null
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ────────────────────────────────────────────── -->
+  <footer class="footer-bar">
+    <div class="container">
+      <span class="footer-brand">La Mafia Tumbada</span>
+      <div class="footer-socials">
+        <a href={spotifyUrl}   target="_blank" rel="noopener noreferrer" aria-label="Spotify">Spotify</a>
+        <a href={instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram">Instagram</a>
+        <a href={tiktokUrl}    target="_blank" rel="noopener noreferrer" aria-label="TikTok">TikTok</a>
+        <a href={youtubeUrl}   target="_blank" rel="noopener noreferrer" aria-label="YouTube">YouTube</a>
+      </div>
+      <p class="footer-copy">
+        © {new Date().getFullYear()} · Xalapa, Veracruz · Todos los derechos reservados
+      </p>
+    </div>
+  </footer>
+
+</MarketingLayout>
+
+<style>
+  /* Admin notice */
+  .admin-notice {
+    background: var(--color-brand, #c8a96e);
+    color: #000;
+    text-align: center;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .admin-notice a {
+    margin-left: 0.5rem;
+    text-decoration: underline;
+  }
+
+  /* Hero actions */
+  .hero-actions {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  /* Social cards */
+  .socials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .social-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border, #e5e1d8);
+    border-radius: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .social-card:hover {
+    border-color: var(--color-brand, #c8a96e);
+    color: var(--color-brand, #c8a96e);
+  }
+
+  .social-icon {
+    display: flex;
+    align-items: center;
+  }
+  .social-name {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .social-handle {
+    font-size: 0.8rem;
+    opacity: 0.6;
+  }
+
+  /* Footer socials */
+  .footer-socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin: 0.5rem 0;
+  }
+  .footer-socials a {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.2s;
+  }
+  .footer-socials a:hover {
+    opacity: 1;
+  }
+</style>

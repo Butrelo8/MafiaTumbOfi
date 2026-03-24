@@ -181,12 +181,13 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ## Completed
 
-### Content / SEO — Press kit page (2026-03-23)
-- **Route:** `GET /press-kit` — `web/src/pages/press-kit.astro` (public; no auth).
+### Content / SEO — Homepage + press kit (merged 2026-03-24; replaces standalone `/press-kit` 2026-03-23)
+- **Route:** `GET /` — `web/src/pages/index.astro` (public; no auth); press assets section `id="press"` for `/#press` deep links.
+- **Legacy:** `GET /press-kit` → 301 to `/` via `web/vercel.json` (removed `web/src/pages/press-kit.astro`).
 - **Layout:** `web/src/layouts/MarketingLayout.astro` + `web/src/styles/marketing-press.css` — full-bleed dark theme; Clerk nav/auth preserved.
-- **URLs:** `pressKitCanonical()` in `web/src/lib/publicSiteUrl.ts` uses `PUBLIC_SITE_URL` or request origin; tests in `web/src/lib/publicSiteUrl.test.ts`.
+- **URLs:** `homeCanonical()` in `web/src/lib/publicSiteUrl.ts` for homepage canonical; `pressKitCanonical()` retained for tests. Tests in `web/src/lib/publicSiteUrl.test.ts`.
 - **Env (documented in `web/.env.example`):** optional `PUBLIC_WHATSAPP_URL`, `PUBLIC_PRESS_PHOTOS_URL`, `PUBLIC_PRESS_LOGO_URL`, `PUBLIC_PRESS_BIO_URL`.
-- **Nav:** links from `web/src/layouts/Layout.astro` and home CTA in `web/src/pages/index.astro`.
+- **Nav:** `Layout.astro` / `MarketingLayout.astro` “Press kit” → `/#press`.
 
 ### Security — Post-review hardening (logs, proxy, health limit, export gate) (2026-03-22)
 - **Logging:** `src/lib/safeLog.ts` — JSON lines with `scope`/`code`/`message`; stacks only when `NODE_ENV=development`. Wired in `admin.ts`, `booking.ts`, `users.ts`, `middleware/error.ts`, `middleware/adminAuth.ts`.

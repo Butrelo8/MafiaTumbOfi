@@ -5,6 +5,13 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-03-24 — Homepage and press kit merged into single-scroll page
+
+**Context:** The press kit was a separate `/press-kit` route with `MarketingLayout`. To reduce friction for press/promoters (one URL, less navigation), we merged homepage and press kit into a single long-scroll page at `/`.
+**Decision:** Replace minimal `index.astro` with combined page (hero, stats, bio, socials, discography, members, shows, press assets, booking CTA). Use `MarketingLayout` for consistent dark aesthetic. Canonical URL points at base domain (no `/press-kit` suffix). Old `/press-kit` URLs redirect to `/` via `web/vercel.json`. Nav links updated to homepage anchors. Add `homeCanonical` helper in `publicSiteUrl.ts` for homepage canonical; keep `pressKitCanonical` unused but safe.
+**Alternatives considered:** Keep two separate pages; redirect `/press-kit` to `/` without anchor; use `Layout.astro` (light theme) instead of `MarketingLayout`.
+**Why not the others:** Single scroll is simpler for press (one link to share); anchor preserves deep-link to assets; `MarketingLayout` matches existing press aesthetic and avoids theme conflict.
+
 ## 2026-03-23 — Press kit: dedicated marketing layout and `/press-kit`
 
 **Context:** The main app layout (`Layout.astro`) is light-themed, max-width content, and tuned for booking/admin. A promoter-facing press page needs a distinct visual treatment and full-width sections without rewriting the whole site theme.
