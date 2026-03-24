@@ -5,6 +5,13 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-03-24 — Booking form: persist structured detail fields in SQLite
+
+**Context:** The marketing booking page collects structured fields (city, event type, duration, show type, attendees, venue sound) beyond the original free-text-centric form. The band notification email alone would lose queryable history and admin export fidelity.
+**Decision:** Add six nullable columns on `bookings` (`city`, `event_type`, `duration`, `show_type`, `attendees`, `venue_sound`), extend `bookingSchema` with optional string fields (with `.max()` bounds), persist on insert, and append the same fields to the band-facing Resend plaintext body. Ship SQL migration `0004_booking_detail_fields.sql`; apply via existing `bun run migrate` / deploy pipeline.
+**Alternatives considered:** Email-only (no DB columns); require `city`/`eventType` on the API (stricter than legacy clients).
+**Why not the others:** Persistence keeps admin list/export and future reporting consistent; optional API fields avoid breaking older clients and tests.
+
 ## 2026-03-24 — Homepage and press kit merged into single-scroll page
 
 **Context:** The press kit was a separate `/press-kit` route with `MarketingLayout`. To reduce friction for press/promoters (one URL, less navigation), we merged homepage and press kit into a single long-scroll page at `/`.

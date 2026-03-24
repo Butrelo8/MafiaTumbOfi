@@ -1,82 +1,456 @@
 ---
-import Layout from '../layouts/Layout.astro'
-const apiUrl = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:3001';
+import MarketingLayout from '../layouts/MarketingLayout.astro'
+import { bookingCanonical } from '../lib/publicSiteUrl'
+
+const apiUrl = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:3001'
+const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
+const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)
 ---
-<Layout title="Contrataciones — Mafia Tumbada" description="Solicitar contratación — Mafia Tumbada">
-  <h2 class="mb-6 text-2xl font-semibold text-stone-900">Solicitar contratación</h2>
-  <form id="booking-form" class="space-y-4">
-    <div class="hidden" aria-hidden="true">
-      <label for="website">Website</label>
-      <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
+
+<MarketingLayout
+  title="Contrataciones — La Mafia Tumbada"
+  description="Solicita una cotización para contratar a La Mafia Tumbada en tu evento. Respondemos en menos de 24 horas."
+  canonicalUrl={canonicalUrl}
+>
+
+  <section class="section booking-page">
+    <div class="container">
+
+      <div class="booking-layout">
+
+        <!-- ─── SIDEBAR INFO ──────────────────────────────── -->
+        <aside class="booking-sidebar">
+          <span class="section-label">Contrataciones</span>
+          <h1 class="booking-title">
+            Solicitar<br /><em>cotización</em>
+          </h1>
+
+          <div class="booking-info-list">
+            <div class="booking-info-item">
+              <span class="booking-info-icon" aria-hidden="true">⏱</span>
+              <div>
+                <p class="booking-info-label">Tiempo de respuesta</p>
+                <p class="booking-info-value">Menos de 24 horas</p>
+              </div>
+            </div>
+            <div class="booking-info-item">
+              <span class="booking-info-icon" aria-hidden="true">📍</span>
+              <div>
+                <p class="booking-info-label">Disponibilidad</p>
+                <p class="booking-info-value">Veracruz y eventos foráneos</p>
+              </div>
+            </div>
+            <div class="booking-info-item">
+              <span class="booking-info-icon" aria-hidden="true">🎸</span>
+              <div>
+                <p class="booking-info-label">Equipo</p>
+                <p class="booking-info-value">Equipo propio disponible</p>
+              </div>
+            </div>
+          </div>
+
+          {whatsappUrl && (
+            <div class="booking-whatsapp">
+              <p class="booking-whatsapp-label">¿Prefieres hablar directo?</p>
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" class="btn-secondary">
+                WhatsApp directo
+              </a>
+            </div>
+          )}
+        </aside>
+
+        <!-- ─── FORMULARIO ────────────────────────────────── -->
+        <div class="booking-form-wrap">
+          <form id="booking-form" class="booking-form" novalidate>
+
+            <!-- Honeypot -->
+            <div class="hidden" aria-hidden="true">
+              <label for="website">Website</label>
+              <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
+            </div>
+
+            <!-- Nombre -->
+            <div class="field">
+              <label for="name" class="field-label">Nombre *</label>
+              <input
+                id="name" name="name" type="text" required
+                placeholder="Tu nombre completo"
+                class="field-input"
+              />
+            </div>
+
+            <!-- Email -->
+            <div class="field">
+              <label for="email" class="field-label">Email *</label>
+              <input
+                id="email" name="email" type="email" required
+                placeholder="correo@ejemplo.com"
+                class="field-input"
+              />
+            </div>
+
+            <!-- Teléfono -->
+            <div class="field">
+              <label for="phone" class="field-label">Teléfono</label>
+              <input
+                id="phone" name="phone" type="tel"
+                placeholder="10 dígitos"
+                class="field-input"
+              />
+            </div>
+
+            <!-- Fecha + Ciudad (row) -->
+            <div class="field-row">
+              <div class="field">
+                <label for="eventDate" class="field-label">Fecha del evento</label>
+                <input
+                  id="eventDate" name="eventDate" type="date"
+                  class="field-input"
+                />
+              </div>
+              <div class="field">
+                <label for="city" class="field-label">Ciudad / Estado *</label>
+                <input
+                  id="city" name="city" type="text" required
+                  placeholder="Xalapa, Veracruz"
+                  class="field-input"
+                />
+              </div>
+            </div>
+
+            <!-- Tipo de evento -->
+            <div class="field">
+              <label for="eventType" class="field-label">Tipo de evento *</label>
+              <select id="eventType" name="eventType" required class="field-input field-select">
+                <option value="" disabled selected>Selecciona una opción</option>
+                <option value="boda">Boda</option>
+                <option value="quinceañera">Quinceañera</option>
+                <option value="bar_antro">Bar / Antro</option>
+                <option value="festival">Festival</option>
+                <option value="evento_privado">Evento privado</option>
+                <option value="gira">Gira / Taquilla</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+
+            <!-- Duración + Tipo de show (row) -->
+            <div class="field-row">
+              <div class="field">
+                <label for="duration" class="field-label">Duración del show</label>
+                <select id="duration" name="duration" class="field-input field-select">
+                  <option value="" disabled selected>Selecciona</option>
+                  <option value="1h">1 hora</option>
+                  <option value="2h">2 horas</option>
+                  <option value="3h_mas">3+ horas</option>
+                  <option value="no_definido">Por definir</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="showType" class="field-label">Tipo de show</label>
+                <select id="showType" name="showType" class="field-input field-select">
+                  <option value="" disabled selected>Selecciona</option>
+                  <option value="corridos">Corridos tumbados</option>
+                  <option value="mix">Mix (corridos + norteño)</option>
+                  <option value="personalizado">Show personalizado</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Asistentes + Sonido (row) -->
+            <div class="field-row">
+              <div class="field">
+                <label for="attendees" class="field-label">Asistentes aproximados</label>
+                <select id="attendees" name="attendees" class="field-input field-select">
+                  <option value="" disabled selected>Estimado</option>
+                  <option value="menos_100">Menos de 100</option>
+                  <option value="100_300">100 – 300</option>
+                  <option value="300_500">300 – 500</option>
+                  <option value="500_1000">500 – 1,000</option>
+                  <option value="mas_1000">Más de 1,000</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">¿El venue tiene sonido?</label>
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input type="radio" name="venueSound" value="si" class="radio-input" />
+                    Sí
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="venueSound" value="no" class="radio-input" />
+                    No
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="venueSound" value="no_se" class="radio-input" checked />
+                    No sé
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mensaje -->
+            <div class="field">
+              <label for="message" class="field-label">Detalles adicionales</label>
+              <textarea
+                id="message" name="message" rows="4"
+                placeholder="Horario tentativo, tema del evento, requerimientos especiales…"
+                class="field-input"
+              ></textarea>
+            </div>
+
+            <button type="submit" id="submit-btn" class="btn-primary submit-btn">
+              Enviar solicitud
+            </button>
+
+          </form>
+
+          <p id="form-status" class="form-status" aria-live="polite"></p>
+        </div>
+
+      </div>
     </div>
-    <div>
-      <label for="name" class="mb-1 block text-sm font-medium text-stone-700">Nombre *</label>
-      <input id="name" name="name" required class="w-full rounded-md border border-stone-300 px-3 py-2 shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+  </section>
+
+  <footer class="footer-bar">
+    <div class="container">
+      <span class="footer-brand">La Mafia Tumbada</span>
+      <p class="footer-copy">
+        © {new Date().getFullYear()} · Xalapa, Veracruz · Todos los derechos reservados
+      </p>
     </div>
-    <div>
-      <label for="email" class="mb-1 block text-sm font-medium text-stone-700">Email *</label>
-      <input id="email" name="email" type="email" required class="w-full rounded-md border border-stone-300 px-3 py-2 shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
-    </div>
-    <div>
-      <label for="phone" class="mb-1 block text-sm font-medium text-stone-700">Teléfono</label>
-      <input id="phone" name="phone" type="tel" class="w-full rounded-md border border-stone-300 px-3 py-2 shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
-    </div>
-    <div>
-      <label for="eventDate" class="mb-1 block text-sm font-medium text-stone-700">Fecha / tipo de evento</label>
-      <input id="eventDate" name="eventDate" class="w-full rounded-md border border-stone-300 px-3 py-2 shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
-    </div>
-    <div>
-      <label for="message" class="mb-1 block text-sm font-medium text-stone-700">Mensaje</label>
-      <textarea id="message" name="message" rows="4" class="w-full rounded-md border border-stone-300 px-3 py-2 shadow-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"></textarea>
-    </div>
-    <button type="submit" class="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2">
-      Enviar
-    </button>
-  </form>
-  <p id="form-status" class="mt-4 text-sm" aria-live="polite"></p>
-  <script define:vars={{ apiUrl }}>
-    const form = document.getElementById('booking-form');
-    const status = document.getElementById('form-status');
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      status.textContent = 'Enviando…';
-      status.style.color = '';
-      const fd = new FormData(form);
-      const body = {
-        name: fd.get('name'),
-        email: fd.get('email'),
-        phone: fd.get('phone') || undefined,
-        eventDate: fd.get('eventDate') || undefined,
-        message: fd.get('message') || undefined,
-        website: fd.get('website') || undefined,
-      };
-      try {
-        const res = await fetch(`${apiUrl}/api/booking`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (res.ok) {
-          const confirmation = data?.data?.confirmation ?? data?.confirmation;
-          if (confirmation === 'sent') {
-            status.textContent = 'Mensaje enviado. Te contactaremos pronto.';
-          } else if (confirmation === 'pending') {
-            status.textContent =
-              'Recibimos tu solicitud. Te contactaremos pronto (la confirmación por correo no pudo enviarse).';
-          } else {
-            status.textContent = 'Recibimos tu solicitud. Te contactaremos pronto.';
-          }
-          status.style.color = 'green';
-          form.reset();
+  </footer>
+
+</MarketingLayout>
+
+<style>
+  .booking-page {
+    padding-block: 3rem;
+  }
+
+  .booking-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  @media (min-width: 768px) {
+    .booking-layout {
+      grid-template-columns: 280px 1fr;
+      align-items: start;
+    }
+  }
+
+  /* Sidebar */
+  .booking-title {
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    line-height: 1.1;
+    margin: 0.5rem 0 2rem;
+  }
+
+  .booking-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .booking-info-item {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .booking-info-icon {
+    font-size: 1.1rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .booking-info-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.5;
+    margin: 0 0 0.15rem;
+  }
+
+  .booking-info-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .booking-whatsapp {
+    border-top: 1px solid var(--color-border, #e5e1d8);
+    padding-top: 1.5rem;
+  }
+
+  .booking-whatsapp-label {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Form */
+  .booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .field-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text, #1c1917);
+    opacity: 0.8;
+  }
+
+  .field-input {
+    width: 100%;
+    border: 1px solid var(--color-border, #e5e1d8);
+    border-radius: 0.375rem;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.95rem;
+    background: transparent;
+    color: inherit;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+  }
+
+  .field-input:focus {
+    outline: none;
+    border-color: var(--color-brand, #c8a96e);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand, #c8a96e) 15%, transparent);
+  }
+
+  .field-select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2.25rem;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    .field-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Radio group */
+  .radio-group {
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+    padding: 0.6rem 0;
+  }
+
+  .radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  .radio-input {
+    accent-color: var(--color-brand, #c8a96e);
+    cursor: pointer;
+  }
+
+  /* Submit */
+  .submit-btn {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+  }
+
+  /* Status */
+  .form-status {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    min-height: 1.25rem;
+  }
+
+  .form-status[data-state="success"] { color: #16a34a; }
+  .form-status[data-state="error"]   { color: #dc2626; }
+  .form-status[data-state="loading"] { opacity: 0.6; }
+
+  /* Honeypot */
+  .hidden { display: none !important; }
+</style>
+
+<script define:vars={{ apiUrl }}>
+  const form    = document.getElementById('booking-form')
+  const status  = document.getElementById('form-status')
+  const btn     = document.getElementById('submit-btn')
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault()
+
+    btn.disabled = true
+    btn.textContent = 'Enviando…'
+    setStatus('loading', 'Enviando…')
+
+    const fd = new FormData(form)
+    const body = {
+      name:       fd.get('name'),
+      email:      fd.get('email'),
+      phone:      fd.get('phone')      || undefined,
+      eventDate:  fd.get('eventDate')  || undefined,
+      city:       fd.get('city')       || undefined,
+      eventType:  fd.get('eventType')  || undefined,
+      attendees:  fd.get('attendees')  || undefined,
+      venueSound: fd.get('venueSound') || undefined,
+      duration:   fd.get('duration')   || undefined,
+      showType:   fd.get('showType')   || undefined,
+      message:    fd.get('message')    || undefined,
+      website:    fd.get('website')    || undefined,
+    }
+
+    try {
+      const res  = await fetch(`${apiUrl}/api/booking`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(body),
+      })
+      const data = await res.json().catch(() => ({}))
+
+      if (res.ok) {
+        const confirmation = data?.data?.confirmation ?? data?.confirmation
+        if (confirmation === 'sent') {
+          setStatus('success', 'Mensaje enviado. Te contactaremos pronto.')
+        } else if (confirmation === 'pending') {
+          setStatus('success', 'Recibimos tu solicitud. Te contactaremos pronto (la confirmación por correo no pudo enviarse).')
         } else {
-          status.textContent = data?.error?.message || `Error ${res.status}. Vuelve a intentar.`;
-          status.style.color = 'red';
+          setStatus('success', 'Recibimos tu solicitud. Te contactaremos pronto.')
         }
-      } catch (err) {
-        status.textContent = 'Error de conexión. Revisa que la API esté en marcha.';
-        status.style.color = 'red';
+        form.reset()
+      } else {
+        setStatus('error', data?.error?.message || `Error ${res.status}. Vuelve a intentar.`)
       }
-    });
-  </script>
-</Layout>
+    } catch {
+      setStatus('error', 'Error de conexión. Revisa tu internet e intenta de nuevo.')
+    } finally {
+      btn.disabled = false
+      btn.textContent = 'Enviar solicitud'
+    }
+  })
+
+  function setStatus(state, text) {
+    status.textContent = text
+    status.dataset.state = state
+  }
+</script>

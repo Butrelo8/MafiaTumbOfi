@@ -1,5 +1,10 @@
 import { describe, expect, test } from 'bun:test'
-import { homeCanonical, pressKitCanonical, resolvePublicBaseUrl } from './publicSiteUrl'
+import {
+  bookingCanonical,
+  homeCanonical,
+  pressKitCanonical,
+  resolvePublicBaseUrl,
+} from './publicSiteUrl'
 
 describe('resolvePublicBaseUrl', () => {
   test('trims and strips trailing slash from PUBLIC_SITE_URL', () => {
@@ -30,5 +35,11 @@ describe('homeCanonical', () => {
 describe('pressKitCanonical', () => {
   test('appends /press-kit to resolved base', () => {
     expect(pressKitCanonical('https://x.com/', 'http://local')).toBe('https://x.com/press-kit')
+  })
+})
+
+describe('bookingCanonical', () => {
+  test('appends /booking to resolved base', () => {
+    expect(bookingCanonical('https://x.com/', 'http://local')).toBe('https://x.com/booking')
   })
 })

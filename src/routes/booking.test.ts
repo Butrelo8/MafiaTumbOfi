@@ -289,4 +289,60 @@ describe('POST /api/booking', () => {
     const data = await res.json()
     expect(data.error?.code).toBe('INTERNAL_ERROR')
   })
+
+  test('returns 201 and persists extended booking fields when provided', async () => {
+    let insertRow: Record<string, unknown> | undefined
+    const captureDb = {
+      insert: () => ({
+        values: (row: Record<string, unknown>) => {
+          insertRow = row
+          return {
+            returning: async () => [{ id: 1 }],
+          }
+        },
+      }),
+      update: () => ({
+        set: () => ({
+          where: async () => undefined,
+        }),
+      }),
+    }
+    mock.module('../db', () => ({ db: captureDb }))
+    mock.module('../lib/resend', () => ({
+      getResend: () => ({
+        emails: {
+          send: async () => ({ data: { id: 'mock-id' }, error: null }),
+        },
+      }),
+    }))
+    const { bookingRoutes: routesExtended } = await import('./booking')
+    const appExtended = new Hono().route('/api', routesExtended)
+    process.env.BOOKING_NOTIFICATION_EMAIL = 'band@example.com'
+    const res = await appExtended.request('/api/booking', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'Organizer',
+        email: 'org@example.com',
+        phone: '555-0100',
+        eventDate: '2026-06-15',
+        city: 'Xalapa, Veracruz',
+        eventType: 'boda',
+        duration: '2h',
+        showType: 'mix',
+        attendees: '100_300',
+        venueSound: 'si',
+        message: 'Boda al aire libre',
+      }),
+      headers: { 'Content-Type': 'application/json', 'x-forwarded-for': '10.1.1.1' },
+    })
+    expect(res.status).toBe(201)
+    const data = await res.json()
+    expect(data.data?.confirmation).toBe('sent')
+    expect(insertRow?.city).toBe('Xalapa, Veracruz')
+    expect(insertRow?.eventType).toBe('boda')
+    expect(insertRow?.duration).toBe('2h')
+    expect(insertRow?.showType).toBe('mix')
+    expect(insertRow?.attendees).toBe('100_300')
+    expect(insertRow?.venueSound).toBe('si')
+  })
 })
