@@ -71,7 +71,8 @@ MafiaTumbadaOfi/
 | `bun start` | Start API (production) |
 | `bun test` | Run tests |
 | `bun db:generate` | Generate Drizzle migrations |
-| `bun db:migrate` | Run pending migrations |
+| `bun db:migrate` | Run pending migrations (applies `drizzle/*.sql` via `scripts/run-migration.ts`; same as `bun run migrate`) |
+| `bun db:upgrade-kit-snapshots` | Drizzle-kit only: upgrade internal migration journal/snapshot metadata (`drizzle-kit up:sqlite`); does **not** apply SQL to the DB |
 | `bun db:studio` | Open Drizzle Studio |
 
 ## Scripts (web/)
