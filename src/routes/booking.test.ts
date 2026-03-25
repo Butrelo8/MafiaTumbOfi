@@ -331,6 +331,7 @@ describe('POST /api/booking', () => {
         showType: 'mix',
         attendees: '100_300',
         venueSound: 'si',
+        budget: '30k_50k',
         message: 'Boda al aire libre',
       }),
       headers: { 'Content-Type': 'application/json', 'x-forwarded-for': '10.1.1.1' },
@@ -344,5 +345,79 @@ describe('POST /api/booking', () => {
     expect(insertRow?.showType).toBe('mix')
     expect(insertRow?.attendees).toBe('100_300')
     expect(insertRow?.venueSound).toBe('si')
+    expect(insertRow?.budget).toBe('30k_50k')
+  })
+
+  test('returns 201 when budget is omitted', async () => {
+    process.env.BOOKING_NOTIFICATION_EMAIL = 'band@example.com'
+    const res = await app.request('/api/booking', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Test', email: 'test@example.com' }),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-forwarded-for': '10.88.1.1',
+      },
+    })
+    expect(res.status).toBe(201)
+    const data = await res.json()
+    expect(data.data?.ok).toBe(true)
+  })
+
+  test('persists null budget when omitted', async () => {
+    let insertRow: Record<string, unknown> | undefined
+    const captureDb = {
+      insert: () => ({
+        values: (row: Record<string, unknown>) => {
+          insertRow = row
+          return {
+            returning: async () => [{ id: 1 }],
+          }
+        },
+      }),
+      update: () => ({
+        set: () => ({
+          where: async () => undefined,
+        }),
+      }),
+    }
+    mock.module('../db', () => ({ db: captureDb }))
+    mock.module('../lib/resend', () => ({
+      getResend: () => ({
+        emails: {
+          send: async () => ({ data: { id: 'mock-id' }, error: null }),
+        },
+      }),
+    }))
+    const { bookingRoutes: routesNoBudget } = await import('./booking')
+    const appNoBudget = new Hono().route('/api', routesNoBudget)
+    process.env.BOOKING_NOTIFICATION_EMAIL = 'band@example.com'
+    const res = await appNoBudget.request('/api/booking', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Test', email: 'nobudget@example.com' }),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-forwarded-for': '10.88.1.4',
+      },
+    })
+    expect(res.status).toBe(201)
+    expect(insertRow?.budget).toBeNull()
+  })
+
+  test('returns 400 VALIDATION_ERROR when budget has invalid value', async () => {
+    const res = await app.request('/api/booking', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'Test',
+        email: 'test@example.com',
+        budget: 'free',
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-forwarded-for': '10.88.1.2',
+      },
+    })
+    expect(res.status).toBe(400)
+    const data = await res.json()
+    expect(data.error?.code).toBe('VALIDATION_ERROR')
   })
 })

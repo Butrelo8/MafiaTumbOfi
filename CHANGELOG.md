@@ -8,6 +8,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- Booking: **presupuesto** (optional) on `/booking` (`web/src/pages/booking.astro`) — MXN range dropdown + helper/context hints; `budget` text enum on `bookings`; validated in `POST /api/booking` (`src/routes/booking.ts`); band email includes budget line when provided; migration `drizzle/0005_booking_budget_field.sql`.
+- Admin (`web/src/pages/admin.astro`): Budget column with readable labels; sortable Budget and Created columns (client-side).
+
+### Fixed
+- Booking page (`web/src/pages/booking.astro`): form labels and radio labels use marketing theme `--text` instead of a light-theme fallback (`#1c1917`), so copy stays readable on the dark `MarketingLayout` background; input borders use `--border`.
+
+### Added
 - Booking: expanded public form at `/booking` (`web/src/pages/booking.astro`) with `MarketingLayout`, city/event type/duration/show type/attendees/venue sound fields; `bookingCanonical()` in `web/src/lib/publicSiteUrl.ts` for canonical URL.
 - API + DB: optional booking payload fields `city`, `eventType`, `duration`, `showType`, `attendees`, `venueSound` validated in `src/routes/booking.ts`, persisted on `bookings`, included in band notification email; migration `drizzle/0004_booking_detail_fields.sql`.
 - Web: combined homepage and press kit into single-scroll page at `/` (`web/src/pages/index.astro`) using `MarketingLayout.astro` and `web/src/styles/marketing-press.css`; includes hero, stats, bio, social links, discography, members, shows, press assets, and booking CTA with anchor navigation. Old `/press-kit` route redirects to `/` via `web/vercel.json`. `homeCanonical` helper in `web/src/lib/publicSiteUrl.ts` for base-domain canonical URL; `pressKitCanonical` retained for tests/back-compat. Optional env vars in `web/.env.example` (`PUBLIC_SITE_URL`, `PUBLIC_WHATSAPP_URL`, asset URLs). Tests in `web/src/lib/publicSiteUrl.test.ts`.

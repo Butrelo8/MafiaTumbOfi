@@ -133,6 +133,36 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
               </select>
             </div>
 
+            <!-- Presupuesto (opcional): después de fecha, ciudad y tipo de evento -->
+            <div class="field field-budget">
+              <label for="budget" class="field-label">
+                Presupuesto orientativo <span class="field-optional">(opcional)</span>
+              </label>
+              <p id="budget-hint" class="field-hint">
+                Solo una referencia en pesos mexicanos (MXN). Si aún no lo tienes claro, elige &quot;Lo vemos después&quot; — lo afinamos contigo sin compromiso.
+              </p>
+              <select
+                id="budget"
+                name="budget"
+                class="field-input field-select"
+                aria-describedby="budget-hint"
+              >
+                <option value="">Lo vemos después — sin problema</option>
+                <option value="menos_15k">Hasta $15,000 MXN</option>
+                <option value="15k_30k">$15,000 – $30,000 MXN</option>
+                <option value="30k_50k">$30,000 – $50,000 MXN</option>
+                <option value="50k_100k">$50,000 – $100,000 MXN</option>
+                <option value="mas_100k">Más de $100,000 MXN</option>
+              </select>
+              <p
+                id="budget-context"
+                class="budget-context budget-context--inactive"
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+              ></p>
+            </div>
+
             <!-- Duración + Tipo de show (row) -->
             <div class="field-row">
               <div class="field">
@@ -296,6 +326,8 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+    /* Native <select> popups use OS styling; dark scheme fixes white list + grey text on Windows/Chrome */
+    color-scheme: dark;
   }
 
   .field {
@@ -307,13 +339,46 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
   .field-label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--color-text, #1c1917);
-    opacity: 0.8;
+    color: var(--text, #ede8df);
+    opacity: 0.95;
+  }
+
+  .field-optional {
+    font-weight: 400;
+    font-size: 0.8rem;
+    opacity: 0.65;
+  }
+
+  .field-hint {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--muted, #7a7267);
+    margin: 0 0 0.5rem;
+    max-width: 40rem;
+  }
+
+  .field-budget {
+    margin-block: 0.35rem 0.65rem;
+  }
+
+  .budget-context {
+    margin: 0.5rem 0 0;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--text, #ede8df);
+    background: color-mix(in srgb, var(--color-brand, #c8a96e) 12%, transparent);
+    border-radius: 0.375rem;
+    border-left: 3px solid var(--color-brand, #c8a96e);
+  }
+
+  .budget-context--inactive {
+    display: none;
   }
 
   .field-input {
     width: 100%;
-    border: 1px solid var(--color-border, #e5e1d8);
+    border: 1px solid var(--border, #262420);
     border-radius: 0.375rem;
     padding: 0.6rem 0.75rem;
     font-size: 0.95rem;
@@ -332,10 +397,23 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
   .field-select {
     cursor: pointer;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    /* Solid surface so closed state matches theme; transparent + inherited color confused native popup contrast */
+    background-color: var(--surface, #111111);
+    color: var(--text, #ede8df);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c8a96e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     padding-right: 2.25rem;
+  }
+
+  .field-select option {
+    background-color: var(--surface2, #191919);
+    color: var(--text, #ede8df);
+  }
+
+  .field-select option:checked {
+    background-color: var(--color-brand, #c8a96e);
+    color: #0b0b0b;
   }
 
   .field-row {
@@ -347,6 +425,10 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
   @media (max-width: 480px) {
     .field-row {
       grid-template-columns: 1fr;
+    }
+
+    .field-select {
+      min-height: 2.75rem;
     }
   }
 
@@ -364,6 +446,7 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
     gap: 0.4rem;
     font-size: 0.9rem;
     cursor: pointer;
+    color: var(--text, #ede8df);
   }
 
   .radio-input {
@@ -396,6 +479,38 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
   const form    = document.getElementById('booking-form')
   const status  = document.getElementById('form-status')
   const btn     = document.getElementById('submit-btn')
+  const budgetSelect = document.getElementById('budget')
+  const budgetContext = document.getElementById('budget-context')
+
+  const BUDGET_HINTS = {
+    '': '',
+    menos_15k:
+      'Rango típico para eventos más íntimos o acústicos — armamos una propuesta a tu medida.',
+    '15k_30k':
+      'Buen punto de partida para cotizar con detalle sin apuros.',
+    '30k_50k':
+      'Aquí suele entrar show completo con logística base en la zona.',
+    '50k_100k':
+      'Hay margen para producción, transporte y extras según tu fecha.',
+    mas_100k:
+      'Gracias por la confianza — podemos coordinar una llamada para afinar todo.',
+  }
+
+  function syncBudgetHint() {
+    if (!budgetSelect || !budgetContext) return
+    const key = budgetSelect.value
+    const line = BUDGET_HINTS[key] || ''
+    if (line) {
+      budgetContext.textContent = line
+      budgetContext.classList.remove('budget-context--inactive')
+    } else {
+      budgetContext.textContent = ''
+      budgetContext.classList.add('budget-context--inactive')
+    }
+  }
+
+  budgetSelect?.addEventListener('change', syncBudgetHint)
+  syncBudgetHint()
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault()
@@ -416,6 +531,7 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
       venueSound: fd.get('venueSound') || undefined,
       duration:   fd.get('duration')   || undefined,
       showType:   fd.get('showType')   || undefined,
+      budget:     fd.get('budget')     || undefined,
       message:    fd.get('message')    || undefined,
       website:    fd.get('website')    || undefined,
     }
@@ -438,6 +554,7 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
           setStatus('success', 'Recibimos tu solicitud. Te contactaremos pronto.')
         }
         form.reset()
+        syncBudgetHint()
       } else {
         setStatus('error', data?.error?.message || `Error ${res.status}. Vuelve a intentar.`)
       }

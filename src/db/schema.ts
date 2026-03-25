@@ -22,6 +22,7 @@ export const bookings = sqliteTable('bookings', {
   showType: text('show_type'),
   attendees: text('attendees'),
   venueSound: text('venue_sound'),
+  budget: text('budget'),
   message: text('message'),
   status: text('status').notNull().default('pending'),
   confirmationLastError: text('confirmation_last_error'),
