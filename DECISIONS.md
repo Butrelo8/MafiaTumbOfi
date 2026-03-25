@@ -5,12 +5,26 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-03-25 — `db:migrate` must apply SQL, not drizzle-kit `up:sqlite`
+
+**Context:** `db:migrate` was wired to `drizzle-kit up:sqlite`. In drizzle-kit 0.20.x, `up` upgrades internal migration snapshots/journal metadata; it does not execute pending SQL against the database. README quickstart told developers to run `bun db:migrate` for “Run pending migrations,” while production and deploy use `bun run migrate` (`scripts/run-migration.ts`), which applies `drizzle/*.sql` in order.
+**Decision:** Point `db:migrate` at the same runner as `migrate` (`scripts/run-migration.ts`). Expose `drizzle-kit up:sqlite` under `db:upgrade-kit-snapshots` for the rare case when kit metadata needs upgrading. Do not use `drizzle-kit migrate` as the primary path — deploy and idempotent SQL handling are defined by the custom script (see `STATE.md`).
+**Alternatives considered:** Replace `db:migrate` with `drizzle-kit migrate` only (rejected: may diverge from the custom runner and journal/SQL source of truth).
+**Why not the others:** One command name (`db:migrate`) should match README and match what Render runs in spirit (apply schema SQL).
+
 ## 2026-03-25 — Booking budget: optional MXN range enum
 
 **Context:** Promoters need a qualification signal without free-form noise; numeric free entry invites garbage. A **required** budget felt high-pressure; some leads prefer to discuss numbers after first contact.
 **Decision:** Add nullable `budget` on `bookings` (existing rows stay null). `POST /api/booking` accepts optional `budget` — one of `menos_15k`, `15k_30k`, `30k_50k`, `50k_100k`, `mas_100k` (Zod `z.enum` + preprocess so `''`/`undefined` omit); DB stores `null` when omitted. Band email includes a readable budget line only when present (`BUDGET_LABELS` in `src/routes/booking.ts`). Public form: non-required `<select>` after date/city/event type, placeholder “Lo vemos después”, helper copy, subtle contextual hints on change. Admin: same labels + sort (`data-budget` / `data-timestamp`). Migration `drizzle/0005_booking_budget_field.sql`; apply via existing `bun run migrate`.
 **Alternatives considered:** Integer MXN column; min/max two-column range; required enum (rejected for UX pressure).
 **Why not the others:** Enum ranges keep validation and triage simple when provided; optional preserves conversion when the lead is not ready to share a number.
+
+## 2026-03-25 — Admin estimated price range: computed at read time
+
+**Context:** Admin needs a fast “expectation setting” signal for leads without adding extra DB complexity or changing the public booking POST contract. The inputs used by the marketing form (city, duration, attendees) are optional, and estimates must degrade safely when fields are missing.
+**Decision:** Implement `src/lib/estimatedPriceRange.ts` as a pure helper and compute `estimatedPriceRange` at read-time inside `src/routes/admin.ts` for both `GET /api/admin/bookings` and `GET /api/admin/export/bookings`. The pricing heuristics use module-level constants (not env vars) so the algorithm stays deterministic and testable. The public booking response remains unchanged.
+**Alternatives considered:** Persisting the estimate in the `bookings` table (requires migration + backfill + dealing with future model changes), computing the estimate in the client (would leak heuristics variability across environments), and wiring the constants via env vars (hurts determinism + complicates caching and tests).
+**Why not the others:** This is a read-only expectation helper for admins; storing introduces long-lived data correctness concerns, and client-side computation reduces consistency across admin views. Module constants keep Bun tests deterministic and avoid configuration drift.
 
 ## 2026-03-24 — Booking form: persist structured detail fields in SQLite
 

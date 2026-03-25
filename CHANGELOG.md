@@ -10,8 +10,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 - Booking: **presupuesto** (optional) on `/booking` (`web/src/pages/booking.astro`) — MXN range dropdown + helper/context hints; `budget` text enum on `bookings`; validated in `POST /api/booking` (`src/routes/booking.ts`); band email includes budget line when provided; migration `drizzle/0005_booking_budget_field.sql`.
 - Admin (`web/src/pages/admin.astro`): Budget column with readable labels; sortable Budget and Created columns (client-side).
+- Admin (`web/src/pages/admin.astro`): Added `Est. Price` column; API computes `estimatedPriceRange` at read-time from `city`/`duration`/`attendees` (`src/lib/estimatedPriceRange.ts` + `src/routes/admin.ts`).
 
 ### Fixed
+- Root `package.json`: `db:migrate` now runs `migrate` / `scripts/run-migration.ts` so it applies SQL migrations to SQLite (same as Render). It previously ran `drizzle-kit up:sqlite`, which only upgrades Drizzle kit journal metadata — developers following README saw success but got no tables. Rare kit upgrades use `db:upgrade-kit-snapshots`.
 - Booking page (`web/src/pages/booking.astro`): form labels and radio labels use marketing theme `--text` instead of a light-theme fallback (`#1c1917`), so copy stays readable on the dark `MarketingLayout` background; input borders use `--border`.
 
 ### Added
@@ -20,7 +22,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Web: combined homepage and press kit into single-scroll page at `/` (`web/src/pages/index.astro`) using `MarketingLayout.astro` and `web/src/styles/marketing-press.css`; includes hero, stats, bio, social links, discography, members, shows, press assets, and booking CTA with anchor navigation. Old `/press-kit` route redirects to `/` via `web/vercel.json`. `homeCanonical` helper in `web/src/lib/publicSiteUrl.ts` for base-domain canonical URL; `pressKitCanonical` retained for tests/back-compat. Optional env vars in `web/.env.example` (`PUBLIC_SITE_URL`, `PUBLIC_WHATSAPP_URL`, asset URLs). Tests in `web/src/lib/publicSiteUrl.test.ts`.
 
 ### Changed
-- Root `package.json`: `db:generate` / `db:migrate` scripts use drizzle-kit `generate:sqlite` and `up:sqlite` (compatible with drizzle-kit 0.20.x).
+- Root `package.json`: `db:generate` still uses `drizzle-kit generate:sqlite`; `db:migrate` applies SQL via `scripts/run-migration.ts`; `db:upgrade-kit-snapshots` runs `drizzle-kit up:sqlite` when kit metadata needs upgrading.
 - Web: removed standalone `web/src/pages/press-kit.astro`; nav “Press kit” links point to `/#press` on `Layout.astro` and `MarketingLayout.astro`.
 
 ### Documentation

@@ -8,6 +8,7 @@ import { bookings } from '../db/schema'
 import { getResend } from '../lib/resend'
 import { isAdminBookingExportAllowed } from '../lib/adminBookingExport'
 import { logServerError, logServerErrorDetails } from '../lib/safeLog'
+import { estimatedPriceRange } from '../lib/estimatedPriceRange'
 
 export const adminRoutes = new Hono()
 
@@ -21,9 +22,18 @@ adminRoutes.get('/bookings', async (c) => {
       .from(bookings)
       .orderBy(desc(bookings.createdAt))
 
+    const enriched = allBookings.map((b) => ({
+      ...b,
+      estimatedPriceRange: estimatedPriceRange({
+        city: b.city,
+        duration: b.duration,
+        attendees: b.attendees,
+      }),
+    }))
+
     return successResponse(c, {
-      bookings: allBookings,
-      total: allBookings.length,
+      bookings: enriched,
+      total: enriched.length,
     })
   } catch (error) {
     logServerError('admin', 'FETCH_BOOKINGS_FAILED', error)
@@ -133,8 +143,17 @@ adminRoutes.get('/export/bookings', async (c) => {
       .from(bookings)
       .orderBy(desc(bookings.createdAt))
 
+    const enriched = allBookings.map((b) => ({
+      ...b,
+      estimatedPriceRange: estimatedPriceRange({
+        city: b.city,
+        duration: b.duration,
+        attendees: b.attendees,
+      }),
+    }))
+
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
-    const last24h = allBookings.filter((b) => b.createdAt && b.createdAt >= oneDayAgo)
+    const last24h = enriched.filter((b) => b.createdAt && b.createdAt >= oneDayAgo)
 
     console.log(
       JSON.stringify({
@@ -148,9 +167,9 @@ adminRoutes.get('/export/bookings', async (c) => {
 
     return successResponse(c, {
       exportedAt: new Date().toISOString(),
-      total: allBookings.length,
+      total: enriched.length,
       last24hCount: last24h.length,
-      bookings: allBookings,
+      bookings: enriched,
     })
   } catch (error) {
     logServerError('admin', 'EXPORT_BOOKINGS_FAILED', error)

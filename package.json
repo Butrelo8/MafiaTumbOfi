@@ -8,7 +8,8 @@
     "build": "bun build src/index.ts --outdir dist",
     "test": "bun test",
     "db:generate": "drizzle-kit generate:sqlite",
-    "db:migrate": "drizzle-kit up:sqlite",
+    "db:migrate": "bun run migrate",
+    "db:upgrade-kit-snapshots": "drizzle-kit up:sqlite",
     "migrate": "bun run scripts/run-migration.ts",
     "check-db": "bun run scripts/check-db.ts",
     "db:studio": "drizzle-kit studio"

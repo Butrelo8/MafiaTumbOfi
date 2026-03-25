@@ -47,6 +47,7 @@ let bookings: Array<{
   phone: string | null
   eventDate: string | null
   budget: string | null
+  estimatedPriceRange: string
   message: string | null
   status: string
   confirmationLastError: string | null
@@ -127,6 +128,7 @@ try {
               <th class="sortable" data-sort="budget" scope="col">
                 Budget <span class="sort-indicator" aria-hidden="true"></span>
               </th>
+              <th>Est. Price</th>
               <th>Status</th>
                 <th>Attempts</th>
                 <th>Last confirmation error</th>
@@ -147,6 +149,7 @@ try {
                 <td data-cell="budget" data-budget={booking.budget ?? ''}>
                   {formatBudget(booking.budget)}
                 </td>
+                <td>{booking.estimatedPriceRange ?? '-'}</td>
                 <td>
                   <span class={`status-badge status-${booking.status}`}>
                     {booking.status}

@@ -12,6 +12,8 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **What:** Execution order for turning the public site into a lead funnel + light CRM: budget capture, marketing blocks, post-submit UX, admin triage, then scoring.
 **Why:** Aligns product work with fastest ROI; extends the existing `bookings` table and booking API rather than replacing them with a minimal greenfield schema.
 **Context:** Booking already persists `city`, `eventType`, `duration`, `showType`, `attendees`, `venueSound`, etc. (`src/db/schema.ts`, `STATE.md`). Items below are **new** or **expand** admin/marketing.
+**Solution:** 
+**Done When:**
 **Effort:** XL (across multiple tickets below)
 **Priority:** P1
 **Depends on:** None
@@ -22,6 +24,8 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **What:** On the public marketing site (`web/`, likely `index.astro` / `MarketingLayout`): embed or link a **video hero** (live performance); add **packages** section (e.g. Basic / Full / Premium); add **repertoire** section; **testimonials** block; **urgency** copy (e.g. limited weekend availability). Match existing marketing CSS and a11y patterns.
 **Why:** Increases conversion without new backend surface area.
 **Context:** Can ship as one vertical slice or split into sub-tasks; no dependency on budget DB work except for coherent CTA toward `/booking`.
+**Solution:** 
+**Done When:**
 **Effort:** M
 **Priority:** P1
 **Depends on:** None
@@ -32,6 +36,8 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **What:** After successful submit, redirect (or in-page flow) to a dedicated thank-you route with embedded/linked performance video and a prominent **WhatsApp** CTA (`PUBLIC_WHATSAPP_URL` or equivalent). Keep confirmation messaging consistent with `data.confirmation` (`sent` | `pending`).
 **Why:** Closes the loop on leads immediately; roadmap Phase 2 UX upgrade.
 **Context:** May require Astro page + `bookingCanonical`/`publicSiteUrl` patterns; avoid breaking existing booking tests.
+**Solution:** 
+**Done When:**
 **Effort:** S
 **Priority:** P2
 **Depends on:** None (coordinate copy with Marketing slice if shipped together)
@@ -42,6 +48,8 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **What:** Add `priority` (`low` | `medium` | `high`) and/or numeric `score` on `bookings` (or compute priority in API on insert/update). Implement scoring rules in a small module (e.g. budget thresholds, event type, attendees, city vs local) so rules can change without scattered conditionals. Expose in admin + optional API for future automation.
 **Why:** Filters noise and ranks follow-up order (roadmap Phase 2).
 **Context:** Requires parseable budget and stable enums for event type; document rule versions in `DECISIONS.md` when tuned.
+**Solution:** 
+**Done When:**
 **Effort:** M
 **Priority:** P2
 **Depends on:** None (prerequisite: budget enum shipped 2026-03-25)
@@ -52,26 +60,23 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **What:** Replace or map `status` beyond `pending`/`sent`/`failed` (confirmation) to **sales** states: e.g. `new`, `contacted`, `closed` — clarify separation between “email delivery” and “pipeline” (may be a second column `pipelineStatus` if confirmation status must stay). Admin UI to update state; API patch if missing; tests.
 **Why:** Light CRM without external tooling (roadmap Phase 2).
 **Context:** Current `bookings.status` is confirmation-oriented; avoid breaking existing flows — see `DECISIONS.md` before migrating semantics.
+**Solution:** 
+**Done When:**
 **Effort:** M
 **Priority:** P3
 **Depends on:** None (admin budget column + sort shipped 2026-03-25)
 
 ---
 
-### Quotes — Server-side estimated price range (quote helper)
-**What:** Backend helper (and optional `POST` response field or admin-only display): inputs such as city (travel), duration, attendees → `estimatedPriceRange` string (e.g. `"20k - 30k MXN"`). Keep constants configurable (env or module). Tests for edge cases and missing optional inputs.
-**Why:** Speeds replies and sets expectations (roadmap Phase 3).
-**Context:** Fits `feat/cotization-page` direction; do not expose misleading precision — range copy only unless legally cleared.
-**Effort:** M
-**Priority:** P3
-**Depends on:** None (prerequisite: budget enum shipped 2026-03-25)
-
 ---
 
 ### Email — Follow-up sequence (drip after booking)
 **What:** Beyond single confirmation: schedule or trigger Email 2 (e.g. “how we sound” / video) and Email 3 (e.g. urgency). Options: Resend batch + `scheduledAt`, N8N on VPS, or external drip — pick one and document in `DECISIONS.md`. Must be idempotent and mock-friendly in tests; no flaky network in CI.
 **Why:** Roadmap Phase 3 nurture; separate from transactional confirmation.
-**Context:** Open **Resend — Verify domain** todo still applies for deliverability to arbitrary addresses.
+**Context:** Open **Resend — Verify domain** todo still applies for 
+deliverability to arbitrary addresses.
+**Solution:** 
+**Done When:**
 **Effort:** L
 **Priority:** P3
 **Depends on:** Resend — Verify domain so confirmation emails reach any customer; optional: N8N — Run local instance on VPS
@@ -257,6 +262,12 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 - **Web:** `web/src/pages/booking.astro` — optional presupuesto `<select>` (MXN ranges); `web/src/pages/admin.astro` — Budget column, `formatBudget`, client-side sort on Budget + Created (`data-budget`, `data-timestamp`).
 - **Tests:** `src/routes/booking.test.ts` — missing/invalid budget, payloads updated; `bun test` green.
 - **Docs:** `DECISIONS.md` (2026-03-25), `CHANGELOG.md` [Unreleased].
+
+### Quotes — Server-side estimated price range (quote helper) (2026-03-25)
+- **API:** `src/routes/admin.ts` enriches `GET /api/admin/bookings` and `GET /api/admin/export/bookings` with `estimatedPriceRange` (computed from `city`/`duration`/`attendees` via `src/lib/estimatedPriceRange.ts`).
+- **Web:** `web/src/pages/admin.astro` shows new `Est. Price` column in the bookings table.
+- **Tests:** `src/lib/estimatedPriceRange.test.ts` covers missing/unknown inputs, local vs foraneo behavior, and formatting/invariants.
+- **Docs:** `DECISIONS.md` + `CHANGELOG.md` [Unreleased].
 
 ### Content / SEO — Homepage + press kit (merged 2026-03-24; replaces standalone `/press-kit` 2026-03-23)
 - **Route:** `GET /` — `web/src/pages/index.astro` (public; no auth); press assets section `id="press"` for `/#press` deep links.
