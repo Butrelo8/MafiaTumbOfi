@@ -27,12 +27,26 @@ if (resendParam === 'ok') {
   resendMessage = 'Solicitud inválida para reenviar confirmación.'
 }
 
+const BUDGET_LABELS: Record<string, string> = {
+  menos_15k: 'Hasta $15,000 MXN',
+  '15k_30k': '$15,000 – $30,000 MXN',
+  '30k_50k': '$30,000 – $50,000 MXN',
+  '50k_100k': '$50,000 – $100,000 MXN',
+  mas_100k: 'Más de $100,000 MXN',
+}
+
+function formatBudget(value: string | null | undefined): string {
+  if (value == null || value === '') return '-'
+  return BUDGET_LABELS[value] ?? value
+}
+
 let bookings: Array<{
   id: number
   name: string
   email: string
   phone: string | null
   eventDate: string | null
+  budget: string | null
   message: string | null
   status: string
   confirmationLastError: string | null
@@ -110,11 +124,16 @@ try {
               <th>Email</th>
               <th>Phone</th>
               <th>Event Date</th>
+              <th class="sortable" data-sort="budget" scope="col">
+                Budget <span class="sort-indicator" aria-hidden="true"></span>
+              </th>
               <th>Status</th>
                 <th>Attempts</th>
                 <th>Last confirmation error</th>
                 <th>Operator</th>
-              <th>Created</th>
+              <th class="sortable" data-sort="created" scope="col">
+                Created <span class="sort-indicator" aria-hidden="true"></span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -125,6 +144,9 @@ try {
                 <td>{booking.email}</td>
                 <td>{booking.phone ?? '-'}</td>
                 <td>{booking.eventDate ?? '-'}</td>
+                <td data-cell="budget" data-budget={booking.budget ?? ''}>
+                  {formatBudget(booking.budget)}
+                </td>
                 <td>
                   <span class={`status-badge status-${booking.status}`}>
                     {booking.status}
@@ -154,7 +176,10 @@ try {
                     '-'
                   )}
                 </td>
-                <td>
+                <td
+                  data-cell="created"
+                  data-timestamp={new Date(booking.createdAt).getTime()}
+                >
                   {new Date(booking.createdAt).toLocaleDateString('es-MX')}
                 </td>
               </tr>
@@ -164,6 +189,66 @@ try {
       </div>
     )}
   </div>
+
+  <script is:inline>
+    (function () {
+      const tbody = document.querySelector('.bookings-table tbody')
+      if (!tbody) return
+      const budgetTh = document.querySelector('.bookings-table th[data-sort="budget"]')
+      const createdTh = document.querySelector('.bookings-table th[data-sort="created"]')
+      const budgetRanks = {
+        '': 0,
+        menos_15k: 1,
+        '15k_30k': 2,
+        '30k_50k': 3,
+        '50k_100k': 4,
+        mas_100k: 5,
+      }
+      let activeKey = null
+      let activeDir = 'asc'
+
+      function setIndicator(th, dir) {
+        document.querySelectorAll('.bookings-table th[data-sort] .sort-indicator').forEach((el) => {
+          el.textContent = ''
+        })
+        if (!th) return
+        const span = th.querySelector('.sort-indicator')
+        if (span) span.textContent = dir === 'asc' ? ' ▲' : ' ▼'
+      }
+
+      function sortBy(key) {
+        const dir = activeKey === key && activeDir === 'asc' ? 'desc' : 'asc'
+        activeKey = key
+        activeDir = dir
+        const rows = Array.from(tbody.querySelectorAll('tr'))
+        const getVal =
+          key === 'budget'
+            ? (row) => {
+                const td = row.querySelector('td[data-cell="budget"]')
+                const b = td?.getAttribute('data-budget') ?? ''
+                return budgetRanks[b] ?? 0
+              }
+            : (row) => {
+                const td = row.querySelector('td[data-cell="created"]')
+                const t = td?.getAttribute('data-timestamp')
+                const n = t ? Number(t) : 0
+                return Number.isFinite(n) ? n : 0
+              }
+        rows.sort((a, b) => {
+          const va = getVal(a)
+          const vb = getVal(b)
+          if (va === vb) return 0
+          const cmp = va < vb ? -1 : 1
+          return dir === 'asc' ? cmp : -cmp
+        })
+        rows.forEach((r) => tbody.appendChild(r))
+        setIndicator(key === 'budget' ? budgetTh : createdTh, dir)
+      }
+
+      budgetTh?.addEventListener('click', () => sortBy('budget'))
+      createdTh?.addEventListener('click', () => sortBy('created'))
+    })()
+  </script>
 </Layout>
 
 <style>
@@ -253,6 +338,20 @@ try {
     font-size: 0.875rem;
     text-transform: uppercase;
     color: #666;
+  }
+
+  .bookings-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .bookings-table th.sortable:hover {
+    background: #eef2ff;
+  }
+
+  .sort-indicator {
+    font-size: 0.75rem;
+    color: #6366f1;
   }
 
   .status-badge {

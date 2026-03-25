@@ -21,6 +21,24 @@ async function markBandEmailFailed(bookingId: number) {
     .where(eq(bookings.id, bookingId))
 }
 
+const bookingBudgetSchema = z.enum([
+  'menos_15k',
+  '15k_30k',
+  '30k_50k',
+  '50k_100k',
+  'mas_100k',
+])
+
+type BookingBudget = z.infer<typeof bookingBudgetSchema>
+
+const BUDGET_LABELS: Record<BookingBudget, string> = {
+  menos_15k: 'Hasta $15,000 MXN',
+  '15k_30k': '$15,000 – $30,000 MXN',
+  '30k_50k': '$30,000 – $50,000 MXN',
+  '50k_100k': '$50,000 – $100,000 MXN',
+  mas_100k: 'Más de $100,000 MXN',
+}
+
 const bookingSchema = z.object({
   name: z.string().min(1).max(200),
   email: z.string().email(),
@@ -32,6 +50,10 @@ const bookingSchema = z.object({
   showType: z.string().max(50).optional(),
   attendees: z.string().max(30).optional(),
   venueSound: z.string().max(10).optional(),
+  budget: z.preprocess(
+    (val) => (val === '' || val === null || val === undefined ? undefined : val),
+    bookingBudgetSchema.optional(),
+  ),
   message: z.string().max(2000).optional(),
   website: z.string().max(100).optional(),
 })
@@ -69,6 +91,7 @@ bookingRoutes.post('/booking', async (c) => {
     showType,
     attendees,
     venueSound,
+    budget,
     message,
     website,
   } = parsed.data
@@ -102,6 +125,7 @@ bookingRoutes.post('/booking', async (c) => {
       showType: showType ?? null,
       attendees: attendees ?? null,
       venueSound: venueSound ?? null,
+      budget: budget ?? null,
       message: message ?? null,
       status: 'pending',
       confirmationLastError: null,
@@ -134,6 +158,7 @@ bookingRoutes.post('/booking', async (c) => {
     showType ? `Show type: ${showType}` : null,
     attendees ? `Attendees: ${attendees}` : null,
     venueSound ? `Venue sound: ${venueSound}` : null,
+    budget ? `Budget: ${BUDGET_LABELS[budget]}` : null,
     message ? `Message:\n${message}` : null,
   ]
     .filter(Boolean)

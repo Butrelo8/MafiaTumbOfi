@@ -5,6 +5,13 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-03-25 — Booking budget: optional MXN range enum
+
+**Context:** Promoters need a qualification signal without free-form noise; numeric free entry invites garbage. A **required** budget felt high-pressure; some leads prefer to discuss numbers after first contact.
+**Decision:** Add nullable `budget` on `bookings` (existing rows stay null). `POST /api/booking` accepts optional `budget` — one of `menos_15k`, `15k_30k`, `30k_50k`, `50k_100k`, `mas_100k` (Zod `z.enum` + preprocess so `''`/`undefined` omit); DB stores `null` when omitted. Band email includes a readable budget line only when present (`BUDGET_LABELS` in `src/routes/booking.ts`). Public form: non-required `<select>` after date/city/event type, placeholder “Lo vemos después”, helper copy, subtle contextual hints on change. Admin: same labels + sort (`data-budget` / `data-timestamp`). Migration `drizzle/0005_booking_budget_field.sql`; apply via existing `bun run migrate`.
+**Alternatives considered:** Integer MXN column; min/max two-column range; required enum (rejected for UX pressure).
+**Why not the others:** Enum ranges keep validation and triage simple when provided; optional preserves conversion when the lead is not ready to share a number.
+
 ## 2026-03-24 — Booking form: persist structured detail fields in SQLite
 
 **Context:** The marketing booking page collects structured fields (city, event type, duration, show type, attendees, venue sound) beyond the original free-text-centric form. The band notification email alone would lose queryable history and admin export fidelity.
