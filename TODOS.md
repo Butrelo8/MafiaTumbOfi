@@ -83,24 +83,12 @@ deliverability to arbitrary addresses.
 
 ---
 
-### API — DRY shared allowlist for CORS and Clerk `authorizedParties`
-**What:** Move the duplicated `allowedOrigins` array (localhost dev ports + `FRONTEND_URL` / `STAGING_URL` / `PRODUCTION_URL`) into a small shared module (e.g. `src/lib/allowedOrigins.ts`) and import it from `src/index.ts` and `src/middleware/auth.ts`.
-**Why:** CORS and Clerk session validation must stay in lockstep; two copies risk drift when URLs change.
-**Context:** Engineering lead codebase review (2026-03-22). Same list is built in both files today.
-**Solution:** Export a helper or constant (filter `Boolean` as today); use in the Hono `cors` `origin` callback and in `authenticateRequest({ authorizedParties })`.
-**Done When:** Both call sites use the shared module; `bun test` green; CORS and auth-related tests unchanged in behavior.
-**Effort:** S
-**Priority:** P2
-**Depends on:** None
-
----
-
-### API — `GET /users/me` uses `successResponse`
-**What:** Change `src/routes/users.ts` to return `successResponse(c, user)` instead of hand-rolled `c.json({ data: user })` so successful JSON matches `src/lib/errors.ts` and admin routes.
-**Why:** One consistent success envelope and helper path for clients and future middleware.
-**Context:** Admin list/export routes already use `successResponse` (`DECISIONS.md` 2026-03-22); `/me` is shape-compatible but bypasses the helper.
-**Solution:** Swap to `successResponse`; update tests/assertions if any expect the raw `c.json` path.
-**Done When:** `/me` uses `successResponse`; Astro or any client still reads `data` as today.
+### API — DRY origins + `/users/me` success envelope (bundle)
+**What:** Ship both consistency fixes together: (1) move duplicated `allowedOrigins` into a shared module consumed by `src/index.ts` (CORS) and `src/middleware/auth.ts` (Clerk `authorizedParties`), and (2) change `GET /api/users/me` in `src/routes/users.ts` to use `successResponse(c, user)` instead of hand-rolled `c.json({ data: user })`.
+**Why:** Keeps CORS + Clerk origin policy in lockstep and standardizes success responses through one helper path.
+**Context:** Both tasks are small P2 API consistency follow-ups from engineering review; bundling avoids two tiny PRs and reduces review overhead.
+**Solution:** Implement exactly as defined in this saved plan: [dry_origins_+_me_successresponse_e3c11ce0.plan.md](c:/Users/black/.cursor/plans/dry_origins_+_me_successresponse_e3c11ce0.plan.md).
+**Done When:** `allowedOrigins` is shared by both call sites, `/api/users/me` returns through `successResponse`, and `bun test` remains green with no behavior regressions.
 **Effort:** S
 **Priority:** P2
 **Depends on:** None
@@ -150,7 +138,7 @@ deliverability to arbitrary addresses.
 **Done When:** 
 **Context:** Current prod: Render (Bun, SQLite at /data) + Vercel (Astro SSR). Steps: buy/register domain → provision VPS → DNS A/AAAA to VPS → reverse proxy + SSL → deploy app. Scope: (A) API only on VPS, frontend stays on Vercel — add VPS API URL to Clerk + CORS. (B) API + frontend on same VPS — one domain, update Clerk + CORS. Use a process manager (e.g. systemd), persistent disk for SQLite, backup strategy. **With or right after this:** Resend domain (same domain), Sentry + VPS log checks, Content/SEO.
 **Effort:** L
-**Priority:** P2
+**Priority:** P1
 **Depends on:** None
 
 ---
