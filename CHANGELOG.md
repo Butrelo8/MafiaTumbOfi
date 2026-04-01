@@ -8,6 +8,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- Marketing homepage hero (`web/src/pages/index.astro`): full-bleed background video from `web/public/video/hero.mov` with blur/brightness filter, linear gradient scrim (`.hero::after`), gold accent line moved to `.hero-deco-line`; `prefers-reduced-motion: reduce` hides video and uses solid `--bg` fallback (`web/src/styles/marketing-press.css`). Smoke test `web/src/lib/homepageHero.test.ts`.
 - Booking: **presupuesto** (optional) on `/booking` (`web/src/pages/booking.astro`) — MXN range dropdown + helper/context hints; `budget` text enum on `bookings`; validated in `POST /api/booking` (`src/routes/booking.ts`); band email includes budget line when provided; migration `drizzle/0005_booking_budget_field.sql`.
 - Admin (`web/src/pages/admin.astro`): Budget column with readable labels; sortable Budget and Created columns (client-side).
 - Admin (`web/src/pages/admin.astro`): Added `Est. Price` column; API computes `estimatedPriceRange` at read-time from `city`/`duration`/`attendees` (`src/lib/estimatedPriceRange.ts` + `src/routes/admin.ts`).
