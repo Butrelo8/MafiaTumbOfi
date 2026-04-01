@@ -2,11 +2,12 @@
 
 ## Current Position
 - Phase: **Booking + optional budget qualification shipped in tree** — marketing `/booking` (`MarketingLayout`, expanded fields + optional **presupuesto** dropdown); API persists `budget` enum when provided + prior detail fields; migrations through `drizzle/0005_booking_budget_field.sql`; `bookingCanonical()` in `web/src/lib/publicSiteUrl.ts`; Render runs `bun run migrate` at startup (see `render.yaml` / `DEPLOY.md`).
-- **Eng lead / backlog:** Open hygiene items remain in `TODOS.md` (shared `allowedOrigins`, `/users/me` → `successResponse`, optional Playwright booking smoke). Ship priorities unchanged: VPS, Resend domain, Content/SEO when ready.
-- Branch: **`main`** — run `git status` before assuming a clean tree; use a feature branch for new work (not direct to `main`).
+- **Eng lead / backlog:** API hygiene follow-ups were bundled into one P2 todo (`DRY origins + /users/me success envelope`) with a saved execution plan link in `TODOS.md`; other ship priorities unchanged (VPS, Resend domain, Content/SEO when ready).
+- Branch: **`feat/budget-fixes-admin-range-deployment-cors-admin-api`** — currently clean except docs todo update; run `git status` before committing.
 - Last completed (this workstream): **Optional budget UX + API** — `src/routes/booking.ts` (optional `budget` + email line when set), `web/src/pages/booking.astro` (placement, helper, contextual hints), `booking.test.ts`, docs updated.
 - Last completed (this workstream): **Admin estimated price range helper + UI** — `src/lib/estimatedPriceRange.ts` (+ tests), enriched `src/routes/admin.ts` (`GET /api/admin/bookings` + `GET /api/admin/export/bookings`), and added `Est. Price` column in `web/src/pages/admin.astro` (computed at read-time). `bun test` green.
-- Next up: **Production / PR** — open a feature branch PR for review and ensure the deployed admin view renders `estimatedPriceRange` correctly.
+- Last completed (this session): **Verification + planning bundle** — confirmed git history/reflog is healthy, reran targeted admin/estimator tests (green), and consolidated two P2 API cleanup todos into one bundled item with a saved plan reference.
+- Next up: **Pick next execution slice** — either ship PR/deploy verification for current branch work, or execute the bundled P2 API consistency plan in a fresh feature commit.
 
 ## Accumulated Decisions
 - 2026-03-25: **Budget as optional MXN range enum** — five values on `bookings.budget`; optional on `POST /api/booking`; label map for email + admin UI; see `DECISIONS.md`.
@@ -27,6 +28,6 @@
 - **Drizzle journal** (`drizzle/meta/_journal.json`) may be out of sync with historical SQL files; **source of truth for deploy** is `scripts/run-migration.ts` applying all `drizzle/*.sql` in sorted order. If you regenerate migrations, verify output before committing.
 
 ## Session Notes
-Last session: **Saved after implementing admin estimated price range** (helper + tests + admin API/UI wiring).
-Stopped at: Ready for PR + deploy verification (admin bookings table should show “Est. Price”).
-Resume with: **`git status`** → review diff → **`bun test`** (already green) → open a feature-branch PR (not on `main`) → verify deployed admin page.
+Last session: **Review + QA + backlog cleanup** (git sanity check, targeted tests, todo bundling).
+Stopped at: Bundled P2 API cleanup task created in `TODOS.md` with plan link `c:/Users/black/.cursor/plans/dry_origins_+_me_successresponse_e3c11ce0.plan.md`; no implementation started.
+Resume with: **Choose path** — (A) continue PR/deploy verification for current branch changes, or (B) switch to a fresh branch and execute the bundled API plan (`allowedOrigins` shared module + `/users/me` `successResponse`) with full `bun test`.
