@@ -13,6 +13,8 @@
     "@astrojs/node": "9.0.0",
     "@astrojs/vercel": "^5.2.0",
     "@clerk/astro": "^3.0.4",
+    "@types/aos": "^3.0.7",
+    "aos": "^2.3.4",
     "astro": "^4.16.0"
   },
   "devDependencies": {

@@ -1,0 +1,113 @@
+---
+// src/components/MemberCard.astro
+const { name, role, image, featured = false, instagram = "#", youtube = "#" } = Astro.props;
+---
+
+<div class={`member-card ${featured ? "featured" : ""}`} data-aos="fade-up">
+  <div class="member-image">
+    <!-- Usamos img estándar porque las imágenes vienen de una URL externa (ui-avatars).
+         Si luego agregas imágenes locales (.jpg), puedes usar <Image /> de "astro:assets"
+         importándolas directamente en el componente o data. -->
+    <img src={image} alt={name} loading="lazy" width="90" height="90" />
+  </div>
+
+  <span class="member-role">{role}</span>
+  <p class="member-name">{name}</p>
+
+  <div class="member-socials">
+    <a href={instagram} target="_blank" rel="noopener noreferrer">IG</a>
+    <!-- <a href={youtube} target="_blank" rel="noopener noreferrer">YT</a> -->
+  </div>
+</div>
+
+<style>
+.member-card {
+  background: var(--surface, #111111);
+  border: 1px solid var(--border, #262420);
+  padding: 2rem 1.8rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.member-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--gold, #c49a2a);
+  box-shadow: 0 10px 30px rgba(196, 154, 42, 0.15);
+  background: var(--surface2, #191919);
+}
+
+.member-image {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  overflow: hidden;
+  filter: grayscale(100%);
+  transition: 0.3s;
+  border: 2px solid transparent;
+}
+
+.member-card:hover .member-image {
+  filter: grayscale(0%);
+  border-color: var(--gold, #c49a2a);
+}
+
+.member-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.member-role {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold, #c49a2a);
+}
+
+.member-name {
+  font-family: var(--ff-display, 'Cormorant Garamond', serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.member-socials {
+  margin-top: 1.2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  border-top: 1px solid rgba(196, 154, 42, 0.1);
+  padding-top: 1rem;
+}
+
+.member-socials a {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--gold, #c49a2a);
+  text-decoration: none;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+  padding: 0.2rem 0.5rem;
+}
+
+.member-socials a:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.member-card:hover .member-socials {
+  border-top-color: rgba(196, 154, 42, 0.3);
+}
+
+/* Vocal principal destacado en grids con auto-fit */
+.featured {
+  grid-column: span 1; /* Puedes usar span 2 si el layout es más ancho */
+}
+</style>
