@@ -55,7 +55,7 @@ body.marketing-body img {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.2rem clamp(1.25rem, 5vw, 3rem);
+  padding: 0.1rem clamp(1.25rem, 5vw, 3rem);
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -69,26 +69,33 @@ body.marketing-body img {
 }
 
 .header-logo-img {
-  height: 36px;
+  height: 100px;
   width: auto;
-  max-width: 140px;
+  max-width: 200px;
   object-fit: contain;
+  filter: invert(35%) sepia(90%) saturate(379%) hue-rotate(7deg) brightness(98%) contrast(84%)
+          drop-shadow(0 0 20px rgba(255, 255, 255, 0.15)) 
+          drop-shadow(0 4px 24px rgba(0, 0, 0, 0.7));
   display: block;
 }
 
 @media (min-width: 640px) {
   .header-logo-img {
-    height: 42px;
-    max-width: 180px;
+    height: 100px;
+    max-width: 300px;
   }
 }
 
 /* Hero logo image (replaces h1 text) */
 .hero-logo-img {
   display: block;
-  width: min(480px, 80vw);
+  width: min(360px, 65vw);
   height: auto;
   object-fit: contain;
+  filter: brightness(0) invert(1) sepia(1) saturate(4) hue-rotate(350deg) brightness(1.1)
+          drop-shadow(0 0 20px rgba(255, 255, 255, 0.15)) 
+          drop-shadow(0 4px 24px rgba(0, 0, 0, 0.7));
+  opacity: 0.95;
 }
 
 .header-right {
@@ -387,12 +394,12 @@ body.marketing-body img {
 }
 
 .hero-eyebrow {
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--gold);
   font-weight: 500;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.1rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
