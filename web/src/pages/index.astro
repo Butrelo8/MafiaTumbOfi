@@ -21,6 +21,7 @@ const spotifyUrl   = 'https://open.spotify.com/intl-es/artist/3pc90hxACiSUahZmmf
 const tiktokUrl    = 'https://www.tiktok.com/@mafia_tumbada_oficial'
 const youtubeUrl   = 'https://www.youtube.com/@mafiatumbada'
 const instagramUrl = 'https://www.instagram.com/mafia_tumbada_oficial/'
+const facebookUrl = 'https://www.facebook.com/share/1Awj8bXU4T/?mibextid=wwXIfr'
 const applemusicUrl = 'https://music.apple.com/us/artist/mafia-tumbada/1777597386'
 ---
 
@@ -92,7 +93,7 @@ const applemusicUrl = 'https://music.apple.com/us/artist/mafia-tumbada/177759738
   <section class="section">
     <div class="container">
       <div class="bio-grid">
-        <div class="bio-sidebar">
+        <div class="bio-sidebar" data-aos="fade-up">
           <span class="section-label">Quiénes somos</span>
           <h2>El sonido de<br /> <em>Xalapa</em></h2>
           <div class="bio-tags">
@@ -104,7 +105,7 @@ const applemusicUrl = 'https://music.apple.com/us/artist/mafia-tumbada/177759738
           </div>
         </div>
 
-        <div class="bio-body">
+        <div class="bio-body" data-aos="fade-up">
           <p>
             La Mafia Tumbada es un grupo de Xalapa, Veracruz que lleva cuatro años construyendo su propio espacio
             dentro del regional mexicano contemporáneo. Con raíces en el corrido tumbado y el norteño, y sin perder el
@@ -181,6 +182,23 @@ const applemusicUrl = 'https://music.apple.com/us/artist/mafia-tumbada/177759738
           </span>
           <span class="social-name">Instagram</span>
           <span class="social-handle">@mafia_tumbada_oficial</span>
+        </a>
+
+<a
+          href={facebookUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="social-card"
+          aria-label="Facebook"
+        >
+          <span class="social-icon" aria-hidden="true">
+            <!-- Facebook -->
+            <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+              <path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/>
+            </svg>
+          </span>
+          <span class="social-name">Facebook</span>
+          <span class="social-handle">MafiaTumbada</span>
         </a>
 
         <a
@@ -334,28 +352,28 @@ const applemusicUrl = 'https://music.apple.com/us/artist/mafia-tumbada/177759738
       </p>
 
       <div class="shows-list">
-        <div class="show-item">
+        <div class="show-item" data-aos="fade-up">
           <span class="show-dot"></span>
           <div>
             <p class="show-name">La Bohemia</p>
             <p class="show-loc">Misantla, Veracruz</p>
           </div>
         </div>
-        <div class="show-item">
+        <div class="show-item" data-aos="fade-up">
           <span class="show-dot"></span>
           <div>
             <p class="show-name">San Benito</p>
             <p class="show-loc">Xalapa, Veracruz</p>
           </div>
         </div>
-        <div class="show-item">
+        <div class="show-item" data-aos="fade-up">
           <span class="show-dot"></span>
           <div>
             <p class="show-name">Jala la Jarra</p>
             <p class="show-loc">Xalapa, Veracruz</p>
           </div>
         </div>
-        <div class="show-item show-item--placeholder">
+        <div class="show-item show-item--placeholder" data-aos="fade-up">
           <span class="show-dot show-dot--muted"></span>
           <div>
             <p class="show-name show-name--muted">+ más fechas</p>
