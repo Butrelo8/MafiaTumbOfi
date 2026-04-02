@@ -21,11 +21,11 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 ---
 
 ### Marketing — Video hero + packages + conversion blocks
-**What:** On the public marketing site (`web/`, likely `index.astro` / `MarketingLayout`): embed or link a **video hero** (live performance); add **packages** section (e.g. Basic / Full / Premium); add **repertoire** section; **testimonials** block; **urgency** copy (e.g. limited weekend availability). Match existing marketing CSS and a11y patterns.
+**What:** On the public marketing site (`web/`, `MarketingLayout`): **video hero** (live performance) — shipped; still to add **packages** section (e.g. Basic / Full / Premium), **repertoire** section, **testimonials** block, **urgency** copy (e.g. limited weekend availability). Match existing marketing CSS and a11y patterns.
 **Why:** Increases conversion without new backend surface area.
-**Context:** Can ship as one vertical slice or split into sub-tasks; no dependency on budget DB work except for coherent CTA toward `/booking`.
-**Solution:** 
-**Done When:**
+**Context:** Can ship as one vertical slice or split into sub-tasks; no dependency on budget DB work except for coherent CTA toward `/booking`. Source footage can stay in repo root `herovid/HEROVIDLV.mov`; the site serves **`web/public/video/hero.mov`** (copy or symlink for deploy).
+**Solution:** **Video hero (done):** Markup in [`web/src/pages/index.astro`](web/src/pages/index.astro) — `<video class="hero-video">` (`/video/hero.mov`, muted autoplay, `playsinline`, `loop`, `aria-hidden`), `.hero-deco-line` for the gold accent. Styles in [`web/src/styles/marketing-press.css`](web/src/styles/marketing-press.css) — full-bleed video + `blur(2px) brightness(0.7)`, `.hero::after` linear scrim, z-index stack, `prefers-reduced-motion: reduce` hides video + `var(--bg)` fallback. Regression checks in [`web/src/lib/homepageHero.test.ts`](web/src/lib/homepageHero.test.ts). See [CHANGELOG.md](CHANGELOG.md) [Unreleased] for summary.
+**Done When:** Packages, repertoire, testimonials, and urgency blocks are on `/` with CTAs to `/booking` or `#booking`; a11y and marketing CSS consistency pass. (Video hero slice already meets its own bar: build + tests green.)
 **Effort:** M
 **Priority:** P1
 **Depends on:** None

@@ -36,9 +36,16 @@ app.use('*', cors({
 app.route('/api', routes)
 
 // ─── Health Check ─────────────────────────────────────
+const APP_VERSION = getAppVersion()
+const START_TIME = Date.now()
+
 app.use('/health', rateLimitHealth)
 app.get('/health', (c) =>
-  c.json({ status: 'ok', version: getAppVersion() }),
+  c.json({
+    status: 'ok',
+    version: APP_VERSION,
+    uptime: Math.floor((Date.now() - START_TIME) / 1000),
+  }, 200),
 )
 
 // ─── Error Handler ────────────────────────────────────

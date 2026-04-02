@@ -315,7 +315,7 @@ body.marketing-body img {
   font-size: 0.8rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.75);
   font-weight: 500;
 }
 

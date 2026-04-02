@@ -7,9 +7,9 @@ import MemberCard from '../components/MemberCard.astro'
 import { members } from '../data/members'
 import 'aos/dist/aos.css'
 
-const title = 'La Mafia Tumbada — Oficial'
+const title = 'Mafia Tumbada — Oficial'
 const description =
-  'Sitio oficial de La Mafia Tumbada. Bio, discografía, material de prensa y contacto para contrataciones. Corridos tumbados y regional mexicano desde Xalapa, Veracruz.'
+  'Sitio oficial de Mafia Tumbada. Bio, discografía, material de prensa y contacto para contrataciones. Corridos tumbados y regional mexicano desde Xalapa, Veracruz.'
 const canonicalUrl = homeCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)
 
 const photosUrl  = import.meta.env.PUBLIC_PRESS_PHOTOS_URL
@@ -50,7 +50,7 @@ const applemusicUrl = 'https://music.apple.com/us/artist/mafia-tumbada/177759738
     <div class="container hero-content">
       <p class="hero-eyebrow">Sitio Oficial</p>
       <h1 class="hero-title">
-        La Mafia<br />
+        Mafia<br />
         <em>Tumbada</em>
       </h1>
       <div class="hero-meta">
@@ -329,7 +329,7 @@ const applemusicUrl = 'https://music.apple.com/us/artist/mafia-tumbada/177759738
       <span class="section-label">En tarima</span>
       <h2 class="section-heading">Presentaciones</h2>
       <p class="shows-intro">
-        Desde los bares de Xalapa hasta plazas fuera del estado, La Mafia Tumbada ha construido su reputación tocando
+        Desde los bares de Xalapa hasta plazas fuera del estado, la Mafia Tumbada ha construido su reputación tocando
         en vivo. Cada fecha suma al historial de un grupo que trabaja en serio.
       </p>
 
@@ -465,9 +465,10 @@ const applemusicUrl = 'https://music.apple.com/us/artist/mafia-tumbada/177759738
   <!-- ─── FOOTER ────────────────────────────────────────────── -->
   <footer class="footer-bar">
     <div class="container">
-      <span class="footer-brand">La Mafia Tumbada</span>
+      <span class="footer-brand">Mafia Tumbada</span>
       <div class="footer-socials">
         <a href={spotifyUrl}   target="_blank" rel="noopener noreferrer" aria-label="Spotify">Spotify</a>
+        <a href={applemusicUrl}   target="_blank" rel="noopener noreferrer" aria-label="Apple Music">Apple Music</a>
         <a href={instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram">Instagram</a>
         <a href={tiktokUrl}    target="_blank" rel="noopener noreferrer" aria-label="TikTok">TikTok</a>
         <a href={youtubeUrl}   target="_blank" rel="noopener noreferrer" aria-label="YouTube">YouTube</a>
