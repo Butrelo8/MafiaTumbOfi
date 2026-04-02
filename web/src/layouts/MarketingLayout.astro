@@ -7,6 +7,7 @@ interface Props {
   title: string
   description: string
   canonicalUrl: string
+  hasHero?: boolean
 }
 
 const { title, description, canonicalUrl } = Astro.props
@@ -135,6 +136,19 @@ const applemusicUrl = 'https://music.apple.com/us/artist/mafia-tumbada/177759738
         hamburgerBtn?.setAttribute('aria-expanded', 'false');
         document.body.style.overflow = '';
       }
+
+      const header = document.getElementById('site-header');
+
+      function checkScroll() {
+        if (window.scrollY > 50) {
+          header?.classList.add('is-scrolled');
+        } else {
+          header?.classList.remove('is-scrolled');
+        }
+      }
+
+      window.addEventListener('scroll', checkScroll);
+      checkScroll();
 
       hamburgerBtn?.addEventListener('click', openMenu);
       closeBtn?.addEventListener('click', closeMenu);
