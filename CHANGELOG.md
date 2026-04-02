@@ -13,7 +13,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Admin (`web/src/pages/admin.astro`): Budget column with readable labels; sortable Budget and Created columns (client-side).
 - Admin (`web/src/pages/admin.astro`): Added `Est. Price` column; API computes `estimatedPriceRange` at read-time from `city`/`duration`/`attendees` (`src/lib/estimatedPriceRange.ts` + `src/routes/admin.ts`).
 
+### Changed
+- Marketing header redesign (`web/src/layouts/MarketingLayout.astro`, `web/src/styles/marketing-press.css`): header logo is `<img src="/icon/mafiatumbada.png">` inside the home link with `aria-label`; typographic “Mafia Tumbada” treatment (Cormorant Garamond, gold `#B8973A`); social icons (Instagram, TikTok, Facebook, X) and hamburger in gold; no visible Sign in/Sign up in the bar — auth and nav live in a fullscreen overlay (Inicio, Redes, Música, Integrantes, Press kit, Contrataciones; Admin when signed in); overlay closes on X, link click, or Escape. Fixed header bar uses semi-transparent black with backdrop blur; hover states (icon scale, close rotation, link gold) and smooth overlay fade.
+- Marketing homepage hero (`web/src/pages/index.astro`, `web/src/styles/marketing-press.css`): hero `<h1>` wraps the same logo image (SEO + `alt` for the name). CSS: `.header-logo-img` — 36px tall mobile, 42px at ≥640px, max-width 180px; `.hero-logo-img` — `min(480px, 80vw)`; `.hero-title` — spacing wrapper only (prior standalone title font sizing removed).
+
 ### Fixed
+- Vercel: Git **production branch** set to **`main`** so production deploys and custom domains track the intended default branch (resolves wrong-URL / stale-branch confusion when production pointed at a deleted or unused branch).
 - Root `package.json`: `db:migrate` now runs `migrate` / `scripts/run-migration.ts` so it applies SQL migrations to SQLite (same as Render). It previously ran `drizzle-kit up:sqlite`, which only upgrades Drizzle kit journal metadata — developers following README saw success but got no tables. Rare kit upgrades use `db:upgrade-kit-snapshots`.
 - Booking page (`web/src/pages/booking.astro`): form labels and radio labels use marketing theme `--text` instead of a light-theme fallback (`#1c1917`), so copy stays readable on the dark `MarketingLayout` background; input borders use `--border`.
 
