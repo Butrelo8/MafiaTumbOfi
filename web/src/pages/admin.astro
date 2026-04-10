@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro'
 import { formatBudgetLabel } from '../../../src/lib/bookingBudget'
+import { normalizePublicApiBaseUrl } from '../lib/publicApiUrl'
 import { sanitizeResendDetail } from '../lib/sanitizeResendDetail'
 
 const { isAuthenticated, redirectToSignIn, getToken } = Astro.locals.auth()
@@ -11,7 +12,7 @@ if (!isAuthenticated) {
 
 export const prerender = false
 
-const apiUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001'
+const apiUrl = normalizePublicApiBaseUrl(import.meta.env.PUBLIC_API_URL)
 const resendParam = Astro.url.searchParams.get('resend')
 let resendMessage: string | null = null
 let resendIsOk = false

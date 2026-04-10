@@ -1,5 +1,6 @@
 ---
 import MarketingLayout from '../layouts/MarketingLayout.astro'
+import { normalizePublicApiBaseUrl } from '../lib/publicApiUrl'
 import { bookingCanonical } from '../lib/publicSiteUrl'
 import {
   BOOKING_BUDGET_EMPTY_OPTION_LABEL,
@@ -7,7 +8,7 @@ import {
   BOOKING_BUDGET_OPTIONS,
 } from '../../../src/lib/bookingBudget'
 
-const apiUrl = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:3001'
+const apiUrl = normalizePublicApiBaseUrl(import.meta.env.PUBLIC_API_URL)
 const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
 const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)
 ---

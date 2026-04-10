@@ -3,13 +3,15 @@
  * Admin-only: fetches GET /api/admin/export/bookings and returns JSON download.
  * Use for debugging (e.g. verify production DB has expected submissions).
  */
+import { normalizePublicApiBaseUrl } from '../../lib/publicApiUrl'
+
 const { isAuthenticated, redirectToSignIn, getToken } = Astro.locals.auth()
 
 if (!isAuthenticated) {
   return redirectToSignIn({ returnBackUrl: '/admin/export-bookings' })
 }
 
-const apiUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001'
+const apiUrl = normalizePublicApiBaseUrl(import.meta.env.PUBLIC_API_URL)
 const token = await getToken()
 
 const response = await fetch(`${apiUrl}/api/admin/export/bookings`, {
