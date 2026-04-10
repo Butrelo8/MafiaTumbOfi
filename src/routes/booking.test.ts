@@ -264,7 +264,7 @@ describe('POST /api/booking', () => {
     expect(data.data?.confirmation).toBe('pending')
   })
 
-  test('returns 500 INTERNAL_ERROR when insert returns no row', async () => {
+  test('returns 500 BOOKING_PERSIST_FAILED when insert returns no row', async () => {
     mock.module('../db', () => ({
       db: {
         insert: () => ({
@@ -287,7 +287,35 @@ describe('POST /api/booking', () => {
     })
     expect(res.status).toBe(500)
     const data = await res.json()
-    expect(data.error?.code).toBe('INTERNAL_ERROR')
+    expect(data.error?.code).toBe('BOOKING_PERSIST_FAILED')
+  })
+
+  test('returns 500 BOOKING_PERSIST_FAILED when insert throws', async () => {
+    mock.module('../db', () => ({
+      db: {
+        insert: () => ({
+          values: () => ({
+            returning: async () => {
+              throw new Error('SQLITE_FULL')
+            },
+          }),
+        }),
+      },
+    }))
+    const { bookingRoutes: routesThrow } = await import('./booking')
+    const appThrow = new Hono().route('/api', routesThrow)
+    process.env.BOOKING_NOTIFICATION_EMAIL = 'band@example.com'
+    const res = await appThrow.request('/api/booking', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Z', email: 'z@z.com' }),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-forwarded-for': '10.99.0.2',
+      },
+    })
+    expect(res.status).toBe(500)
+    const data = await res.json()
+    expect(data.error?.code).toBe('BOOKING_PERSIST_FAILED')
   })
 
   test('returns 201 and persists extended booking fields when provided', async () => {

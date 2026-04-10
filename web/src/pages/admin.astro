@@ -1,5 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro'
+import { formatBudgetLabel } from '../../../src/lib/bookingBudget'
+import { sanitizeResendDetail } from '../lib/sanitizeResendDetail'
 
 const { isAuthenticated, redirectToSignIn, getToken } = Astro.locals.auth()
 
@@ -13,8 +15,9 @@ const apiUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001'
 const resendParam = Astro.url.searchParams.get('resend')
 let resendMessage: string | null = null
 let resendIsOk = false
-const resendDetailParam = Astro.url.searchParams.get('resendDetail')
-let resendDetail: string | null = resendDetailParam ?? null
+const resendDetail = sanitizeResendDetail(
+  Astro.url.searchParams.get('resendDetail'),
+)
 
 if (resendParam === 'ok') {
   resendIsOk = true
@@ -25,19 +28,6 @@ if (resendParam === 'ok') {
     : 'No se pudo reenviar la confirmación.'
 } else if (resendParam === 'invalid') {
   resendMessage = 'Solicitud inválida para reenviar confirmación.'
-}
-
-const BUDGET_LABELS: Record<string, string> = {
-  menos_15k: 'Hasta $15,000 MXN',
-  '15k_30k': '$15,000 – $30,000 MXN',
-  '30k_50k': '$30,000 – $50,000 MXN',
-  '50k_100k': '$50,000 – $100,000 MXN',
-  mas_100k: 'Más de $100,000 MXN',
-}
-
-function formatBudget(value: string | null | undefined): string {
-  if (value == null || value === '') return '-'
-  return BUDGET_LABELS[value] ?? value
 }
 
 let bookings: Array<{
@@ -55,10 +45,23 @@ let bookings: Array<{
   createdAt: number | Date
 }> = []
 let error: string | null = null
+const pageSize = 50
+const pageParam = Astro.url.searchParams.get('page')
+const pageNum = Math.max(
+  1,
+  Number.parseInt(pageParam ?? '1', 10) || 1,
+)
+const page = Number.isFinite(pageNum) ? pageNum : 1
+const offset = (page - 1) * pageSize
+let totalBookings = 0
+let hasMore = false
 
 try {
   const token = await getToken()
-  const response = await fetch(`${apiUrl}/api/admin/bookings`, {
+  const listUrl = new URL(`${apiUrl}/api/admin/bookings`)
+  listUrl.searchParams.set('limit', String(pageSize))
+  listUrl.searchParams.set('offset', String(offset))
+  const response = await fetch(listUrl.toString(), {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   })
 
@@ -79,6 +82,13 @@ try {
 
   const result = await response.json()
   bookings = result.data?.bookings ?? []
+  totalBookings = typeof result.data?.total === 'number' ? result.data.total : 0
+  hasMore = Boolean(result.data?.hasMore)
+
+  const maxPage = Math.max(1, Math.ceil(totalBookings / pageSize))
+  if (totalBookings > 0 && page > maxPage) {
+    return Astro.redirect(`/admin?page=${maxPage}`)
+  }
 } catch (e) {
   error = e instanceof Error ? e.message : String(e)
   console.error('Failed to fetch bookings:', e)
@@ -111,8 +121,14 @@ try {
       </div>
     )}
 
-    {!error && bookings.length === 0 && (
+    {!error && totalBookings === 0 && (
       <p>No bookings found.</p>
+    )}
+
+    {!error && totalBookings > 0 && (
+      <p class="admin-pagination-meta">
+        Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalBookings)} of {totalBookings}
+ </p>
     )}
 
     {!error && bookings.length > 0 && (
@@ -147,7 +163,7 @@ try {
                 <td>{booking.phone ?? '-'}</td>
                 <td>{booking.eventDate ?? '-'}</td>
                 <td data-cell="budget" data-budget={booking.budget ?? ''}>
-                  {formatBudget(booking.budget)}
+                  {formatBudgetLabel(booking.budget)}
                 </td>
                 <td>{booking.estimatedPriceRange ?? '-'}</td>
                 <td>
@@ -191,22 +207,34 @@ try {
         </table>
       </div>
     )}
+
+    {!error && totalBookings > pageSize && (
+      <nav class="admin-pagination" aria-label="Booking pages">
+        {page > 1 ? (
+          <a href={`/admin?page=${page - 1}`} class="pagination-link">Previous</a>
+        ) : (
+          <span class="pagination-disabled">Previous</span>
+        )}
+        <span class="pagination-page">Page {page} of {Math.ceil(totalBookings / pageSize)}</span>
+        {hasMore ? (
+          <a href={`/admin?page=${page + 1}`} class="pagination-link">Next</a>
+        ) : (
+          <span class="pagination-disabled">Next</span>
+        )}
+      </nav>
+    )}
   </div>
 
-  <script is:inline>
-    (function () {
+  <script>
+    import { BOOKING_BUDGET_SORT_RANK } from '../../../src/lib/bookingBudget'
+
+    const budgetRanks = BOOKING_BUDGET_SORT_RANK
+
+    ;(function () {
       const tbody = document.querySelector('.bookings-table tbody')
       if (!tbody) return
       const budgetTh = document.querySelector('.bookings-table th[data-sort="budget"]')
       const createdTh = document.querySelector('.bookings-table th[data-sort="created"]')
-      const budgetRanks = {
-        '': 0,
-        menos_15k: 1,
-        '15k_30k': 2,
-        '30k_50k': 3,
-        '50k_100k': 4,
-        mas_100k: 5,
-      }
       let activeKey = null
       let activeDir = 'asc'
 
@@ -266,6 +294,40 @@ try {
 
   .admin-actions {
     margin-bottom: 1.5rem;
+  }
+
+  .admin-pagination-meta {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    color: #52525b;
+  }
+
+  .admin-pagination {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .pagination-link {
+    font-size: 0.875rem;
+    color: var(--brand, #6366f1);
+    text-decoration: none;
+  }
+
+  .pagination-link:hover {
+    text-decoration: underline;
+  }
+
+  .pagination-disabled {
+    font-size: 0.875rem;
+    color: #a1a1aa;
+  }
+
+  .pagination-page {
+    font-size: 0.875rem;
+    color: #3f3f46;
   }
 
   .export-link {

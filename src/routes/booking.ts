@@ -13,6 +13,7 @@ import {
   logServerInfo,
   logServerWarning,
 } from '../lib/safeLog'
+import { BUDGET_LABELS, BOOKING_BUDGET_VALUES } from '../lib/bookingBudget'
 
 async function markBandEmailFailed(bookingId: number) {
   await db
@@ -21,23 +22,7 @@ async function markBandEmailFailed(bookingId: number) {
     .where(eq(bookings.id, bookingId))
 }
 
-const bookingBudgetSchema = z.enum([
-  'menos_15k',
-  '15k_30k',
-  '30k_50k',
-  '50k_100k',
-  'mas_100k',
-])
-
-type BookingBudget = z.infer<typeof bookingBudgetSchema>
-
-const BUDGET_LABELS: Record<BookingBudget, string> = {
-  menos_15k: 'Hasta $15,000 MXN',
-  '15k_30k': '$15,000 – $30,000 MXN',
-  '30k_50k': '$30,000 – $50,000 MXN',
-  '50k_100k': '$50,000 – $100,000 MXN',
-  mas_100k: 'Más de $100,000 MXN',
-}
+const bookingBudgetSchema = z.enum(BOOKING_BUDGET_VALUES)
 
 const bookingSchema = z.object({
   name: z.string().min(1).max(200),
@@ -112,31 +97,48 @@ bookingRoutes.post('/booking', async (c) => {
     return errorResponse(c, 500, 'CONFIG_ERROR', 'Booking email is not configured')
   }
 
-  const insertedRows = await db
-    .insert(bookings)
-    .values({
-      name,
-      email,
-      phone: phone ?? null,
-      eventDate: eventDate ?? null,
-      city: city ?? null,
-      eventType: eventType ?? null,
-      duration: duration ?? null,
-      showType: showType ?? null,
-      attendees: attendees ?? null,
-      venueSound: venueSound ?? null,
-      budget: budget ?? null,
-      message: message ?? null,
-      status: 'pending',
-      confirmationLastError: null,
-      confirmationAttempts: 0,
-    })
-    .returning({ id: bookings.id })
+  let inserted: { id: number }
+  try {
+    const insertedRows = await db
+      .insert(bookings)
+      .values({
+        name,
+        email,
+        phone: phone ?? null,
+        eventDate: eventDate ?? null,
+        city: city ?? null,
+        eventType: eventType ?? null,
+        duration: duration ?? null,
+        showType: showType ?? null,
+        attendees: attendees ?? null,
+        venueSound: venueSound ?? null,
+        budget: budget ?? null,
+        message: message ?? null,
+        status: 'pending',
+        confirmationLastError: null,
+        confirmationAttempts: 0,
+      })
+      .returning({ id: bookings.id })
 
-  const inserted = insertedRows[0]
-  if (!inserted) {
-    logServerError('booking', 'INSERT_RETURN_EMPTY', new Error('insert returned no row'))
-    return errorResponse(c, 500, 'INTERNAL_ERROR', 'Could not create booking')
+    const row = insertedRows[0]
+    if (!row) {
+      logServerError('booking', 'INSERT_RETURN_EMPTY', new Error('insert returned no row'))
+      return errorResponse(
+        c,
+        500,
+        'BOOKING_PERSIST_FAILED',
+        'No se pudo guardar la solicitud.',
+      )
+    }
+    inserted = row
+  } catch (err) {
+    logServerError('booking', 'BOOKING_INSERT_FAILED', err)
+    return errorResponse(
+      c,
+      500,
+      'BOOKING_PERSIST_FAILED',
+      'No se pudo guardar la solicitud.',
+    )
   }
 
   logServerInfo('booking', 'REQUEST_RECEIVED', {

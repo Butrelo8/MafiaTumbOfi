@@ -1,6 +1,11 @@
 ---
 import MarketingLayout from '../layouts/MarketingLayout.astro'
 import { bookingCanonical } from '../lib/publicSiteUrl'
+import {
+  BOOKING_BUDGET_EMPTY_OPTION_LABEL,
+  BOOKING_BUDGET_HINTS_WITH_EMPTY,
+  BOOKING_BUDGET_OPTIONS,
+} from '../../../src/lib/bookingBudget'
 
 const apiUrl = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:3001'
 const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
@@ -147,12 +152,10 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
                 class="field-input field-select"
                 aria-describedby="budget-hint"
               >
-                <option value="">Lo vemos después — sin problema</option>
-                <option value="menos_15k">Hasta $15,000 MXN</option>
-                <option value="15k_30k">$15,000 – $30,000 MXN</option>
-                <option value="30k_50k">$30,000 – $50,000 MXN</option>
-                <option value="50k_100k">$50,000 – $100,000 MXN</option>
-                <option value="mas_100k">Más de $100,000 MXN</option>
+                <option value="">{BOOKING_BUDGET_EMPTY_OPTION_LABEL}</option>
+                {BOOKING_BUDGET_OPTIONS.map(({ value, label }) => (
+                  <option value={value}>{label}</option>
+                ))}
               </select>
               <p
                 id="budget-context"
@@ -475,31 +478,17 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
   .hidden { display: none !important; }
 </style>
 
-<script define:vars={{ apiUrl }}>
+<script define:vars={{ apiUrl, budgetHints: BOOKING_BUDGET_HINTS_WITH_EMPTY }}>
   const form    = document.getElementById('booking-form')
   const status  = document.getElementById('form-status')
   const btn     = document.getElementById('submit-btn')
   const budgetSelect = document.getElementById('budget')
   const budgetContext = document.getElementById('budget-context')
 
-  const BUDGET_HINTS = {
-    '': '',
-    menos_15k:
-      'Rango típico para eventos más íntimos o acústicos — armamos una propuesta a tu medida.',
-    '15k_30k':
-      'Buen punto de partida para cotizar con detalle sin apuros.',
-    '30k_50k':
-      'Aquí suele entrar show completo con logística base en la zona.',
-    '50k_100k':
-      'Hay margen para producción, transporte y extras según tu fecha.',
-    mas_100k:
-      'Gracias por la confianza — podemos coordinar una llamada para afinar todo.',
-  }
-
   function syncBudgetHint() {
     if (!budgetSelect || !budgetContext) return
     const key = budgetSelect.value
-    const line = BUDGET_HINTS[key] || ''
+    const line = budgetHints[key] || ''
     if (line) {
       budgetContext.textContent = line
       budgetContext.classList.remove('budget-context--inactive')

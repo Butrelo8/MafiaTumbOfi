@@ -45,6 +45,8 @@ If **neither** `X-Forwarded-Proto` nor `Forwarded: proto=` is present, the app *
 
 **`GET /health`** is limited to **120 requests per minute** per client id (derived from the same forwarded-IP logic). N8N or uptime checks should poll at a sane interval.
 
+**Local dev (direct Bun, no proxy):** `X-Forwarded-For` / `X-Real-IP` are often missing, so rate limiting uses the shared key `unknown` for all traffic. Expect one bucket for the whole process; heavy parallel tests can hit limits faster than in production behind Render.
+
 ---
 
 ## 2. Deploy Frontend on Vercel
@@ -101,6 +103,7 @@ If **neither** `X-Forwarded-Proto` nor `Forwarded: proto=` is present, the app *
 - **Migrations:** They run at API startup. If you add new migrations, push and redeploy; the new instance will run `bun run migrate` then start.
 - **SQLite on Render:** The disk is only available at **runtime**. Do not run migrations in a pre-deploy or build step; the start command handles them.
 - **"no such table: users" / admin 500:** The DB was not migrated. In Render → your API service → **Settings**: set **Start Command** to exactly `bun run migrate && bun run check-db && bun run start`, set **Environment** → **DB_PATH** to `/data/sqlite.db`. Then **Manual Deploy** → redeploy. Check **Logs** for `[migrate] DB_PATH:` to confirm the path.
+- **check-db:** Startup fails fast if either `users` or `bookings` is missing from the DB (after migrate).
 - **Vercel "invalid runtime: render (nodejs18.x)":** The Astro preset runs `astro build` only, so the patch never runs. **Fix:** In Vercel → Project → **Settings** → **Build & Development** → **Build Command**, set to **`bun run build`** (not the default). Then redeploy. The `build` script in `web/package.json` runs the patch after `astro build`.
 - **Health check:** Use the **Render** API URL for `/health`, e.g. `https://mto-api-xxxx.onrender.com/health`. The **Vercel** app (Astro) has no `/health` route and will return 404 for that path.
 
@@ -129,7 +132,12 @@ With SSH enabled you can copy the file to your machine, then open it locally (e.
 
 ### Option C: Export data via your API (any plan)
 
-The app exposes a **Clerk-protected**, read-only admin endpoint `GET /api/admin/export/bookings` that returns bookings as JSON inside the standard success envelope `{ "data": { "exportedAt", "total", "last24hCount", "bookings" } }` (same shape as other API successes; used from `/admin/export-bookings` on the frontend). The route is **default-deny**: it returns **403** unless **`ALLOW_ADMIN_BOOKING_EXPORT=true`** on the API **or** the API runs with **`NODE_ENV=development`** (local). On real hosts set **`NODE_ENV=production`** and enable export only via **`ALLOW_ADMIN_BOOKING_EXPORT=true`** for short debugging windows. Successful exports emit a structured **audit** line to the API logs (`action: admin_booking_export`, `userId`, `sessionId`, `timestamp`). No SSH required; works on free tier.
+The app exposes **Clerk-protected**, read-only admin endpoints:
+
+- **`GET /api/admin/bookings`** — paginated list: query params **`limit`** (default 50, max 200) and **`offset`** (default 0). Response **`data`** includes **`bookings`**, **`total`** (full table row count), **`limit`**, **`offset`**, **`hasMore`**. Negative **`offset`** returns **`400`** (`VALIDATION_ERROR`).
+- **`GET /api/admin/export/bookings`** — JSON export inside **`{ "data": { "exportedAt", "total", "last24hCount", "bookings", "returnedCount", "truncated", … } }`**. **`total`** is the full booking count in the database; the **`bookings`** array is capped per response (default **10000** rows, override with **`ADMIN_EXPORT_MAX_ROWS`**, hard max **50000**). When truncated, **`data`** also includes **`totalInDb`** and **`warning`**. **`last24hCount`** is computed in SQL (not by loading all rows). Used from **`/admin/export-bookings`** on the frontend.
+
+Both routes are **default-deny** for export in production: **`GET /api/admin/export/bookings`** returns **403** unless **`ALLOW_ADMIN_BOOKING_EXPORT=true`** on the API **or** the API runs with **`NODE_ENV=development`** (local). On real hosts set **`NODE_ENV=production`** and enable export only via **`ALLOW_ADMIN_BOOKING_EXPORT=true`** for short debugging windows. Successful exports emit a structured **audit** line to the API logs (`action: admin_booking_export`, `userId`, `sessionId`, `timestamp`). No SSH required; works on free tier.
 
 ### Summary
 

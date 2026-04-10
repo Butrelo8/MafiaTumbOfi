@@ -13,7 +13,7 @@ const mockBookings = [
     eventDate: '2025-06-01',
     message: 'Hello',
     status: 'pending',
-    createdAt: new Date('2025-03-15'),
+    createdAt: new Date('2020-01-15'),
   },
 ]
 
@@ -29,14 +29,44 @@ const mockAdminUser = {
 
 mock.module('../db', () => ({
   db: {
-    select: () => ({
-      from: () => ({
-        orderBy: () => Promise.resolve(mockBookings),
-        where: () => ({
-          get: () => Promise.resolve(mockAdminUser),
+    select: (fields?: unknown) => {
+      const isCount =
+        fields != null &&
+        typeof fields === 'object' &&
+        !Array.isArray(fields) &&
+        'total' in (fields as Record<string, unknown>)
+      if (isCount) {
+        const fromResult = Object.assign(
+          Promise.resolve([{ total: mockBookings.length }]),
+          {
+            where: () => Promise.resolve([{ total: 0 }]),
+          },
+        )
+        return {
+          from: () => fromResult,
+        }
+      }
+      return {
+        from: () => ({
+          orderBy: () => ({
+            limit: (lim: number) => {
+              const sorted = [...mockBookings].sort(
+                (a, b) =>
+                  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+              )
+              const page = Promise.resolve(sorted.slice(0, lim))
+              return Object.assign(page, {
+                offset: (off: number) =>
+                  Promise.resolve(sorted.slice(off, off + lim)),
+              })
+            },
+          }),
+          where: () => ({
+            get: () => Promise.resolve(mockAdminUser),
+          }),
         }),
-      }),
-    }),
+      }
+    },
   },
 }))
 
@@ -77,6 +107,9 @@ describe('Admin Routes', () => {
     expect(body).toHaveProperty('data')
     expect(body.data).toHaveProperty('bookings')
     expect(body.data).toHaveProperty('total', 1)
+    expect(body.data).toHaveProperty('limit', 50)
+    expect(body.data).toHaveProperty('offset', 0)
+    expect(body.data).toHaveProperty('hasMore', false)
     expect(Array.isArray(body.data.bookings)).toBe(true)
     expect(body.data.bookings).toHaveLength(1)
     expect(body.data.bookings[0].name).toBe('Test Band')
@@ -98,6 +131,8 @@ describe('Admin Routes', () => {
       expect(body.data).toHaveProperty('total', 1)
       expect(body.data).toHaveProperty('last24hCount')
       expect(typeof body.data.last24hCount).toBe('number')
+      expect(body.data).toHaveProperty('returnedCount', 1)
+      expect(body.data).toHaveProperty('truncated', false)
       expect(body.data).toHaveProperty('bookings')
       expect(Array.isArray(body.data.bookings)).toBe(true)
       expect(body.data.bookings).toHaveLength(1)

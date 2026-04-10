@@ -5,6 +5,34 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-04-10 — CORS allowlist: normalize `PRODUCTION_URL` + www/apex pair
+
+**Context:** The booking page calls the API cross-origin; Hono `cors` only reflects `Access-Control-Allow-Origin` when the request `Origin` is in the allowlist. `https://mafiatumbada.com` and `https://www.mafiatumbada.com` are different origins; a trailing slash in `PRODUCTION_URL` also fails string equality vs the browser `Origin` header.
+**Decision:** Build the allowlist with `expandCorsAllowedOrigins()` in `src/lib/corsOrigins.ts`: each configured URL is normalized via `new URL(...).origin`, then the paired hostname is added (`www.` ↔ apex) except for `localhost` and IPv4 literals. Incoming origins are matched after `normalizeRequestOrigin()`.
+**Alternatives considered:** Document-only (“set both URLs in env” or “pick one hostname only”). Separate `PRODUCTION_URL_WWW` env.
+**Why not the others:** One env value should work for the common Cloudflare/Vercel setup where both hostnames redirect or serve the same app; fewer manual misconfigurations.
+
+## 2026-04-10 — Admin bookings: offset pagination + capped export
+
+**Context:** `GET /api/admin/bookings` and export loaded all rows; large SQLite tables risk memory and slow TTFB. Export computed **`last24hCount`** by filtering the full in-memory list.
+**Decision:** List route uses **`limit`/`offset`** (defaults 50 / 0, max limit 200), separate **`count(*)`** for **`data.total`**, and **`hasMore`**. Export uses two SQL **`count`** queries (all rows + rows with **`createdAt >= now - 24h`**) and a **`select`** ordered by **`createdAt` desc** with **`limit ADMIN_EXPORT_MAX_ROWS`** (default 10000, parsed in **`getAdminExportMaxRows`**, hard cap 50000). When **`total > cap`**, response includes **`truncated`**, **`returnedCount`**, **`totalInDb`**, **`warning`**. Admin UI: fixed page size 50 with **`?page=`** SSR links.
+**Alternatives considered:** Cursor-based pagination (deferred until offset proves insufficient). Streaming NDJSON export (deferred; cap + env is enough for admin debugging).
+**Why not the others:** Offset matches the stated TODO and is simplest for an internal admin table at ~1k–10k rows.
+
+## 2026-04-10 — Booking budget tiers in `src/lib/bookingBudget.ts` (API + Astro)
+
+**Context:** Budget enum strings, human-readable labels, booking-page hint copy, and admin sort ranks lived in three places (`src/routes/booking.ts`, `web/src/pages/booking.astro`, `web/src/pages/admin.astro`), risking drift when adding or renaming a tier.
+**Decision:** Centralize in `src/lib/bookingBudget.ts` with **no Zod import** so the marketing/admin app can import the module without adding `zod` to `web/package.json`. The API uses `z.enum(BOOKING_BUDGET_VALUES)` in `src/routes/booking.ts`. Astro pages import via relative path `../../../src/lib/bookingBudget`; admin client sort uses a bundled `<script>` (not `is:inline`) to read `BOOKING_BUDGET_SORT_RANK`.
+**Alternatives considered:** Yarn/bun workspace `packages/shared`; duplicate constants in web with a codegen step.
+**Why not the others:** A single root-level module matches the current two-folder layout and keeps deploys simple.
+
+## 2026-04-10 — `users.updated_at` auto-refresh + `confirmation_attempts` default 0
+
+**Context:** `users.updated_at` used only `$defaultFn`, so it never changed on `UPDATE`. `bookings.confirmation_attempts` had Drizzle `default(1)` while `POST /api/booking` always inserted `0` before the first send attempt — a future insert omitting the field would disagree with app semantics. SQLite cannot `ALTER COLUMN` default in place.
+**Decision:** Add Drizzle `.$onUpdateFn(() => new Date())` on `users.updated_at` (keep `$defaultFn` for inserts). Set `confirmation_attempts` default to `0` in `src/db/schema.ts` and ship `drizzle/0006_booking_confirmation_attempts_default_zero.sql` (rebuild `bookings`, `INSERT…SELECT`, drop old table, rename). Note: SQLite `integer` + `mode: 'timestamp'` stores **epoch seconds**, so two updates in the same wall-clock second write the same `updated_at`.
+**Alternatives considered:** Drop `updated_at` until user updates exist (rejected: column is useful for future admin/audit). Rely on schema-only default change without SQL migration (rejected: existing DBs would keep SQLite DEFAULT1 for raw SQL inserts).
+**Why not the others:** ORM-level `onUpdate` matches how Drizzle is meant to maintain touch timestamps; rebuilding `bookings` is the portable SQLite way to change a column default.
+
 ## 2026-03-25 — `db:migrate` must apply SQL, not drizzle-kit `up:sqlite`
 
 **Context:** `db:migrate` was wired to `drizzle-kit up:sqlite`. In drizzle-kit 0.20.x, `up` upgrades internal migration snapshots/journal metadata; it does not execute pending SQL against the database. README quickstart told developers to run `bun db:migrate` for “Run pending migrations,” while production and deploy use `bun run migrate` (`scripts/run-migration.ts`), which applies `drizzle/*.sql` in order.
@@ -15,7 +43,7 @@ Updated automatically by the AI agent when decisions are made.
 ## 2026-03-25 — Booking budget: optional MXN range enum
 
 **Context:** Promoters need a qualification signal without free-form noise; numeric free entry invites garbage. A **required** budget felt high-pressure; some leads prefer to discuss numbers after first contact.
-**Decision:** Add nullable `budget` on `bookings` (existing rows stay null). `POST /api/booking` accepts optional `budget` — one of `menos_15k`, `15k_30k`, `30k_50k`, `50k_100k`, `mas_100k` (Zod `z.enum` + preprocess so `''`/`undefined` omit); DB stores `null` when omitted. Band email includes a readable budget line only when present (`BUDGET_LABELS` in `src/routes/booking.ts`). Public form: non-required `<select>` after date/city/event type, placeholder “Lo vemos después”, helper copy, subtle contextual hints on change. Admin: same labels + sort (`data-budget` / `data-timestamp`). Migration `drizzle/0005_booking_budget_field.sql`; apply via existing `bun run migrate`.
+**Decision:** Add nullable `budget` on `bookings` (existing rows stay null). `POST /api/booking` accepts optional `budget` — one of `menos_15k`, `15k_30k`, `30k_50k`, `50k_100k`, `mas_100k` (Zod `z.enum` + preprocess so `''`/`undefined` omit); DB stores `null` when omitted. Band email includes a readable budget line only when present (labels from `src/lib/bookingBudget.ts`, shared with Astro). Public form: non-required `<select>` after date/city/event type, placeholder “Lo vemos después”, helper copy, subtle contextual hints on change. Admin: same labels + sort (`data-budget` / `data-timestamp`). Migration `drizzle/0005_booking_budget_field.sql`; apply via existing `bun run migrate`.
 **Alternatives considered:** Integer MXN column; min/max two-column range; required enum (rejected for UX pressure).
 **Why not the others:** Enum ranges keep validation and triage simple when provided; optional preserves conversion when the lead is not ready to share a number.
 

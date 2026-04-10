@@ -80,6 +80,30 @@ describe('getOrCreateUser', () => {
     expect(row.isAdmin).toBe(false)
   })
 
+  test('updatedAt advances on update when column is omitted from set()', async () => {
+    const row = await getOrCreateUser('clerk_update_ts', { db: testDb })
+    const createdMs = row.createdAt?.getTime() ?? 0
+    const updatedBeforeMs = row.updatedAt?.getTime() ?? 0
+    expect(updatedBeforeMs).toBeGreaterThanOrEqual(createdMs)
+
+    // SQLite `integer` + `mode: 'timestamp'` stores epoch seconds; same wall-clock second => same value.
+    await new Promise((r) => setTimeout(r, 1100))
+
+    await testDb
+      .update(users)
+      .set({ name: 'Renamed' })
+      .where(eq(users.clerkId, 'clerk_update_ts'))
+
+    const [after] = await testDb
+      .select()
+      .from(users)
+      .where(eq(users.clerkId, 'clerk_update_ts'))
+
+    expect(after?.name).toBe('Renamed')
+    expect(after?.updatedAt?.getTime() ?? 0).toBeGreaterThan(updatedBeforeMs)
+    expect(after?.createdAt?.getTime()).toBe(createdMs)
+  })
+
   test('concurrent first signups leave exactly one admin', async () => {
     const [a, b] = await Promise.all([
       getOrCreateUser('clerk_parallel_a', { db: testDb }),
