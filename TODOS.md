@@ -8,6 +8,114 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ## Open
 
+### Code review — Stripe: remove dead code until webhook ships
+**What:** If `POST /api/webhooks/stripe` is not imminent: remove `stripe` from root `package.json`, delete or stub `src/lib/stripe.ts`, and fold required helpers back in when **Payments — Implement Stripe webhook handler** is done. If webhook is next: implement minimal route instead of removal.
+**Why:** Unused dependency and helpers confuse reviewers and security scanners.
+**Context:** Code review 2026-04-10; aligns with existing Payments + Stripe test todos.
+**Solution:** 
+**Done When:** No orphaned `getStripe` / `verifyWebhookSignature` without a caller, or webhook route exists.
+**Effort:** S
+**Priority:** P3
+**Depends on:** Coordination with **Payments — Implement Stripe webhook handler**
+
+---
+
+### Code review — Resend client test hook (optional)
+**What:** Add `setResendForTesting` (or inject `getResend` dependency) mirroring `setClerkClientForTesting` so booking tests avoid brittle `import` mocks.
+**Why:** Cleaner integration tests for email paths.
+**Context:** Code review 2026-04-10.
+**Solution:** 
+**Done When:** At least one booking test uses the hook; production path unchanged.
+**Effort:** S
+**Priority:** P4
+**Depends on:** None
+
+---
+
+### Code review — Web package: version, `preview`, health endpoints
+**What:** (1) Align `web/package.json` version with release policy (match root semver or document why they differ). (2) Change `web/package.json` `preview` script from `astro dev` to `astro preview` after build. (3) Replace hardcoded `0.4.0` in `web/src/pages/health.ts` and `web/src/pages/api/health.ts` with read from `web/package.json` or `import.meta.env` / build-time inject.
+**Why:** Ops and uptime checks show wrong version; `preview` misleads developers.
+**Context:** Code review 2026-04-10.
+**Solution:** 
+**Done When:** Local `bun run build && bun run preview` serves built site; health JSON version matches package.
+**Effort:** S
+**Priority:** P3
+**Depends on:** None
+
+---
+
+### Code review — Remove or document `/api/auth/*` 501 stubs
+**What:** Either delete `src/routes/auth.ts` routes (and mount) if Clerk is the only auth surface, updating tests and any clients; or keep routes with a clear README/TODOS note and skip rate limiting until implemented. Prefer removal to reduce attack surface and wasted rate-limit budget.
+**Why:** Endpoints return 501 but still consume `rateLimitAuth` quota.
+**Context:** Code review 2026-04-10.
+**Solution:** 
+**Done When:** No unexplained 501 auth routes, or they are explicitly reserved and documented.
+**Effort:** S
+**Priority:** P3
+**Depends on:** None
+
+---
+
+### Code review — CI: run tests on push/PR
+**What:** Add `.github/workflows/ci.yml` (or extend repo workflows): install Bun, run `bun test` at repo root; optionally `cd web && bun test` for `*.test.ts` under `web/`.
+**Why:** Only **Keep Render Alive** workflow exists today; regressions ship without a gate.
+**Context:** Code review 2026-04-10.
+**Solution:** 
+**Done When:** Failing test fails CI; branch protection can require workflow (optional).
+**Effort:** S
+**Priority:** P2
+**Depends on:** None
+
+---
+
+### Code review — Lint/format baseline
+**What:** Add Biome (or ESLint + Prettier) with minimal rules, `bun run lint` / `bun run format` scripts; fix or grandfather existing violations in a single pass to avoid endless churn.
+**Why:** No automated style gate today; drift grows with contributors.
+**Context:** Code review 2026-04-10.
+**Solution:** 
+**Done When:** CI or local script runs clean on intended scope; documented in README.
+**Effort:** M
+**Priority:** P3
+**Depends on:** None
+
+---
+
+### Code review — Centralize marketing social URLs
+**What:** Move repeated Spotify, Instagram, TikTok, etc. URLs from `MarketingLayout.astro` and `index.astro` into e.g. `web/src/data/socials.ts`; import in both.
+**Why:** One edit when a link changes.
+**Context:** Code review 2026-04-10.
+**Solution:** 
+**Done When:** No duplicated long URLs across those files.
+**Effort:** S
+**Priority:** P4
+**Depends on:** None
+
+---
+
+### Code review — Homepage Apple Music icon (nested `<svg>`)
+**What:** In `web/src/pages/index.astro`, replace nested `<svg>` inside `<svg>` for Apple Music with a single valid SVG; align `aria-hidden` / `aria-label` with other social cards.
+**Why:** Odd DOM; outer `viewBox` ineffective; a11y inconsistent.
+**Context:** Code review 2026-04-10.
+**Solution:** 
+**Done When:** Markup validates; visual unchanged or improved.
+**Effort:** S
+**Priority:** P4
+**Depends on:** None
+
+---
+
+### Code review — DEPLOY note: Render Node image + Bun
+**What:** One short paragraph in `DEPLOY.md` (or comment in `render.yaml`): production assumes Bun is available on Render’s Node runtime — re-verify after platform upgrades before deploying.
+**Why:** Base image change could break `bun run` startCommand.
+**Context:** Code review 2026-04-10.
+**Solution:** 
+**Done When:** Operators have a checklist line for major Render upgrades.
+**Effort:** S
+**Priority:** P4
+**Depends on:** None
+
+---
+
 ### Product roadmap — Lead generation & booking (prioritized slice)
 **What:** Execution order for turning the public site into a lead funnel + light CRM: budget capture, marketing blocks, post-submit UX, admin triage, then scoring.
 **Why:** Aligns product work with fastest ROI; extends the existing `bookings` table and booking API rather than replacing them with a minimal greenfield schema.
@@ -243,6 +351,49 @@ deliverability to arbitrary addresses.
 ---
 
 ## Completed
+
+### Code review — Admin bookings: pagination or caps (2026-04-10)
+- **API:** `GET /api/admin/bookings` — query `limit` (default 50, max 200) + `offset` (default 0); `400` on negative offset; `data.total` = full row count; `data.limit`, `data.offset`, `data.hasMore`; same enrichment as before (`src/routes/admin.ts`). `GET /api/admin/export/bookings` — `data.total` = full DB count; `last24hCount` via SQL `count` + `gte(createdAt, …)`; rows capped by `ADMIN_EXPORT_MAX_ROWS` (default 10000, max 50000); when capped: `truncated`, `returnedCount`, `totalInDb`, `warning`.
+- **Lib:** `src/lib/adminBookingsQuery.ts` — `parseAdminBookingsListParams`, `getAdminExportMaxRows`; tests `src/lib/adminBookingsQuery.test.ts`.
+- **Web:** `web/src/pages/admin.astro` — page size 50, `?page=` SSR pagination + redirect if page out of range.
+- **Tests:** `src/routes/admin-bookings-pagination.test.ts` (SQLite :memory:); `src/routes/00-auth-protected.test.ts` mock updated for count + `limit`/`offset` chains.
+- **Docs:** `.env.example`, `DEPLOY.md` (Option C); `CHANGELOG.md` [Unreleased]; `DECISIONS.md`.
+
+### Code review — Booking insert: structured error handling (2026-04-10)
+- **API:** `src/routes/booking.ts` — `try/catch` around insert + `returning`; throw → `logServerError('booking', 'BOOKING_INSERT_FAILED', err)` + `500` / `BOOKING_PERSIST_FAILED` / Spanish user message; empty `returning` → `INSERT_RETURN_EMPTY` log + same public code.
+- **Tests:** `src/routes/booking.test.ts` — empty row + `returning` throw cases.
+- **Docs:** `CHANGELOG.md` [Unreleased].
+
+### Code review — Rate limiters: DRY factory + `getClientId` consistency (2026-04-10)
+- **Factory:** `src/middleware/rateLimitFactory.ts` — `createRateLimiter` (fixed-window `count` + `resetAt`, 5 min cleanup interval, `destroy()` for tests).
+- **Client id:** `src/middleware/getClientId.ts` — documented `unknown` single-bucket behavior for local dev; `rateLimit.ts` re-exports for `booking.ts` imports.
+- **Middleware:** `rateLimit.ts` (5/min booking), `rateLimitHealth.ts` (120/min), `rateLimitAuth.ts` (10 / 5 min); unchanged `errorResponse` / `RATE_LIMITED` shape.
+- **Tests:** `src/middleware/rateLimitFactory.test.ts`; `src/security.test.ts` rate limit cases pass.
+- **Docs:** `DEPLOY.md` local dev note; `CHANGELOG.md` [Unreleased].
+
+### Code review — Admin resend banner: harden `resendDetail` query param (2026-04-10)
+- **Lib:** `web/src/lib/sanitizeResendDetail.ts` — `sanitizeResendDetail` + `MAX_RESEND_DETAIL_LEN` (120); strips ASCII controls and `<>\"'\``; read-side only (`/admin` can be hit with arbitrary query strings).
+- **Page:** `web/src/pages/admin.astro` — uses sanitizer before building `resendMessage`; banner still plain `{resendMessage}` (Astro escaping unchanged). **No change** to `web/src/pages/admin/resend-confirmation.ts`.
+- **Tests:** `web/src/lib/sanitizeResendDetail.test.ts`.
+- **Docs:** `CHANGELOG.md` [Unreleased].
+
+### Code review — `check-db` must verify `bookings` table (2026-04-10)
+- **Script:** `scripts/check-db.ts` — `REQUIRED_TABLES` `users` + `bookings`; default `DB_PATH` still `join(import.meta.dir, '..', 'data', 'sqlite.db')`; aggregated error lists all missing tables; success log for deploy visibility.
+- **Lib:** `src/lib/findMissingSqliteTables.ts` — parameterized `sqlite_master` lookup.
+- **Tests:** `src/lib/findMissingSqliteTables.test.ts` (`:memory:` SQLite).
+- **Docs:** `DEPLOY.md` — `check-db` fails fast if `users` or `bookings` missing; `CHANGELOG.md` [Unreleased].
+
+### Code review — Single source for budget tiers (API + web) (2026-04-10)
+- **Module:** `src/lib/bookingBudget.ts` — `BOOKING_BUDGET_VALUES`, `BUDGET_LABELS`, `BUDGET_HINTS`, `BOOKING_BUDGET_OPTIONS`, `BOOKING_BUDGET_HINTS_WITH_EMPTY`, `BOOKING_BUDGET_SORT_RANK`, `formatBudgetLabel`, `isBookingBudget` (no Zod so `web/` can import).
+- **API:** `src/routes/booking.ts` — `z.enum(BOOKING_BUDGET_VALUES)` + shared `BUDGET_LABELS`.
+- **Web:** `web/src/pages/booking.astro` — options + `define:vars` hints from module; `web/src/pages/admin.astro` — `formatBudgetLabel` + bundled script imports `BOOKING_BUDGET_SORT_RANK`.
+- **Tests:** `src/lib/bookingBudget.test.ts`; `bun test` + `web` build green.
+
+### Code review — Schema & startup correctness (2026-04-10)
+- **DB:** `src/db/schema.ts` — `users.updated_at` uses `.$onUpdateFn(() => new Date())` with existing `.$defaultFn`; `bookings.confirmation_attempts` default **0** (was `1` in Drizzle + migration0003).
+- **Migration:** `drizzle/0006_booking_confirmation_attempts_default_zero.sql` — rebuild `bookings` so SQLite column default is `0` (copy all rows, drop, rename).
+- **Tests:** `src/lib/users.test.ts` — `updatedAt` advances after `update()` when wall clock crosses a new second (SQLite timestamp = epoch seconds).
+- **Docs:** `CHANGELOG.md` [Unreleased]. **Still open:** **API — DRY origins + `/users/me` success envelope** (unchanged by this slice).
 
 ### Booking — Budget field (optional enum) + admin budget/date sort (2026-03-25)
 - **DB:** `drizzle/0005_booking_budget_field.sql`; `bookings.budget` nullable text enum in `src/db/schema.ts` (`menos_15k` … `mas_100k`).

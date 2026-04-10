@@ -7,7 +7,9 @@ export const users = sqliteTable('users', {
   name: text('name'),
   isAdmin: integer('is_admin', { mode: 'boolean' }).notNull().default(false),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .$defaultFn(() => new Date())
+    .$onUpdateFn(() => new Date()),
 })
 
 export const bookings = sqliteTable('bookings', {
@@ -26,6 +28,6 @@ export const bookings = sqliteTable('bookings', {
   message: text('message'),
   status: text('status').notNull().default('pending'),
   confirmationLastError: text('confirmation_last_error'),
-  confirmationAttempts: integer('confirmation_attempts').notNull().default(1),
+  confirmationAttempts: integer('confirmation_attempts').notNull().default(0),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 })

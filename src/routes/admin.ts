@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { desc, eq } from 'drizzle-orm'
+import { count, desc, eq, gte } from 'drizzle-orm'
 import { authMiddleware } from '../middleware/auth'
 import { adminAuth } from '../middleware/adminAuth'
 import { errorResponse, successResponse } from '../lib/errors'
@@ -9,6 +9,10 @@ import { getResend } from '../lib/resend'
 import { isAdminBookingExportAllowed } from '../lib/adminBookingExport'
 import { logServerError, logServerErrorDetails } from '../lib/safeLog'
 import { estimatedPriceRange } from '../lib/estimatedPriceRange'
+import {
+  getAdminExportMaxRows,
+  parseAdminBookingsListParams,
+} from '../lib/adminBookingsQuery'
 
 export const adminRoutes = new Hono()
 
@@ -16,13 +20,27 @@ adminRoutes.use('*', authMiddleware)
 adminRoutes.use('*', adminAuth)
 
 adminRoutes.get('/bookings', async (c) => {
+  const parsed = parseAdminBookingsListParams({
+    limit: c.req.query('limit'),
+    offset: c.req.query('offset'),
+  })
+  if (!parsed.ok) {
+    return errorResponse(c, 400, 'VALIDATION_ERROR', parsed.message)
+  }
+  const { limit, offset } = parsed
+
   try {
-    const allBookings = await db
+    const [countRow] = await db.select({ total: count() }).from(bookings)
+    const total = countRow?.total ?? 0
+
+    const pageRows = await db
       .select()
       .from(bookings)
       .orderBy(desc(bookings.createdAt))
+      .limit(limit)
+      .offset(offset)
 
-    const enriched = allBookings.map((b) => ({
+    const enriched = pageRows.map((b) => ({
       ...b,
       estimatedPriceRange: estimatedPriceRange({
         city: b.city,
@@ -33,7 +51,10 @@ adminRoutes.get('/bookings', async (c) => {
 
     return successResponse(c, {
       bookings: enriched,
-      total: enriched.length,
+      total,
+      limit,
+      offset,
+      hasMore: offset + enriched.length < total,
     })
   } catch (error) {
     logServerError('admin', 'FETCH_BOOKINGS_FAILED', error)
@@ -138,12 +159,25 @@ adminRoutes.get('/export/bookings', async (c) => {
   }
 
   try {
-    const allBookings = await db
+    const exportCap = getAdminExportMaxRows()
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+
+    const [totalRow] = await db.select({ total: count() }).from(bookings)
+    const totalInDb = totalRow?.total ?? 0
+
+    const [last24Row] = await db
+      .select({ total: count() })
+      .from(bookings)
+      .where(gte(bookings.createdAt, oneDayAgo))
+    const last24hCount = last24Row?.total ?? 0
+
+    const pageRows = await db
       .select()
       .from(bookings)
       .orderBy(desc(bookings.createdAt))
+      .limit(exportCap)
 
-    const enriched = allBookings.map((b) => ({
+    const enriched = pageRows.map((b) => ({
       ...b,
       estimatedPriceRange: estimatedPriceRange({
         city: b.city,
@@ -152,8 +186,8 @@ adminRoutes.get('/export/bookings', async (c) => {
       }),
     }))
 
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
-    const last24h = enriched.filter((b) => b.createdAt && b.createdAt >= oneDayAgo)
+    const truncated = totalInDb > exportCap
+    const returnedCount = enriched.length
 
     console.log(
       JSON.stringify({
@@ -167,9 +201,17 @@ adminRoutes.get('/export/bookings', async (c) => {
 
     return successResponse(c, {
       exportedAt: new Date().toISOString(),
-      total: enriched.length,
-      last24hCount: last24h.length,
+      total: totalInDb,
+      last24hCount,
       bookings: enriched,
+      returnedCount,
+      truncated,
+      ...(truncated
+        ? {
+            totalInDb,
+            warning: `Export includes at most ${exportCap} rows (${totalInDb} in database). Set ADMIN_EXPORT_MAX_ROWS to raise the cap (see .env.example).`,
+          }
+        : {}),
     })
   } catch (error) {
     logServerError('admin', 'EXPORT_BOOKINGS_FAILED', error)

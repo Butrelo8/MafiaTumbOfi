@@ -6,18 +6,21 @@ import { enforceHttps } from './middleware/https'
 import { rateLimitHealth } from './middleware/rateLimitHealth'
 import { securityHeaders } from './middleware/security'
 import { errorHandler } from './middleware/error'
+import { expandCorsAllowedOrigins, normalizeRequestOrigin } from './lib/corsOrigins'
 import { getAppVersion } from './lib/appVersion'
 import { routes } from './routes'
 
 const app = new Hono()
 
-const allowedOrigins = [
-  'http://localhost:4321',
-  'http://localhost:4322',
-  process.env.FRONTEND_URL,
-  process.env.STAGING_URL,
-  process.env.PRODUCTION_URL,
-].filter(Boolean) as string[]
+const allowedOrigins = expandCorsAllowedOrigins(
+  [
+    'http://localhost:4321',
+    'http://localhost:4322',
+    process.env.FRONTEND_URL,
+    process.env.STAGING_URL,
+    process.env.PRODUCTION_URL,
+  ].filter((x): x is string => Boolean(x)),
+)
 
 // ─── Global Middleware ────────────────────────────────
 app.use('*', enforceHttps)
@@ -26,7 +29,9 @@ app.use('*', securityHeaders)
 app.use('*', bodyLimit)
 app.use('*', cors({
   origin: (origin) => {
-    if (!origin || allowedOrigins.includes(origin)) return origin
+    if (!origin) return origin
+    const key = normalizeRequestOrigin(origin)
+    if (allowedOrigins.includes(key)) return origin
     return undefined
   },
   credentials: true,

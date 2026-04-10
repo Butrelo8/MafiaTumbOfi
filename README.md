@@ -44,7 +44,7 @@ bun dev
 - API: http://localhost:3001  
 - Site: http://localhost:4321  
 - Booking form: http://localhost:4321/booking  
-- Admin: http://localhost:4321/admin (Clerk sign-in required; the **first user to sign in** becomes admin and can view bookings).
+- Admin: http://localhost:4321/admin (Clerk sign-in required; the **first user to sign in** becomes admin; bookings load in pages of 50 via `GET /api/admin/bookings?limit=&offset=`).
 
 ## Project Structure
 
