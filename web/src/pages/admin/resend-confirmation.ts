@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro'
+import { normalizePublicApiBaseUrl } from '../../lib/publicApiUrl'
 
 /**
  * Admin operator action relay:
@@ -28,7 +29,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     })
   }
 
-  const apiUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001'
+  const apiUrl = normalizePublicApiBaseUrl(import.meta.env.PUBLIC_API_URL)
   const token = await getToken()
 
   try {
