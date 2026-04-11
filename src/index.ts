@@ -1,56 +1,54 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
+import { allowedOrigins as rawAllowedOrigins } from './lib/allowedOrigins'
+import { getAppVersion } from './lib/appVersion'
+import { expandCorsAllowedOrigins, normalizeRequestOrigin } from './lib/corsOrigins'
 import { bodyLimit } from './middleware/bodyLimit'
+import { errorHandler } from './middleware/error'
 import { enforceHttps } from './middleware/https'
 import { rateLimitHealth } from './middleware/rateLimitHealth'
 import { securityHeaders } from './middleware/security'
-import { errorHandler } from './middleware/error'
-import { expandCorsAllowedOrigins, normalizeRequestOrigin } from './lib/corsOrigins'
-import { getAppVersion } from './lib/appVersion'
 import { routes } from './routes'
 
 const app = new Hono()
 
-const allowedOrigins = expandCorsAllowedOrigins(
-  [
-    'http://localhost:4321',
-    'http://localhost:4322',
-    process.env.FRONTEND_URL,
-    process.env.STAGING_URL,
-    process.env.PRODUCTION_URL,
-  ].filter((x): x is string => Boolean(x)),
-)
+const allowedOrigins = expandCorsAllowedOrigins(rawAllowedOrigins)
 
 // ─── Global Middleware ────────────────────────────────
 app.use('*', enforceHttps)
 app.use('*', logger())
 app.use('*', securityHeaders)
 app.use('*', bodyLimit)
-app.use('*', cors({
-  origin: (origin) => {
-    if (!origin) return origin
-    const key = normalizeRequestOrigin(origin)
-    if (allowedOrigins.includes(key)) return origin
-    return undefined
-  },
-  credentials: true,
-}))
+app.use(
+  '*',
+  cors({
+    origin: (origin) => {
+      if (!origin) return origin
+      const key = normalizeRequestOrigin(origin)
+      if (allowedOrigins.includes(key)) return origin
+      return undefined
+    },
+    credentials: true,
+  }),
+)
 
 // ─── Routes ───────────────────────────────────────────
 app.route('/api', routes)
 
 // ─── Health Check ─────────────────────────────────────
-const APP_VERSION = getAppVersion()
 const START_TIME = Date.now()
 
 app.use('/health', rateLimitHealth)
 app.get('/health', (c) =>
-  c.json({
-    status: 'ok',
-    version: APP_VERSION,
-    uptime: Math.floor((Date.now() - START_TIME) / 1000),
-  }, 200),
+  c.json(
+    {
+      status: 'ok',
+      version: getAppVersion(),
+      uptime: Math.floor((Date.now() - START_TIME) / 1000),
+    },
+    200,
+  ),
 )
 
 // ─── Error Handler ────────────────────────────────────

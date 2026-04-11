@@ -2,225 +2,30 @@
 
 Track open work and completed items by version. See CHANGELOG.md for full release notes.
 
-**Roadmap (Hold Scope):** No first-paying-customer goal; no merch yet. **Primary milestone: deploy to VPS** (your domain + HTTPS). Resend, Monitoring, and Content/SEO are done as part of or right after that deploy — one place, one domain. Stripe webhook only when there is a product to sell.
+**Roadmap (Hold Scope):** No first-paying-customer goal; no merch yet. **Custom domain + HTTPS** already live (Vercel + Render). **Optional later:** migrate stack to a **VPS** (P3 todo — cost/ops preference). **Resend** verified domain + prod **`RESEND_FROM_EMAIL`** shipped (see Completed). Monitoring and Content/SEO can stay on current hosts or move with a VPS. Stripe webhook only when there is a product to sell.
 
 ---
 
 ## Open
 
-### Code review — Stripe: remove dead code until webhook ships
-**What:** If `POST /api/webhooks/stripe` is not imminent: remove `stripe` from root `package.json`, delete or stub `src/lib/stripe.ts`, and fold required helpers back in when **Payments — Implement Stripe webhook handler** is done. If webhook is next: implement minimal route instead of removal.
-**Why:** Unused dependency and helpers confuse reviewers and security scanners.
-**Context:** Code review 2026-04-10; aligns with existing Payments + Stripe test todos.
-**Solution:** 
-**Done When:** No orphaned `getStripe` / `verifyWebhookSignature` without a caller, or webhook route exists.
-**Effort:** S
-**Priority:** P3
-**Depends on:** Coordination with **Payments — Implement Stripe webhook handler**
-
----
-
-### Code review — Resend client test hook (optional)
-**What:** Add `setResendForTesting` (or inject `getResend` dependency) mirroring `setClerkClientForTesting` so booking tests avoid brittle `import` mocks.
-**Why:** Cleaner integration tests for email paths.
-**Context:** Code review 2026-04-10.
-**Solution:** 
-**Done When:** At least one booking test uses the hook; production path unchanged.
-**Effort:** S
-**Priority:** P4
-**Depends on:** None
-
----
-
-### Code review — Web package: version, `preview`, health endpoints
-**What:** (1) Align `web/package.json` version with release policy (match root semver or document why they differ). (2) Change `web/package.json` `preview` script from `astro dev` to `astro preview` after build. (3) Replace hardcoded `0.4.0` in `web/src/pages/health.ts` and `web/src/pages/api/health.ts` with read from `web/package.json` or `import.meta.env` / build-time inject.
-**Why:** Ops and uptime checks show wrong version; `preview` misleads developers.
-**Context:** Code review 2026-04-10.
-**Solution:** 
-**Done When:** Local `bun run build && bun run preview` serves built site; health JSON version matches package.
-**Effort:** S
-**Priority:** P3
-**Depends on:** None
-
----
-
-### Code review — Remove or document `/api/auth/*` 501 stubs
-**What:** Either delete `src/routes/auth.ts` routes (and mount) if Clerk is the only auth surface, updating tests and any clients; or keep routes with a clear README/TODOS note and skip rate limiting until implemented. Prefer removal to reduce attack surface and wasted rate-limit budget.
-**Why:** Endpoints return 501 but still consume `rateLimitAuth` quota.
-**Context:** Code review 2026-04-10.
-**Solution:** 
-**Done When:** No unexplained 501 auth routes, or they are explicitly reserved and documented.
-**Effort:** S
-**Priority:** P3
-**Depends on:** None
-
----
-
-### Code review — CI: run tests on push/PR
-**What:** Add `.github/workflows/ci.yml` (or extend repo workflows): install Bun, run `bun test` at repo root; optionally `cd web && bun test` for `*.test.ts` under `web/`.
-**Why:** Only **Keep Render Alive** workflow exists today; regressions ship without a gate.
-**Context:** Code review 2026-04-10.
-**Solution:** 
-**Done When:** Failing test fails CI; branch protection can require workflow (optional).
-**Effort:** S
-**Priority:** P2
-**Depends on:** None
-
----
-
-### Code review — Lint/format baseline
-**What:** Add Biome (or ESLint + Prettier) with minimal rules, `bun run lint` / `bun run format` scripts; fix or grandfather existing violations in a single pass to avoid endless churn.
-**Why:** No automated style gate today; drift grows with contributors.
-**Context:** Code review 2026-04-10.
-**Solution:** 
-**Done When:** CI or local script runs clean on intended scope; documented in README.
-**Effort:** M
-**Priority:** P3
-**Depends on:** None
-
----
-
-### Code review — Centralize marketing social URLs
-**What:** Move repeated Spotify, Instagram, TikTok, etc. URLs from `MarketingLayout.astro` and `index.astro` into e.g. `web/src/data/socials.ts`; import in both.
-**Why:** One edit when a link changes.
-**Context:** Code review 2026-04-10.
-**Solution:** 
-**Done When:** No duplicated long URLs across those files.
-**Effort:** S
-**Priority:** P4
-**Depends on:** None
-
----
-
-### Code review — Homepage Apple Music icon (nested `<svg>`)
-**What:** In `web/src/pages/index.astro`, replace nested `<svg>` inside `<svg>` for Apple Music with a single valid SVG; align `aria-hidden` / `aria-label` with other social cards.
-**Why:** Odd DOM; outer `viewBox` ineffective; a11y inconsistent.
-**Context:** Code review 2026-04-10.
-**Solution:** 
-**Done When:** Markup validates; visual unchanged or improved.
-**Effort:** S
-**Priority:** P4
-**Depends on:** None
-
----
-
-### Code review — DEPLOY note: Render Node image + Bun
-**What:** One short paragraph in `DEPLOY.md` (or comment in `render.yaml`): production assumes Bun is available on Render’s Node runtime — re-verify after platform upgrades before deploying.
-**Why:** Base image change could break `bun run` startCommand.
-**Context:** Code review 2026-04-10.
-**Solution:** 
-**Done When:** Operators have a checklist line for major Render upgrades.
-**Effort:** S
-**Priority:** P4
-**Depends on:** None
-
----
-
 ### Product roadmap — Lead generation & booking (prioritized slice)
 **What:** Execution order for turning the public site into a lead funnel + light CRM: budget capture, marketing blocks, post-submit UX, admin triage, then scoring.
 **Why:** Aligns product work with fastest ROI; extends the existing `bookings` table and booking API rather than replacing them with a minimal greenfield schema.
 **Context:** Booking already persists `city`, `eventType`, `duration`, `showType`, `attendees`, `venueSound`, etc. (`src/db/schema.ts`, `STATE.md`). Items below are **new** or **expand** admin/marketing.
-**Solution:** 
-**Done When:**
+**Solution:** Treat the open tickets **below this card** as the execution backlog — ship **vertical slices** (one PR = one user-visible outcome + tests), re-order only when discovery says so. Suggested sequence: **(1) Marketing — Video hero + packages + conversion blocks** — **shipped** 2026-04-11 (see **## Completed**). **(2) Booking UX — Thank-you page + WhatsApp follow-up CTA** — **shipped** 2026-04-11 (**`/booking/gracias`**, session handoff; see **## Completed**). **(3) Booking — Workflow statuses** — **shipped** 2026-04-10 (**`pipeline_status`**, admin PATCH + UI; see **## Completed**). **(4) Email — Follow-up sequence (drip after booking)** — **shipped** 2026-04-11 (see **## Completed** — **`drizzle/0009`**, **`POST /api/internal/process-drip`**, Render **`mto-drip-cron`**). Each slice: extend `bookings` / API only when that slice needs it; keep mocks in tests; note rule/version changes in **`DECISIONS.md`** when behavior ships.
+**Done When:** Roadmap slices **(1)–(4)** above are **Completed** in **## Completed** (or **removed** with defer note); production path is: discover band on `/` → submit **`/booking`** → thank-you / WhatsApp CTA → staff triage in **`/admin`** (lead score + priority + pipeline already on list) without a parallel spreadsheet; **`bun test`** stays green end-to-end.
 **Effort:** XL (across multiple tickets below)
 **Priority:** P1
 **Depends on:** None
 
 ---
 
-### Marketing — Video hero + packages + conversion blocks
-**What:** On the public marketing site (`web/`, `MarketingLayout`): **video hero** (live performance) — shipped; still to add **packages** section (e.g. Basic / Full / Premium), **repertoire** section, **testimonials** block, **urgency** copy (e.g. limited weekend availability). Match existing marketing CSS and a11y patterns.
-**Why:** Increases conversion without new backend surface area.
-**Context:** Can ship as one vertical slice or split into sub-tasks; no dependency on budget DB work except for coherent CTA toward `/booking`. Source footage can stay in repo root `herovid/HEROVIDLV.mov`; the site serves **`web/public/video/hero.mov`** (copy or symlink for deploy).
-**Solution:** **Video hero (done):** Markup in [`web/src/pages/index.astro`](web/src/pages/index.astro) — `<video class="hero-video">` (`/video/hero.mov`, muted autoplay, `playsinline`, `loop`, `aria-hidden`), `.hero-deco-line` for the gold accent. Styles in [`web/src/styles/marketing-press.css`](web/src/styles/marketing-press.css) — full-bleed video + `blur(2px) brightness(0.7)`, `.hero::after` linear scrim, z-index stack, `prefers-reduced-motion: reduce` hides video + `var(--bg)` fallback. Regression checks in [`web/src/lib/homepageHero.test.ts`](web/src/lib/homepageHero.test.ts). See [CHANGELOG.md](CHANGELOG.md) [Unreleased] for summary.
-**Done When:** Packages, repertoire, testimonials, and urgency blocks are on `/` with CTAs to `/booking` or `#booking`; a11y and marketing CSS consistency pass. (Video hero slice already meets its own bar: build + tests green.)
-**Effort:** M
-**Priority:** P1
-**Depends on:** None
-
----
-
-### Booking UX — Thank-you page + WhatsApp follow-up CTA
-**What:** After successful submit, redirect (or in-page flow) to a dedicated thank-you route with embedded/linked performance video and a prominent **WhatsApp** CTA (`PUBLIC_WHATSAPP_URL` or equivalent). Keep confirmation messaging consistent with `data.confirmation` (`sent` | `pending`).
-**Why:** Closes the loop on leads immediately; roadmap Phase 2 UX upgrade.
-**Context:** May require Astro page + `bookingCanonical`/`publicSiteUrl` patterns; avoid breaking existing booking tests.
-**Solution:** 
-**Done When:**
-**Effort:** S
-**Priority:** P2
-**Depends on:** None (coordinate copy with Marketing slice if shipped together)
-
----
-
-### Booking — Lead score + priority field
-**What:** Add `priority` (`low` | `medium` | `high`) and/or numeric `score` on `bookings` (or compute priority in API on insert/update). Implement scoring rules in a small module (e.g. budget thresholds, event type, attendees, city vs local) so rules can change without scattered conditionals. Expose in admin + optional API for future automation.
-**Why:** Filters noise and ranks follow-up order (roadmap Phase 2).
-**Context:** Requires parseable budget and stable enums for event type; document rule versions in `DECISIONS.md` when tuned.
-**Solution:** 
-**Done When:**
-**Effort:** M
-**Priority:** P2
-**Depends on:** None (prerequisite: budget enum shipped 2026-03-25)
-
----
-
-### Booking — Workflow statuses (new / contacted / closed)
-**What:** Replace or map `status` beyond `pending`/`sent`/`failed` (confirmation) to **sales** states: e.g. `new`, `contacted`, `closed` — clarify separation between “email delivery” and “pipeline” (may be a second column `pipelineStatus` if confirmation status must stay). Admin UI to update state; API patch if missing; tests.
-**Why:** Light CRM without external tooling (roadmap Phase 2).
-**Context:** Current `bookings.status` is confirmation-oriented; avoid breaking existing flows — see `DECISIONS.md` before migrating semantics.
-**Solution:** 
-**Done When:**
-**Effort:** M
-**Priority:** P3
-**Depends on:** None (admin budget column + sort shipped 2026-03-25)
-
----
-
----
-
-### Email — Follow-up sequence (drip after booking)
-**What:** Beyond single confirmation: schedule or trigger Email 2 (e.g. “how we sound” / video) and Email 3 (e.g. urgency). Options: Resend batch + `scheduledAt`, N8N on VPS, or external drip — pick one and document in `DECISIONS.md`. Must be idempotent and mock-friendly in tests; no flaky network in CI.
-**Why:** Roadmap Phase 3 nurture; separate from transactional confirmation.
-**Context:** Open **Resend — Verify domain** todo still applies for 
-deliverability to arbitrary addresses.
-**Solution:** 
-**Done When:**
-**Effort:** L
-**Priority:** P3
-**Depends on:** Resend — Verify domain so confirmation emails reach any customer; optional: N8N — Run local instance on VPS
-
----
-
-### API — DRY origins + `/users/me` success envelope (bundle)
-**What:** Ship both consistency fixes together: (1) move duplicated `allowedOrigins` into a shared module consumed by `src/index.ts` (CORS) and `src/middleware/auth.ts` (Clerk `authorizedParties`), and (2) change `GET /api/users/me` in `src/routes/users.ts` to use `successResponse(c, user)` instead of hand-rolled `c.json({ data: user })`.
-**Why:** Keeps CORS + Clerk origin policy in lockstep and standardizes success responses through one helper path.
-**Context:** Both tasks are small P2 API consistency follow-ups from engineering review; bundling avoids two tiny PRs and reduces review overhead.
-**Solution:** Implement exactly as defined in this saved plan: [dry_origins_+_me_successresponse_e3c11ce0.plan.md](c:/Users/black/.cursor/plans/dry_origins_+_me_successresponse_e3c11ce0.plan.md).
-**Done When:** `allowedOrigins` is shared by both call sites, `/api/users/me` returns through `successResponse`, and `bun test` remains green with no behavior regressions.
-**Effort:** S
-**Priority:** P2
-**Depends on:** None
-
----
-
-### Tests — Playwright smoke: public booking flow
-**What:** Add Playwright under `web/` (or repo root) with a minimal smoke: open booking page, fill required fields, submit, assert expected success or error UI (mock API or point at test/staging per convention).
-**Why:** Crosses UI + API boundary; catches form and confirmation-message regressions.
-**Context:** No Playwright in `web/package.json` today; workspace standards prefer Playwright for boundary-crossing flows. Keep deterministic: no live Resend/network in CI.
-**Solution:** Add `@playwright/test`, one spec (e.g. `web/e2e/booking.spec.ts`), document browser install in README or DEPLOY.md.
-**Done When:** One smoke passes locally; CI runs it when feasible; tests do not depend on third-party APIs without mocks.
-**Effort:** M
-**Priority:** P3
-**Depends on:** None (optional: stable staging URL for real API)
-
----
-
 ### Infra — Distributed rate limiting for multiple API instances
-**What:** Replace or back in-memory booking/auth rate limit stores with a shared limiter (e.g. Redis, Upstash) or document single-instance requirement in DEPLOY.md.
-**Why:** `Map`-based limits in `rateLimit.ts` / `rateLimitAuth.ts` reset per process; multiple workers = weaker protection.
+**What:** Replace or back in-memory booking (and future route-scoped) rate limit stores with a shared limiter (e.g. Redis, Upstash) or document single-instance requirement in DEPLOY.md.
+**Why:** `Map`-based limits in `rateLimit.ts` reset per process; multiple workers = weaker protection.
 **Context:** Comments already warn about trusted `x-forwarded-for`; scaling horizontally adds a new gap.
-**Solution:** Run a single Redis service in Coolify (same host/VPC as your apps). Add REDIS_URL (or host/port/password) to the API app’s env. Refactor booking + auth rate limiting to use a shared Redis-backed fixed window (or sliding window) with distinct key prefixes (e.g. rl:booking:, rl:auth:) so limits are consistent across all API replicas. Use INCR + EXPIRE (or a small Lua script for atomic window reset) keyed by the same client id logic as today (x-forwarded-for / x-real-ip behind a trusted proxy). Keep in-memory limiter as a dev fallback when REDIS_URL is unset so local dev stays simple. Document Coolify Redis wiring, env vars, and “single-instance API + SQLite vs multi-instance + Redis” in DEPLOY.md.
-**Done When:** Production/staging API uses Redis when REDIS_URL is set; dev works without it. Booking and auth routes still enforce their intended limits across processes (verified by tests with a mock Redis or testcontainer, not a live network). DEPLOY.md / .env.example describe Coolify Redis and the trust requirement for forwarded IP headers.
+**Solution:** Run a single Redis service in Coolify (same host/VPC as your apps). Add REDIS_URL (or host/port/password) to the API app’s env. Refactor booking (and any future route-scoped) rate limiting to use a shared Redis-backed fixed window (or sliding window) with distinct key prefixes (e.g. `rl:booking:`, `rl:health:`) so limits are consistent across all API replicas. Use INCR + EXPIRE (or a small Lua script for atomic window reset) keyed by the same client id logic as today (x-forwarded-for / x-real-ip behind a trusted proxy). Keep in-memory limiter as a dev fallback when REDIS_URL is unset so local dev stays simple. Document Coolify Redis wiring, env vars, and “single-instance API + SQLite vs multi-instance + Redis” in DEPLOY.md.
+**Done When:** Production/staging API uses Redis when REDIS_URL is set; dev works without it. Booking (and other rate-limited public routes) still enforce their intended limits across processes (verified by tests with a mock Redis or testcontainer, not a live network). DEPLOY.md / .env.example describe Coolify Redis and the trust requirement for forwarded IP headers.
 **Effort:** M
 **Priority:** P2
 **Depends on:** Decision to run more than one API instance/process; do when migrating to more robust hosting.
@@ -230,7 +35,7 @@ deliverability to arbitrary addresses.
 ### Tests — Unit tests for Stripe webhook verification helper
 **What:** Add tests for `verifyWebhookSignature` / `getStripe` error paths (mock Stripe SDK) when the webhook route exists.
 **Why:** Payment boundary should be covered before production traffic; helper is currently unused until POST /api/webhooks/stripe ships.
-**Context:** `src/lib/stripe.ts`; pair with open “Payments — Implement Stripe webhook handler” todo.
+**Context:** Pair with **Payments — Implement Stripe webhook handler**; reintroduce `stripe` SDK + helper module when that route ships (no `src/lib/stripe.ts` in repo until then — removed 2026-04-10).
 **Solution:** 
 **Done When:** 
 **Effort:** S
@@ -239,51 +44,27 @@ deliverability to arbitrary addresses.
 
 ---
 
-### Deploy — Acquire custom domain and migrate production to a VPS
-**What:** (1) Acquire a custom domain (e.g. for the band) and (2) move production to a VPS: provision server, point DNS at the VPS, reverse proxy (nginx or Caddy), SSL (e.g. Let’s Encrypt), run API (Bun + SQLite on persistent path) and optionally serve frontend (Astro build or Node); document in DEPLOY.md.
-**Why:** Full control, one bill, and your own HTTPS domain — which is when Resend domain verification, monitoring (VPS logs), and a proper “official” site (content/SEO) all land in one go.
-**Solution:** 
-**Done When:** 
-**Context:** Current prod: Render (Bun, SQLite at /data) + Vercel (Astro SSR). Steps: buy/register domain → provision VPS → DNS A/AAAA to VPS → reverse proxy + SSL → deploy app. Scope: (A) API only on VPS, frontend stays on Vercel — add VPS API URL to Clerk + CORS. (B) API + frontend on same VPS — one domain, update Clerk + CORS. Use a process manager (e.g. systemd), persistent disk for SQLite, backup strategy. **With or right after this:** Resend domain (same domain), Sentry + VPS log checks, Content/SEO.
+### Deploy — Migrate production to a VPS (future)
+**What:** When/if you want a single host instead of Render + Vercel: provision VPS, point **DNS** for the band domain at the VPS (domain already owned; today DNS points at Vercel/Render as applicable), reverse proxy (nginx or Caddy), SSL (e.g. Let’s Encrypt), run API (Bun + SQLite on persistent path) and optionally serve the Astro app; document in DEPLOY.md.
+**Why:** Optional consolidation — one bill, full box control, your own logs — not required while Render + Vercel + custom domain meet needs.
+**Solution:** Pick VPS provider + sizing; define cutover order (API first vs frontend first); rehearse env migration checklist (`PRODUCTION_URL`, CORS, Clerk URLs, `PUBLIC_API_URL`, `PUBLIC_SITE_URL`, Resend SPF/DKIM if mail stays on same domain).
+**Done When:** Production traffic for site + API serves from the VPS with TLS; Render/Vercel decommissioned or demoted to preview; DEPLOY.md describes the chosen layout.
+**Context:** **2026-04-10:** Custom domain and HTTPS already in use on current stack; **Resend** verified + `RESEND_FROM_EMAIL` on Render (see Completed). This ticket is **backlog** until you explicitly want to leave managed hosts.
 **Effort:** L
-**Priority:** P1
+**Priority:** P3
 **Depends on:** None
-
----
-
-### Resend — Verify domain so confirmation emails reach any customer
-**What:** Verify a sending domain in Resend and set RESEND_FROM_EMAIL so the customer confirmation email is delivered to any address (not only the Resend account owner).
-**Why:** In test mode Resend only delivers to the account owner’s email; customers never receive the “Recibimos tu solicitud” email until a domain is verified.
-**Context:** Verify at resend.com/domains; use a From address on that domain (e.g. noreply@tudominio.com). See BUGS.md “Resend: no email delivered to customer”. **Do when you have your domain on the VPS (HTTPS)** — same deploy cycle.
-**Solution:** 
-**Done When:** 
-**Effort:** S
-**Priority:** P2
-**Depends on:** VPS (or any environment where you already use your custom domain with HTTPS)
 
 ---
 
 ### Payments — Implement Stripe webhook handler
 **What:** Create POST /api/webhooks/stripe endpoint
 **Why:** Required to handle subscription lifecycle events when ticket sales or merch are added
-**Context:** Stripe client in src/lib/stripe.ts (lazy init). Verify signature before processing. Use idempotency keys.
+**Context:** Add `bun add stripe`, lazy-init client + `constructEvent` verification (`STRIPE_WEBHOOK_SECRET`) before handling events. Idempotency keys for side effects. Prior stub `src/lib/stripe.ts` removed 2026-04-10 with unused dependency — restore pattern from git history or Stripe docs when implementing.
 **Solution:** 
 **Done When:** 
 **Effort:** M
 **Priority:** P3
 **Depends on:** If we ever do a shop. STRIPE_WEBHOOK_SECRET in .env
-
----
-
-### Content / SEO — Global meta & Open Graph skeleton
-**What:** Extend `web/src/layouts/Layout.astro` (or a small `Seo.astro` partial) with Twitter/OG tags, default `og:image` (or per-page override), `theme-color`, and optional `robots` where needed. Per-page `title` / `description` stay props-driven.
-**Why:** Link previews and crawlers get consistent, professional signals without waiting on final copy.
-**Context:** Today only basic `<meta name="description">` and `<title>`. Use env like `PUBLIC_SITE_URL` only when stable; avoid wrong canonicals on preview URLs until domain todo ships.
-**Solution:** 
-**Done When:** 
-**Effort:** S
-**Priority:** P2
-**Depends on:** None
 
 ---
 
@@ -299,27 +80,15 @@ deliverability to arbitrary addresses.
 
 ---
 
-### Content / SEO — Canonical URLs & sitemap after custom domain
-**What:** Set canonical `<link rel="canonical">` and `og:url` from a single source of truth (e.g. `PUBLIC_SITE_URL` or build-time); add `sitemap.xml` (Astro `@astrojs/sitemap` or static route) and ensure it lists public routes only (exclude `/admin`).
-**Why:** Wrong canonicals on `*.vercel.app` / `*.onrender.com` hurt sharing and indexing; sitemap matters once the real domain is live.
-**Context:** Do when production URL is stable — same window as **Deploy — Acquire custom domain and migrate production to a VPS** (or at least when frontend serves from the final hostname).
-**Solution:** 
-**Done When:** 
-**Effort:** S
-**Priority:** P2
-**Depends on:** Deploy — Acquire custom domain and migrate production to a VPS (or equivalent stable production origin)
-
----
-
 ### Monitoring — Sentry or similar; check logs after deploys
 **What:** Add Sentry (or similar) for error tracking; ensure logs are checked after each deploy.
 **Why:** Catch production errors and failed deploys early; avoid blind debugging.
-**Context:** .env.example has optional SENTRY_DSN. Wire Sentry in API (Hono) and/or frontend (Astro). **On VPS:** check VPS logs (e.g. systemd/journald or your reverse proxy logs) after deploy. If still on Render/Vercel, check their logs. Same habit either way.
-**Solution:** 
-**Done When:** 
+**Context:** Root **`.env.example`** has optional **`SENTRY_DSN`** (API). Wire Sentry in API (Hono) and/or frontend (Astro). **On VPS:** check VPS logs (e.g. systemd/journald or your reverse proxy logs) after deploy. If still on Render/Vercel, check their logs. Same habit either way.
+**Solution:** **(1) API (required for this ticket’s minimum):** Add **`@sentry/bun`** (or **`@sentry/node`** if Bun adapter lags), call **`Sentry.init({ dsn: process.env.SENTRY_DSN, environment: NODE_ENV, tracesSampleRate: 0 … })`** only when **`SENTRY_DSN`** is set, as early as possible in **`src/index.ts`** (before routes). Hook **`src/middleware/error.ts`** (or top-level Hono **`onError`**) to **`Sentry.captureException`** for **5xx** / unexpected errors; use **`beforeSend`** / **`ignoreErrors`** to strip **`Authorization`**, cookies, and known noisy client errors. Set **`SENTRY_DSN`** on **Render** (same service as API). **(2) Web (optional same slice or follow-up):** If SSR errors matter on Vercel, add **`@sentry/astro`** (or server-only **`Sentry.init`** in Astro middleware) with DSN from **Vercel env** — avoid shipping a **public** DSN unless you accept client replay budget. **(3) Process:** Add a short **“After deploy”** subsection to **`DEPLOY.md`**: open **Render** + **Vercel** deploy logs, confirm **200** on **`GET /health`** (API) and homepage, then skim **Sentry → Issues** for new spikes in the first 15–30 minutes. Same checklist applies later on a VPS (replace dashboard names with journald / proxy).
+**Done When:** **`SENTRY_DSN`** documented in **`.env.example`** / **`DEPLOY.md`** as **Render** (and **Vercel** if web wired) secret; API sends at least one **verified** test event to Sentry (e.g. temporary **`throw`** behind a dev-only route or Sentry’s “send test” flow) without logging the DSN; production **5xx** from the global error path appear in Sentry with scrubbed headers; **`DEPLOY.md`** includes the **post-deploy log + Sentry** checklist; **`bun test`** still green (init must no-op when DSN unset in CI).
 **Effort:** S
-**Priority:** P3
-**Depends on:** None
+**Priority:** P4
+**Depends on:** None, add Sentry when the first “invisible prod bug” costs you more than an hour or when adding more surface (webhooks, admin actions, payments) where failures are easy to miss in raw logs.
 
 ---
 
@@ -330,8 +99,8 @@ deliverability to arbitrary addresses.
 **Solution:** 
 **Done When:** 
 **Effort:** M
-**Priority:** P3
-**Depends on:** VPS deploy
+**Priority:** P4
+**Depends on:** None required; easiest co-location is after **Deploy — Migrate production to a VPS (future)** (same P3 backlog). N8N can also run on any other Docker-capable host if you do not migrate the app stack.
 
 ---
 
@@ -345,12 +114,129 @@ deliverability to arbitrary addresses.
 **Solution:** 
 **Done When:** 
 **Effort:** L
-**Priority:** P2
+**Priority:** P4
 **Depends on:** “Postgres when we need multi-instance writes or ops wants a managed DB,” and keep SQLite as the default VPS path until then.
 
 ---
 
 ## Completed
+
+### Email — Follow-up sequence / nurture drip (2026-04-11)
+- **DB:** **`drizzle/0009_booking_drip.sql`** — **`drip2_due_at`**, **`drip2_sent_at`**, **`drip3_due_at`**, **`drip3_sent_at`** on **`bookings`**; **`src/db/schema.ts`**.
+- **Schedule:** **`src/lib/dripSchedule.ts`** + **`dripSchedule.test.ts`** — defaults **+24h** / **+72h** from booking; env **`DRIP_EMAIL_2_DELAY_HOURS`**, **`DRIP_EMAIL_3_DELAY_HOURS`**.
+- **Content:** **`src/lib/dripEmails.ts`** + **`dripEmails.test.ts`** — Email 2 video **`https://www.youtube.com/watch?v=7Sx0yDjGoq0`**; Email 3 urgency + **`/booking`** (+ optional **`PUBLIC_WHATSAPP_URL`**).
+- **Worker:** **`src/lib/dripProcessor.ts`** + **`dripProcessor.test.ts`** — only **`status === 'sent'`**; idempotent **`drip*_sent_at`** after Resend OK; **`DRIP_BATCH_SIZE`**.
+- **API:** **`POST /api/booking`** sets **`createdAt`** + due columns (**`src/routes/booking.ts`**). **`POST /api/internal/process-drip`** (**`src/routes/internal.ts`**, **`internal.test.ts`**) — Bearer **`DRIP_CRON_SECRET`**.
+- **Deploy:** **`render.yaml`** — **`mto-drip-cron`** **`curl`**s **`DRIP_PROCESS_URL`**; web **`DRIP_CRON_SECRET`**. **`.env.example`**, **`DEPLOY.md`**, **`DECISIONS.md`**, **`CHANGELOG.md`**.
+
+### Booking UX — Thank-you page + WhatsApp follow-up CTA (2026-04-11)
+- **`web/src/lib/bookingThanksSession.ts`** + **`bookingThanksSession.test.ts`** — key **`mto_booking_thanks`**, **`normalizeBookingConfirmation`**, **`parseBookingThanksStored`**.
+- **`web/src/lib/publicSiteUrl.ts`** — **`bookingThanksCanonical()`**; test in **`publicSiteUrl.test.ts`**.
+- **`web/src/pages/booking.astro`** — success: **`sessionStorage`** + **`location.assign('/booking/gracias')`**; form **`data-api-url`** / **`data-budget-hints`** (client script imports; no **`define:vars`** with imports).
+- **`web/src/pages/booking/gracias.astro`** — **`MarketingLayout`** + **`robots="noindex,nofollow"`**; client: invalid/missing session → **`/booking`**; **remove session after read**; copy branches match previous inline success; video **`/video/hero.mp4`** + “Ver presentación en vivo” link; WhatsApp primary iff **`PUBLIC_WHATSAPP_URL`**.
+- **`MarketingLayout.astro`** — optional **`robots`** → **`Seo`**.
+- **`web/e2e/booking.e2e.ts`** — **`sent`**, **`pending`**, redirect without session. **`CHANGELOG.md`**, **`DECISIONS.md`**.
+
+### Marketing — Video hero + packages + conversion blocks (2026-04-11)
+- **Video hero (earlier):** [`web/src/pages/index.astro`](web/src/pages/index.astro) + [`web/src/styles/marketing-press.css`](web/src/styles/marketing-press.css); tests in [`web/src/lib/homepageHero.test.ts`](web/src/lib/homepageHero.test.ts).
+- **This slice:** **Repertorio** (`#repertorio`), **Testimonios** (placeholder), **Paquetes** (`#paquetes` — Básico / Completo destacado / Premium), **urgencia** (`.booking-urgency` en `#booking`). Datos editables: **`web/src/data/repertoire.ts`**, **`testimonials.ts`**, **`packages.ts`**. Nav móvil: **Paquetes** → `/#paquetes` en **`MarketingLayout.astro`**. **`CHANGELOG.md`** [Unreleased]; **`bun test`** green (incl. `marketing homepage conversion blocks`).
+
+### Content / SEO — Global meta & Open Graph skeleton (2026-04-11)
+- **`web/src/components/Seo.astro`:** OG + Twitter Card + **`theme-color`** + optional **`robots`** (prop or **`PUBLIC_ALLOW_INDEXING=false`**); default **`og:image`** via **`absoluteAssetUrl(canonicalUrl, '/icon/mafiatumbada.png')`**.
+- **`MarketingLayout.astro`** / **`Layout.astro`:** use **`Seo`**; marketing **`theme-color`** **`#0b0b0b`**, app shell **`#ffffff`** default.
+- **`web/src/lib/publicSiteUrl.ts`:** **`adminCanonical`**, **`absoluteAssetUrl`**; **`admin.astro`** passes **`canonicalUrl`**. Tests **`publicSiteUrl.test.ts`**. **`web/.env.example`** — **`PUBLIC_ALLOW_INDEXING`**. **`DECISIONS.md`**, **`CHANGELOG.md`** [Unreleased]. **`bun test`** 166 pass; **`bun run test:e2e`** green.
+
+### Tests — Playwright smoke: public booking flow (2026-04-11)
+- **`web/package.json`:** devDependency **`@playwright/test`**; scripts **`test:e2e`**, **`test:e2e:install`**.
+- **`web/playwright.config.ts`:** Chromium project; **`webServer`** runs **`astro dev`** on **127.0.0.1:4329** with **`PUBLIC_API_URL=http://127.0.0.1:3001`** (avoids clash with dev on 4321).
+- **`web/e2e/booking.e2e.ts`:** mocks **`**/api/booking`** — success (**201** + `confirmation: sent` → `#form-status` success) and error (**400** + API message → error state). Files use **`*.e2e.ts`** so **`bun test`** does not pick them up as `*.spec.ts`.
+- **Root:** **`bun run test:e2e`** (`bun run --cwd web test:e2e`); **`.gitignore`** — `web/test-results/`, `web/playwright-report/`, `web/blob-report/`.
+- **Docs:** **`README.md`** (E2E + scripts), **`DEPLOY.md`** (optional smoke note). **`CHANGELOG.md`** [Unreleased].
+
+### API — DRY origins + `/users/me` success envelope (2026-04-11)
+- **`src/lib/allowedOrigins.ts`** — raw origin list (localhost + `FRONTEND_URL` / `STAGING_URL` / `PRODUCTION_URL`).
+- **`src/index.ts`** — `expandCorsAllowedOrigins(rawAllowedOrigins)` for CORS allowlist (unchanged behavior vs inline array).
+- **`src/middleware/auth.ts`** — Clerk **`authorizedParties`** imports same module.
+- **`src/routes/users.ts`** — **`GET /api/users/me`** → **`successResponse(c, user)`** (same JSON shape **`{ data }`**).
+- **`CHANGELOG.md`** [Unreleased]. **`bun test`** green (163).
+
+### Booking — Workflow statuses / `pipeline_status` (2026-04-10)
+- **DB:** **`drizzle/0008_booking_pipeline_status.sql`** — **`pipeline_status`** on **`bookings`** (default **`new`**); **`src/db/schema.ts`**.
+- **API:** **`POST /api/booking`** sets **`pipelineStatus: 'new'`**; **`PATCH /api/admin/bookings/:id`** — **`{ pipelineStatus }`** only; **`bookings.status`** unchanged (resend still **`pending`** only). **`src/lib/bookingPipeline.ts`** + **`bookingPipeline.test.ts`**.
+- **Web:** **`web/src/pages/admin.astro`** — **Seguimiento** column + legend (**Correo** vs **Seguimiento**); **`web/src/pages/admin/update-pipeline.ts`** relay (Clerk server-side).
+- **Tests:** **`src/routes/admin-bookings-pipeline.test.ts`** (SQLite + migrations; dynamic booking id). **`src/routes/booking.test.ts`** — default **`pipelineStatus`**. **`src/routes/admin-auth.test.ts`** — non-admin **PATCH** **403**.
+- **Docs:** **`DECISIONS.md`** (two-axis model), **`CHANGELOG.md`** [Unreleased].
+
+### Booking — Lead score + priority field (2026-04-10)
+- **Lib:** **`src/lib/bookingLeadScore.ts`** — `computeBookingLeadScore` (budget / attendees / duration / city + extras); **`src/lib/bookingLeadScore.test.ts`**.
+- **DB:** **`drizzle/0007_booking_lead_score.sql`** — `lead_score`, `lead_priority` on **`bookings`**; **`src/db/schema.ts`**.
+- **API:** **`POST /api/booking`** persists score at insert (**frozen**, see **`DECISIONS.md`**). Admin **`GET`** list/export unchanged shape (**`select()`** picks up new columns).
+- **Web:** **`web/src/pages/admin.astro`** — Prioridad + sortable Lead score.
+- **Docs:** **`CHANGELOG.md`** [Unreleased], **`DECISIONS.md`**.
+
+### Content / SEO — Canonical URLs & sitemap after custom domain (2026-04-10)
+- **Canonical + `og:url`:** `MarketingLayout.astro` — `PUBLIC_SITE_URL` + `resolvePublicBaseUrl` / `homeCanonical` / `bookingCanonical` (`web/src/lib/publicSiteUrl.ts`); **`index.astro`** + **`booking.astro`** pass `canonicalUrl`.
+- **Sitemap:** `web/src/pages/sitemap.xml.ts` — `GET` returns XML for **`/`** and **`/booking`** only (no `/admin`); base URL = same resolver as marketing pages (`PUBLIC_SITE_URL` or request origin). **`web/src/lib/publicSitemap.ts`** + **`publicSitemap.test.ts`**.
+- **Docs:** `CHANGELOG.md` [Unreleased].
+
+### Resend — Verify domain so confirmation emails reach any customer (2026-04-10)
+- **Prod:** Domain verified in Resend; **`RESEND_FROM_EMAIL`** = **`noreply@mafiatumbada.com`** on Render (see **`STATE.md`**, **`README.md`** “Email (Resend)”).
+- **BUGS:** **`BUGS.md`** — Resend deliverability entry marked **fixed** for production; dev without verified domain still Resend-limited.
+- **Docs:** `CHANGELOG.md` [Unreleased].
+
+### Code review — DEPLOY note: Render Node image + Bun (2026-04-10)
+- **Docs:** `DEPLOY.md` §1 — new **“Bun on Render (Node runtime)”** subsection (assumption, upgrade checklist with `bun --version` / Shell, fallbacks `npx bun@latest` or Docker). Step 4 start line aligned with **`render.yaml`** (`migrate && check-db && start`).
+- **Infra:** `render.yaml` — comments above **`runtime`** / **`startCommand`** point to that section.
+
+### Code review — Centralize marketing social URLs (2026-04-11)
+- **Data:** `web/src/data/socials.ts` — **`bandSocialUrls`** (`spotify`, `tiktok`, `youtube`, `instagram`, `facebook`, `appleMusic`). Per-member links stay in **`members.ts`**.
+- **Consumers:** `web/src/layouts/MarketingLayout.astro`, `web/src/pages/index.astro` — import + `href={bandSocialUrls.*}`; removed duplicate `const …Url` blocks.
+- **Docs:** `README.md` (project tree); `CHANGELOG.md` [Unreleased]; `DECISIONS.md`.
+
+### Code review — Homepage Apple Music icon (nested `<svg>`) (2026-04-11)
+- **Web:** `web/src/pages/index.astro` — Redes sociales Apple Music card: **one** `<svg>` with the existing **`<path>`**; removed inner **`<svg role="img">`**, **`xmlns`**, **`title`** (parent **`<a aria-label="Apple Music">`** unchanged; **`span.social-icon`** still **`aria-hidden="true"`**).
+- **Tests:** `web/src/lib/homepageHero.test.ts` — asserts exactly one `<svg` in the Apple Music block.
+- **Docs:** `CHANGELOG.md` [Unreleased]; `DECISIONS.md`.
+
+### Code review — Lint/format baseline (Biome) (2026-04-11)
+- **Tool:** `@biomejs/biome` at repo root; **`biome.json`** — `files.includes` → `src/**/*.ts`, `scripts/**/*.ts`, `web/src/**/*.ts`; **`*.astro` excluded**; `suspicious.noControlCharactersInRegex` off (intentional ASCII-strip regex in `sanitizeResendDetail.ts`); `noNonNullAssertion` off.
+- **VCS:** **`vcs.useIgnoreFile` on** again — **`.code-review-graph/`** in **`.gitignore`** so Biome skips that tree; **`bun run lint`** green.
+- **Scripts:** `lint`, `format`, `lint:fix` in root **`package.json`**; baseline applied with **`biome check --write`** and **`--unsafe`** for `node:` import protocol.
+- **Docs:** `README.md` (Lint and format + Scripts table); `CHANGELOG.md`, `DECISIONS.md`.
+
+### Code review — GitHub Actions: no CI / no keep-alive (2026-04-11)
+- **Removed:** `.github/workflows/keep-alive.yml` (scheduled Render ping).
+- **Dropped open todo:** “CI: run tests on push/PR” — not using GitHub Actions for gates or uptime pings; run **`bun test`** locally before ship.
+- **Docs:** `CHANGELOG.md` [Unreleased], `DECISIONS.md`, `STATE.md`.
+
+### Code review — Remove `/api/auth/*` 501 stubs (2026-04-10)
+- **Removed:** `src/routes/auth.ts`, `src/middleware/rateLimitAuth.ts`; `src/routes/index.ts` no longer mounts `/auth`.
+- **Tests:** `src/routes/booking.test.ts` — `rate limit: returns 429 after 5 requests per IP` on `POST /api/booking` (mocked `db` + Resend; no real DB rows or Resend traffic).
+- **Docs:** `CHANGELOG.md` [Unreleased], `README.md` (routes tree), `DECISIONS.md`; auth remains Clerk + `src/middleware/auth.ts` (`/api/users`, `/api/admin`).
+
+### Code review — Web package: version, `preview`, health endpoints (2026-04-11)
+- **`web/package.json`:** `version` aligned to root (`0.5.0`); `preview` script is `astro preview` (requires `bun run build` first).
+- **Lib:** `web/src/lib/webAppVersion.ts` — `getWebAppVersion()` reads `web/package.json`; override order matches API: `APP_VERSION`, `RELEASE_VERSION`, then file. Tests: `web/src/lib/webAppVersion.test.ts`.
+- **Routes:** `web/src/pages/health.ts`, `web/src/pages/api/health.ts` — use `getWebAppVersion()` instead of hardcoded `0.4.0`.
+- **API:** `src/index.ts` — `GET /health` calls `getAppVersion()` per request (fixes stale module-load `APP_VERSION` and `src/health.test.ts`).
+- **Docs:** `README.md` (versioning note), `web/.env.example` (optional overrides); `CHANGELOG.md` [Unreleased]; `DECISIONS.md`.
+
+### Marketing — Admin signed-in banner: discrete styling (2026-04-11)
+- **Web:** `web/src/pages/index.astro` — `.admin-notice` / `.admin-notice a` / `:hover` — dark translucent bar, subtle bottom border, small muted copy, gold link + hover (replaces full-width `--color-brand` strip).
+- **Tests:** `web/src/lib/homepageHero.test.ts` — new case for admin strip tokens; hero/marketing expectations synced to shipped `hero.mp4` + `marketing-press.css` (video filter + scrim alphas).
+- **Docs:** `CHANGELOG.md` [Unreleased].
+
+### Code review — Resend client test hook (optional) (2026-04-10)
+- **Lib:** `src/lib/resend.ts` — `resendOverride` + `setResendForTesting(Resend | null)` (tests-only); `getResend()` prefers override; `null` clears override and `_resend` singleton.
+- **Tests:** `src/lib/resend.test.ts` — override skips `RESEND_API_KEY`; missing key throws when no override. `src/routes/booking.test.ts` — `beforeEach`/`afterEach` + per-test overrides; removed `mock.module('../lib/resend')`. `src/routes/admin-resend.test.ts` — shared mock + `resendBehavior` with `beforeEach`/`afterEach` instead of module mock.
+- **Docs:** `CHANGELOG.md` [Unreleased]; `DECISIONS.md`.
+
+### Code review — Stripe: remove dead code until webhook ships (2026-04-10)
+- **Deps:** Removed `stripe` from root `package.json`; `bun install` refreshes lockfile.
+- **Code:** Deleted unused `src/lib/stripe.ts` (`getStripe`, `verifyWebhookSignature` had no importers).
+- **Rules:** `.cursor/rules/hono-template.mdc` — Stack + Stripe section updated (SDK when webhook/checkout ships; webhook checklist: `constructEvent`, secrets, idempotency).
+- **TODOS:** **Payments** + **Tests — Stripe webhook verification** context lines point at re-add path when handler ships.
+- **Docs:** `DECISIONS.md`, `CHANGELOG.md` [Unreleased].
 
 ### Code review — Admin bookings: pagination or caps (2026-04-10)
 - **API:** `GET /api/admin/bookings` — query `limit` (default 50, max 200) + `offset` (default 0); `400` on negative offset; `data.total` = full row count; `data.limit`, `data.offset`, `data.hasMore`; same enrichment as before (`src/routes/admin.ts`). `GET /api/admin/export/bookings` — `data.total` = full DB count; `last24hCount` via SQL `count` + `gte(createdAt, …)`; rows capped by `ADMIN_EXPORT_MAX_ROWS` (default 10000, max 50000); when capped: `truncated`, `returnedCount`, `totalInDb`, `warning`.

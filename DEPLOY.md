@@ -6,6 +6,8 @@
 
 Deploy order: **API first**, then frontend (so you can set `PUBLIC_API_URL` to the live API).
 
+**Optional — booking UI smoke (no live API):** From repo root, `bun run test:e2e` runs Playwright against `astro dev` and **mocks** `POST …/api/booking` in the browser (no Resend/DB). First time on a machine: `cd web && bunx playwright install chromium`. See **README** (E2E section). CI can run the same command when you add a workflow step.
+
 ---
 
 ## 1. Deploy API on Render
@@ -24,12 +26,27 @@ Deploy order: **API first**, then frontend (so you can set `PUBLIC_API_URL` to t
    | `BOOKING_NOTIFICATION_EMAIL` | Email that receives booking form submissions. |
    | `CLERK_PUBLISHABLE_KEY` | From [Clerk](https://dashboard.clerk.com) (same app as frontend). |
    | `CLERK_SECRET_KEY` | From Clerk. |
+   | `DRIP_CRON_SECRET` | **Optional but recommended** for nurture emails: long random string; must match the **cron** service (see below). |
+   | `PUBLIC_SITE_URL` | **Optional** for drip email links; falls back to `PRODUCTION_URL` / `FRONTEND_URL`. |
+   | `PUBLIC_WHATSAPP_URL` | **Optional** — adds WhatsApp CTA in Email 3 (same pattern as the Astro site). |
 
-4. **DB:** The Blueprint attaches a 1 GB persistent disk at `/data`. `DB_PATH` is set to `/data/sqlite.db`. Migrations run automatically on every start (`bun run migrate && bun run start`).
+4. **DB:** The Blueprint attaches a 1 GB persistent disk at `/data`. `DB_PATH` is set to `/data/sqlite.db`. Migrations and a fast schema check run on every start (`bun run migrate && bun run check-db && bun run start` — see `render.yaml`).
 
-5. Deploy. After deploy, copy the **service URL** (e.g. `https://mto-api.onrender.com`) for the frontend.
+### Bun on Render (Node runtime)
 
-6. In **Clerk Dashboard** → your application → **Paths** / **Allowed redirect URLs**: add your production frontend URL and, if needed, the API URL. Add the frontend origin to **CORS** if Clerk uses it.
+The API service uses **`runtime: node`** with **`buildCommand`** / **`startCommand`** that call the **Bun** CLI (`bun install`, `bun run …`). That assumes Render’s **Node** native environment continues to ship **Bun** alongside Node — true today, but **not a permanent platform guarantee**.
+
+**Checklist (major upgrades):** After you change the service **Node version**, switch **environment type**, or Render ships a **large platform update**, verify before trusting prod traffic:
+
+- [ ] In the Render **Shell** (or a one-off deploy), run **`bun --version`** and confirm **`bun run migrate`** / **`bun run start`** still work.
+
+**If `bun` is missing** from a future image: fall back to something you control — e.g. **`npx bun@latest run migrate`** (and equivalent for `start`), or move the service to a **Docker** deploy with an explicit Bun/Node base image.
+
+5. **Booking nurture drip (optional):** The Blueprint adds **`mto-drip-cron`**, which **cannot** read the API’s SQLite file (different instance / no disk mount). It only **`curl`s** `POST /api/internal/process-drip` on **mto-api**. Set **`DRIP_PROCESS_URL`** on the cron service to your public API URL plus path, e.g. `https://mto-api.onrender.com/api/internal/process-drip`, and set **`DRIP_CRON_SECRET`** to the **same** value on **both** **mto-api** and **mto-drip-cron**. Optional tuning: **`DRIP_EMAIL_2_DELAY_HOURS`**, **`DRIP_EMAIL_3_DELAY_HOURS`**, **`DRIP_BATCH_SIZE`** (see root **`.env.example`**).
+
+6. Deploy. After deploy, copy the **service URL** (e.g. `https://mto-api.onrender.com`) for the frontend.
+
+7. In **Clerk Dashboard** → your application → **Paths** / **Allowed redirect URLs**: add your production frontend URL and, if needed, the API URL. Add the frontend origin to **CORS** if Clerk uses it.
 
 ### Reverse proxy headers (TLS and rate limits)
 

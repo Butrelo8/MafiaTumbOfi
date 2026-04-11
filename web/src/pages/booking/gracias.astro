@@ -1,0 +1,204 @@
+---
+import MarketingLayout from '../../layouts/MarketingLayout.astro'
+import { bookingThanksCanonical } from '../../lib/publicSiteUrl'
+
+const canonicalUrl = bookingThanksCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)
+const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
+
+const title = 'Solicitud recibida — La Mafia Tumbada'
+const description =
+  'Gracias por tu solicitud de contratación. Te contactaremos pronto. Mafia Tumbada, Xalapa Veracruz.'
+---
+
+<MarketingLayout
+  title={title}
+  description={description}
+  canonicalUrl={canonicalUrl}
+  robots="noindex,nofollow"
+>
+
+  <section class="section thanks-page">
+    <div class="container">
+      <div id="thanks-checking" class="thanks-checking" aria-live="polite">
+        <p class="thanks-checking-text">Comprobando tu solicitud…</p>
+      </div>
+
+      <div id="thanks-content" class="thanks-content" hidden>
+        <span class="section-label">Contrataciones</span>
+        <h1 class="thanks-title">Solicitud recibida</h1>
+        <p id="thanks-message" class="thanks-message"></p>
+        <p class="thanks-sub">
+          Revisamos cada mensaje con atención. Si no ves nuestro correo, revisa spam o promociones.
+        </p>
+
+        <div class="thanks-video-wrap" aria-label="Presentación en vivo">
+          <video
+            class="thanks-video"
+            autoplay
+            muted
+            playsinline
+            loop
+            controls
+            poster="/icon/mafiatumbada.png"
+          >
+            <source src="/video/hero.mp4" type="video/mp4" />
+          </video>
+          <p class="thanks-video-caption">
+            <a href="/video/hero.mp4" class="thanks-video-link">Ver presentación en vivo</a> (descarga / reproducción)
+          </p>
+        </div>
+
+        <div class="thanks-actions">
+          {
+            whatsappUrl ? (
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" class="btn-primary">
+                WhatsApp directo
+              </a>
+            ) : (
+              <p class="thanks-whatsapp-fallback">
+                Escríbenos por el formulario de contacto en <a href="/booking">Contrataciones</a> si necesitas otro canal.
+              </p>
+            )
+          }
+          <a href="/booking" class="btn-secondary">Nueva solicitud</a>
+          <a href="/" class="btn-secondary">Volver al inicio</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer-bar">
+    <div class="container">
+      <span class="footer-brand">Mafia Tumbada</span>
+      <p class="footer-copy">
+        © {new Date().getFullYear()} · Xalapa, Veracruz · Todos los derechos reservados
+      </p>
+    </div>
+  </footer>
+</MarketingLayout>
+
+<style>
+  .thanks-page {
+    padding-block: clamp(3rem, 8vw, 5rem);
+    min-height: 50vh;
+  }
+
+  .thanks-checking-text {
+    font-size: 0.95rem;
+    color: var(--muted, #7a7267);
+  }
+
+  .thanks-content[hidden] {
+    display: none !important;
+  }
+
+  .thanks-title {
+    font-family: var(--ff-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0.5rem 0 1rem;
+  }
+
+  .thanks-message {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--text, #ede8df);
+    margin: 0 0 1rem;
+    max-width: 40rem;
+  }
+
+  .thanks-sub {
+    font-size: 0.88rem;
+    color: var(--muted, #7a7267);
+    margin: 0 0 2rem;
+    max-width: 36rem;
+  }
+
+  .thanks-video-wrap {
+    margin-bottom: 2rem;
+    max-width: 720px;
+  }
+
+  .thanks-video {
+    width: 100%;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border, #262420);
+    background: #000;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .thanks-video {
+      display: none;
+    }
+  }
+
+  .thanks-video-caption {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .thanks-video-link {
+    color: var(--gold, #c49a2a);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .thanks-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .thanks-whatsapp-fallback {
+    font-size: 0.9rem;
+    color: var(--muted, #7a7267);
+    max-width: 32rem;
+    margin: 0;
+  }
+
+  .thanks-whatsapp-fallback a {
+    color: var(--gold, #c49a2a);
+    text-decoration: underline;
+  }
+</style>
+
+<script>
+  import {
+    BOOKING_THANKS_SESSION_KEY,
+    parseBookingThanksStored,
+  } from '../../lib/bookingThanksSession'
+
+  const MESSAGES = {
+    sent: 'Mensaje enviado. Te contactaremos pronto.',
+    pending:
+      'Recibimos tu solicitud. Te contactaremos pronto (la confirmación por correo no pudo enviarse).',
+    default: 'Recibimos tu solicitud. Te contactaremos pronto.',
+  } as const
+
+  const checking = document.getElementById('thanks-checking')
+  const content = document.getElementById('thanks-content')
+  const messageEl = document.getElementById('thanks-message')
+
+  const raw = sessionStorage.getItem(BOOKING_THANKS_SESSION_KEY)
+  const stored = parseBookingThanksStored(raw)
+
+  if (!stored || !messageEl || !content || !checking) {
+    window.location.replace('/booking')
+  } else {
+    const { confirmation } = stored
+    sessionStorage.removeItem(BOOKING_THANKS_SESSION_KEY)
+
+    const text =
+      confirmation === 'sent'
+        ? MESSAGES.sent
+        : confirmation === 'pending'
+          ? MESSAGES.pending
+          : MESSAGES.default
+    messageEl.textContent = text
+
+    checking.hidden = true
+    content.hidden = false
+  }
+</script>

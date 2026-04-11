@@ -3,17 +3,19 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { db } from '../db'
 import { bookings } from '../db/schema'
+import { BOOKING_BUDGET_VALUES, BUDGET_LABELS } from '../lib/bookingBudget'
+import { computeBookingLeadScore } from '../lib/bookingLeadScore'
+import { computeDripDueDatesFromCreatedAt } from '../lib/dripSchedule'
 import { errorResponse, successResponse } from '../lib/errors'
 import { getResend } from '../lib/resend'
-import { spanishErrorMap } from '../lib/zod-es'
-import { getClientId, rateLimitBooking } from '../middleware/rateLimit'
 import {
   logServerError,
   logServerErrorDetails,
   logServerInfo,
   logServerWarning,
 } from '../lib/safeLog'
-import { BUDGET_LABELS, BOOKING_BUDGET_VALUES } from '../lib/bookingBudget'
+import { spanishErrorMap } from '../lib/zod-es'
+import { getClientId, rateLimitBooking } from '../middleware/rateLimit'
 
 async function markBandEmailFailed(bookingId: number) {
   await db
@@ -59,9 +61,10 @@ bookingRoutes.post('/booking', async (c) => {
   const parsed = bookingSchema.safeParse(body, { errorMap: spanishErrorMap })
   if (!parsed.success) {
     const first = parsed.error.flatten().fieldErrors
-    const message = Object.entries(first)
-      .map(([, v]) => (Array.isArray(v) ? v[0] : v))
-      .join('; ') || 'Error de validación'
+    const message =
+      Object.entries(first)
+        .map(([, v]) => (Array.isArray(v) ? v[0] : v))
+        .join('; ') || 'Error de validación'
     return errorResponse(c, 400, 'VALIDATION_ERROR', message)
   }
 
@@ -97,6 +100,19 @@ bookingRoutes.post('/booking', async (c) => {
     return errorResponse(c, 500, 'CONFIG_ERROR', 'Booking email is not configured')
   }
 
+  const { leadScore, leadPriority } = computeBookingLeadScore({
+    budget: budget ?? null,
+    city: city ?? null,
+    eventType: eventType ?? null,
+    duration: duration ?? null,
+    showType: showType ?? null,
+    attendees: attendees ?? null,
+    venueSound: venueSound ?? null,
+  })
+
+  const createdAt = new Date()
+  const { drip2DueAt, drip3DueAt } = computeDripDueDatesFromCreatedAt(createdAt)
+
   let inserted: { id: number }
   try {
     const insertedRows = await db
@@ -113,32 +129,28 @@ bookingRoutes.post('/booking', async (c) => {
         attendees: attendees ?? null,
         venueSound: venueSound ?? null,
         budget: budget ?? null,
+        leadScore,
+        leadPriority,
         message: message ?? null,
+        pipelineStatus: 'new',
         status: 'pending',
         confirmationLastError: null,
         confirmationAttempts: 0,
+        createdAt,
+        drip2DueAt,
+        drip3DueAt,
       })
       .returning({ id: bookings.id })
 
     const row = insertedRows[0]
     if (!row) {
       logServerError('booking', 'INSERT_RETURN_EMPTY', new Error('insert returned no row'))
-      return errorResponse(
-        c,
-        500,
-        'BOOKING_PERSIST_FAILED',
-        'No se pudo guardar la solicitud.',
-      )
+      return errorResponse(c, 500, 'BOOKING_PERSIST_FAILED', 'No se pudo guardar la solicitud.')
     }
     inserted = row
   } catch (err) {
     logServerError('booking', 'BOOKING_INSERT_FAILED', err)
-    return errorResponse(
-      c,
-      500,
-      'BOOKING_PERSIST_FAILED',
-      'No se pudo guardar la solicitud.',
-    )
+    return errorResponse(c, 500, 'BOOKING_PERSIST_FAILED', 'No se pudo guardar la solicitud.')
   }
 
   logServerInfo('booking', 'REQUEST_RECEIVED', {
@@ -187,12 +199,7 @@ bookingRoutes.post('/booking', async (c) => {
         name: error.name,
       })
       await markBandEmailFailed(inserted.id)
-      return errorResponse(
-        c,
-        500,
-        'EMAIL_FAILED',
-        'Could not send booking request',
-      )
+      return errorResponse(c, 500, 'EMAIL_FAILED', 'Could not send booking request')
     }
   } catch (err) {
     logServerError('booking', 'RESEND_BAND_THROW', err)

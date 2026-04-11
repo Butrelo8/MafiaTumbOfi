@@ -28,8 +28,7 @@ export const BUDGET_HINTS: Record<BookingBudget, string> = {
   '15k_30k': 'Buen punto de partida para cotizar con detalle sin apuros.',
   '30k_50k': 'Aquí suele entrar show completo con logística base en la zona.',
   '50k_100k': 'Hay margen para producción, transporte y extras según tu fecha.',
-  mas_100k:
-    'Gracias por la confianza — podemos coordinar una llamada para afinar todo.',
+  mas_100k: 'Gracias por la confianza — podemos coordinar una llamada para afinar todo.',
 }
 
 /** First `<option value="">` label on `/booking` (not a tier). */
@@ -52,9 +51,7 @@ export const BOOKING_BUDGET_HINTS_WITH_EMPTY: Record<string, string> = {
  */
 export const BOOKING_BUDGET_SORT_RANK: Record<string, number> = {
   '': 0,
-  ...Object.fromEntries(
-    BOOKING_BUDGET_VALUES.map((value, index) => [value, index + 1]),
-  ),
+  ...Object.fromEntries(BOOKING_BUDGET_VALUES.map((value, index) => [value, index + 1])),
 }
 
 export function isBookingBudget(value: string): value is BookingBudget {

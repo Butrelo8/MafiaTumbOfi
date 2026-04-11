@@ -1,7 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro'
 import { formatBudgetLabel } from '../../../src/lib/bookingBudget'
+import {
+  BOOKING_PIPELINE_STATUS_VALUES,
+  formatPipelineStatusLabel,
+} from '../../../src/lib/bookingPipeline'
+import { formatLeadPriorityLabel } from '../../../src/lib/bookingLeadScore'
 import { normalizePublicApiBaseUrl } from '../lib/publicApiUrl'
+import { adminCanonical } from '../lib/publicSiteUrl'
 import { sanitizeResendDetail } from '../lib/sanitizeResendDetail'
 
 const { isAuthenticated, redirectToSignIn, getToken } = Astro.locals.auth()
@@ -12,6 +18,7 @@ if (!isAuthenticated) {
 
 export const prerender = false
 
+const adminCanonicalUrl = adminCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)
 const apiUrl = normalizePublicApiBaseUrl(import.meta.env.PUBLIC_API_URL)
 const resendParam = Astro.url.searchParams.get('resend')
 let resendMessage: string | null = null
@@ -31,6 +38,18 @@ if (resendParam === 'ok') {
   resendMessage = 'Solicitud inválida para reenviar confirmación.'
 }
 
+const pipelineParam = Astro.url.searchParams.get('pipeline')
+let pipelineMessage: string | null = null
+let pipelineIsOk = false
+if (pipelineParam === 'ok') {
+  pipelineIsOk = true
+  pipelineMessage = 'Seguimiento actualizado.'
+} else if (pipelineParam === 'error') {
+  pipelineMessage = 'No se pudo actualizar el seguimiento. Intenta de nuevo.'
+} else if (pipelineParam === 'invalid') {
+  pipelineMessage = 'Solicitud inválida para actualizar seguimiento.'
+}
+
 let bookings: Array<{
   id: number
   name: string
@@ -38,9 +57,12 @@ let bookings: Array<{
   phone: string | null
   eventDate: string | null
   budget: string | null
+  leadScore: number | null
+  leadPriority: string | null
   estimatedPriceRange: string
   message: string | null
   status: string
+  pipelineStatus?: string | null
   confirmationLastError: string | null
   confirmationAttempts: number
   createdAt: number | Date
@@ -96,7 +118,11 @@ try {
 }
 ---
 
-<Layout title="Admin - Bookings" description="Panel de administración de solicitudes.">
+<Layout
+  title="Admin - Bookings"
+  description="Panel de administración de solicitudes."
+  canonicalUrl={adminCanonicalUrl}
+>
   <div class="admin-container">
     <h1>Bookings Management</h1>
 
@@ -110,10 +136,22 @@ try {
       </div>
     )}
 
-    <div class="status-legend" role="note" aria-label="Significado de estados">
-      <p><strong>sent</strong>: ambos correos fueron enviados correctamente.</p>
-      <p><strong>pending</strong>: el correo al equipo fue enviado, pero la confirmación al cliente falló.</p>
-      <p><strong>failed</strong>: el correo al equipo falló (la solicitud no pudo procesarse).</p>
+    {pipelineMessage && (
+      <div class={`resend-banner ${pipelineIsOk ? 'resend-ok' : 'resend-error'}`}>
+        {pipelineMessage}
+      </div>
+    )}
+
+    <div class="status-legend" role="note" aria-label="Correo vs seguimiento">
+      <p>
+        <strong>Columna Status (correo):</strong>{' '}
+        <strong>sent</strong> = ambos correos enviados; <strong>pending</strong> = al cliente falló la
+        confirmación; <strong>failed</strong> = falló el correo al equipo.
+      </p>
+      <p>
+        <strong>Seguimiento:</strong> Nuevo / Contactado / Cerrado — independiente del envío de correo.
+        Cambia con el menú; se guarda al elegir.
+      </p>
     </div>
 
     {error && (
@@ -145,8 +183,13 @@ try {
               <th class="sortable" data-sort="budget" scope="col">
                 Budget <span class="sort-indicator" aria-hidden="true"></span>
               </th>
+              <th>Prioridad</th>
+              <th class="sortable" data-sort="leadScore" scope="col">
+                Lead score <span class="sort-indicator" aria-hidden="true"></span>
+              </th>
               <th>Est. Price</th>
               <th>Status</th>
+              <th>Seguimiento</th>
                 <th>Attempts</th>
                 <th>Last confirmation error</th>
                 <th>Operator</th>
@@ -166,11 +209,32 @@ try {
                 <td data-cell="budget" data-budget={booking.budget ?? ''}>
                   {formatBudgetLabel(booking.budget)}
                 </td>
+                <td>{formatLeadPriorityLabel(booking.leadPriority)}</td>
+                <td data-cell="leadScore" data-lead-score={booking.leadScore ?? ''}>
+                  {booking.leadScore == null ? '-' : booking.leadScore}
+                </td>
                 <td>{booking.estimatedPriceRange ?? '-'}</td>
                 <td>
                   <span class={`status-badge status-${booking.status}`}>
                     {booking.status}
                   </span>
+                </td>
+                <td>
+                  <form method="post" action="/admin/update-pipeline" class="pipeline-form">
+                    <input type="hidden" name="bookingId" value={booking.id} />
+                    <select
+                      name="pipelineStatus"
+                      class="pipeline-select"
+                      aria-label={`Seguimiento solicitud ${booking.id}`}
+                      onchange="this.form.requestSubmit()"
+                    >
+                      {BOOKING_PIPELINE_STATUS_VALUES.map((v) => (
+                        <option value={v} selected={(booking.pipelineStatus ?? 'new') === v}>
+                          {formatPipelineStatusLabel(v)}
+                        </option>
+                      ))}
+                    </select>
+                  </form>
                 </td>
                 <td>
                   {booking.status === 'failed' ? '-' : booking.confirmationAttempts}
@@ -235,6 +299,7 @@ try {
       const tbody = document.querySelector('.bookings-table tbody')
       if (!tbody) return
       const budgetTh = document.querySelector('.bookings-table th[data-sort="budget"]')
+      const leadScoreTh = document.querySelector('.bookings-table th[data-sort="leadScore"]')
       const createdTh = document.querySelector('.bookings-table th[data-sort="created"]')
       let activeKey = null
       let activeDir = 'asc'
@@ -260,12 +325,19 @@ try {
                 const b = td?.getAttribute('data-budget') ?? ''
                 return budgetRanks[b] ?? 0
               }
-            : (row) => {
-                const td = row.querySelector('td[data-cell="created"]')
-                const t = td?.getAttribute('data-timestamp')
-                const n = t ? Number(t) : 0
-                return Number.isFinite(n) ? n : 0
-              }
+            : key === 'leadScore'
+              ? (row) => {
+                  const td = row.querySelector('td[data-cell="leadScore"]')
+                  const s = td?.getAttribute('data-lead-score') ?? ''
+                  const n = s === '' ? 0 : Number(s)
+                  return Number.isFinite(n) ? n : 0
+                }
+              : (row) => {
+                  const td = row.querySelector('td[data-cell="created"]')
+                  const t = td?.getAttribute('data-timestamp')
+                  const n = t ? Number(t) : 0
+                  return Number.isFinite(n) ? n : 0
+                }
         rows.sort((a, b) => {
           const va = getVal(a)
           const vb = getVal(b)
@@ -274,10 +346,13 @@ try {
           return dir === 'asc' ? cmp : -cmp
         })
         rows.forEach((r) => tbody.appendChild(r))
-        setIndicator(key === 'budget' ? budgetTh : createdTh, dir)
+        const activeTh =
+          key === 'budget' ? budgetTh : key === 'leadScore' ? leadScoreTh : createdTh
+        setIndicator(activeTh, dir)
       }
 
       budgetTh?.addEventListener('click', () => sortBy('budget'))
+      leadScoreTh?.addEventListener('click', () => sortBy('leadScore'))
       createdTh?.addEventListener('click', () => sortBy('created'))
     })()
   </script>
@@ -444,8 +519,14 @@ try {
     color: #991b1b;
   }
 
-  .resend-form {
+  .resend-form,
+  .pipeline-form {
     margin: 0;
+  }
+
+  .pipeline-select {
+    font-size: 0.875rem;
+    max-width: 10rem;
   }
 
   .resend-button {

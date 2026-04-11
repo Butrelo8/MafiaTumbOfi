@@ -47,25 +47,29 @@ describe('estimatedPriceRange', () => {
 
   test('scales with duration', () => {
     // Local, <100 attendees, 2h
-    expect(
-      estimatedPriceRange({ city: 'Monterrey', duration: '2h', attendees: 'menos_100' })
-    ).toBe('27k – 45k MXN')
+    expect(estimatedPriceRange({ city: 'Monterrey', duration: '2h', attendees: 'menos_100' })).toBe(
+      '27k – 45k MXN',
+    )
 
     // Local, <100 attendees, 3h_mas
     expect(
-      estimatedPriceRange({ city: 'Monterrey', duration: '3h_mas', attendees: 'menos_100' })
+      estimatedPriceRange({ city: 'Monterrey', duration: '3h_mas', attendees: 'menos_100' }),
     ).toBe('38k – 63k MXN')
   })
 
   test('scales with attendees', () => {
     // Local, 1h, 500_1000 attendees
-    expect(
-      estimatedPriceRange({ city: 'Monterrey', duration: '1h', attendees: '500_1000' })
-    ).toBe('21k – 40k MXN')
+    expect(estimatedPriceRange({ city: 'Monterrey', duration: '1h', attendees: '500_1000' })).toBe(
+      '21k – 40k MXN',
+    )
   })
 
   test('handles unknown duration and attendees gracefully (falls back)', () => {
-    const res = estimatedPriceRange({ city: 'Monterrey', duration: 'garbage', attendees: 'garbage' })
+    const res = estimatedPriceRange({
+      city: 'Monterrey',
+      duration: 'garbage',
+      attendees: 'garbage',
+    })
     // Uses defaults: duration(no_definido fallback) + attendees fallback
     expect(res).toBe('15k – 45k MXN')
   })

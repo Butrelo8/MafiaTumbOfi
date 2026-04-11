@@ -1,8 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import {
-  getForwardedProtoFromRequest,
-  parseForwardedHeaderProto,
-} from './forwardedProto'
+import { getForwardedProtoFromRequest, parseForwardedHeaderProto } from './forwardedProto'
 
 describe('parseForwardedHeaderProto', () => {
   test('extracts proto from first segment', () => {
@@ -14,11 +11,9 @@ describe('parseForwardedHeaderProto', () => {
   })
 
   test('uses first comma-separated forwarded pair', () => {
-    expect(
-      parseForwardedHeaderProto(
-        'proto=https;host=a.com, for=9.9.9.9;proto=http',
-      ),
-    ).toBe('https')
+    expect(parseForwardedHeaderProto('proto=https;host=a.com, for=9.9.9.9;proto=http')).toBe(
+      'https',
+    )
   })
 
   test('returns undefined when missing', () => {

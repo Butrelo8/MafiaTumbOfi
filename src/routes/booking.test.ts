@@ -1,5 +1,7 @@
-import { describe, expect, mock, test } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test'
 import { Hono } from 'hono'
+import type { Resend } from 'resend'
+import { setResendForTesting } from '../lib/resend'
 
 const mockDb = {
   insert: () => ({
@@ -14,17 +16,26 @@ const mockDb = {
   }),
 }
 
-mock.module('../db', () => ({ db: mockDb }))
-mock.module('../lib/resend', () => ({
-  getResend: () => ({
+function defaultResendMock(): Resend {
+  return {
     emails: {
       send: async () => ({ data: { id: 'mock-id' }, error: null }),
     },
-  }),
-}))
+  } as Resend
+}
+
+mock.module('../db', () => ({ db: mockDb }))
 
 const { bookingRoutes } = await import('./booking')
 const app = new Hono().route('/api', bookingRoutes)
+
+beforeEach(() => {
+  setResendForTesting(defaultResendMock())
+})
+
+afterEach(() => {
+  setResendForTesting(null)
+})
 
 describe('POST /api/booking', () => {
   test('returns 400 for invalid JSON', async () => {
@@ -109,20 +120,16 @@ describe('POST /api/booking', () => {
 
   test('calls Resend twice on success (band notification + confirmation)', async () => {
     let sendCalls = 0
-    mock.module('../lib/resend', () => ({
-      getResend: () => ({
-        emails: {
-          send: async () => {
-            sendCalls += 1
-            return { data: { id: 'mock-id' }, error: null }
-          },
+    setResendForTesting({
+      emails: {
+        send: async () => {
+          sendCalls += 1
+          return { data: { id: 'mock-id' }, error: null }
         },
-      }),
-    }))
-    const { bookingRoutes: bookingRoutesConfirm } = await import('./booking')
-    const appConfirm = new Hono().route('/api', bookingRoutesConfirm)
+      },
+    } as Resend)
     process.env.BOOKING_NOTIFICATION_EMAIL = 'band@example.com'
-    const res = await appConfirm.request('/api/booking', {
+    const res = await app.request('/api/booking', {
       method: 'POST',
       body: JSON.stringify({ name: 'A', email: 'a@b.com' }),
       headers: { 'Content-Type': 'application/json', 'x-forwarded-for': '10.0.0.1' },
@@ -132,17 +139,13 @@ describe('POST /api/booking', () => {
   })
 
   test('returns 500 and EMAIL_FAILED when Resend send fails', async () => {
-    mock.module('../lib/resend', () => ({
-      getResend: () => ({
-        emails: {
-          send: async () => ({ data: null, error: { message: 'Resend API error' } }),
-        },
-      }),
-    }))
-    const { bookingRoutes: bookingRoutesFail } = await import('./booking')
-    const appFail = new Hono().route('/api', bookingRoutesFail)
+    setResendForTesting({
+      emails: {
+        send: async () => ({ data: null, error: { message: 'Resend API error' } }),
+      },
+    } as Resend)
     process.env.BOOKING_NOTIFICATION_EMAIL = 'band@example.com'
-    const res = await appFail.request('/api/booking', {
+    const res = await app.request('/api/booking', {
       method: 'POST',
       body: JSON.stringify({ name: 'Test', email: 'test@example.com' }),
       headers: {
@@ -181,17 +184,15 @@ describe('POST /api/booking', () => {
       }),
     }
     mock.module('../db', () => ({ db: captureDb }))
-    mock.module('../lib/resend', () => ({
-      getResend: () => ({
-        emails: {
-          send: async () => {
-            callCount += 1
-            if (callCount === 1) return { data: { id: 'ok' }, error: null }
-            return { data: null, error: { message: 'Confirmation rejected' } }
-          },
+    setResendForTesting({
+      emails: {
+        send: async () => {
+          callCount += 1
+          if (callCount === 1) return { data: { id: 'ok' }, error: null }
+          return { data: null, error: { message: 'Confirmation rejected' } }
         },
-      }),
-    }))
+      },
+    } as Resend)
     const { bookingRoutes: routes } = await import('./booking')
     const testApp = new Hono().route('/api', routes)
     process.env.BOOKING_NOTIFICATION_EMAIL = 'band@example.com'
@@ -234,17 +235,15 @@ describe('POST /api/booking', () => {
     }
 
     mock.module('../db', () => ({ db: captureDb }))
-    mock.module('../lib/resend', () => ({
-      getResend: () => ({
-        emails: {
-          send: async () => {
-            callCount += 1
-            if (callCount === 1) return { data: { id: 'ok' }, error: null }
-            throw new Error('Resend failure during confirmation')
-          },
+    setResendForTesting({
+      emails: {
+        send: async () => {
+          callCount += 1
+          if (callCount === 1) return { data: { id: 'ok' }, error: null }
+          throw new Error('Resend failure during confirmation')
         },
-      }),
-    }))
+      },
+    } as Resend)
 
     const { bookingRoutes: routes } = await import('./booking')
     const testApp = new Hono().route('/api', routes)
@@ -336,13 +335,6 @@ describe('POST /api/booking', () => {
       }),
     }
     mock.module('../db', () => ({ db: captureDb }))
-    mock.module('../lib/resend', () => ({
-      getResend: () => ({
-        emails: {
-          send: async () => ({ data: { id: 'mock-id' }, error: null }),
-        },
-      }),
-    }))
     const { bookingRoutes: routesExtended } = await import('./booking')
     const appExtended = new Hono().route('/api', routesExtended)
     process.env.BOOKING_NOTIFICATION_EMAIL = 'band@example.com'
@@ -374,6 +366,7 @@ describe('POST /api/booking', () => {
     expect(insertRow?.attendees).toBe('100_300')
     expect(insertRow?.venueSound).toBe('si')
     expect(insertRow?.budget).toBe('30k_50k')
+    expect(insertRow?.pipelineStatus).toBe('new')
   })
 
   test('returns 201 when budget is omitted', async () => {
@@ -409,13 +402,6 @@ describe('POST /api/booking', () => {
       }),
     }
     mock.module('../db', () => ({ db: captureDb }))
-    mock.module('../lib/resend', () => ({
-      getResend: () => ({
-        emails: {
-          send: async () => ({ data: { id: 'mock-id' }, error: null }),
-        },
-      }),
-    }))
     const { bookingRoutes: routesNoBudget } = await import('./booking')
     const appNoBudget = new Hono().route('/api', routesNoBudget)
     process.env.BOOKING_NOTIFICATION_EMAIL = 'band@example.com'
@@ -429,6 +415,7 @@ describe('POST /api/booking', () => {
     })
     expect(res.status).toBe(201)
     expect(insertRow?.budget).toBeNull()
+    expect(insertRow?.pipelineStatus).toBe('new')
   })
 
   test('returns 400 VALIDATION_ERROR when budget has invalid value', async () => {
@@ -447,5 +434,31 @@ describe('POST /api/booking', () => {
     expect(res.status).toBe(400)
     const data = await res.json()
     expect(data.error?.code).toBe('VALIDATION_ERROR')
+  })
+
+  test('rate limit: returns 429 after 5 requests per IP', async () => {
+    process.env.BOOKING_NOTIFICATION_EMAIL = 'band@example.com'
+    const ip = '198.51.100.77'
+    const headers = {
+      'Content-Type': 'application/json',
+      'x-forwarded-for': ip,
+    }
+    const body = JSON.stringify({ name: 'Rate limit', email: 'limit@example.com' })
+    for (let i = 0; i < 5; i++) {
+      const res = await app.request('/api/booking', {
+        method: 'POST',
+        headers,
+        body,
+      })
+      expect(res.status).not.toBe(429)
+    }
+    const res = await app.request('/api/booking', {
+      method: 'POST',
+      headers,
+      body,
+    })
+    expect(res.status).toBe(429)
+    const data = await res.json()
+    expect(data.error?.code).toBe('RATE_LIMITED')
   })
 })

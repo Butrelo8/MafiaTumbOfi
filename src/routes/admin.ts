@@ -1,18 +1,22 @@
-import { Hono } from 'hono'
 import { count, desc, eq, gte } from 'drizzle-orm'
-import { authMiddleware } from '../middleware/auth'
-import { adminAuth } from '../middleware/adminAuth'
-import { errorResponse, successResponse } from '../lib/errors'
+import { Hono } from 'hono'
+import { z } from 'zod'
 import { db } from '../db'
 import { bookings } from '../db/schema'
-import { getResend } from '../lib/resend'
 import { isAdminBookingExportAllowed } from '../lib/adminBookingExport'
-import { logServerError, logServerErrorDetails } from '../lib/safeLog'
+import { getAdminExportMaxRows, parseAdminBookingsListParams } from '../lib/adminBookingsQuery'
+import { BOOKING_PIPELINE_STATUS_VALUES } from '../lib/bookingPipeline'
+import { errorResponse, successResponse } from '../lib/errors'
 import { estimatedPriceRange } from '../lib/estimatedPriceRange'
-import {
-  getAdminExportMaxRows,
-  parseAdminBookingsListParams,
-} from '../lib/adminBookingsQuery'
+import { getResend } from '../lib/resend'
+import { logServerError, logServerErrorDetails } from '../lib/safeLog'
+import { spanishErrorMap } from '../lib/zod-es'
+import { adminAuth } from '../middleware/adminAuth'
+import { authMiddleware } from '../middleware/auth'
+
+const patchPipelineBodySchema = z.object({
+  pipelineStatus: z.enum(BOOKING_PIPELINE_STATUS_VALUES),
+})
 
 export const adminRoutes = new Hono()
 
@@ -62,6 +66,47 @@ adminRoutes.get('/bookings', async (c) => {
   }
 })
 
+adminRoutes.patch('/bookings/:id', async (c) => {
+  const idParam = c.req.param('id')
+  const id = Number(idParam)
+  if (!idParam || Number.isNaN(id) || !Number.isInteger(id) || id <= 0) {
+    return errorResponse(c, 400, 'VALIDATION_ERROR', 'Invalid booking id')
+  }
+
+  let body: unknown
+  try {
+    body = await c.req.json()
+  } catch {
+    return errorResponse(c, 400, 'INVALID_JSON', 'Invalid JSON body')
+  }
+
+  const parsed = patchPipelineBodySchema.safeParse(body, { errorMap: spanishErrorMap })
+  if (!parsed.success) {
+    const first = parsed.error.flatten().fieldErrors
+    const message =
+      Object.entries(first)
+        .map(([, v]) => (Array.isArray(v) ? v[0] : v))
+        .join('; ') || 'Error de validación'
+    return errorResponse(c, 400, 'VALIDATION_ERROR', message)
+  }
+
+  const { pipelineStatus } = parsed.data
+
+  try {
+    const existing = await db.select().from(bookings).where(eq(bookings.id, id)).get()
+    if (!existing) {
+      return errorResponse(c, 404, 'NOT_FOUND', 'Booking not found')
+    }
+
+    await db.update(bookings).set({ pipelineStatus }).where(eq(bookings.id, id))
+
+    return successResponse(c, { id, pipelineStatus }, 200)
+  } catch (error) {
+    logServerError('admin', 'PATCH_BOOKING_PIPELINE_FAILED', error)
+    return errorResponse(c, 500, 'INTERNAL_ERROR', 'Failed to update pipeline status')
+  }
+})
+
 adminRoutes.post('/bookings/:id/resend-confirmation', async (c) => {
   const idParam = c.req.param('id')
   const id = Number(idParam)
@@ -70,11 +115,7 @@ adminRoutes.post('/bookings/:id/resend-confirmation', async (c) => {
   }
 
   try {
-    const booking = await db
-      .select()
-      .from(bookings)
-      .where(eq(bookings.id, id))
-      .get()
+    const booking = await db.select().from(bookings).where(eq(bookings.id, id)).get()
 
     if (!booking) {
       return errorResponse(c, 404, 'NOT_FOUND', 'Booking not found')

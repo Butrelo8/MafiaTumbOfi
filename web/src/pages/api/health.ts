@@ -1,4 +1,5 @@
-import type { APIRoute } from 'astro';
+import type { APIRoute } from 'astro'
+import { getWebAppVersion } from '../../lib/webAppVersion'
 
 /**
  * Health check for the frontend (Vercel). Used by N8N or monitors.
@@ -6,12 +7,16 @@ import type { APIRoute } from 'astro';
  */
 export const GET: APIRoute = () => {
   return new Response(
-    JSON.stringify({ status: 'ok', source: 'frontend', version: '0.4.0' }),
+    JSON.stringify({
+      status: 'ok',
+      source: 'frontend',
+      version: getWebAppVersion(),
+    }),
     {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
-    }
-  );
-};
+    },
+  )
+}
 
-export const prerender = false;
+export const prerender = false

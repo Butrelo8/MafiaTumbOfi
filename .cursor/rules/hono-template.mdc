@@ -13,7 +13,7 @@ This project was created from **hono-template**. Use these conventions so rules 
 - **Framework:** Hono
 - **Database:** PostgreSQL + Drizzle ORM
 - **Auth:** Clerk
-- **Payments:** Stripe
+- **Payments:** Stripe (when shop/webhooks ship — SDK not in repo until then)
 
 ## Conventions
 
@@ -35,7 +35,8 @@ This project was created from **hono-template**. Use these conventions so rules 
 
 ### Stripe
 
-- Use `stripe` and `verifyWebhookSignature` from `src/lib/stripe`. Always verify webhook signatures before processing.
+- **Not bundled today:** no `stripe` package until `POST /api/webhooks/stripe` (or checkout) is implemented — see **Payments** todo in `TODOS.md`.
+- When adding webhooks: `bun add stripe`, lazy-init client with `STRIPE_SECRET_KEY`, verify payloads with `constructEvent` + `STRIPE_WEBHOOK_SECRET` before handling events, idempotency keys for side effects.
 
 ### Structure
 

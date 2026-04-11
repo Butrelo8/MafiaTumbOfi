@@ -1,10 +1,5 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test'
-import {
-  logServerError,
-  logServerErrorDetails,
-  logServerInfo,
-  logServerWarning,
-} from './safeLog'
+import { logServerError, logServerErrorDetails, logServerInfo, logServerWarning } from './safeLog'
 
 describe('safeLog', () => {
   const lines: string[] = []

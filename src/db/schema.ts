@@ -25,9 +25,21 @@ export const bookings = sqliteTable('bookings', {
   attendees: text('attendees'),
   venueSound: text('venue_sound'),
   budget: text('budget'),
+  /** 0–1000; computed once at booking insert (`computeBookingLeadScore`). */
+  leadScore: integer('lead_score'),
+  /** `low` | `medium` | `high`; derived from `lead_score` bands at insert. */
+  leadPriority: text('lead_priority'),
   message: text('message'),
+  /** Follow-up: `new` | `contacted` | `closed` — not email delivery; see `status`. */
+  pipelineStatus: text('pipeline_status').notNull().default('new'),
   status: text('status').notNull().default('pending'),
   confirmationLastError: text('confirmation_last_error'),
   confirmationAttempts: integer('confirmation_attempts').notNull().default(0),
+  /** When Email 2 (nurture) should send; set at insert from `createdAt` + delay. */
+  drip2DueAt: integer('drip2_due_at', { mode: 'timestamp' }),
+  drip2SentAt: integer('drip2_sent_at', { mode: 'timestamp' }),
+  /** When Email 3 (urgency) should send; set at insert from `createdAt` + delay. */
+  drip3DueAt: integer('drip3_due_at', { mode: 'timestamp' }),
+  drip3SentAt: integer('drip3_sent_at', { mode: 'timestamp' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 })

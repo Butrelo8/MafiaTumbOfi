@@ -36,12 +36,9 @@ mock.module('../db', () => ({
         !Array.isArray(fields) &&
         'total' in (fields as Record<string, unknown>)
       if (isCount) {
-        const fromResult = Object.assign(
-          Promise.resolve([{ total: mockBookings.length }]),
-          {
-            where: () => Promise.resolve([{ total: 0 }]),
-          },
-        )
+        const fromResult = Object.assign(Promise.resolve([{ total: mockBookings.length }]), {
+          where: () => Promise.resolve([{ total: 0 }]),
+        })
         return {
           from: () => fromResult,
         }
@@ -51,13 +48,11 @@ mock.module('../db', () => ({
           orderBy: () => ({
             limit: (lim: number) => {
               const sorted = [...mockBookings].sort(
-                (a, b) =>
-                  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+                (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
               )
               const page = Promise.resolve(sorted.slice(0, lim))
               return Object.assign(page, {
-                offset: (off: number) =>
-                  Promise.resolve(sorted.slice(off, off + lim)),
+                offset: (off: number) => Promise.resolve(sorted.slice(off, off + lim)),
               })
             },
           }),
@@ -189,11 +184,7 @@ describe('Admin Routes', () => {
     const lines: string[] = []
     const origLog = console.log
     console.log = (...args: unknown[]) => {
-      lines.push(
-        args
-          .map((a) => (typeof a === 'string' ? a : JSON.stringify(a)))
-          .join(' '),
-      )
+      lines.push(args.map((a) => (typeof a === 'string' ? a : JSON.stringify(a))).join(' '))
     }
     try {
       process.env.NODE_ENV = 'development'
@@ -227,11 +218,7 @@ describe('Admin Routes', () => {
     const lines: string[] = []
     const origLog = console.log
     console.log = (...args: unknown[]) => {
-      lines.push(
-        args
-          .map((a) => (typeof a === 'string' ? a : JSON.stringify(a)))
-          .join(' '),
-      )
+      lines.push(args.map((a) => (typeof a === 'string' ? a : JSON.stringify(a))).join(' '))
     }
     try {
       process.env.NODE_ENV = 'production'

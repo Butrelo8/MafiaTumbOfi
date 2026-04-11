@@ -1,8 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import {
-  MAX_RESEND_DETAIL_LEN,
-  sanitizeResendDetail,
-} from './sanitizeResendDetail'
+import { MAX_RESEND_DETAIL_LEN, sanitizeResendDetail } from './sanitizeResendDetail'
 
 describe('sanitizeResendDetail', () => {
   test('returns null for null and empty', () => {

@@ -2,12 +2,7 @@ import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const packageJsonPath = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '..',
-  '..',
-  'package.json',
-)
+const packageJsonPath = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'package.json')
 
 function readPackageJsonVersion(): string {
   const raw = readFileSync(packageJsonPath, 'utf-8')

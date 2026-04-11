@@ -1,7 +1,7 @@
 import type { Context, Next } from 'hono'
 import { errorResponse } from '../lib/errors'
-import { getOrCreateUser } from '../lib/users'
 import { logServerError } from '../lib/safeLog'
+import { getOrCreateUser } from '../lib/users'
 
 /**
  * Requires authMiddleware to have run first (userId set).

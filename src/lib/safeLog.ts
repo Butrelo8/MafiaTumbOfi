@@ -80,11 +80,7 @@ export function logServerWarning(
 /**
  * Structured info line (stdout). Use for non-error observability (e.g. booking received).
  */
-export function logServerInfo(
-  scope: string,
-  code: string,
-  meta?: Record<string, unknown>,
-): void {
+export function logServerInfo(scope: string, code: string, meta?: Record<string, unknown>): void {
   console.log(
     JSON.stringify({
       level: 'info',

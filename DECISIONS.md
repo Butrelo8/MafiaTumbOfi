@@ -5,6 +5,104 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-04-11 — Booking nurture drip: Resend + columns + Render cron → internal HTTP
+
+**Context:** Post-confirmation nurture (Email 2 “how we sound” + video, Email 3 urgency) must be **idempotent**, **testable without network**, and compatible with **SQLite on the API Web Service disk** on Render.
+**Decision:** Persist **`drip2_due_at` / `drip2_sent_at` / `drip3_due_at` / `drip3_sent_at`** on **`bookings`**. Only process rows where **`bookings.status === 'sent'`** (customer got transactional confirmation). **`processDripEmails`** runs inside the API, sends via **`getResend()`**, sets **`drip*_sent_at` only after Resend success**. **`POST /api/internal/process-drip`** is gated by **`Authorization: Bearer $DRIP_CRON_SECRET`**. A separate Render **`type: cron`** service (**`mto-drip-cron`**) runs **`curl`** to **`DRIP_PROCESS_URL`** (full URL to that route) every 15 minutes — **no second container with DB disk**. Delays default **24h / 72h**, overridable via env.
+**Alternatives considered:** Render cron process running SQL against `DB_PATH` (rejected — cron job has **no access** to the web service’s mounted SQLite volume). **N8N on VPS** (deferred — TODOS kept as optional migration path). **Resend-only `scheduled_at`** without DB markers (rejected — harder to prove idempotency and retry semantics in one place).
+**Why not the others:** Row-level sent markers + secret-gated in-process worker matches existing Resend patterns (`setResendForTesting`) and keeps a single source of truth on the booking row.
+
+## 2026-04-11 — Booking thank-you: `sessionStorage` + `/booking/gracias`
+
+**Context:** After **`POST /api/booking`** succeeds, promoters should land on a dedicated thank-you screen (video + WhatsApp) without overloading **`/booking`** or exposing confirmation state in the URL.
+**Decision:** Stable route **`/booking/gracias`** (`bookingThanksCanonical` in **`publicSiteUrl.ts`**). On success, client writes **`sessionStorage`** key **`mto_booking_thanks`** with JSON **`{ confirmation: 'sent' | 'pending' | 'default' }`** (normalized from API), then **`location.assign('/booking/gracias')`**. Thank-you page script: if parse fails or key missing → **`location.replace('/booking')`**; on success, fill copy (same three strings as before), then **`sessionStorage.removeItem`** immediately so **refresh or bookmark** does not show a stale thank-you without a new submit; **direct visits** without payload also bounce to **`/booking`**. Page uses **`MarketingLayout`** with **`robots="noindex,nofollow"`** (passed to **`Seo`**). WhatsApp CTA only when **`PUBLIC_WHATSAPP_URL`** is set.
+**Alternatives considered:** Thank-you state only in URL query (rejected — shareable/leaky). Server session cookie (rejected — extra API surface for static marketing host).
+**Why not the others:** **`sessionStorage`** is same-origin, tab-scoped, and clears naturally when the tab closes; **`noindex`** keeps organic focus on **`/booking`**.
+
+## 2026-04-11 — Homepage marketing blocks: typed `web/src/data/*` modules
+
+**Context:** `/` needed **repertoire**, **testimonials**, and **packages** sections plus booking **urgency** copy without new backend or CMS.
+**Decision:** Add **`web/src/data/repertoire.ts`**, **`testimonials.ts`**, and **`packages.ts`** — exported typed arrays (same pattern as **`members.ts`** / **`socials.ts`**). **`index.astro`** maps over them; styles live in **`marketing-press.css`**. Placeholder testimonials and package bullets until the band replaces copy.
+**Alternatives considered:** Inline all strings in **`index.astro`** only (rejected — noisy, harder to review). Headless CMS (deferred — no operational need yet).
+**Why not the others:** Keeps markup thin and edits localized to data files.
+
+## 2026-04-11 — Shared SEO head: `Seo.astro` + URL helpers
+
+**Context:** **`MarketingLayout.astro`** already had partial Open Graph tags; **`Layout.astro`** (admin) had only **`<title>`** / description, so link previews and parity were inconsistent.
+**Decision:** Add **`web/src/components/Seo.astro`** with shared **OG + Twitter Card** tags, **`theme-color`**, **`og:image`** (absolute URL via **`absoluteAssetUrl(pageCanonical, '/icon/mafiatumbada.png')`**), optional **`robots`** override, and env **`PUBLIC_ALLOW_INDEXING=false`** → **`noindex,nofollow`**. **`adminCanonical()`** in **`publicSiteUrl.ts`** supplies admin canonical. Marketing uses **`theme-color`** **`#0b0b0b`**; app shell uses **`#ffffff`** default.
+**Alternatives considered:** Duplicate meta blocks in each layout (rejected — drift). Nuxt-style `@astrojs/seo` integration (deferred — small surface; custom partial is enough).
+**Why not the others:** One partial keeps OG/Twitter/locale/site_name aligned with **`canonicalUrl`** passed from existing page helpers.
+
+## 2026-04-10 — Bookings: `status` vs `pipeline_status` (two axes)
+
+**Context:** Operators want light CRM triage (`new` / `contacted` / `closed`) without breaking confirmation email semantics already stored in **`bookings.status`** (`pending` \| `sent` \| `failed`).
+**Decision:** Keep **`bookings.status`** strictly for **email delivery / confirmation** (POST booking, resend, admin “Correo” legend). Add **`bookings.pipeline_status`** (`new` \| `contacted` \| `closed`, default **`new`**) for **sales follow-up** only. Admin updates pipeline via **`PATCH /api/admin/bookings/:id`** with body **`{ pipelineStatus }`**; resend confirmation remains gated on **`status === 'pending'`** only.
+**Alternatives considered:** Overload **`status`** with combined values (rejected — breaks resend and existing admin copy). Separate **`sales_status`** table (rejected — unnecessary join for current volume).
+**Why not the others:** Two columns keep transactional state and human triage independent; export/list use **`select()`** so **`pipelineStatus`** appears alongside **`status`**.
+
+## 2026-04-10 — Booking lead score frozen at insert
+
+**Context:** Operators want a stable queue rank (`lead_score` + `lead_priority`) without past leads jumping when weights are tuned, and without scattering scoring `if` chains across routes.
+**Decision:** Add **`computeBookingLeadScore`** in **`src/lib/bookingLeadScore.ts`** (weights + city local/foraneo reuse **`PRICE_CONSTANTS`** from **`estimatedPriceRange.ts`**; budget ranks from **`bookingBudget.ts`**). Persist **`lead_score`** (0–1000) and **`lead_priority`** (`low` \| `medium` \| `high`) on **`POST /api/booking`** only. **No** automatic recompute on read or admin list. Optional future: `PATCH` override + `lead_score_rule_version` column if audits need it.
+**Alternatives considered:** Recompute on every **`GET /api/admin/bookings`** (rejected — history would shift when constants change). Single `priority` enum without numeric score (rejected — score enables finer client-side sort and future thresholds).
+**Why not the others:** Frozen snapshot matches “what we knew at intake”; module is the single place to change weights.
+
+## 2026-04-11 — Apple Music icon: one `<svg>` on homepage
+
+**Context:** The “Redes sociales” Apple Music card in **`index.astro`** wrapped a Simple Icons–style **`<svg><title>…</title><path/></svg>`** inside another **`<svg>`**, producing invalid nested SVGs and redundant accessible naming vs the link’s **`aria-label`**.
+**Decision:** Keep the outer decorative **`<svg>`** (inside **`aria-hidden`** `span`) and **move only the `<path>`** into it; drop inner **`role`**, **`xmlns`**, and **`<title>`**. Add a small **string slice test** in **`homepageHero.test.ts`** so the regression does not return.
+**Alternatives considered:** Duplicate Simple Icons markup only at outer level without path extraction (same outcome). Use an `<img>` for the logo (rejected for this pass — would change styling from `currentColor`).
+**Why not the others:** Minimal DOM fix; matches Spotify/Instagram card structure.
+
+## 2026-04-11 — Official band social URLs in `web/src/data/socials.ts`
+
+**Context:** Spotify, TikTok, YouTube, Instagram, Facebook, and Apple Music URLs were copy-pasted in **`MarketingLayout.astro`** and **`index.astro`**, so link updates risked drift.
+**Decision:** Add **`bandSocialUrls`** in **`web/src/data/socials.ts`** and import it from both files. Keep **per-member Instagram** in **`members.ts`** unchanged.
+**Alternatives considered:** Env vars for each URL (more deploy surface for static marketing links). Inline duplication (status quo).
+**Why not the others:** One TypeScript module is easy to edit and covered by Biome; no need for runtime config for stable public links.
+
+## 2026-04-11 — Biome for lint/format (TS only; no `.astro` in v1)
+
+**Context:** No shared formatter/linter; drift risk as the repo grows. ESLint + Prettier + Astro plugin is heavier for a small monorepo (API + `web/`).
+**Decision:** Add **Biome** at the **repo root** with `files.includes` limited to **`src/**/*.ts`**, **`scripts/**/*.ts`**, **`web/src/**/*.ts`**. Do **not** lint/format **`.astro`** in this slice (editor + Astro defaults until a follow-up). Disable **`suspicious/noControlCharactersInRegex`** for the intentional control-strip regex in `web/src/lib/sanitizeResendDetail.ts`. **VCS `useIgnoreFile`:** temporarily off when Biome crashed on a non–UTF-8 `.gitignore` under **`.code-review-graph/`**; **follow-up (2026-04-11):** add **`.code-review-graph/`** to root **`.gitignore`** and turn **`vcs.enabled` + `useIgnoreFile` back on** — `bun run lint` passes.
+**Alternatives considered:** ESLint + `eslint-plugin-astro` + Prettier (best Astro coverage, more config). Leave VCS off forever (rejected — loses `.gitignore` alignment for Biome).
+**Why not the others:** One fast tool, one config file, matches “minimal baseline”; Astro can wait.
+
+## 2026-04-11 — No GitHub Actions (CI or keep-alive)
+
+**Context:** The repo had a scheduled **Keep Render Alive** workflow pinging the Render URL; a **CI** todo proposed `bun test` on push/PR. Neither is part of the maintainer’s current workflow.
+**Decision:** Remove **`.github/workflows/keep-alive.yml`** and drop the **CI on GitHub** todo. Rely on **local `bun test`** (and host/platform monitoring as needed) instead of Actions for gates or uptime.
+**Alternatives considered:** Add `ci.yml` only; keep keep-alive and skip CI (rejected: keep-alive still unused). External uptime (e.g. Better Stack) without Actions (deferred until needed).
+**Why not the others:** Fewer moving parts and no dependency on GitHub scheduler/credits for a ping the team does not use.
+
+## 2026-04-10 — Remove unimplemented `/api/auth/*` API routes
+
+**Context:** `src/routes/auth.ts` exposed `POST /api/auth/login` and `POST /api/auth/logout` returning **501** while still applying `rateLimitAuth` (in-memory bucket per client). Real sign-in is Clerk on the frontend; API uses `src/middleware/auth.ts` for `/api/users` and `/api/admin`.
+**Decision:** Delete the stub routes and `rateLimitAuth`; remove the `/auth` mount from `src/routes/index.ts`. Keep rate-limit coverage on **`POST /api/booking`** (5/min) in **`src/routes/booking.test.ts`** with mocked `db` + Resend so the suite does not write real rows or hit Resend through the full API app.
+**Alternatives considered:** Keep routes with README “reserved” note and disable rate limiting until implemented (rejected: extra public surface, wasted limiter state). Implement custom login/logout on the API (rejected: duplicates Clerk).
+**Why not the others:** Fewer unexplained endpoints; aligns public API with actual auth architecture.
+
+## 2026-04-11 — Web `package.json` version tracks root; health uses `getWebAppVersion`
+
+**Context:** `web/package.json` stayed at `0.1.0` while root was `0.5.0`; `/health` and `/api/health` hardcoded `0.4.0`; `preview` ran `astro dev`, which does not validate production build output.
+**Decision:** Bump **`web/package.json` `version`** to match root for each release. Add **`getWebAppVersion()`** reading `web/package.json` with **`APP_VERSION` / `RELEASE_VERSION`** overrides (same order as API `getAppVersion`). Set **`preview`** to **`astro preview`**. Document in **README** and **`web/.env.example`**. **API `GET /health`:** call **`getAppVersion()`** inside the handler (not once at module load) so runtime env overrides match documented behavior and tests.
+**Alternatives considered:** Independent web semver with README-only explanation (rejected for this repo — one product, two deploy targets). Inject version only via `import.meta.env` at build time (rejected — file read keeps local `bun dev` honest without extra env wiring).
+**Why not the others:** Matching numbers reduces ops confusion; env overrides keep CI/sha parity with the API pattern already in use.
+
+## 2026-04-10 — Resend: `setResendForTesting` for integration tests
+
+**Context:** Booking and admin resend tests used `mock.module('../lib/resend', …)` and sometimes re-imported route modules so Resend mocks applied — brittle and easy to desync from production `getResend()` usage.
+**Decision:** Add `setResendForTesting(client | null)` in `src/lib/resend.ts` with a module-level override checked before lazy `new Resend(RESEND_API_KEY)`; clearing sets `_resend = null` to avoid singleton bleed. Migrate `booking.test.ts` and `admin-resend.test.ts` to `beforeEach`/`afterEach` + per-test overrides; add `resend.test.ts` for override vs missing-key behavior.
+**Alternatives considered:** Dependency-inject `getResend` into route factories (larger refactor). Keep only `mock.module` (rejected: harder to maintain).
+**Why not the others:** Same pattern as `setClerkClientForTesting` already in the codebase.
+
+## 2026-04-10 — Remove unused Stripe SDK until payments/webhooks ship
+
+**Context:** Root `package.json` depended on `stripe` and `src/lib/stripe.ts` exported `getStripe` / `verifyWebhookSignature`, but nothing imported them — dead code and extra supply-chain surface until a shop or webhook exists.
+**Decision:** Remove the `stripe` dependency, delete `src/lib/stripe.ts`, and document re-add steps in `.cursor/rules/hono-template.mdc` and **Payments** todo context (`bun add stripe`, `constructEvent`, secrets, idempotency).
+**Alternatives considered:** Keep stub “for later” (rejected: confuses reviewers and scanners). Implement minimal webhook route now (rejected: no product to sell; roadmap defers Stripe).
+**Why not the others:** Git history + Stripe docs recover the ~35-line helper when the handler is implemented.
+
 ## 2026-04-10 — CORS allowlist: normalize `PRODUCTION_URL` + www/apex pair
 
 **Context:** The booking page calls the API cross-origin; Hono `cors` only reflects `Access-Control-Allow-Origin` when the request `Origin` is in the allowlist. `https://mafiatumbada.com` and `https://www.mafiatumbada.com` are different origins; a trailing slash in `PRODUCTION_URL` also fails string equality vs the browser `Origin` header.

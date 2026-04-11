@@ -17,12 +17,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const bookingIdRaw = formData.get('bookingId')
   const bookingId = Number(bookingIdRaw)
 
-  if (
-    !bookingIdRaw ||
-    Number.isNaN(bookingId) ||
-    !Number.isInteger(bookingId) ||
-    bookingId <= 0
-  ) {
+  if (!bookingIdRaw || Number.isNaN(bookingId) || !Number.isInteger(bookingId) || bookingId <= 0) {
     return new Response('', {
       status: 303,
       headers: { Location: '/admin?resend=invalid' },
@@ -33,13 +28,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const token = await getToken()
 
   try {
-    const response = await fetch(
-      `${apiUrl}/api/admin/bookings/${bookingId}/resend-confirmation`,
-      {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      },
-    )
+    const response = await fetch(`${apiUrl}/api/admin/bookings/${bookingId}/resend-confirmation`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
 
     if (response.ok) {
       return new Response('', {
@@ -82,4 +74,3 @@ export const POST: APIRoute = async ({ request, locals }) => {
 }
 
 export const prerender = false
-

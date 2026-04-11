@@ -11,9 +11,6 @@ export function sanitizeResendDetail(raw: string | null): string | null {
   if (raw == null || raw === '') {
     return null
   }
-  const cleaned = raw
-    .trim()
-    .replace(CONTROL_AND_HTMLISH, '')
-    .slice(0, MAX_RESEND_DETAIL_LEN)
+  const cleaned = raw.trim().replace(CONTROL_AND_HTMLISH, '').slice(0, MAX_RESEND_DETAIL_LEN)
   return cleaned.length > 0 ? cleaned : null
 }
