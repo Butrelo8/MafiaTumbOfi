@@ -23,6 +23,7 @@ describe('marketing homepage hero', () => {
   test('marketing CSS defines video layer, scrim, deco line, and reduced-motion fallback', () => {
     const css = readFileSync(marketingCssPath, 'utf8')
     expect(css).toContain('.hero-video')
+    expect(css).toMatch(/\.hero-video\s*\{[^}]*pointer-events:\s*none/s)
     expect(css).toContain('blur(2px)')
     expect(css).toContain('brightness(1.1)')
     expect(css).toContain('rgba(0, 0, 0, 0.2)')
@@ -48,6 +49,26 @@ describe('marketing homepage hero', () => {
     expect(src).toContain('border-bottom: 1px solid rgba(255, 255, 255, 0.1)')
     expect(src).toContain('Ver solicitudes')
     expect(src).toContain('.admin-notice a:hover')
+  })
+
+  test('includes above-the-fold blurb and trust strip after stats bar', () => {
+    const src = readFileSync(indexPath, 'utf8')
+    expect(src).toContain('class="hero-blurb"')
+    expect(src).toContain('class="trust-strip"')
+    expect(src).toContain('id="trust-heading"')
+    expect(src).toContain('class="trust-grid"')
+    expect(src).toContain('class="trust-item"')
+    expect(src).toContain('.hero-blurb')
+    expect(src).toContain('.sr-only')
+    const heroMeta = src.indexOf('class="hero-meta"')
+    const blurb = src.indexOf('class="hero-blurb"')
+    const actions = src.indexOf('class="hero-actions"')
+    expect(blurb).toBeGreaterThan(heroMeta)
+    expect(actions).toBeGreaterThan(blurb)
+    const statsEnd = src.indexOf('<!-- ─── TRUST STRIP')
+    const bioStart = src.indexOf('<!-- ─── BIO')
+    expect(statsEnd).toBeGreaterThan(-1)
+    expect(bioStart).toBeGreaterThan(statsEnd)
   })
 })
 
@@ -75,6 +96,13 @@ describe('marketing homepage conversion blocks', () => {
 
     const layoutSrc = readFileSync(marketingLayoutPath, 'utf8')
     expect(layoutSrc).toContain('href="/#paquetes"')
+  })
+
+  test('MarketingLayout defers closeMenu after menu-auth click so Clerk modals are not under z-index overlay', () => {
+    const layoutSrc = readFileSync(marketingLayoutPath, 'utf8')
+    expect(layoutSrc).toContain('class="menu-auth"')
+    expect(layoutSrc).toContain("querySelector('.menu-auth')")
+    expect(layoutSrc).toContain('window.setTimeout(() => closeMenu(), 0)')
   })
 
   test('marketing CSS defines repertoire, testimonials, packages, and booking-urgency', () => {

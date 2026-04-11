@@ -151,6 +151,12 @@ const { title, description, canonicalUrl, robots } = Astro.props
       hamburgerBtn?.addEventListener('click', openMenu);
       closeBtn?.addEventListener('click', closeMenu);
 
+      // Clerk modals render on `body`; this overlay is z-index 200 — close it after SignIn/SignUp/UserButton
+      // so the modal is not covered (otherwise the flow looks "stuck" / unrelated page copy can show through).
+      document.querySelector('.menu-auth')?.addEventListener('click', () => {
+        window.setTimeout(() => closeMenu(), 0);
+      });
+
       // Close on link click
       menu?.querySelectorAll('.menu-link').forEach(link => {
         link.addEventListener('click', closeMenu);

@@ -55,8 +55,11 @@ function mockClerkForUserIds() {
 describe('getOrCreateUser', () => {
   let sqlite: Database
   let testDb: ReturnType<typeof drizzle<typeof schema>>
+  let prevAdmin: string | undefined
 
   beforeEach(() => {
+    prevAdmin = process.env.ADMIN_CLERK_ID
+    process.env.ADMIN_CLERK_ID = 'clerk_authoritative'
     sqlite = new Database(':memory:')
     applyDrizzleMigrations(sqlite)
     testDb = drizzle(sqlite, { schema })
@@ -64,19 +67,51 @@ describe('getOrCreateUser', () => {
   })
 
   afterEach(() => {
+    if (prevAdmin === undefined) delete process.env.ADMIN_CLERK_ID
+    else process.env.ADMIN_CLERK_ID = prevAdmin
     setClerkClientForTesting(null)
     sqlite.close()
   })
 
-  test('first new user becomes admin on empty database', async () => {
-    const row = await getOrCreateUser('clerk_first', { db: testDb })
-    expect(row.clerkId).toBe('clerk_first')
+  test('user whose clerk id matches ADMIN_CLERK_ID becomes admin on insert', async () => {
+    const row = await getOrCreateUser('clerk_authoritative', { db: testDb })
+    expect(row.clerkId).toBe('clerk_authoritative')
     expect(row.isAdmin).toBe(true)
   })
 
-  test('second new user is not admin when an admin already exists', async () => {
-    await getOrCreateUser('clerk_admin', { db: testDb })
+  test('user whose clerk id does not match ADMIN_CLERK_ID is not admin on insert', async () => {
+    await getOrCreateUser('clerk_authoritative', { db: testDb })
     const row = await getOrCreateUser('clerk_member', { db: testDb })
+    expect(row.isAdmin).toBe(false)
+  })
+
+  test('when ADMIN_CLERK_ID unset, new user is never admin', async () => {
+    delete process.env.ADMIN_CLERK_ID
+    const row = await getOrCreateUser('clerk_noenv', { db: testDb })
+    expect(row.isAdmin).toBe(false)
+  })
+
+  test('reconciles existing row to admin when ADMIN_CLERK_ID matches', async () => {
+    await testDb.insert(users).values({
+      clerkId: 'clerk_rec',
+      email: 'rec@test.invalid',
+      name: 'X',
+      isAdmin: false,
+    })
+    process.env.ADMIN_CLERK_ID = 'clerk_rec'
+    const row = await getOrCreateUser('clerk_rec', { db: testDb })
+    expect(row.isAdmin).toBe(true)
+  })
+
+  test('reconciles existing admin row to non-admin when ADMIN_CLERK_ID does not match', async () => {
+    await testDb.insert(users).values({
+      clerkId: 'clerk_old_admin',
+      email: 'old@test.invalid',
+      name: 'Old',
+      isAdmin: true,
+    })
+    process.env.ADMIN_CLERK_ID = 'clerk_authoritative'
+    const row = await getOrCreateUser('clerk_old_admin', { db: testDb })
     expect(row.isAdmin).toBe(false)
   })
 
@@ -98,19 +133,16 @@ describe('getOrCreateUser', () => {
     expect(after?.createdAt?.getTime()).toBe(createdMs)
   })
 
-  test('concurrent first signups leave exactly one admin', async () => {
+  test('concurrent signups: only clerk id matching ADMIN_CLERK_ID ends admin', async () => {
+    process.env.ADMIN_CLERK_ID = 'clerk_parallel_a'
     const [a, b] = await Promise.all([
       getOrCreateUser('clerk_parallel_a', { db: testDb }),
       getOrCreateUser('clerk_parallel_b', { db: testDb }),
     ])
     expect(a.clerkId).not.toBe(b.clerkId)
-
+    expect(a.isAdmin).toBe(true)
+    expect(b.isAdmin).toBe(false)
     const admins = await testDb.select({ id: users.id }).from(users).where(eq(users.isAdmin, true))
     expect(admins).toHaveLength(1)
-
-    const adminIds = new Set(admins.map((r) => r.id))
-    const winnerIsAdmin = (a.isAdmin && adminIds.has(a.id)) || (b.isAdmin && adminIds.has(b.id))
-    expect(winnerIsAdmin).toBe(true)
-    expect(a.isAdmin !== b.isAdmin).toBe(true)
   })
 })

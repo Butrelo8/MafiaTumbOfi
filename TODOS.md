@@ -2,23 +2,11 @@
 
 Track open work and completed items by version. See CHANGELOG.md for full release notes.
 
-**Roadmap (Hold Scope):** No first-paying-customer goal; no merch yet. **Custom domain + HTTPS** already live (Vercel + Render). **Optional later:** migrate stack to a **VPS** (P3 todo — cost/ops preference). **Resend** verified domain + prod **`RESEND_FROM_EMAIL`** shipped (see Completed). Monitoring and Content/SEO can stay on current hosts or move with a VPS. Stripe webhook only when there is a product to sell.
+**Roadmap (Hold Scope):** No first-paying-customer goal; no merch yet. **P1 lead-funnel roadmap (slices 1–4)** — closed **2026-04-11**; see **## Completed** → **Product roadmap — Lead generation & booking (P1 closed)**. **Custom domain + HTTPS** already live (Vercel + Render). **Optional later:** migrate stack to a **VPS** (P3 todo — cost/ops preference). **Resend** verified domain + prod **`RESEND_FROM_EMAIL`** shipped (see Completed). Monitoring and Content/SEO can stay on current hosts or move with a VPS. Stripe webhook only when there is a product to sell.
 
 ---
 
 ## Open
-
-### Product roadmap — Lead generation & booking (prioritized slice)
-**What:** Execution order for turning the public site into a lead funnel + light CRM: budget capture, marketing blocks, post-submit UX, admin triage, then scoring.
-**Why:** Aligns product work with fastest ROI; extends the existing `bookings` table and booking API rather than replacing them with a minimal greenfield schema.
-**Context:** Booking already persists `city`, `eventType`, `duration`, `showType`, `attendees`, `venueSound`, etc. (`src/db/schema.ts`, `STATE.md`). Items below are **new** or **expand** admin/marketing.
-**Solution:** Treat the open tickets **below this card** as the execution backlog — ship **vertical slices** (one PR = one user-visible outcome + tests), re-order only when discovery says so. Suggested sequence: **(1) Marketing — Video hero + packages + conversion blocks** — **shipped** 2026-04-11 (see **## Completed**). **(2) Booking UX — Thank-you page + WhatsApp follow-up CTA** — **shipped** 2026-04-11 (**`/booking/gracias`**, session handoff; see **## Completed**). **(3) Booking — Workflow statuses** — **shipped** 2026-04-10 (**`pipeline_status`**, admin PATCH + UI; see **## Completed**). **(4) Email — Follow-up sequence (drip after booking)** — **shipped** 2026-04-11 (see **## Completed** — **`drizzle/0009`**, **`POST /api/internal/process-drip`**, Render **`mto-drip-cron`**). Each slice: extend `bookings` / API only when that slice needs it; keep mocks in tests; note rule/version changes in **`DECISIONS.md`** when behavior ships.
-**Done When:** Roadmap slices **(1)–(4)** above are **Completed** in **## Completed** (or **removed** with defer note); production path is: discover band on `/` → submit **`/booking`** → thank-you / WhatsApp CTA → staff triage in **`/admin`** (lead score + priority + pipeline already on list) without a parallel spreadsheet; **`bun test`** stays green end-to-end.
-**Effort:** XL (across multiple tickets below)
-**Priority:** P1
-**Depends on:** None
-
----
 
 ### Infra — Distributed rate limiting for multiple API instances
 **What:** Replace or back in-memory booking (and future route-scoped) rate limit stores with a shared limiter (e.g. Redis, Upstash) or document single-instance requirement in DEPLOY.md.
@@ -68,23 +56,6 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ---
 
-### Content / SEO — Homepage & booking copy pass
-**What:** Rewrite/structure `index.astro` and `booking.astro` for promoters and fans: clear who the band is, what "contrataciones" means, trust signals, CTA flow; optional short FAQ block for SEO.
-**Why:** Current pages may be thin; this is the core conversion and clarity work separate from meta plumbing.
-**Context:** Keep existing booking form behavior; focus on headings, sections, and accessibility. Align tone with press kit when both exist.
-**Solution:**
-- `index.astro`: Add a short above-the-fold blurb (2–3 sentences) identifying the band, genre, and region. Ensure there's a visible CTA button pointing to `/contrataciones`. Add a trust signal section (e.g. notable venues, years active, or a pull quote) above the fold or just below the hero.
-- `booking.astro`: Add a brief intro paragraph explaining what the form is for and what happens after submission (response time, what info they'll receive). Label form sections clearly. Add a short FAQ block (3–5 Q&As) below the form covering: response time, minimum notice, coverage area, event types, and deposit/payment process — each answer 1–2 sentences for SEO value.
-- Align tone, vocabulary, and heading hierarchy with the press kit page (same register, same brand voice).
-- All new headings must use proper `h1`/`h2`/`h3` nesting; no skipped levels.
-- No changes to form `action`, validation logic, or backend endpoints.
-**Done When:** Both pages have descriptive headings, at least one trust signal each, clear CTAs, and the booking page includes a FAQ block. Copy reads consistently with the press kit. No existing form behavior is broken.
-**Effort:** M
-**Priority:** P2
-**Depends on:** None
-
----
-
 ### Monitoring — Sentry or similar; check logs after deploys
 **What:** Add Sentry (or similar) for error tracking; ensure logs are checked after each deploy.
 **Why:** Catch production errors and failed deploys early; avoid blind debugging.
@@ -125,6 +96,26 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 ---
 
 ## Completed
+
+### Auth — Admin via `ADMIN_CLERK_ID` (no first-user heuristic) (2026-04-11)
+**What:** Replaced “first `users` row is admin” SQL with **`ADMIN_CLERK_ID`** (trimmed) matching Clerk **`sub`** for **`is_admin`** on insert; when env is set, **`getOrCreateUser`** reconciles **`is_admin`** on read. Migration **`drizzle/0010_admin_explicit_clerk_ids.sql`** for known legacy **`clerk_id`** rows.
+**Why:** Second signup could steal admin; registration order is not a security boundary.
+**Code:** **`src/lib/adminClerkConfig.ts`**, **`adminClerkConfig.test.ts`**; **`src/lib/users.ts`**, **`users.test.ts`**; **`src/middleware/adminAuth.ts`** comment. **`.env.example`**, **`render.yaml`**, **`DEPLOY.md`**, **`README.md`**, **`CHANGELOG.md`**, **`DECISIONS.md`**.
+**Done When:** Set **`ADMIN_CLERK_ID`** on API (local + Render) to the band Clerk user id; only that user passes admin middleware; other accounts stay non-admin; **`bun test`** green.
+
+### Product roadmap — Lead generation & booking (P1 closed) (2026-04-11)
+**What:** Umbrella for prioritized funnel + light CRM vertical slices **(1)–(4)** (budget already on booking form; marketing, post-submit, admin triage, drip).
+**Done When (met):** All four slices recorded below; production path **`/`** → **`/booking`** → **`/booking/gracias`** + WhatsApp CTA → **`/admin`** (lead score, priority, **`pipeline_status`**); no parallel spreadsheet for core triage; **`bun test`** green end-to-end.
+- **(1)** **Marketing — Video hero + packages + conversion blocks** (2026-04-11) — this section.
+- **(2)** **Booking UX — Thank-you page + WhatsApp follow-up CTA** (2026-04-11) — this section.
+- **(3)** **Booking — Workflow statuses / `pipeline_status`** (2026-04-10) — this section.
+- **(4)** **Email — Follow-up sequence / nurture drip** (2026-04-11) — this section.
+**Next:** New funnel or CRM scope → new **## Open** card (P2+ backlog continues below **## Open**).
+
+### Content / SEO — Homepage & booking copy pass (2026-04-11)
+- **`web/src/pages/index.astro`:** **`hero-blurb`** (band + contrataciones + cotización sin compromiso), **`trust-strip`** (**`.trust-grid`** / **`.trust-item`** + SVG icons) after stats bar; scoped **`.hero-blurb`**, **`.sr-only`**, trust strip layout. Hero CTA unchanged (**`#booking`** / material prensa).
+- **`web/src/pages/booking.astro`:** **`booking-intro`**, **`h2.form-section-heading`** (“Datos de contacto” / “Detalles del evento”), **`faq-section`** with five **`<details>`** (respuesta, anticipación, cobertura, tipos de evento, anticipo/pago). Form script + **`POST`** URL untouched.
+- **Tests:** **`homepageHero.test.ts`** (blurb + trust order), **`bookingPageCopy.test.ts`**. **`CHANGELOG.md`** [Unreleased].
 
 ### UI — Admin page: marketing layout & dark design system (2026-04-11)
 - **`web/src/pages/admin.astro`** — **`MarketingLayout`** (same shell as `/`, `/booking`), **`robots="noindex,nofollow"`**, **`footer-bar`**; table / legend / banners / pagination / status pills use **`marketing-press.css`** tokens; export → **`btn-secondary`** (“Exportar JSON (depuración)”).

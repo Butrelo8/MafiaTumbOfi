@@ -31,6 +31,11 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
             Solicitar<br /><em>cotización</em>
           </h1>
 
+          <p class="booking-intro">
+            Completa el formulario con los datos de tu evento y recibirás una cotización personalizada en menos de 24
+            horas. Sin compromiso: si prefieres hablar primero, usa el WhatsApp directo.
+          </p>
+
           <div class="booking-info-list">
             <div class="booking-info-item">
               <span class="booking-info-icon" aria-hidden="true">⏱</span>
@@ -81,6 +86,8 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
               <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
             </div>
 
+            <h2 class="form-section-heading">Datos de contacto</h2>
+
             <!-- Nombre -->
             <div class="field">
               <label for="name" class="field-label">Nombre *</label>
@@ -110,6 +117,8 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
                 class="field-input"
               />
             </div>
+
+            <h2 class="form-section-heading">Detalles del evento</h2>
 
             <!-- Fecha + Ciudad (row) -->
             <div class="field-row">
@@ -251,6 +260,50 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
     </div>
   </section>
 
+  <section class="section faq-section" aria-labelledby="faq-heading">
+    <div class="container">
+      <span class="section-label">Contrataciones</span>
+      <h2 id="faq-heading" class="section-heading">Preguntas frecuentes</h2>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>¿En cuánto tiempo recibo la cotización?</summary>
+          <p>
+            Respondemos solicitudes en menos de 24 horas hábiles. Incluye fecha tentativa, ciudad y tipo de evento para
+            agilizar la respuesta.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Con cuánta anticipación debo reservar?</summary>
+          <p>
+            Los fines de semana suelen reservarse con 3 a 4 semanas de anticipación. Para fechas pico o foráneas,
+            conviene escribir lo antes posible.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary>¿En qué zonas tocan?</summary>
+          <p>
+            Base en Xalapa, Veracruz: tocan en el estado y en eventos foráneos. La logística y el rider se ajustan según
+            ciudad y venue.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Qué tipos de evento cubren?</summary>
+          <p>
+            Bodas, quinceañeras, bares y antros, festivales, eventos privados, giras y taquilla. Si tu formato no está
+            en la lista, descríbelo en el mensaje.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Cómo funciona el anticipo y el pago?</summary>
+          <p>
+            Tras acordar fecha y condiciones se solicita un anticipo para apartar el día; el saldo y la forma de pago se
+            definen en la cotización formal, antes del evento.
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
   <footer class="footer-bar">
     <div class="container">
       <span class="footer-brand">Mafia Tumbada</span>
@@ -284,7 +337,14 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
   .booking-title {
     font-size: clamp(2rem, 5vw, 2.8rem);
     line-height: 1.1;
-    margin: 0.5rem 0 2rem;
+    margin: 0.5rem 0 0.5rem;
+  }
+
+  .booking-intro {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    opacity: 0.75;
+    margin: 0 0 1.5rem;
   }
 
   .booking-info-list {
@@ -338,6 +398,22 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
     gap: 1.25rem;
     /* Native <select> popups use OS styling; dark scheme fixes white list + grey text on Windows/Chrome */
     color-scheme: dark;
+  }
+
+  .form-section-heading {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.5;
+    margin: 1rem 0 0.25rem;
+    border: none;
+    line-height: 1.2;
+    color: var(--text, #ede8df);
+  }
+
+  .booking-form > .form-section-heading:first-of-type {
+    margin-top: 0;
   }
 
   .field {
@@ -480,6 +556,47 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
   .form-status[data-state="success"] { color: #16a34a; }
   .form-status[data-state="error"]   { color: #dc2626; }
   .form-status[data-state="loading"] { opacity: 0.6; }
+
+  /* FAQ */
+  .faq-section {
+    padding-block: 2rem 3rem;
+    border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+  }
+
+  .faq-list {
+    margin-top: 1.25rem;
+    max-width: 42rem;
+  }
+
+  .faq-item {
+    border-bottom: 1px solid var(--border, #262420);
+  }
+
+  .faq-item summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.65rem 0;
+    list-style: none;
+  }
+
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-item[open] summary {
+    color: var(--color-brand, #c8a96e);
+    border-left: 3px solid var(--color-brand, #c8a96e);
+    padding-left: 0.65rem;
+  }
+
+  .faq-item p {
+    margin: 0 0 0.85rem;
+    padding-left: 0.65rem;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--muted, #7a7267);
+  }
 
   /* Honeypot */
   .hidden { display: none !important; }

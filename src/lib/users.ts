@@ -1,12 +1,20 @@
-import { eq, sql } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { db } from '../db'
 import { users } from '../db/schema'
 import { getClerkClient } from '../middleware/auth'
+import { clerkIdIsConfiguredAdmin, getConfiguredAdminClerkId } from './adminClerkConfig'
 
 export type UserRow = typeof users.$inferSelect
 
-/** First bootstrap admin: single-statement check + insert avoids count-then-insert races. */
-const firstBootstrapAdminIsAdmin = sql`(SELECT CASE WHEN EXISTS (SELECT 1 FROM ${users} WHERE ${users.isAdmin} = 1) THEN 0 ELSE 1 END)`
+async function reconcileAdminWithEnv(database: typeof db, row: UserRow): Promise<UserRow> {
+  if (getConfiguredAdminClerkId() === null) return row
+  const expected = clerkIdIsConfiguredAdmin(row.clerkId)
+  if (row.isAdmin === expected) return row
+  await database.update(users).set({ isAdmin: expected }).where(eq(users.clerkId, row.clerkId))
+  const updated = await database.select().from(users).where(eq(users.clerkId, row.clerkId)).get()
+  if (!updated) throw new Error('User row missing after admin flag sync')
+  return updated
+}
 
 export type GetOrCreateUserOptions = {
   /**
@@ -16,8 +24,9 @@ export type GetOrCreateUserOptions = {
 }
 
 /**
- * Get user by Clerk ID from DB, or create with first-user-is-admin logic.
- * Fetches email/name from Clerk when creating. Used by admin routes and /me.
+ * Get user by Clerk ID from DB, or create. Admin flag: `ADMIN_CLERK_ID` env (trimmed) must match
+ * `clerkId` for `is_admin` true on insert; when env is set, existing rows are reconciled on read.
+ * Used by admin routes and /me.
  */
 export async function getOrCreateUser(
   clerkId: string,
@@ -26,7 +35,7 @@ export async function getOrCreateUser(
   const database = options?.db ?? db
   const existing = await database.select().from(users).where(eq(users.clerkId, clerkId)).get()
 
-  if (existing) return existing
+  if (existing) return reconcileAdminWithEnv(database, existing)
 
   const clerkClient = getClerkClient()
   const clerkUser = await clerkClient.users.getUser(clerkId)
@@ -40,7 +49,7 @@ export async function getOrCreateUser(
       clerkId,
       email,
       name,
-      isAdmin: firstBootstrapAdminIsAdmin,
+      isAdmin: clerkIdIsConfiguredAdmin(clerkId),
     })
     .returning()
 

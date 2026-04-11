@@ -57,7 +57,7 @@ bun run lint:fix    # check + safe/unsafe fixes (e.g. import cleanup)
 Run `bun run lint` before opening a PR or shipping.
 
 - Booking form: http://localhost:4321/booking  
-- Admin: http://localhost:4321/admin (Clerk sign-in required; the **first user to sign in** becomes admin; bookings load in pages of 50 via `GET /api/admin/bookings?limit=&offset=`).
+- Admin: http://localhost:4321/admin (Clerk sign-in required; API **`ADMIN_CLERK_ID`** must match your Clerk user id — see root **`.env.example`**; bookings load in pages of 50 via `GET /api/admin/bookings?limit=&offset=`).
 
 **Versioning:** Root `package.json` and `web/package.json` use the **same semver** for releases. Frontend `GET /health` and `GET /api/health` return `version` from `web/package.json`, overridable with `APP_VERSION` / `RELEASE_VERSION` (see `web/.env.example`; same semantics as the API `GET /health`). The Vercel adapter does not support `astro preview` locally; use **`bun run test:e2e`** (Playwright + `astro dev` on port **4329**) for a deterministic booking UI smoke, or `vercel dev` for production-like SSR.
 
@@ -119,7 +119,7 @@ MafiaTumbadaOfi/
 
 ## Environment Variables
 
-- **API:** See root `.env.example` (PORT, FRONTEND_URL, DB_PATH, RESEND_API_KEY, BOOKING_NOTIFICATION_EMAIL).
+- **API:** See root `.env.example` (PORT, FRONTEND_URL, DB_PATH, **ADMIN_CLERK_ID**, RESEND_API_KEY, BOOKING_NOTIFICATION_EMAIL).
 - **Frontend:** See `web/.env.example` (`PUBLIC_API_URL`, `PUBLIC_SITE_URL` for canonicals / absolute **OG image**, optional **`PUBLIC_ALLOW_INDEXING=false`** for **`noindex`** on previews).
 
 ## Email (Resend)

@@ -234,6 +234,7 @@ body.marketing-body img {
 /* Push main content below fixed header */
 .marketing-main {
   display: block;
+  padding-top: clamp(60px, 10vh, 80px);
 }
 
 .container {
@@ -353,6 +354,7 @@ body.marketing-body img {
   height: 100%;
   object-fit: cover;
   z-index: 0;
+  pointer-events: none;
   filter: blur(2px) brightness(1.1);
 }
 

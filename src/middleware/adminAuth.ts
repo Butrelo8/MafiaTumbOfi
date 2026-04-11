@@ -5,7 +5,7 @@ import { getOrCreateUser } from '../lib/users'
 
 /**
  * Requires authMiddleware to have run first (userId set).
- * Ensures user exists in DB (first user becomes admin), then requires isAdmin for access.
+ * Ensures user exists in DB (`getOrCreateUser`), then requires `is_admin` (driven by `ADMIN_CLERK_ID` + DB).
  */
 export async function adminAuth(c: Context, next: Next) {
   const userId = c.get('userId')
