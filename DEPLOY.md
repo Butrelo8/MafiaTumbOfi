@@ -1,8 +1,8 @@
-# Deploy: API (Render) + Frontend (Vercel) + SQLite
+# Deploy: API (Render) + Frontend (Vercel) + Turso (libsql)
 
-- **API:** Hono + Bun on Render (Web Service with persistent disk for SQLite).
+- **API:** Hono + Bun on Render (Web Service; **no** persistent disk — DB is **Turso** / libsql).
 - **Frontend:** Astro (SSR) on Vercel via `@astrojs/vercel` (serverless adapter; see `web/astro.config.mjs`).
-- **Database:** SQLite file on Render disk at `/data/sqlite.db`; migrations run at API startup.
+- **Database:** **Turso** (hosted SQLite-compatible libsql). Migrations and schema check run at API startup (`bun run migrate && bun run check-db && bun run start`). Optional **file SQLite** (`bun:sqlite` + `DB_PATH` only) remains for local/offline dev when Turso env vars are unset — see **`.env.example`** and `src/db/detect.ts`.
 
 Deploy order: **API first**, then frontend (so you can set `PUBLIC_API_URL` to the live API).
 
@@ -30,8 +30,12 @@ Deploy order: **API first**, then frontend (so you can set `PUBLIC_API_URL` to t
    | `DRIP_CRON_SECRET` | **Optional but recommended** for nurture emails: long random string; must match the **cron** service (see below). |
    | `PUBLIC_SITE_URL` | **Optional** for drip email links; falls back to `PRODUCTION_URL` / `FRONTEND_URL`. |
    | `PUBLIC_WHATSAPP_URL` | **Optional** — adds WhatsApp CTA in Email 3 (same pattern as the Astro site). |
+   | `TURSO_DATABASE_URL` | From [Turso](https://turso.tech): `turso db show <name> --url` (e.g. `libsql://…`). **Required** for production in `render.yaml`. |
+   | `TURSO_AUTH_TOKEN` | `turso db tokens create <name>` — treat as a secret; rotate if leaked. |
 
-4. **DB:** The Blueprint attaches a 1 GB persistent disk at `/data`. `DB_PATH` is set to `/data/sqlite.db`. Migrations and a fast schema check run on every start (`bun run migrate && bun run check-db && bun run start` — see `render.yaml`).
+4. **DB (Turso):** The Blueprint sets **`TURSO_DATABASE_URL`** and **`TURSO_AUTH_TOKEN`** (`sync: false` — you paste values in the Dashboard). **Do not** set **`DB_PATH`** on the API service for production (unset = remote libsql only). Migrations run against Turso on every deploy start. **CLI (Windows):** `npm i -g @turso/cli` or [Turso CLI install](https://docs.turso.tech/cli/overview); create DB and token before first deploy.
+
+   **Existing data on Render disk:** Before switching to Turso, export or dump the old SQLite file (if any), then import into Turso (`turso db shell <name>` with SQL dump) **or** run migrations on an empty Turso DB and accept empty tables — see §7.
 
 ### Bun on Render (Node runtime)
 
@@ -43,7 +47,7 @@ The API service uses **`runtime: node`** with **`buildCommand`** / **`startComma
 
 **If `bun` is missing** from a future image: fall back to something you control — e.g. **`npx bun@latest run migrate`** (and equivalent for `start`), or move the service to a **Docker** deploy with an explicit Bun/Node base image.
 
-5. **Booking nurture drip (optional):** The Blueprint adds **`mto-drip-cron`**, which **cannot** read the API’s SQLite file (different instance / no disk mount). It only **`curl`s** `POST /api/internal/process-drip` on **mto-api**. Set **`DRIP_PROCESS_URL`** on the cron service to your public API URL plus path, e.g. `https://mto-api.onrender.com/api/internal/process-drip`, and set **`DRIP_CRON_SECRET`** to the **same** value on **both** **mto-api** and **mto-drip-cron**. Optional tuning: **`DRIP_EMAIL_2_DELAY_HOURS`**, **`DRIP_EMAIL_3_DELAY_HOURS`**, **`DRIP_BATCH_SIZE`** (see root **`.env.example`**).
+5. **Booking nurture drip (optional):** The Blueprint adds **`mto-drip-cron`**, which does not open the DB directly; it **`curl`s** `POST /api/internal/process-drip` on **mto-api** (same pattern as the old SQLite-on-disk setup). Set **`DRIP_PROCESS_URL`** on the cron service to your public API URL plus path, e.g. `https://mto-api.onrender.com/api/internal/process-drip`, and set **`DRIP_CRON_SECRET`** to the **same** value on **both** **mto-api** and **mto-drip-cron**. Optional tuning: **`DRIP_EMAIL_2_DELAY_HOURS`**, **`DRIP_EMAIL_3_DELAY_HOURS`**, **`DRIP_BATCH_SIZE`** (see root **`.env.example`**).
 
 6. Deploy. After deploy, copy the **service URL** (e.g. `https://mto-api.onrender.com`) for the frontend.
 
@@ -118,9 +122,9 @@ If **neither** `X-Forwarded-Proto` nor `Forwarded: proto=` is present, the app *
 ## 6. Troubleshooting
 
 - **CORS errors:** Ensure `PRODUCTION_URL` on Render exactly matches the frontend origin (scheme + host, no trailing slash).
-- **Migrations:** They run at API startup. If you add new migrations, push and redeploy; the new instance will run `bun run migrate` then start.
-- **SQLite on Render:** The disk is only available at **runtime**. Do not run migrations in a pre-deploy or build step; the start command handles them.
-- **"no such table: users" / admin 500:** The DB was not migrated. In Render → your API service → **Settings**: set **Start Command** to exactly `bun run migrate && bun run check-db && bun run start`, set **Environment** → **DB_PATH** to `/data/sqlite.db`. Then **Manual Deploy** → redeploy. Check **Logs** for `[migrate] DB_PATH:` to confirm the path.
+- **Migrations:** They run at API startup against whatever **`detectDbMode()`** resolves (Turso or file SQLite). If you add new migrations, push and redeploy.
+- **Turso / startup:** Do not run migrations only in a build step without DB access — the **start** command runs migrate + check-db + start.
+- **"no such table: users" / admin 500:** Migrations did not apply or env is wrong. In Render → **mto-api** → **Settings**: **Start Command** = `bun run migrate && bun run check-db && bun run start`. **Environment:** **`TURSO_DATABASE_URL`** and **`TURSO_AUTH_TOKEN`** set; **`DB_PATH` unset** for remote Turso. **Manual Deploy** → redeploy. Logs: **`[migrate] libsql: remote`** (Turso) or **`[migrate] DB_PATH:`** (file SQLite fallback).
 - **check-db:** Startup fails fast if either `users` or `bookings` is missing from the DB (after migrate).
 - **Vercel "invalid runtime: render (nodejs18.x)":** The Astro preset runs `astro build` only, so the patch never runs. **Fix:** In Vercel → Project → **Settings** → **Build & Development** → **Build Command**, set to **`bun run build`** (not the default). Then redeploy. The `build` script in `web/package.json` runs the patch after `astro build`.
 - **Health check:** Use the **Render** API URL for `/health`, e.g. `https://mto-api-xxxx.onrender.com/health`. The **Vercel** app (Astro) has no `/health` route and will return 404 for that path.
@@ -129,24 +133,21 @@ If **neither** `X-Forwarded-Proto` nor `Forwarded: proto=` is present, the app *
 
 ## 7. Accessing the production database
 
-The production DB is a **SQLite file** on Render’s persistent disk at `/data/sqlite.db`. There is no network connection string; you access it by reaching the Render instance or by exporting data through your app.
+Production data lives in **Turso** (libsql), not on the Render instance disk. Use the **Turso CLI / dashboard**, **Drizzle Studio** against Turso env, or the app’s **admin export** routes.
 
-### Option A: Render Shell (paid plans only)
+### Option A: Turso CLI / dashboard
 
-**SSH/Shell** is available only on **paid** Web Services (not free tier).
+- Install CLI: [Turso CLI](https://docs.turso.tech/cli/overview) (macOS/Linux Homebrew, or **`npm i -g @turso/cli`** on Windows).
+- **`turso db shell <database-name>`** — run SQL against the remote database.
+- **`turso db inspect`** / Turso web dashboard — usage, branches, tokens.
 
-1. In [Render Dashboard](https://dashboard.render.com/) → your **mto-api** service → **Shell** (or use [Render SSH](https://render.com/docs/ssh) from your terminal).
-2. In the shell you can:
-   - Inspect the file: `ls -la /data/sqlite.db`
-   - Query with Bun:  
-     `bun -e "const db = require('bun:sqlite').Database; const d = new db('/data/sqlite.db'); console.log(d.query('SELECT * FROM users').all());"`
-   - If `sqlite3` is available in the image: `sqlite3 /data/sqlite.db "SELECT * FROM users;"`
+### Option B: Drizzle Studio against Turso
 
-### Option B: Download the DB file with SCP (paid plans only)
+From repo root, set **`TURSO_DATABASE_URL`** and **`TURSO_AUTH_TOKEN`** (see **`.env.example`**). **`drizzle.config.ts`** switches to the Turso driver when both are set. Then:
 
-With SSH enabled you can copy the file to your machine, then open it locally (e.g. Drizzle Studio or any SQLite client):
-
-- See [Render SSH docs](https://render.com/docs/ssh) for `render scp` or `scp` usage to copy from the service to your machine (e.g. `scp` from the instance to your laptop).
+```bash
+bun run db:studio
+```
 
 ### Option C: Export data via your API (any plan)
 
@@ -159,11 +160,15 @@ Both routes are **default-deny** for export in production: **`GET /api/admin/exp
 
 ### Summary
 
-| Goal | Free tier | Paid (Shell/SSH) |
-|------|-----------|------------------|
-| Run one-off queries | Use Option C (API export) | Shell + `bun` or `sqlite3` |
-| Open DB in Drizzle Studio | Not possible (no direct access) | SCP the file, then `DB_PATH=./prod.db bun db:studio` |
-| Backup the DB | Option C or add backup job that uploads to S3/GCS | SCP or backup job |
+| Goal | Approach |
+|------|----------|
+| Run one-off queries | Turso shell (**§7 Option A**) or API export (**Option C**) |
+| Open DB in Drizzle Studio | **§7 Option B** with Turso env vars |
+| Backup / DR | Turso [backups](https://docs.turso.tech/concepts/backup) + Option C exports |
+
+### Legacy: file SQLite on Render (optional)
+
+If you intentionally keep **`DB_PATH`** on Render **without** Turso env (not in the default Blueprint), the API uses **`bun:sqlite`** on that path — you would attach a **persistent disk** again and set **`DB_PATH`** to the mounted file (e.g. `/data/sqlite.db`). The default **`render.yaml`** in this repo is **Turso-only** (no disk).
 
 ---
 

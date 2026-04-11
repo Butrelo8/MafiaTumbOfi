@@ -1,4 +1,4 @@
-# Mafia Tumbada Oficial — API on Render (Bun + SQLite)
+# Mafia Tumbada Oficial — API on Render (Bun + Turso / libsql)
 # Docs: https://docs.render.com/blueprint-spec
 # After connecting the repo, set secret env vars in the Render Dashboard (sync: false).
 
@@ -9,21 +9,18 @@ services:
     # Bun CLI ships with Render's Node env today, not guaranteed forever — after Node/env upgrades, verify `bun --version` in Shell. Full checklist: DEPLOY.md §1 "Bun on Render (Node runtime)".
 
     buildCommand: bun install --frozen-lockfile
-    # Migrations + schema check at startup (disk only at runtime). Longer doc: DEPLOY.md §1.
+    # Migrations + schema check at startup. DB is Turso (remote libsql) — no persistent disk on the web service.
     startCommand: bun run migrate && bun run check-db && bun run start
-
-    disk:
-      name: data
-      mountPath: /data
-      sizeGB: 1
 
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 3001
-      - key: DB_PATH
-        value: /data/sqlite.db
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
       - key: FRONTEND_URL
         sync: false
       - key: PRODUCTION_URL
@@ -45,8 +42,7 @@ services:
 
     healthCheckPath: /health
 
-  # SQLite lives on **mto-api** disk only — cron cannot run migrate against that file.
-  # This job calls the API over HTTPS (Bearer DRIP_CRON_SECRET).
+  # Drip worker hits the API over HTTPS (Bearer DRIP_CRON_SECRET) — same as SQLite-on-disk layout.
   - type: cron
     name: mto-drip-cron
     runtime: node

@@ -5,6 +5,13 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-04-11 — Production DB: Turso (libsql) instead of Render persistent disk
+
+**Context:** The API used **`bun:sqlite`** with **`DB_PATH`** on a Render **1 GB persistent disk** (`/data/sqlite.db`). That works but adds disk cost, ties DB to one instance, and Shell/SCP access is paywalled.
+**Decision:** Production uses **Turso** via **`@libsql/client`** + **`drizzle-orm/libsql`**, with **`TURSO_DATABASE_URL`** and **`TURSO_AUTH_TOKEN`** on Render (**no** **`DB_PATH`** on the web service). **`detectDbMode()`** in **`src/db/detect.ts`**: remote Turso when both Turso vars set and **`DB_PATH`** unset; **embedded replica** when Turso vars + **`DB_PATH`** set (local dev); **`bun:sqlite`** when Turso vars unset (tests, offline). **`scripts/run-migration.ts`** and **`scripts/check-db.ts`** support both drivers. **`render.yaml`** drops the disk block and documents Turso env vars.
+**Alternatives considered:** Keep Render disk only (rejected for this cut — ongoing cost / single-box coupling). **Neon / Supabase Postgres** (deferred — dialect + migration churn vs current **`sqlite-core`** schema). **VPS SQLite** (separate TODOS card).
+**Why not the others:** libsql keeps the existing **`drizzle/*.sql`** and **`sqlite-core`** schema; Turso is the smallest jump from file SQLite.
+
 ## 2026-04-11 — Admin: `ADMIN_CLERK_ID` env instead of first-user heuristic
 
 **Context:** The API used a SQL subquery so the first inserted **`users`** row became **`is_admin`**, which granted admin to whoever signed up second in a misordered or multi-tester environment.
