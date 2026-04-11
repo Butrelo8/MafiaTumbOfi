@@ -18,7 +18,7 @@ const __agentLog = (payload: Record<string, unknown>) => {
   console.warn('[agent-debug]', body)
   fetch('http://127.0.0.1:7813/ingest/b731065b-0a2c-4578-8e8d-91a4a7063b54',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0436d5'},body}).catch(()=>{})
 }
-__agentLog({ location: 'admin.astro:locals.auth', message: 'admin SSR auth', data: { isAuthenticated, hypothesisId: 'H1' }, runId: 'pre-fix' })
+__agentLog({ location: 'admin.astro:locals.auth', message: 'admin SSR auth', data: { isAuthenticated, hypothesisId: 'H1' }, runId: 'post-fix' })
 // #endregion
 
 if (!isAuthenticated) {
@@ -95,7 +95,7 @@ try {
     location: 'admin.astro:after.getToken',
     message: 'admin token presence',
     data: { hasToken: Boolean(token), hypothesisId: 'H2' },
-    runId: 'pre-fix',
+    runId: 'post-fix',
   })
   // #endregion
   const listUrl = new URL(`${apiUrl}/api/admin/bookings`)
@@ -110,7 +110,7 @@ try {
     location: 'admin.astro:after.bookings.fetch',
     message: 'admin API list response',
     data: { status: response.status, hypothesisId: 'H3' },
-    runId: 'pre-fix',
+    runId: 'post-fix',
   })
   // #endregion
 

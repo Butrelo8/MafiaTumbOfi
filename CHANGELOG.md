@@ -19,6 +19,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Deploy docs:** `DEPLOY.md` §1 — **“Bun on Render (Node runtime)”** — documents reliance on Bun in Render’s Node image, operator checklist after Node/env/platform upgrades, and fallbacks if Bun is removed. **`render.yaml`** comments link to that section.
 
 ### Fixed
+- **Admin redirect loop (`/admin`):** API **`authenticateRequest`** used raw **`allowedOrigins`** for Clerk **`authorizedParties`** while CORS already expanded **www ↔ apex**. Sessions minted for **`https://www.…`** failed on the API when Render had only the apex **`PRODUCTION_URL`**, so **`GET /api/admin/bookings`** returned **401** and Astro kept calling **`redirectToSignIn`**. **`clerkAuthorizedParties`** now uses **`expandCorsAllowedOrigins`**, and **`PUBLIC_SITE_URL`** is merged into the raw list when set on the API.
 - **`web/src/pages/admin/update-pipeline.ts`:** import path to **`bookingPipeline`** — one **`../`** short (`../../../…` → **`../../../../src/lib/…`**) so **`astro build`** could resolve from **`web/src/pages/admin/`**.
 - **Resend / booking confirmation:** Production uses a **verified domain** and **`RESEND_FROM_EMAIL`** (`noreply@mafiatumbada.com` on Render) so the customer “Recibimos tu solicitud” email can reach **any recipient address**, not only the Resend account owner. **`BUGS.md`** entry updated (dev without domain still limited).
 
@@ -33,7 +34,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 - **Marketing homepage — Repertorio:** **`web/src/pages/index.astro`** — single **`repertoire-cta`** (removed broken nested wrappers); streaming row **`repertoire-stream`** with compact **`.repertoire-stream-link`** buttons (Apple Music / Spotify / YouTube icons + labels). **`marketing-press.css`** — cards use centered flex wrap (balances the 5-card last row), light surface gradient + radius, gold titles; CTA column centered with full-width capped booking button.
-- **API:** Shared **`src/lib/allowedOrigins.ts`** — single raw origin list for CORS (`expandCorsAllowedOrigins` in **`src/index.ts`**) and Clerk **`authorizedParties`** in **`src/middleware/auth.ts`**. **`GET /api/users/me`** uses **`successResponse`** from **`src/lib/errors.ts`** instead of ad-hoc **`c.json({ data })`**.
+- **API:** Shared **`src/lib/allowedOrigins.ts`** — single raw origin list for CORS (`expandCorsAllowedOrigins` in **`src/index.ts`**); Clerk **`authorizedParties`** uses **`clerkAuthorizedParties`** (same expansion + optional **`PUBLIC_SITE_URL`**). **`GET /api/users/me`** uses **`successResponse`** from **`src/lib/errors.ts`** instead of ad-hoc **`c.json({ data })`**.
 - **Homepage (`web/src/pages/index.astro`):** Apple Music social card — removed **nested `<svg>`** (invalid HTML); single icon `<svg>` + `<path>` like other cards; **`homepageHero.test.ts`** asserts one `<svg` in that block.
 - **Marketing social URLs:** Single source **`web/src/data/socials.ts`** (`bandSocialUrls`); **`MarketingLayout.astro`** and **`index.astro`** import it instead of duplicating Spotify / TikTok / YouTube / Instagram / Facebook / Apple Music links.
 - **Biome / git:** **`.code-review-graph/`** in root **`.gitignore`**; **`biome.json`** VCS integration **`useIgnoreFile`** enabled again (Biome no longer reads the ignored tool tree).
