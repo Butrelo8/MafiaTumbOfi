@@ -12,6 +12,15 @@ import { sanitizeResendDetail } from '../lib/sanitizeResendDetail'
 
 const { isAuthenticated, redirectToSignIn, getToken } = Astro.locals.auth()
 
+// #region agent log
+const __agentLog = (payload: Record<string, unknown>) => {
+  const body = JSON.stringify({ sessionId: '0436d5', ...payload, timestamp: Date.now() })
+  console.warn('[agent-debug]', body)
+  fetch('http://127.0.0.1:7813/ingest/b731065b-0a2c-4578-8e8d-91a4a7063b54',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0436d5'},body}).catch(()=>{})
+}
+__agentLog({ location: 'admin.astro:locals.auth', message: 'admin SSR auth', data: { isAuthenticated, hypothesisId: 'H1' }, runId: 'pre-fix' })
+// #endregion
+
 if (!isAuthenticated) {
   return redirectToSignIn({ returnBackUrl: '/admin' })
 }
@@ -81,12 +90,29 @@ let hasMore = false
 
 try {
   const token = await getToken()
+  // #region agent log
+  __agentLog({
+    location: 'admin.astro:after.getToken',
+    message: 'admin token presence',
+    data: { hasToken: Boolean(token), hypothesisId: 'H2' },
+    runId: 'pre-fix',
+  })
+  // #endregion
   const listUrl = new URL(`${apiUrl}/api/admin/bookings`)
   listUrl.searchParams.set('limit', String(pageSize))
   listUrl.searchParams.set('offset', String(offset))
   const response = await fetch(listUrl.toString(), {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   })
+
+  // #region agent log
+  __agentLog({
+    location: 'admin.astro:after.bookings.fetch',
+    message: 'admin API list response',
+    data: { status: response.status, hypothesisId: 'H3' },
+    runId: 'pre-fix',
+  })
+  // #endregion
 
   if (response.status === 401) {
     return redirectToSignIn({ returnBackUrl: '/admin' })
