@@ -97,6 +97,11 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ## Completed
 
+### DB — Turso (libsql) for production SQLite (2026-04-11)
+**What:** API uses **Turso** (`@libsql/client` + **`drizzle-orm/libsql`**) when **`TURSO_DATABASE_URL`** + **`TURSO_AUTH_TOKEN`** are set without **`DB_PATH`** (Render); embedded replica when Turso env + **`DB_PATH`**; else **`bun:sqlite`** (tests, offline).
+**Code:** **`src/db/detect.ts`**, **`detect.test.ts`**, **`src/db/index.ts`**, **`scripts/run-migration.ts`**, **`scripts/check-db.ts`**, **`src/lib/findMissingTables.ts`**, **`findMissingTables.test.ts`**; **`render.yaml`** (no disk); **`DEPLOY.md`**, **`.env.example`**, **`drizzle.config.ts`**, **`DECISIONS.md`**, **`CHANGELOG.md`**, **`README.md`**.
+**Done When:** Met — operator sets Turso secrets on Render; migrate/check-db/start path documented; **`bun test`** green.
+
 ### Auth — Admin via `ADMIN_CLERK_ID` (no first-user heuristic) (2026-04-11)
 **What:** Replaced “first `users` row is admin” SQL with **`ADMIN_CLERK_ID`** (trimmed) matching Clerk **`sub`** for **`is_admin`** on insert; when env is set, **`getOrCreateUser`** reconciles **`is_admin`** on read. Migration **`drizzle/0010_admin_explicit_clerk_ids.sql`** for known legacy **`clerk_id`** rows.
 **Why:** Second signup could steal admin; registration order is not a security boundary.
@@ -269,9 +274,9 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 - **Docs:** `CHANGELOG.md` [Unreleased].
 
 ### Code review — `check-db` must verify `bookings` table (2026-04-10)
-- **Script:** `scripts/check-db.ts` — `REQUIRED_TABLES` `users` + `bookings`; default `DB_PATH` still `join(import.meta.dir, '..', 'data', 'sqlite.db')`; aggregated error lists all missing tables; success log for deploy visibility.
-- **Lib:** `src/lib/findMissingSqliteTables.ts` — parameterized `sqlite_master` lookup.
-- **Tests:** `src/lib/findMissingSqliteTables.test.ts` (`:memory:` SQLite).
+- **Script:** `scripts/check-db.ts` — `REQUIRED_TABLES` `users` + `bookings`; supports Turso + file SQLite via **`detectDbMode()`**; success log for deploy visibility.
+- **Lib:** `src/lib/findMissingTables.ts` — parameterized `sqlite_master` lookup.
+- **Tests:** `src/lib/findMissingTables.test.ts` (`:memory:` SQLite).
 - **Docs:** `DEPLOY.md` — `check-db` fails fast if `users` or `bookings` missing; `CHANGELOG.md` [Unreleased].
 
 ### Code review — Single source for budget tiers (API + web) (2026-04-10)
@@ -346,7 +351,7 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 - **Tests:** added regression tests covering confirmation “error return” and “throw” paths (`src/routes/booking.test.ts`).
 
 ### Deploy — Ship API + frontend to production (2026-03)
-- **API:** Render (Bun + SQLite on persistent disk at /data). Start: `bun run migrate && bun run check-db && bun run start`.
+- **API:** Render (Bun + Turso / libsql). Start: `bun run migrate && bun run check-db && bun run start`.
 - **Frontend:** Vercel (Astro SSR, @astrojs/vercel, Node 20 runtime patch).
 - **Auth:** Clerk (production allowed origins via Instance API for *.vercel.app).
 - **Email:** Resend (band notification + customer confirmation). See open todo: verify domain so customers receive to any address.

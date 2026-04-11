@@ -119,7 +119,7 @@ MafiaTumbadaOfi/
 
 ## Environment Variables
 
-- **API:** See root `.env.example` (PORT, FRONTEND_URL, DB_PATH, **ADMIN_CLERK_ID**, RESEND_API_KEY, BOOKING_NOTIFICATION_EMAIL).
+- **API:** See root `.env.example` (PORT, FRONTEND_URL, `DB_PATH`, `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN`, **ADMIN_CLERK_ID**, RESEND_API_KEY, BOOKING_NOTIFICATION_EMAIL).
 - **Frontend:** See `web/.env.example` (`PUBLIC_API_URL`, `PUBLIC_SITE_URL` for canonicals / absolute **OG image**, optional **`PUBLIC_ALLOW_INDEXING=false`** for **`noindex`** on previews).
 
 ## Email (Resend)
@@ -138,5 +138,5 @@ More deploy detail: [DEPLOY.md](./DEPLOY.md) (Resend domain, `PRODUCTION_URL` / 
 
 ## Deploy
 
-- **API:** Render (Bun + SQLite on a persistent disk). See `render.yaml` and [DEPLOY.md](./DEPLOY.md).
+- **API:** Render (Bun + **Turso** / libsql). See `render.yaml` and [DEPLOY.md](./DEPLOY.md).
 - **Frontend:** Vercel (Astro SSR with `@astrojs/vercel`). Set root directory to `web/` and env vars as in DEPLOY.md.
