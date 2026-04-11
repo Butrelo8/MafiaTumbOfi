@@ -5,6 +5,13 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-04-11 — Admin UI: `MarketingLayout` instead of light `Layout`
+
+**Context:** **`/admin`** used **`Layout.astro`** (white header, Tailwind-ish light shell) while the public site uses **`MarketingLayout`** + **`marketing-press.css`** dark theme — internal page felt broken/off-brand.
+**Decision:** Render admin with **`MarketingLayout`**, same **`footer-bar`** pattern as **`/booking`**, scoped table/banner/pagination styles using existing CSS variables (**`--surface`**, **`--gold`**, etc.), **`robots="noindex,nofollow"`** always on admin. Export uses **`btn-secondary`**.
+**Alternatives considered:** Only restyle **`Layout.astro`** children while keeping light global chrome (rejected — still mismatched header). Duplicate marketing header markup inside admin (rejected — drift).
+**Why not the others:** One layout component keeps nav, fonts, and Clerk controls aligned with the rest of the marketing surface.
+
 ## 2026-04-11 — Clerk `authorizedParties`: expand www ↔ apex (match CORS)
 
 **Context:** Production users on **`https://www.mafiatumbada.com`** could sign in (Clerk on Astro) but **`GET /api/admin/bookings`** returned **401** because the API passed only raw env URLs into **`authenticateRequest({ authorizedParties })`**, while CORS already used **`expandCorsAllowedOrigins`**. Vercel logs showed **`admin.astro`** list fetch **`status:401`** and rapid **307** loops; Clerk sometimes logged handshake JWT expiry during the storm.

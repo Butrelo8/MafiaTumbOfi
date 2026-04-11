@@ -1,5 +1,5 @@
 ---
-import Layout from '../layouts/Layout.astro'
+import MarketingLayout from '../layouts/MarketingLayout.astro'
 import { formatBudgetLabel } from '../../../src/lib/bookingBudget'
 import {
   BOOKING_PIPELINE_STATUS_VALUES,
@@ -11,15 +11,6 @@ import { adminCanonical } from '../lib/publicSiteUrl'
 import { sanitizeResendDetail } from '../lib/sanitizeResendDetail'
 
 const { isAuthenticated, redirectToSignIn, getToken } = Astro.locals.auth()
-
-// #region agent log
-const __agentLog = (payload: Record<string, unknown>) => {
-  const body = JSON.stringify({ sessionId: '0436d5', ...payload, timestamp: Date.now() })
-  console.warn('[agent-debug]', body)
-  fetch('http://127.0.0.1:7813/ingest/b731065b-0a2c-4578-8e8d-91a4a7063b54',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'0436d5'},body}).catch(()=>{})
-}
-__agentLog({ location: 'admin.astro:locals.auth', message: 'admin SSR auth', data: { isAuthenticated, hypothesisId: 'H1' }, runId: 'post-fix' })
-// #endregion
 
 if (!isAuthenticated) {
   return redirectToSignIn({ returnBackUrl: '/admin' })
@@ -90,29 +81,12 @@ let hasMore = false
 
 try {
   const token = await getToken()
-  // #region agent log
-  __agentLog({
-    location: 'admin.astro:after.getToken',
-    message: 'admin token presence',
-    data: { hasToken: Boolean(token), hypothesisId: 'H2' },
-    runId: 'post-fix',
-  })
-  // #endregion
   const listUrl = new URL(`${apiUrl}/api/admin/bookings`)
   listUrl.searchParams.set('limit', String(pageSize))
   listUrl.searchParams.set('offset', String(offset))
   const response = await fetch(listUrl.toString(), {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   })
-
-  // #region agent log
-  __agentLog({
-    location: 'admin.astro:after.bookings.fetch',
-    message: 'admin API list response',
-    data: { status: response.status, hypothesisId: 'H3' },
-    runId: 'post-fix',
-  })
-  // #endregion
 
   if (response.status === 401) {
     return redirectToSignIn({ returnBackUrl: '/admin' })
@@ -144,17 +118,22 @@ try {
 }
 ---
 
-<Layout
-  title="Admin - Bookings"
-  description="Panel de administración de solicitudes."
+<MarketingLayout
+  title="Admin — Solicitudes de contratación"
+  description="Panel interno de administración de solicitudes de contratación."
   canonicalUrl={adminCanonicalUrl}
+  robots="noindex,nofollow"
 >
-  <div class="admin-container">
-    <h1>Bookings Management</h1>
+  <section class="admin-page" aria-label="Solicitudes">
+    <div class="container admin-container">
+      <span class="section-label">Administración</span>
+      <h1 class="admin-title">Solicitudes de contratación</h1>
 
-    <p class="admin-actions">
-      <a href="/admin/export-bookings" class="export-link">Export for debugging (JSON)</a>
-    </p>
+      <p class="admin-actions">
+        <a href="/admin/export-bookings" class="btn-secondary admin-export-btn">
+          Exportar JSON (depuración)
+        </a>
+      </p>
 
     {resendMessage && (
       <div class={`resend-banner ${resendIsOk ? 'resend-ok' : 'resend-error'}`}>
@@ -182,12 +161,12 @@ try {
 
     {error && (
       <div class="error-message">
-        Error loading bookings: {error}
+        Error al cargar solicitudes: {error}
       </div>
     )}
 
     {!error && totalBookings === 0 && (
-      <p>No bookings found.</p>
+      <p class="admin-empty">No hay solicitudes registradas.</p>
     )}
 
     {!error && totalBookings > 0 && (
@@ -314,7 +293,17 @@ try {
         )}
       </nav>
     )}
-  </div>
+    </div>
+  </section>
+
+  <footer class="footer-bar">
+    <div class="container">
+      <span class="footer-brand">Mafia Tumbada</span>
+      <p class="footer-copy">
+        © {new Date().getFullYear()} · Xalapa, Veracruz · Panel interno
+      </p>
+    </div>
+  </footer>
 
   <script>
     import { BOOKING_BUDGET_SORT_RANK } from '../../../src/lib/bookingBudget'
@@ -382,26 +371,44 @@ try {
       createdTh?.addEventListener('click', () => sortBy('created'))
     })()
   </script>
-</Layout>
+</MarketingLayout>
 
 <style>
-  .admin-container {
-    max-width: 1200px;
-    margin: 0 auto;
+  .admin-page {
+    padding-block: clamp(5.5rem, 12vw, 7rem) clamp(2.5rem, 6vw, 4rem);
   }
 
-  h1 {
-    margin-bottom: 0.5rem;
+  .admin-container {
+    max-width: 1200px;
+  }
+
+  .admin-title {
+    font-family: var(--ff-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: clamp(1.85rem, 4vw, 2.75rem);
+    font-weight: 700;
+    line-height: 1.12;
+    color: var(--text, #ede8df);
+    margin: 0 0 1.25rem;
   }
 
   .admin-actions {
     margin-bottom: 1.5rem;
   }
 
+  .admin-export-btn {
+    display: inline-flex;
+    width: fit-content;
+  }
+
+  .admin-empty {
+    color: var(--muted, #7a7267);
+    font-size: 0.95rem;
+  }
+
   .admin-pagination-meta {
     margin: 0 0 0.75rem;
     font-size: 0.875rem;
-    color: #52525b;
+    color: var(--muted, #7a7267);
   }
 
   .admin-pagination {
@@ -413,98 +420,120 @@ try {
   }
 
   .pagination-link {
-    font-size: 0.875rem;
-    color: var(--brand, #6366f1);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold, #c49a2a);
     text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s, color 0.2s;
   }
 
   .pagination-link:hover {
-    text-decoration: underline;
+    border-bottom-color: var(--gold-dim, #8a6c1c);
+    color: var(--gold-dim, #8a6c1c);
   }
 
   .pagination-disabled {
-    font-size: 0.875rem;
-    color: #a1a1aa;
+    font-size: 0.8rem;
+    color: var(--muted, #7a7267);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .pagination-page {
-    font-size: 0.875rem;
-    color: #3f3f46;
-  }
-
-  .export-link {
-    font-size: 0.875rem;
-    color: var(--brand, #6366f1);
-  }
-
-  .export-link:hover {
-    text-decoration: underline;
+    font-size: 0.85rem;
+    color: var(--muted, #7a7267);
   }
 
   .error-message {
-    background: var(--error-bg, #fee);
-    border: 1px solid var(--error-border, #fcc);
-    color: var(--error-text, #c00);
-    padding: 1rem;
-    border-radius: 4px;
+    background: var(--surface2, #191919);
+    border: 1px solid #5c2a2a;
+    color: #f0c4c4;
+    padding: 1rem 1.1rem;
+    border-radius: 0.25rem;
     margin-bottom: 1rem;
+    font-size: 0.9rem;
   }
 
   .resend-banner {
     margin: 1rem 0;
     padding: 0.75rem 1rem;
-    border-radius: 4px;
-    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    border: 1px solid var(--border, #262420);
+    font-size: 0.9rem;
   }
 
   .resend-ok {
-    background: #ecfdf5;
-    border-color: #bbf7d0;
-    color: #065f46;
+    background: rgba(34, 80, 56, 0.35);
+    border-color: rgba(196, 154, 42, 0.45);
+    color: #d8e8df;
   }
 
   .resend-error {
-    background: #fef2f2;
-    border-color: #fecaca;
-    color: #991b1b;
+    background: rgba(60, 24, 24, 0.45);
+    border-color: rgba(180, 90, 90, 0.5);
+    color: #f0d4d4;
   }
 
   .status-legend {
-    margin: 1rem 0;
-    padding: 0.75rem 1rem;
-    background: #f9fafb;
-    border: 1px solid #eee;
-    border-radius: 6px;
+    margin: 1rem 0 1.5rem;
+    padding: 1rem 1.15rem;
+    background: var(--surface, #111111);
+    border: 1px solid var(--border, #262420);
+    border-radius: 0.25rem;
   }
 
   .status-legend p {
-    margin: 0.25rem 0;
+    margin: 0.35rem 0;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--muted, #7a7267);
+  }
+
+  .status-legend strong {
+    color: var(--text, #ede8df);
+    font-weight: 600;
   }
 
   .table-container {
     overflow-x: auto;
+    border: 1px solid var(--border, #262420);
+    border-radius: 0.25rem;
+    background: var(--surface, #111111);
   }
 
   .bookings-table {
     width: 100%;
+    min-width: 720px;
     border-collapse: collapse;
-    background: white;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    background: var(--surface, #111111);
+    color: var(--text, #ede8df);
+    font-size: 0.8125rem;
   }
 
   .bookings-table th,
   .bookings-table td {
-    padding: 0.75rem;
+    padding: 0.65rem 0.75rem;
     text-align: left;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border, #262420);
+    vertical-align: top;
+  }
+
+  .bookings-table tbody tr:hover {
+    background: var(--surface2, #191919);
   }
 
   .bookings-table th {
-    background: #f9fafb;
+    background: var(--bg, #0b0b0b);
+    font-family: var(--ff-body, system-ui, sans-serif);
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: #666;
+    color: var(--gold, #c49a2a);
+    white-space: nowrap;
   }
 
   .bookings-table th.sortable {
@@ -513,36 +542,42 @@ try {
   }
 
   .bookings-table th.sortable:hover {
-    background: #eef2ff;
+    background: var(--surface2, #191919);
+    color: var(--text, #ede8df);
   }
 
   .sort-indicator {
-    font-size: 0.75rem;
-    color: #6366f1;
+    font-size: 0.65rem;
+    color: var(--gold, #c49a2a);
   }
 
   .status-badge {
     display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
     font-weight: 600;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
+    border: 1px solid transparent;
   }
 
   .status-pending {
-    background: #fef3c7;
-    color: #92400e;
+    background: rgba(196, 154, 42, 0.18);
+    border-color: rgba(196, 154, 42, 0.45);
+    color: #e8d4a8;
   }
 
   .status-sent {
-    background: #d1fae5;
-    color: #065f46;
+    background: rgba(46, 120, 80, 0.28);
+    border-color: rgba(80, 160, 110, 0.45);
+    color: #c5e8d4;
   }
 
   .status-failed {
-    background: #fee2e2;
-    color: #991b1b;
+    background: rgba(120, 40, 40, 0.35);
+    border-color: rgba(200, 100, 100, 0.45);
+    color: #f0c8c8;
   }
 
   .resend-form,
@@ -551,21 +586,34 @@ try {
   }
 
   .pipeline-select {
-    font-size: 0.875rem;
-    max-width: 10rem;
+    font-size: 0.8125rem;
+    max-width: 11rem;
+    color-scheme: dark;
+    color: var(--text, #ede8df);
+    background: var(--bg, #0b0b0b);
+    border: 1px solid var(--border, #262420);
+    border-radius: 0.2rem;
+    padding: 0.3rem 0.45rem;
   }
 
   .resend-button {
-    font-size: 0.875rem;
-    color: var(--brand, #6366f1);
+    font-family: var(--ff-body, system-ui, sans-serif);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold, #c49a2a);
     background: transparent;
-    border: 1px solid var(--brand, #6366f1);
-    padding: 0.35rem 0.7rem;
-    border-radius: 9999px;
+    border: 1px solid var(--gold-dim, #8a6c1c);
+    padding: 0.4rem 0.65rem;
+    border-radius: 0.15rem;
     cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
   }
 
   .resend-button:hover {
-    background: rgba(99, 102, 241, 0.08);
+    border-color: var(--gold, #c49a2a);
+    color: var(--text, #ede8df);
+    background: rgba(196, 154, 42, 0.12);
   }
 </style>

@@ -69,11 +69,16 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 ---
 
 ### Content / SEO — Homepage & booking copy pass
-**What:** Rewrite/structure `index.astro` and `booking.astro` for promoters and fans: clear who the band is, what “contrataciones” means, trust signals, CTA flow; optional short FAQ block for SEO.
+**What:** Rewrite/structure `index.astro` and `booking.astro` for promoters and fans: clear who the band is, what "contrataciones" means, trust signals, CTA flow; optional short FAQ block for SEO.
 **Why:** Current pages may be thin; this is the core conversion and clarity work separate from meta plumbing.
 **Context:** Keep existing booking form behavior; focus on headings, sections, and accessibility. Align tone with press kit when both exist.
-**Solution:** 
-**Done When:** 
+**Solution:**
+- `index.astro`: Add a short above-the-fold blurb (2–3 sentences) identifying the band, genre, and region. Ensure there's a visible CTA button pointing to `/contrataciones`. Add a trust signal section (e.g. notable venues, years active, or a pull quote) above the fold or just below the hero.
+- `booking.astro`: Add a brief intro paragraph explaining what the form is for and what happens after submission (response time, what info they'll receive). Label form sections clearly. Add a short FAQ block (3–5 Q&As) below the form covering: response time, minimum notice, coverage area, event types, and deposit/payment process — each answer 1–2 sentences for SEO value.
+- Align tone, vocabulary, and heading hierarchy with the press kit page (same register, same brand voice).
+- All new headings must use proper `h1`/`h2`/`h3` nesting; no skipped levels.
+- No changes to form `action`, validation logic, or backend endpoints.
+**Done When:** Both pages have descriptive headings, at least one trust signal each, clear CTAs, and the booking page includes a FAQ block. Copy reads consistently with the press kit. No existing form behavior is broken.
 **Effort:** M
 **Priority:** P2
 **Depends on:** None
@@ -121,6 +126,15 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ## Completed
 
+### UI — Admin page: marketing layout & dark design system (2026-04-11)
+- **`web/src/pages/admin.astro`** — **`MarketingLayout`** (same shell as `/`, `/booking`), **`robots="noindex,nofollow"`**, **`footer-bar`**; table / legend / banners / pagination / status pills use **`marketing-press.css`** tokens; export → **`btn-secondary`** (“Exportar JSON (depuración)”).
+- **Tests:** **`web/src/lib/adminPageTheme.test.ts`** (markup regression). **`DECISIONS.md`**, **`CHANGELOG.md`** [Unreleased].
+
+### UI — Booking thank-you: YouTube embed instead of local video (2026-04-11)
+- **`web/src/pages/booking/gracias.astro`** — lazy **YouTube** iframe **`HTA31yUX41A`** (16:9, ~600px); **`prefers-reduced-motion: reduce`** → link to watch URL; no **`hero.mp4`** on gracias (**`hero.mp4`** stays on homepage only).
+- **`web/src/lib/bookingThanksPresentation.ts`** + **`bookingThanksPresentation.test.ts`** — embed/watch URLs + iframe title.
+- **`web/e2e/booking.e2e.ts`** — asserts embed **`src`**. **`CHANGELOG.md`** [Unreleased].
+
 ### Email — Follow-up sequence / nurture drip (2026-04-11)
 - **DB:** **`drizzle/0009_booking_drip.sql`** — **`drip2_due_at`**, **`drip2_sent_at`**, **`drip3_due_at`**, **`drip3_sent_at`** on **`bookings`**; **`src/db/schema.ts`**.
 - **Schedule:** **`src/lib/dripSchedule.ts`** + **`dripSchedule.test.ts`** — defaults **+24h** / **+72h** from booking; env **`DRIP_EMAIL_2_DELAY_HOURS`**, **`DRIP_EMAIL_3_DELAY_HOURS`**.
@@ -133,7 +147,7 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 - **`web/src/lib/bookingThanksSession.ts`** + **`bookingThanksSession.test.ts`** — key **`mto_booking_thanks`**, **`normalizeBookingConfirmation`**, **`parseBookingThanksStored`**.
 - **`web/src/lib/publicSiteUrl.ts`** — **`bookingThanksCanonical()`**; test in **`publicSiteUrl.test.ts`**.
 - **`web/src/pages/booking.astro`** — success: **`sessionStorage`** + **`location.assign('/booking/gracias')`**; form **`data-api-url`** / **`data-budget-hints`** (client script imports; no **`define:vars`** with imports).
-- **`web/src/pages/booking/gracias.astro`** — **`MarketingLayout`** + **`robots="noindex,nofollow"`**; client: invalid/missing session → **`/booking`**; **remove session after read**; copy branches match previous inline success; video **`/video/hero.mp4`** + “Ver presentación en vivo” link; WhatsApp primary iff **`PUBLIC_WHATSAPP_URL`**.
+- **`web/src/pages/booking/gracias.astro`** — **`MarketingLayout`** + **`robots="noindex,nofollow"`**; client: invalid/missing session → **`/booking`**; **remove session after read**; copy branches match previous inline success; **YouTube** presentation embed (**`bookingThanksPresentation.ts`**, reduced-motion fallback link); WhatsApp primary iff **`PUBLIC_WHATSAPP_URL`**.
 - **`MarketingLayout.astro`** — optional **`robots`** → **`Seo`**.
 - **`web/e2e/booking.e2e.ts`** — **`sent`**, **`pending`**, redirect without session. **`CHANGELOG.md`**, **`DECISIONS.md`**.
 

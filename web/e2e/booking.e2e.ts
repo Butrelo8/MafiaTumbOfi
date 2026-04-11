@@ -27,6 +27,10 @@ test.describe('public booking flow', () => {
     await expect(page).toHaveURL(/\/booking\/gracias/)
 
     await expect(page.locator('#thanks-message')).toContainText('Mensaje enviado. Te contactaremos pronto.')
+    await expect(page.locator('.thanks-youtube-frame')).toHaveAttribute(
+      'src',
+      /youtube\.com\/embed\/HTA31yUX41A/,
+    )
   })
 
   test('POST success with confirmation pending lands on gracias with pending copy (API mocked)', async ({
