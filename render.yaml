@@ -36,6 +36,9 @@ services:
         sync: false
       - key: CLERK_SECRET_KEY
         sync: false
+      # Clerk Dashboard → Users → User ID (matches JWT `sub`). Gates `is_admin` on insert + sync on read.
+      - key: ADMIN_CLERK_ID
+        sync: false
       # Same value on **mto-drip-cron**; gates POST /api/internal/process-drip
       - key: DRIP_CRON_SECRET
         sync: false

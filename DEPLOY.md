@@ -26,6 +26,7 @@ Deploy order: **API first**, then frontend (so you can set `PUBLIC_API_URL` to t
    | `BOOKING_NOTIFICATION_EMAIL` | Email that receives booking form submissions. |
    | `CLERK_PUBLISHABLE_KEY` | From [Clerk](https://dashboard.clerk.com) (same app as frontend). |
    | `CLERK_SECRET_KEY` | From Clerk. |
+   | `ADMIN_CLERK_ID` | **Required for `/api/admin/*`.** Clerk **User ID** for the band account (Dashboard → Users → copy id; matches JWT `sub`). New signups never auto-gain admin. |
    | `DRIP_CRON_SECRET` | **Optional but recommended** for nurture emails: long random string; must match the **cron** service (see below). |
    | `PUBLIC_SITE_URL` | **Optional** for drip email links; falls back to `PRODUCTION_URL` / `FRONTEND_URL`. |
    | `PUBLIC_WHATSAPP_URL` | **Optional** — adds WhatsApp CTA in Email 3 (same pattern as the Astro site). |
@@ -94,7 +95,7 @@ If **neither** `X-Forwarded-Proto` nor `Forwarded: proto=` is present, the app *
 
 - [ ] API: `https://your-api.onrender.com/health` returns `{"status":"ok",...}`.
 - [ ] Frontend loads; booking form submits to the API (check Network tab and Resend inbox).
-- [ ] Clerk: first user to sign in in production becomes admin; `/admin` works for that user.
+- [ ] API env **`ADMIN_CLERK_ID`** set to the band Clerk user id; `/admin` works for that user only (new signups never auto-admin).
 - [ ] In Clerk dashboard, production frontend URL is in allowed redirect/origin list.
 
 ---

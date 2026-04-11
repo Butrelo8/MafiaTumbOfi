@@ -5,6 +5,13 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-04-11 — Admin: `ADMIN_CLERK_ID` env instead of first-user heuristic
+
+**Context:** The API used a SQL subquery so the first inserted **`users`** row became **`is_admin`**, which granted admin to whoever signed up second in a misordered or multi-tester environment.
+**Decision:** **`ADMIN_CLERK_ID`** on the API (trimmed) must match the Clerk **`sub`** for **`is_admin`** on insert. When the env is set, **`getOrCreateUser`** updates existing rows so **`is_admin`** matches the env (no Render Shell required on free tier). A one-time migration **`0010_admin_explicit_clerk_ids.sql`** fixes known **`clerk_id`** values in existing DBs.
+**Alternatives considered:** Clerk **`publicMetadata.role`** only (deferred — extra Dashboard/webhook ops). Manual SQL on production disk only (rejected — free tier has no Shell; env sync covers drift).
+**Why not the others:** Single env var is easy to rotate with the band account and is testable without Clerk metadata writes.
+
 ## 2026-04-11 — Admin UI: `MarketingLayout` instead of light `Layout`
 
 **Context:** **`/admin`** used **`Layout.astro`** (white header, Tailwind-ish light shell) while the public site uses **`MarketingLayout`** + **`marketing-press.css`** dark theme — internal page felt broken/off-brand.
