@@ -1,4 +1,6 @@
-import { describe, expect, mock, test } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test'
+import type { Resend } from 'resend'
+import { setResendForTesting } from '../lib/resend'
 
 const mockAdminUser = {
   id: 1,
@@ -21,15 +23,12 @@ const mockNonAdminUser = {
 }
 
 let bookingToReturn: unknown = null
-let getOrCreateUserReturn: typeof mockAdminUser | typeof mockNonAdminUser =
-  mockAdminUser
-let lastUpdate:
-  | {
-      status?: 'pending' | 'sent' | 'failed'
-      confirmationLastError?: string | null
-      confirmationAttempts?: number
-    }
-  | null = null
+let getOrCreateUserReturn: typeof mockAdminUser | typeof mockNonAdminUser = mockAdminUser
+let lastUpdate: {
+  status?: 'pending' | 'sent' | 'failed'
+  confirmationLastError?: string | null
+  confirmationAttempts?: number
+} | null = null
 let resendBehavior: 'success' | 'error' | 'throw' = 'success'
 
 mock.module('../db', () => ({
@@ -60,26 +59,24 @@ mock.module('../lib/users', () => ({
   getOrCreateUser: async () => getOrCreateUserReturn,
 }))
 
-mock.module('../lib/resend', () => ({
-  getResend: () => ({
-    emails: {
-      send: async () => {
-        if (resendBehavior === 'throw') {
-          throw new Error('Resend throw during confirmation')
-        }
+const resendApiMock = {
+  emails: {
+    send: async () => {
+      if (resendBehavior === 'throw') {
+        throw new Error('Resend throw during confirmation')
+      }
 
-        if (resendBehavior === 'error') {
-          return {
-            data: null,
-            error: { message: 'Resend API error', name: 'Test' },
-          }
+      if (resendBehavior === 'error') {
+        return {
+          data: null,
+          error: { message: 'Resend API error', name: 'Test' },
         }
+      }
 
-        return { data: { id: 'mock-id' }, error: null }
-      },
+      return { data: { id: 'mock-id' }, error: null }
     },
-  }),
-}))
+  },
+} as Resend
 
 const { app } = await import('../index')
 const { setClerkClientForTesting } = await import('../middleware/auth')
@@ -98,6 +95,15 @@ const mockClerkClient = {
 setClerkClientForTesting(mockClerkClient as never)
 
 describe('POST /api/admin/bookings/:id/resend-confirmation', () => {
+  beforeEach(() => {
+    setResendForTesting(resendApiMock)
+    resendBehavior = 'success'
+  })
+
+  afterEach(() => {
+    setResendForTesting(null)
+  })
+
   test('returns 401 when unauthenticated', async () => {
     getOrCreateUserReturn = mockAdminUser
     bookingToReturn = null
@@ -235,4 +241,3 @@ describe('POST /api/admin/bookings/:id/resend-confirmation', () => {
     expect(lastUpdate.confirmationAttempts).toBe(2)
   })
 })
-

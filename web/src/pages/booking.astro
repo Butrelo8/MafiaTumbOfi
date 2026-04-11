@@ -67,7 +67,13 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
 
         <!-- ─── FORMULARIO ────────────────────────────────── -->
         <div class="booking-form-wrap">
-          <form id="booking-form" class="booking-form" novalidate>
+          <form
+            id="booking-form"
+            class="booking-form"
+            novalidate
+            data-api-url={apiUrl}
+            data-budget-hints={JSON.stringify(BOOKING_BUDGET_HINTS_WITH_EMPTY)}
+          >
 
             <!-- Honeypot -->
             <div class="hidden" aria-hidden="true">
@@ -479,8 +485,24 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
   .hidden { display: none !important; }
 </style>
 
-<script define:vars={{ apiUrl, budgetHints: BOOKING_BUDGET_HINTS_WITH_EMPTY }}>
-  const form    = document.getElementById('booking-form')
+<script>
+  import {
+    BOOKING_THANKS_SESSION_KEY,
+    normalizeBookingConfirmation,
+  } from '../lib/bookingThanksSession'
+
+  const form = document.getElementById('booking-form') as HTMLFormElement | null
+  if (!form) throw new Error('booking-form missing')
+
+  const apiUrl = form.dataset.apiUrl ?? ''
+  let budgetHints: Record<string, string> = {}
+  try {
+    budgetHints = JSON.parse(form.dataset.budgetHints || '{}') as Record<string, string>
+  } catch {
+    budgetHints = {}
+  }
+
+  const formEl = form
   const status  = document.getElementById('form-status')
   const btn     = document.getElementById('submit-btn')
   const budgetSelect = document.getElementById('budget')
@@ -502,14 +524,14 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
   budgetSelect?.addEventListener('change', syncBudgetHint)
   syncBudgetHint()
 
-  form.addEventListener('submit', async (e) => {
+  formEl.addEventListener('submit', async (e) => {
     e.preventDefault()
 
     btn.disabled = true
     btn.textContent = 'Enviando…'
     setStatus('loading', 'Enviando…')
 
-    const fd = new FormData(form)
+    const fd = new FormData(formEl)
     const body = {
       name:       fd.get('name'),
       email:      fd.get('email'),
@@ -536,15 +558,15 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
 
       if (res.ok) {
         const confirmation = data?.data?.confirmation ?? data?.confirmation
-        if (confirmation === 'sent') {
-          setStatus('success', 'Mensaje enviado. Te contactaremos pronto.')
-        } else if (confirmation === 'pending') {
-          setStatus('success', 'Recibimos tu solicitud. Te contactaremos pronto (la confirmación por correo no pudo enviarse).')
-        } else {
-          setStatus('success', 'Recibimos tu solicitud. Te contactaremos pronto.')
-        }
-        form.reset()
+        const normalized = normalizeBookingConfirmation(confirmation)
+        sessionStorage.setItem(
+          BOOKING_THANKS_SESSION_KEY,
+          JSON.stringify({ confirmation: normalized }),
+        )
+        formEl.reset()
         syncBudgetHint()
+        window.location.assign('/booking/gracias')
+        return
       } else {
         setStatus('error', data?.error?.message || `Error ${res.status}. Vuelve a intentar.`)
       }

@@ -24,11 +24,7 @@ export async function getOrCreateUser(
   options?: GetOrCreateUserOptions,
 ): Promise<UserRow> {
   const database = options?.db ?? db
-  const existing = await database
-    .select()
-    .from(users)
-    .where(eq(users.clerkId, clerkId))
-    .get()
+  const existing = await database.select().from(users).where(eq(users.clerkId, clerkId)).get()
 
   if (existing) return existing
 
@@ -36,8 +32,7 @@ export async function getOrCreateUser(
   const clerkUser = await clerkClient.users.getUser(clerkId)
   const primaryEmail = clerkUser.primaryEmailAddress ?? clerkUser.emailAddresses?.[0]
   const email = primaryEmail?.emailAddress ?? `${clerkId}@clerk.placeholder`
-  const name =
-    [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || null
+  const name = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || null
 
   const [inserted] = await database
     .insert(users)

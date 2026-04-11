@@ -67,4 +67,18 @@ describe('Admin authorization', () => {
     expect(body.error.code).toBe('FORBIDDEN')
     expect(body.error.message).toContain('Admin')
   })
+
+  test('PATCH /api/admin/bookings/:id returns 403 when user is not admin', async () => {
+    const res = await app.request('/api/admin/bookings/1', {
+      method: 'PATCH',
+      headers: {
+        Authorization: 'Bearer valid_token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ pipelineStatus: 'contacted' }),
+    })
+    expect(res.status).toBe(403)
+    const body = await res.json()
+    expect(body.error.code).toBe('FORBIDDEN')
+  })
 })

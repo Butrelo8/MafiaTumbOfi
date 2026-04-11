@@ -2,9 +2,7 @@
  * Parse `proto` from the first segment of an RFC 7239 `Forwarded` header value.
  * Example: `for=192.0.2.1;proto=https` → `https`
  */
-export function parseForwardedHeaderProto(
-  forwarded: string | undefined,
-): string | undefined {
+export function parseForwardedHeaderProto(forwarded: string | undefined): string | undefined {
   if (!forwarded) return undefined
   const segment = forwarded.split(',')[0]?.trim()
   if (!segment) return undefined

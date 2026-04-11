@@ -14,9 +14,9 @@ Known bugs and workarounds. Updated automatically by the AI agent.
 -->
 
 ## Resend: no email delivered to customer / “only send to your own email”
-**Description:** In development, Resend only delivers to the Resend account owner’s email. Sending to other addresses (e.g. the booking customer) is rejected with a validation error; the app may still mark the booking as sent.
-**Workaround:** Verify a domain at [resend.com/domains](https://resend.com/domains), set `RESEND_FROM_EMAIL` to an address on that domain (e.g. `noreply@tudominio.com`), and use that in production. For testing, use your Resend account email as the booking email so the confirmation is delivered.
-**Status:** pending (Resend platform limitation)
+**Description:** Without a verified sending domain, Resend only delivers to the account owner’s email; sending to arbitrary customer addresses (booking confirmation) fails validation. **Production (2026-04-10):** verified domain + `RESEND_FROM_EMAIL` on Render — confirmations deliver to the address the visitor entered.
+**Workaround:** For **local/dev** without a verified domain: use your Resend account email as the test customer, or verify a domain and set `RESEND_FROM_EMAIL` like prod.
+**Status:** fixed (production); dev/sandbox still subject to Resend limits without domain setup
 **Reported:** 2026-03-16
 
 ## [BUG] API HTTPS redirect skipped when `x-forwarded-proto` is missing

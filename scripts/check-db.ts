@@ -2,8 +2,9 @@
  * Exits with code 1 if the DB is missing required tables (users, bookings).
  * Use after migrate in startCommand so the app never starts with an empty DB.
  */
-import { join } from 'path'
+
 import { Database } from 'bun:sqlite'
+import { join } from 'node:path'
 import { findMissingSqliteTables } from '../src/lib/findMissingSqliteTables'
 
 const root = join(import.meta.dir, '..')

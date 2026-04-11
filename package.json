@@ -7,6 +7,10 @@
     "start": "bun run src/index.ts",
     "build": "bun build src/index.ts --outdir dist",
     "test": "bun test",
+    "test:e2e": "bun run --cwd web test:e2e",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write --unsafe .",
+    "format": "biome format --write .",
     "db:generate": "drizzle-kit generate:sqlite",
     "db:migrate": "bun run migrate",
     "db:upgrade-kit-snapshots": "drizzle-kit up:sqlite",
@@ -19,10 +23,10 @@
     "drizzle-orm": "^0.30.0",
     "hono": "^4.0.0",
     "resend": "^4.0.0",
-    "stripe": "^14.0.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.11",
     "bun-types": "latest",
     "drizzle-kit": "^0.20.0",
     "typescript": "^5.0.0"

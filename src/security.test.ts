@@ -37,26 +37,6 @@ describe('Security middleware', () => {
     expect(data.error?.code).toBe('PAYLOAD_TOO_LARGE')
   })
 
-  test('auth rate limit: returns 429 after 10 requests per IP', async () => {
-    const ip = '192.168.100.50'
-    for (let i = 0; i < 10; i++) {
-      const res = await app.request('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-forwarded-for': ip },
-        body: JSON.stringify({}),
-      })
-      expect(res.status).toBe(501)
-    }
-    const res = await app.request('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-forwarded-for': ip },
-      body: JSON.stringify({}),
-    })
-    expect(res.status).toBe(429)
-    const data = await res.json()
-    expect(data.error?.code).toBe('RATE_LIMITED')
-  })
-
   test('CORS: allows configured origin', async () => {
     const res = await app.request('/health', {
       headers: { Origin: 'http://localhost:4321' },

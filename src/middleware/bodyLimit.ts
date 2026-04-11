@@ -8,12 +8,7 @@ export async function bodyLimit(c: Context, next: Next) {
   if (contentLengthHeader) {
     const contentLength = Number.parseInt(contentLengthHeader, 10)
     if (!Number.isNaN(contentLength) && contentLength > MAX_SIZE) {
-      return errorResponse(
-        c,
-        413,
-        'PAYLOAD_TOO_LARGE',
-        'Request body exceeds 100KB',
-      )
+      return errorResponse(c, 413, 'PAYLOAD_TOO_LARGE', 'Request body exceeds 100KB')
     }
   }
 
@@ -45,12 +40,7 @@ export async function bodyLimit(c: Context, next: Next) {
       totalBytes += value.byteLength
       if (totalBytes > MAX_SIZE) {
         await reader.cancel().catch(() => undefined)
-        return errorResponse(
-          c,
-          413,
-          'PAYLOAD_TOO_LARGE',
-          'Request body exceeds 100KB',
-        )
+        return errorResponse(c, 413, 'PAYLOAD_TOO_LARGE', 'Request body exceeds 100KB')
       }
     }
   } catch {

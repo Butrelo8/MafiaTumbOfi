@@ -6,10 +6,10 @@ services:
   - type: web
     name: mto-api
     runtime: node
-    # Bun is available in Render's Node runtime; use BUN_VERSION env if needed
+    # Bun CLI ships with Render's Node env today, not guaranteed forever — after Node/env upgrades, verify `bun --version` in Shell. Full checklist: DEPLOY.md §1 "Bun on Render (Node runtime)".
 
     buildCommand: bun install --frozen-lockfile
-    # Migrations run at startup (disk only available at runtime). check-db fails fast if tables missing.
+    # Migrations + schema check at startup (disk only at runtime). Longer doc: DEPLOY.md §1.
     startCommand: bun run migrate && bun run check-db && bun run start
 
     disk:
@@ -36,5 +36,23 @@ services:
         sync: false
       - key: CLERK_SECRET_KEY
         sync: false
+      # Same value on **mto-drip-cron**; gates POST /api/internal/process-drip
+      - key: DRIP_CRON_SECRET
+        sync: false
 
     healthCheckPath: /health
+
+  # SQLite lives on **mto-api** disk only — cron cannot run migrate against that file.
+  # This job calls the API over HTTPS (Bearer DRIP_CRON_SECRET).
+  - type: cron
+    name: mto-drip-cron
+    runtime: node
+    schedule: "*/15 * * * *"
+    buildCommand: "echo noop"
+    startCommand: 'curl -sf -X POST -H "Authorization: Bearer $DRIP_CRON_SECRET" "$DRIP_PROCESS_URL"'
+    envVars:
+      - key: DRIP_CRON_SECRET
+        sync: false
+      # Full URL, e.g. https://mto-api.onrender.com/api/internal/process-drip
+      - key: DRIP_PROCESS_URL
+        sync: false

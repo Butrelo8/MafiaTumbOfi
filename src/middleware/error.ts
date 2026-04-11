@@ -11,25 +11,30 @@ export const errorHandler = (err: Error, c: Context) => {
   // Known app errors
   if (err.name === 'AppError') {
     const appErr = err as AppError
-    return c.json({
-      error: {
-        code: appErr.code,
-        message: appErr.message,
-        status: appErr.status,
-      }
-    }, appErr.status as StatusCode)
+    return c.json(
+      {
+        error: {
+          code: appErr.code,
+          message: appErr.message,
+          status: appErr.status,
+        },
+      },
+      appErr.status as StatusCode,
+    )
   }
 
   // Unknown errors — don't leak details in production
-  return c.json({
-    error: {
-      code: 'INTERNAL_SERVER_ERROR',
-      message: process.env.NODE_ENV === 'development'
-        ? err.message
-        : 'An unexpected error occurred',
-      status: 500,
-    }
-  }, 500)
+  return c.json(
+    {
+      error: {
+        code: 'INTERNAL_SERVER_ERROR',
+        message:
+          process.env.NODE_ENV === 'development' ? err.message : 'An unexpected error occurred',
+        status: 500,
+      },
+    },
+    500,
+  )
 }
 
 export class AppError extends Error {

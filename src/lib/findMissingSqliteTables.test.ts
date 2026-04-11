@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'bun:test'
 import { Database } from 'bun:sqlite'
+import { describe, expect, test } from 'bun:test'
 import { findMissingSqliteTables } from './findMissingSqliteTables'
 
 const REQUIRED = ['users', 'bookings'] as const

@@ -1,6 +1,6 @@
-import { readFileSync, mkdirSync, existsSync, readdirSync } from 'fs'
-import { dirname, join } from 'path'
 import { Database } from 'bun:sqlite'
+import { existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 
 const root = join(import.meta.dir, '..')
 const dbPath = process.env.DB_PATH ?? join(root, 'data', 'sqlite.db')
@@ -28,8 +28,7 @@ for (const file of files) {
     } catch (e: unknown) {
       const err = e as { message?: string }
       const msg = err.message ?? ''
-      const isIdempotent =
-        msg.includes('already exists') || msg.includes('duplicate column name')
+      const isIdempotent = msg.includes('already exists') || msg.includes('duplicate column name')
       if (!isIdempotent) throw e
     }
   }

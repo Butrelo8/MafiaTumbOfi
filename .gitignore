@@ -24,6 +24,7 @@ bun.lockb
 # Graph
 graph.db
 graph.html
+.code-review-graph/
 
 # OS
 .DS_Store
@@ -42,6 +43,9 @@ npm-debug.log*
 
 # Testing
 coverage/
+web/test-results/
+web/playwright-report/
+web/blob-report/
 
 # Videos
 herovid/

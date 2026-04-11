@@ -1,12 +1,13 @@
 /**
  * Admin bookings list + export pagination (real SQLite).
  */
-import { afterAll, beforeAll, beforeEach, describe, expect, mock, test } from 'bun:test'
-import { readFileSync, readdirSync } from 'fs'
-import { join } from 'path'
+
 import { Database } from 'bun:sqlite'
-import { drizzle } from 'drizzle-orm/bun-sqlite'
+import { afterAll, beforeAll, beforeEach, describe, expect, mock, test } from 'bun:test'
+import { readdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { sql } from 'drizzle-orm'
+import { drizzle } from 'drizzle-orm/bun-sqlite'
 import * as schema from '../db/schema'
 import { bookings } from '../db/schema'
 import { setClerkClientForTesting } from '../middleware/auth'
@@ -27,8 +28,7 @@ function applyDrizzleMigrations(sqlite: Database): void {
         sqlite.run(st)
       } catch (e: unknown) {
         const msg = (e as Error).message ?? ''
-        const isIdempotent =
-          msg.includes('already exists') || msg.includes('duplicate column name')
+        const isIdempotent = msg.includes('already exists') || msg.includes('duplicate column name')
         if (!isIdempotent) throw e
       }
     }

@@ -1,13 +1,22 @@
 ---
 import '../styles/global.css'
 import { Show, UserButton, SignInButton, SignUpButton } from '@clerk/astro/components'
+import Seo from '../components/Seo.astro'
 
 interface Props {
   title: string
   description?: string
+  canonicalUrl: string
+  /** Browser chrome / PWA tint; default matches light app shell. */
+  themeColor?: string
 }
 
-const { title, description = 'Mafia Tumbada — sitio oficial y contrataciones.' } = Astro.props
+const {
+  title,
+  description = 'Mafia Tumbada — sitio oficial y contrataciones.',
+  canonicalUrl,
+  themeColor = '#ffffff',
+} = Astro.props
 ---
 <!DOCTYPE html>
 <html lang="es">
@@ -15,8 +24,7 @@ const { title, description = 'Mafia Tumbada — sitio oficial y contrataciones.'
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content={description} />
-    <title>{title}</title>
+    <Seo title={title} description={description} canonicalUrl={canonicalUrl} themeColor={themeColor} />
   </head>
   <body>
     <header class="border-b border-stone-200 bg-white shadow-sm">

@@ -1,0 +1,67 @@
+---
+import { absoluteAssetUrl } from '../lib/publicSiteUrl'
+
+export interface Props {
+  title: string
+  description: string
+  canonicalUrl: string
+  /** Root-relative path; default band logo in /public. */
+  ogImagePath?: string
+  ogImageAlt?: string
+  ogSiteName?: string
+  ogLocale?: string
+  /** PWA / browser chrome tint (marketing dark vs app shell light). */
+  themeColor: string
+  /**
+   * When set (including empty string), overrides robots meta entirely: empty string = omit tag.
+   * When omitted, `PUBLIC_ALLOW_INDEXING=false` (or `0`) emits `noindex,nofollow`.
+   */
+  robots?: string
+}
+
+const {
+  title,
+  description,
+  canonicalUrl,
+  ogImagePath = '/icon/mafiatumbada.png',
+  ogImageAlt = 'Mafia Tumbada',
+  ogSiteName = 'Mafia Tumbada',
+  ogLocale = 'es_MX',
+  themeColor,
+  robots: robotsProp,
+} = Astro.props
+
+const ogImage = absoluteAssetUrl(canonicalUrl, ogImagePath)
+
+const allowIndexingRaw = import.meta.env.PUBLIC_ALLOW_INDEXING
+const envNoindex =
+  allowIndexingRaw === 'false' || allowIndexingRaw === '0' ? 'noindex,nofollow' : null
+
+let robotsContent: string | null
+if (robotsProp !== undefined) {
+  robotsContent = robotsProp.length > 0 ? robotsProp : null
+} else {
+  robotsContent = envNoindex
+}
+
+const twitterCard = 'summary_large_image'
+---
+
+<meta name="description" content={description} />
+<title>{title}</title>
+{robotsContent ? <meta name="robots" content={robotsContent} /> : null}
+<meta name="theme-color" content={themeColor} />
+<link rel="canonical" href={canonicalUrl} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content="website" />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:alt" content={ogImageAlt} />
+<meta property="og:site_name" content={ogSiteName} />
+<meta property="og:locale" content={ogLocale} />
+<meta name="twitter:card" content={twitterCard} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+<meta name="twitter:image:alt" content={ogImageAlt} />

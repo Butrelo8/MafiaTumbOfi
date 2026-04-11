@@ -4,12 +4,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getAppVersion } from './appVersion'
 
-const pkgPath = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '..',
-  '..',
-  'package.json',
-)
+const pkgPath = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'package.json')
 const expectedPkgVersion = (
   JSON.parse(readFileSync(pkgPath, 'utf-8')) as { version: string }
 ).version.trim()

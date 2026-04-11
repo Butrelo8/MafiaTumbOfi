@@ -89,10 +89,8 @@ export function estimatedPriceRange(input: EstimatePriceInput): string {
     high: 1.2, // fallback for unknown/missing
   }
 
-  const low =
-    PRICE_CONSTANTS.baseLow * durationMult.low * attendeesMult.low + travelLow
-  const high =
-    PRICE_CONSTANTS.baseHigh * durationMult.high * attendeesMult.high + travelHigh
+  const low = PRICE_CONSTANTS.baseLow * durationMult.low * attendeesMult.low + travelLow
+  const high = PRICE_CONSTANTS.baseHigh * durationMult.high * attendeesMult.high + travelHigh
 
   // Ensure invariants
   const finalLow = Math.min(low, high)

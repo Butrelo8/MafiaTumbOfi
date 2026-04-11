@@ -1,12 +1,13 @@
 /**
  * Integration tests for getOrCreateUser (real SQLite + Clerk mock).
  */
-import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
-import { readFileSync, readdirSync } from 'fs'
-import { join } from 'path'
+
 import { Database } from 'bun:sqlite'
-import { drizzle } from 'drizzle-orm/bun-sqlite'
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
+import { readdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { eq } from 'drizzle-orm'
+import { drizzle } from 'drizzle-orm/bun-sqlite'
 import * as schema from '../db/schema'
 import { users } from '../db/schema'
 import { setClerkClientForTesting } from '../middleware/auth'
@@ -28,8 +29,7 @@ function applyDrizzleMigrations(sqlite: Database): void {
         sqlite.run(st)
       } catch (e: unknown) {
         const msg = (e as Error).message ?? ''
-        const isIdempotent =
-          msg.includes('already exists') || msg.includes('duplicate column name')
+        const isIdempotent = msg.includes('already exists') || msg.includes('duplicate column name')
         if (!isIdempotent) throw e
       }
     }
@@ -89,15 +89,9 @@ describe('getOrCreateUser', () => {
     // SQLite `integer` + `mode: 'timestamp'` stores epoch seconds; same wall-clock second => same value.
     await new Promise((r) => setTimeout(r, 1100))
 
-    await testDb
-      .update(users)
-      .set({ name: 'Renamed' })
-      .where(eq(users.clerkId, 'clerk_update_ts'))
+    await testDb.update(users).set({ name: 'Renamed' }).where(eq(users.clerkId, 'clerk_update_ts'))
 
-    const [after] = await testDb
-      .select()
-      .from(users)
-      .where(eq(users.clerkId, 'clerk_update_ts'))
+    const [after] = await testDb.select().from(users).where(eq(users.clerkId, 'clerk_update_ts'))
 
     expect(after?.name).toBe('Renamed')
     expect(after?.updatedAt?.getTime() ?? 0).toBeGreaterThan(updatedBeforeMs)
@@ -111,15 +105,11 @@ describe('getOrCreateUser', () => {
     ])
     expect(a.clerkId).not.toBe(b.clerkId)
 
-    const admins = await testDb
-      .select({ id: users.id })
-      .from(users)
-      .where(eq(users.isAdmin, true))
+    const admins = await testDb.select({ id: users.id }).from(users).where(eq(users.isAdmin, true))
     expect(admins).toHaveLength(1)
 
     const adminIds = new Set(admins.map((r) => r.id))
-    const winnerIsAdmin =
-      (a.isAdmin && adminIds.has(a.id)) || (b.isAdmin && adminIds.has(b.id))
+    const winnerIsAdmin = (a.isAdmin && adminIds.has(a.id)) || (b.isAdmin && adminIds.has(b.id))
     expect(winnerIsAdmin).toBe(true)
     expect(a.isAdmin !== b.isAdmin).toBe(true)
   })

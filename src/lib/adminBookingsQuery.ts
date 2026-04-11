@@ -27,9 +27,7 @@ function parseOffset(raw: string | undefined): { ok: true; offset: number } | { 
 export function parseAdminBookingsListParams(query: {
   limit?: string
   offset?: string
-}):
-  | { ok: true; limit: number; offset: number }
-  | { ok: false; message: string } {
+}): { ok: true; limit: number; offset: number } | { ok: false; message: string } {
   const off = parseOffset(query.offset)
   if (!off.ok) {
     return { ok: false, message: 'offset must be a non-negative integer' }
