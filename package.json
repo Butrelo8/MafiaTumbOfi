@@ -19,8 +19,10 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@astrojs/vercel": "^10.0.4",
     "@clerk/backend": "^3.2.0",
     "@libsql/client": "^0.17.2",
+    "astro": "^6.1.5",
     "drizzle-orm": "^0.30.0",
     "hono": "^4.0.0",
     "resend": "^4.0.0",
@@ -33,6 +35,9 @@
     "typescript": "^5.0.0"
   },
   "trustedDependencies": [
-    "es5-ext"
+    "@clerk/shared",
+    "es5-ext",
+    "esbuild",
+    "sharp"
   ]
 }
