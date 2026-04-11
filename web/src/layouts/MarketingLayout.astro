@@ -104,6 +104,7 @@ const { title, description, canonicalUrl, robots } = Astro.props
       <div class="menu-auth">
         <Show when="signed-out">
           <SignInButton mode="modal" />
+          <SignUpButton mode="modal" />
         </Show>
         <Show when="signed-in">
           <UserButton />
