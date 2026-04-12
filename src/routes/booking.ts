@@ -343,7 +343,7 @@ bookingRoutes.post('/booking', async (c) => {
     '',
     'Responder a este correo para continuar la cotizacion.',
   ]
-    .filter(Boolean)
+    .filter((line): line is string => line !== null)
     .join('\n')
   const bandHtml = buildBookingBandEmailHtml({
     name,
@@ -420,7 +420,7 @@ bookingRoutes.post('/booking', async (c) => {
     '',
     'Equipo Mafia Tumbada',
   ]
-    .filter(Boolean)
+    .filter((line): line is string => line !== null)
     .join('\n')
   const customerConfirmationHtml = buildBookingCustomerConfirmationHtml(name, customerCta)
 
