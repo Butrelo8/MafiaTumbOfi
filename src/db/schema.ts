@@ -42,4 +42,8 @@ export const bookings = sqliteTable('bookings', {
   drip3DueAt: integer('drip3_due_at', { mode: 'timestamp' }),
   drip3SentAt: integer('drip3_sent_at', { mode: 'timestamp' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  /** Staff-only notes; never shown to the lead. */
+  internalNotes: text('internal_notes'),
+  /** When set, row is hidden from admin list/export and follow-up actions. */
+  deletedAt: integer('deleted_at', { mode: 'timestamp' }),
 })

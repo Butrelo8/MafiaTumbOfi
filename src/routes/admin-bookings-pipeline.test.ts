@@ -180,4 +180,62 @@ describe('PATCH /api/admin/bookings/:id pipeline', () => {
     const row = await testDb.select().from(bookings).where(eq(bookings.id, bookingId)).get()
     expect(row?.pipelineStatus).toBe('new')
   })
+
+  test('returns 400 for invalid booking id on PATCH', async () => {
+    const res = await app.request('/api/admin/bookings/0', {
+      method: 'PATCH',
+      headers: {
+        Authorization: 'Bearer valid_token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ pipelineStatus: 'contacted' }),
+    })
+    expect(res.status).toBe(400)
+  })
+
+  test('returns 400 when body omits both pipelineStatus and internalNotes', async () => {
+    const res = await app.request(`/api/admin/bookings/${bookingId}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: 'Bearer valid_token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    })
+    expect(res.status).toBe(400)
+  })
+
+  test('returns 200 and persists internalNotes', async () => {
+    const res = await app.request(`/api/admin/bookings/${bookingId}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: 'Bearer valid_token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ internalNotes: 'Nota interna' }),
+    })
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.data.internalNotes).toBe('Nota interna')
+    const row = await testDb.select().from(bookings).where(eq(bookings.id, bookingId)).get()
+    expect(row?.internalNotes).toBe('Nota interna')
+  })
+
+  test('clears internalNotes with null', async () => {
+    await testDb
+      .update(bookings)
+      .set({ internalNotes: 'temp' })
+      .where(eq(bookings.id, bookingId))
+    const res = await app.request(`/api/admin/bookings/${bookingId}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: 'Bearer valid_token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ internalNotes: null }),
+    })
+    expect(res.status).toBe(200)
+    const row = await testDb.select().from(bookings).where(eq(bookings.id, bookingId)).get()
+    expect(row?.internalNotes).toBeNull()
+  })
 })
