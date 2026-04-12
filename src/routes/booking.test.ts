@@ -138,6 +138,28 @@ describe('POST /api/booking', () => {
     expect(sendCalls).toBe(2)
   })
 
+  test('plain text bodies keep blank-line paragraph breaks', async () => {
+    const texts: string[] = []
+    setResendForTesting({
+      emails: {
+        send: async (opts: { text?: string }) => {
+          if (typeof opts.text === 'string') texts.push(opts.text)
+          return { data: { id: 'mock-id' }, error: null }
+        },
+      },
+    } as Resend)
+    process.env.BOOKING_NOTIFICATION_EMAIL = 'band@example.com'
+    const res = await app.request('/api/booking', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Pat', email: 'pat@example.com', phone: '555' }),
+      headers: { 'Content-Type': 'application/json', 'x-forwarded-for': '10.0.0.2' },
+    })
+    expect(res.status).toBe(201)
+    expect(texts).toHaveLength(2)
+    expect(texts[0]).toMatch(/sitio web\.\n\nNombre:/)
+    expect(texts[1]).toMatch(/^Hola Pat,\n\nGracias/)
+  })
+
   test('returns 500 and EMAIL_FAILED when Resend send fails', async () => {
     setResendForTesting({
       emails: {

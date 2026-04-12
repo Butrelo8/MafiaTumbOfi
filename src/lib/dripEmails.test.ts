@@ -36,6 +36,14 @@ describe('buildDripEmail3', () => {
     expect(e.html).toContain('Luis')
   })
 
+  test('plain text keeps blank-line paragraph breaks (only null lines dropped)', () => {
+    process.env.FRONTEND_URL = 'https://band.test'
+    const e = buildDripEmail3('Luis')
+    expect(e.text).toMatch(/^Hola Luis,\n\n/)
+    expect(e.text).toContain('\n\nLas fechas')
+    expect(e.text).toMatch(/\n\nEquipo Mafia Tumbada$/)
+  })
+
   test('includes WhatsApp when PUBLIC_WHATSAPP_URL set', () => {
     process.env.FRONTEND_URL = 'https://x.com'
     process.env.PUBLIC_WHATSAPP_URL = 'https://wa.me/5215512345678'
