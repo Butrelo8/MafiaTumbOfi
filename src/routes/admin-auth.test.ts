@@ -81,4 +81,18 @@ describe('Admin authorization', () => {
     const body = await res.json()
     expect(body.error.code).toBe('FORBIDDEN')
   })
+
+  test('POST /api/admin/bookings/delete-all returns 403 when user is not admin', async () => {
+    const res = await app.request('/api/admin/bookings/delete-all', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer valid_token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ confirm: 'DELETE_ALL_BOOKINGS' }),
+    })
+    expect(res.status).toBe(403)
+    const body = await res.json()
+    expect(body.error.code).toBe('FORBIDDEN')
+  })
 })
