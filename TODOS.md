@@ -97,6 +97,11 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ## Completed
 
+### Admin — Bulk delete all booking records (danger zone) (2026-04-11)
+**What:** Admin-only hard delete of **all** rows in **`bookings`** (including soft-deleted) in one action; optional dry-run count; phrase confirmation; env gate in production like export.
+**Code:** **`POST /api/admin/bookings/delete-all`** in **`src/routes/admin.ts`**; **`src/lib/adminDeleteAllBookings.ts`**, **`adminDeleteAllBookings.test.ts`**; **`src/routes/admin-delete-all-bookings.test.ts`**; **`src/routes/admin-auth.test.ts`** (non-admin **403**); relay **`web/src/pages/admin/delete-all-bookings.ts`**; **`web/src/pages/admin.astro`** (zona peligrosa + modal + banner **`bulkDeleted`**); **`adminPageTheme.test.ts`**. **`.env.example`** **`ALLOW_ADMIN_DELETE_ALL_BOOKINGS`**; **`README.md`**, **`DEPLOY.md`**, **`CHANGELOG.md`**, **`DECISIONS.md`**.
+**Done When:** Met — UI + API + tests + docs; **`bun test`** green.
+
 ### DB — Turso (libsql) for production SQLite (2026-04-11)
 **What:** API uses **Turso** (`@libsql/client` + **`drizzle-orm/libsql`**) when **`TURSO_DATABASE_URL`** + **`TURSO_AUTH_TOKEN`** are set without **`DB_PATH`** (Render); embedded replica when Turso env + **`DB_PATH`**; else **`bun:sqlite`** (tests, offline).
 **Code:** **`src/db/detect.ts`**, **`detect.test.ts`**, **`src/db/index.ts`**, **`scripts/run-migration.ts`**, **`scripts/check-db.ts`**, **`src/lib/findMissingTables.ts`**, **`findMissingTables.test.ts`**; **`render.yaml`** (no disk); **`DEPLOY.md`**, **`.env.example`**, **`drizzle.config.ts`**, **`DECISIONS.md`**, **`CHANGELOG.md`**, **`README.md`**.

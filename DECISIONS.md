@@ -5,6 +5,13 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-04-11 — Admin bulk hard-delete: env gate + confirm phrase
+
+**Context:** Operators need a one-shot empty of **`bookings`** for demos and test resets; per-row soft-delete is slow and leaves hidden rows in the table.
+**Decision:** **`POST /api/admin/bookings/delete-all`** accepts **`{ dryRun: true }`** (count only) or **`{ confirm: "DELETE_ALL_BOOKINGS" }`** to run a transaction that counts then **`delete(bookings)`** (all rows, including soft-deleted). Default-deny on production-like hosts unless **`ALLOW_ADMIN_DELETE_ALL_BOOKINGS=true`** or **`NODE_ENV=development`**, mirroring **`ALLOW_ADMIN_BOOKING_EXPORT`**. Success emits one **`console.log`** audit JSON line (**`admin_bookings_delete_all`**, **`deletedCount`**, **`userId`**, **`sessionId`**).
+**Alternatives considered:** Document SQL-only cleanup (rejected — no in-app audit, easy to run wrong DB). Soft-delete entire table (rejected — spec asked hard delete for true empty / demo speed).
+**Why not the others:** Same env pattern as export keeps prod safe; explicit phrase + POST avoids accidental clears.
+
 ## 2026-04-12 — Admin: Drizzle `bookings` columns for migrations 0011 / 0012
 
 **Context:** SQL migrations **`0011_booking_internal_notes.sql`** and **`0012_booking_soft_delete.sql`** were merged, but **`src/db/schema.ts`** omitted **`internal_notes`** and **`deleted_at`**, so **`bookingSoftDeleteFilter`** and PATCH relays could not type-check against real columns and production behavior depended on raw SQL only.

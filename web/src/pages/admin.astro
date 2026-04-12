@@ -53,6 +53,19 @@ if (pipelineParam === 'ok') {
   pipelineMessage = 'Solicitud inválida para actualizar seguimiento.'
 }
 
+const bulkDeletedParam = Astro.url.searchParams.get('bulkDeleted')
+const bulkDeletedCountRaw = Astro.url.searchParams.get('count')
+let bulkDeletedMessage: string | null = null
+let bulkDeletedIsOk = false
+if (bulkDeletedParam === 'ok') {
+  bulkDeletedIsOk = true
+  const nParsed =
+    bulkDeletedCountRaw != null ? Number.parseInt(bulkDeletedCountRaw, 10) : Number.NaN
+  bulkDeletedMessage = Number.isFinite(nParsed)
+    ? `Base vaciada: ${nParsed} registro(s) eliminado(s) por completo (incluye ocultos por soft-delete).`
+    : 'Base vaciada: todas las solicitudes eliminadas por completo.'
+}
+
 type AdminBookingRow = {
   id: number
   name: string
@@ -161,6 +174,12 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
       </div>
     )}
 
+    {bulkDeletedMessage && (
+      <div class={`resend-banner ${bulkDeletedIsOk ? 'resend-ok' : 'resend-error'}`}>
+        {bulkDeletedMessage}
+      </div>
+    )}
+
     <div class="status-legend" role="note" aria-label="Leyenda del panel">
       <p>
         <strong>Status (correo):</strong>{' '}
@@ -176,6 +195,66 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
       <p>
         <strong>Eliminar:</strong> oculta la solicitud del panel (soft-delete); no borra el historial en base de datos.
       </p>
+    </div>
+
+    <div class="admin-danger-zone" aria-labelledby="admin-danger-title">
+      <h2 id="admin-danger-title" class="admin-danger-title">
+        Zona peligrosa
+      </h2>
+      <p class="admin-danger-copy">
+        <strong>Borrar todas las solicitudes</strong> elimina por completo cada fila de la tabla{' '}
+        <code>bookings</code> (incluye las ocultas por soft-delete). No se puede deshacer desde el panel. En
+        producción la API debe tener{' '}
+        <code>ALLOW_ADMIN_DELETE_ALL_BOOKINGS=true</code> (o entorno de desarrollo).
+      </p>
+      <button type="button" class="btn-secondary admin-danger-open" id="admin-open-delete-all">
+        Vaciar todas las solicitudes…
+      </button>
+    </div>
+
+    <div id="admin-delete-all-modal" class="admin-drawer" hidden>
+      <div class="admin-drawer-backdrop" data-close-delete-all-modal aria-hidden="true"></div>
+      <div
+        class="admin-drawer-panel admin-delete-all-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admin-delete-all-modal-title"
+      >
+        <div class="admin-drawer-head">
+          <h2 id="admin-delete-all-modal-title" class="admin-drawer-title">
+            Borrar todas las solicitudes
+          </h2>
+          <button type="button" class="admin-drawer-close" data-close-delete-all-modal>
+            Cerrar
+          </button>
+        </div>
+        <p class="admin-danger-modal-intro">
+          Escribe exactamente la frase (mayúsculas y guion bajo) para habilitar el borrado definitivo:
+        </p>
+        <p>
+          <code class="admin-code-phrase">DELETE_ALL_BOOKINGS</code>
+        </p>
+        <label class="admin-delete-all-label" for="admin-delete-all-phrase">
+          Frase de confirmación
+        </label>
+        <input
+          id="admin-delete-all-phrase"
+          class="admin-delete-all-input"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <div class="admin-delete-all-actions">
+          <button type="button" class="btn-secondary" id="admin-delete-all-dry">
+            Vista previa (conteo)
+          </button>
+          <button type="button" class="admin-delete-btn" id="admin-delete-all-submit" disabled>
+            Borrar todo (irreversible)
+          </button>
+        </div>
+        <p id="admin-delete-all-dry-result" class="admin-danger-feedback" hidden></p>
+        <p id="admin-delete-all-modal-error" class="admin-danger-feedback admin-danger-error" hidden></p>
+      </div>
     </div>
 
     {error && (
@@ -438,6 +517,7 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
   <script is:inline type="application/json" id="admin-bookings-json" set:html={bookingsJson} />
 
   <script>
+    import { ADMIN_DELETE_ALL_BOOKINGS_CONFIRM_PHRASE } from '../../../src/lib/adminDeleteAllBookings'
     import { BOOKING_BUDGET_SORT_RANK } from '../../../src/lib/bookingBudget'
     import { buildAdminBookingDrawerRows } from '../lib/adminBookingDrawer'
     import {
@@ -702,7 +782,134 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
           })
       })
 
+      const deleteAllModal = document.getElementById('admin-delete-all-modal')
+      const phraseInput = document.getElementById('admin-delete-all-phrase') as HTMLInputElement | null
+      const deleteAllSubmit = document.getElementById('admin-delete-all-submit') as HTMLButtonElement | null
+      const deleteAllDry = document.getElementById('admin-delete-all-dry') as HTMLButtonElement | null
+      const deleteAllDryResult = document.getElementById('admin-delete-all-dry-result')
+      const deleteAllModalErr = document.getElementById('admin-delete-all-modal-error')
+      const deleteAllPhrase = ADMIN_DELETE_ALL_BOOKINGS_CONFIRM_PHRASE
+
+      function setDeleteAllModalOpen(open: boolean) {
+        if (!deleteAllModal) return
+        deleteAllModal.hidden = !open
+        if (!open && phraseInput) phraseInput.value = ''
+        if (deleteAllModalErr) {
+          deleteAllModalErr.hidden = true
+          deleteAllModalErr.textContent = ''
+        }
+        if (deleteAllDryResult) {
+          deleteAllDryResult.hidden = true
+          deleteAllDryResult.textContent = ''
+        }
+        syncDeleteAllSubmit()
+      }
+
+      function syncDeleteAllSubmit() {
+        if (!deleteAllSubmit || !phraseInput) return
+        const busy = deleteAllSubmit.dataset.loading === '1'
+        deleteAllSubmit.disabled = busy || phraseInput.value.trim() !== deleteAllPhrase
+      }
+
+      phraseInput?.addEventListener('input', syncDeleteAllSubmit)
+
+      document.getElementById('admin-open-delete-all')?.addEventListener('click', () => {
+        setDeleteAllModalOpen(true)
+      })
+
+      document.querySelectorAll('[data-close-delete-all-modal]').forEach((el) => {
+        el.addEventListener('click', () => setDeleteAllModalOpen(false))
+      })
+
+      deleteAllDry?.addEventListener('click', () => {
+        if (!deleteAllDryResult || !deleteAllDry) return
+        deleteAllDry.disabled = true
+        if (deleteAllModalErr) {
+          deleteAllModalErr.hidden = true
+          deleteAllModalErr.textContent = ''
+        }
+        fetch('/admin/delete-all-bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dryRun: true }),
+        })
+          .then(async (res) => {
+            const j = (await res.json()) as {
+              ok?: boolean
+              data?: { count?: number }
+              message?: string
+            }
+            if (!res.ok || !j.ok) {
+              if (deleteAllModalErr) {
+                deleteAllModalErr.hidden = false
+                deleteAllModalErr.textContent = j.message ?? 'Error'
+              }
+              return
+            }
+            const c = typeof j.data?.count === 'number' ? j.data.count : '—'
+            deleteAllDryResult.hidden = false
+            deleteAllDryResult.textContent = `Filas en base (todas, incl. ocultas): ${c}`
+          })
+          .catch(() => {
+            if (deleteAllModalErr) {
+              deleteAllModalErr.hidden = false
+              deleteAllModalErr.textContent = 'Error de red'
+            }
+          })
+          .finally(() => {
+            deleteAllDry.disabled = false
+          })
+      })
+
+      deleteAllSubmit?.addEventListener('click', () => {
+        if (!phraseInput || phraseInput.value.trim() !== deleteAllPhrase || !deleteAllSubmit) return
+        deleteAllSubmit.dataset.loading = '1'
+        deleteAllSubmit.disabled = true
+        if (deleteAllModalErr) {
+          deleteAllModalErr.hidden = true
+          deleteAllModalErr.textContent = ''
+        }
+        fetch('/admin/delete-all-bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ confirm: deleteAllPhrase }),
+        })
+          .then(async (res) => {
+            const j = (await res.json()) as {
+              ok?: boolean
+              data?: { deletedCount?: number }
+              message?: string
+              code?: string
+            }
+            if (!res.ok || !j.ok) {
+              if (deleteAllModalErr) {
+                deleteAllModalErr.hidden = false
+                deleteAllModalErr.textContent = j.message ?? j.code ?? 'Error'
+              }
+              return
+            }
+            const n = typeof j.data?.deletedCount === 'number' ? j.data.deletedCount : 0
+            window.location.replace(
+              `/admin?bulkDeleted=ok&count=${encodeURIComponent(String(n))}`,
+            )
+          })
+          .catch(() => {
+            if (deleteAllModalErr) {
+              deleteAllModalErr.hidden = false
+              deleteAllModalErr.textContent = 'Error de red'
+            }
+          })
+          .finally(() => {
+            delete deleteAllSubmit.dataset.loading
+            syncDeleteAllSubmit()
+          })
+      })
+
       window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && deleteAllModal && !deleteAllModal.hidden) {
+          setDeleteAllModalOpen(false)
+          return
+        }
         if (e.key === 'Escape' && drawer && !drawer.hidden) setDrawerOpen(false)
       })
     })()
@@ -1082,6 +1289,92 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
     color: #fff;
   }
 
+  .admin-danger-zone {
+    margin-top: 2rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid rgba(180, 90, 90, 0.45);
+    border-radius: 0.25rem;
+    background: rgba(40, 16, 16, 0.25);
+  }
+
+  .admin-danger-title {
+    font-family: var(--ff-body, system-ui, sans-serif);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #f0a8a8;
+    margin: 0 0 0.5rem;
+  }
+
+  .admin-danger-copy {
+    font-size: 0.8125rem;
+    color: var(--muted, #7a7267);
+    margin: 0 0 0.75rem;
+    line-height: 1.45;
+  }
+
+  .admin-danger-open {
+    border-color: rgba(180, 90, 90, 0.55);
+  }
+
+  .admin-danger-feedback {
+    font-size: 0.8125rem;
+    margin: 0.65rem 0 0;
+    color: var(--text, #ede8df);
+  }
+
+  .admin-danger-error {
+    color: #f0a8a8;
+  }
+
+  .admin-delete-all-panel {
+    max-width: min(100vw - 2rem, 26rem);
+    margin-inline: auto;
+  }
+
+  .admin-danger-modal-intro {
+    font-size: 0.8125rem;
+    margin: 0 0 0.35rem;
+    color: var(--text, #ede8df);
+  }
+
+  .admin-code-phrase {
+    font-size: 0.8125rem;
+    padding: 0.15rem 0.35rem;
+    border-radius: 0.15rem;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border, #262420);
+  }
+
+  .admin-delete-all-label {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted, #7a7267);
+    margin: 0.75rem 0 0.35rem;
+  }
+
+  .admin-delete-all-input {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.875rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 0.2rem;
+    border: 1px solid var(--border, #262420);
+    background: var(--bg, #0b0b0b);
+    color: var(--text, #ede8df);
+    color-scheme: dark;
+  }
+
+  .admin-delete-all-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
   .resend-form,
   .pipeline-form {
     margin: 0;
@@ -1119,10 +1412,11 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
     background: rgba(196, 154, 42, 0.12);
   }
 
+  /* Above `.site-header` (z-index 100); below `.mobile-menu` / Clerk overlays (200). */
   .admin-drawer {
     position: fixed;
     inset: 0;
-    z-index: 80;
+    z-index: 150;
   }
 
   .admin-drawer[hidden] {
@@ -1140,14 +1434,14 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
     top: 0;
     right: 0;
     height: 100%;
-    width: min(100%, 26rem);
+    width: min(100%, 32rem);
     background: var(--surface, #111111);
     border-left: 1px solid var(--border, #262420);
     box-shadow: -4px 0 24px rgba(0, 0, 0, 0.45);
     display: flex;
     flex-direction: column;
     padding: 1rem 1.1rem 1.25rem;
-    overflow: auto;
+    overflow: hidden;
   }
 
   .admin-drawer-head {
@@ -1185,6 +1479,9 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
   .admin-drawer-fields {
     flex: 1;
     min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 0.25rem;
   }
 
   .admin-drawer-dl {
@@ -1208,6 +1505,7 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
   }
 
   .admin-drawer-notes-block {
+    flex-shrink: 0;
     margin-top: 1rem;
     padding-top: 1rem;
     border-top: 1px solid var(--border, #262420);

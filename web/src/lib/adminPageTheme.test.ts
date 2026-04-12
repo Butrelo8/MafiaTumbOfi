@@ -21,4 +21,24 @@ describe('admin page marketing shell', () => {
     expect(src).toContain('class="footer-bar"')
     expect(src).toContain('class="container admin-container"')
   })
+
+  test('danger zone bulk delete uses drawer overlay pattern', () => {
+    const src = readFileSync(adminPath, 'utf8')
+    expect(src).toContain('admin-danger-zone')
+    expect(src).toContain('/admin/delete-all-bookings')
+    expect(src).toContain('ADMIN_DELETE_ALL_BOOKINGS_CONFIRM_PHRASE')
+  })
+
+  test('detail drawer stacks above fixed marketing header', () => {
+    const adminSrc = readFileSync(adminPath, 'utf8')
+    const marketingPath = join(__dirname, '../styles/marketing-press.css')
+    const marketingSrc = readFileSync(marketingPath, 'utf8')
+    const headerZ = marketingSrc.match(/\.site-header\s*\{[^}]*z-index:\s*(\d+)/s)
+    expect(headerZ).not.toBeNull()
+    const headerZNum = Number(headerZ![1])
+    const drawerZ = adminSrc.match(/\.admin-drawer\s*\{[^}]*z-index:\s*(\d+)/s)
+    expect(drawerZ).not.toBeNull()
+    expect(Number(drawerZ![1])).toBeGreaterThan(headerZNum)
+    expect(Number(drawerZ![1])).toBeLessThan(200)
+  })
 })

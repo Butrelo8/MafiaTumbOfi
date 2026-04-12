@@ -4,6 +4,10 @@ import { z } from 'zod'
 import { db } from '../db'
 import { bookings } from '../db/schema'
 import { isAdminBookingExportAllowed } from '../lib/adminBookingExport'
+import {
+  ADMIN_DELETE_ALL_BOOKINGS_CONFIRM_PHRASE,
+  isAdminDeleteAllBookingsAllowed,
+} from '../lib/adminDeleteAllBookings'
 import { getAdminExportMaxRows, parseAdminBookingsListParams } from '../lib/adminBookingsQuery'
 import { bookingNotSoftDeleted } from '../lib/bookingSoftDeleteFilter'
 import { BOOKING_PIPELINE_STATUS_VALUES } from '../lib/bookingPipeline'
@@ -16,6 +20,22 @@ import { adminAuth } from '../middleware/adminAuth'
 import { authMiddleware } from '../middleware/auth'
 
 const MAX_INTERNAL_NOTES_LEN = 10_000
+
+const deleteAllBookingsBodySchema = z
+  .object({
+    dryRun: z.boolean().optional(),
+    confirm: z.string().optional(),
+  })
+  .superRefine((val, ctx) => {
+    if (val.dryRun === true) return
+    if (val.confirm !== ADMIN_DELETE_ALL_BOOKINGS_CONFIRM_PHRASE) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Se requiere confirm: "${ADMIN_DELETE_ALL_BOOKINGS_CONFIRM_PHRASE}"`,
+        path: ['confirm'],
+      })
+    }
+  })
 
 const patchBookingBodySchema = z
   .object({
@@ -180,6 +200,73 @@ adminRoutes.delete('/bookings/:id', async (c) => {
   } catch (error) {
     logServerError('admin', 'SOFT_DELETE_BOOKING_FAILED', error)
     return errorResponse(c, 500, 'INTERNAL_ERROR', 'Failed to delete booking')
+  }
+})
+
+/** Hard-delete every row in `bookings` (incl. soft-deleted). Admin-only; gated by env like export. */
+adminRoutes.post('/bookings/delete-all', async (c) => {
+  if (!isAdminDeleteAllBookingsAllowed()) {
+    return errorResponse(
+      c,
+      403,
+      'ADMIN_DELETE_ALL_BOOKINGS_DISABLED',
+      'Bulk delete-all is disabled. Set ALLOW_ADMIN_DELETE_ALL_BOOKINGS=true on the API, or NODE_ENV=development for local use.',
+    )
+  }
+
+  let body: unknown
+  try {
+    body = await c.req.json()
+  } catch {
+    return errorResponse(c, 400, 'INVALID_JSON', 'Invalid JSON body')
+  }
+
+  const parsed = deleteAllBookingsBodySchema.safeParse(body, { errorMap: spanishErrorMap })
+  if (!parsed.success) {
+    const flat = parsed.error.flatten()
+    const formMsg = flat.formErrors[0]
+    const fieldMsg = Object.entries(flat.fieldErrors)
+      .map(([, v]) => (Array.isArray(v) ? v[0] : v))
+      .filter(Boolean)
+      .join('; ')
+    const message = formMsg || fieldMsg || 'Error de validación'
+    return errorResponse(c, 400, 'VALIDATION_ERROR', message)
+  }
+
+  if (parsed.data.dryRun === true) {
+    try {
+      const [countRow] = await db.select({ total: count() }).from(bookings)
+      const countVal = countRow?.total ?? 0
+      return successResponse(c, { dryRun: true, count: countVal })
+    } catch (error) {
+      logServerError('admin', 'DELETE_ALL_BOOKINGS_DRY_RUN_FAILED', error)
+      return errorResponse(c, 500, 'INTERNAL_ERROR', 'Failed to count bookings')
+    }
+  }
+
+  try {
+    const deletedCount = await db.transaction(async (tx) => {
+      const [countRow] = await tx.select({ total: count() }).from(bookings)
+      const n = countRow?.total ?? 0
+      await tx.delete(bookings)
+      return n
+    })
+
+    console.log(
+      JSON.stringify({
+        type: 'audit',
+        action: 'admin_bookings_delete_all',
+        timestamp: new Date().toISOString(),
+        userId: c.get('userId'),
+        sessionId: c.get('sessionId') ?? null,
+        deletedCount,
+      }),
+    )
+
+    return successResponse(c, { deletedCount, dryRun: false })
+  } catch (error) {
+    logServerError('admin', 'DELETE_ALL_BOOKINGS_FAILED', error)
+    return errorResponse(c, 500, 'INTERNAL_ERROR', 'Failed to delete all bookings')
   }
 })
 
