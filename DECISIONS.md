@@ -5,6 +5,13 @@ Updated automatically by the AI agent when decisions are made.
 
 ---
 
+## 2026-04-12 — Admin: Drizzle `bookings` columns for migrations 0011 / 0012
+
+**Context:** SQL migrations **`0011_booking_internal_notes.sql`** and **`0012_booking_soft_delete.sql`** were merged, but **`src/db/schema.ts`** omitted **`internal_notes`** and **`deleted_at`**, so **`bookingSoftDeleteFilter`** and PATCH relays could not type-check against real columns and production behavior depended on raw SQL only.
+**Decision:** Add **`internalNotes`** and **`deletedAt`** to the Drizzle **`bookings`** table definition; wire **`admin.ts`** (list/export counts, PATCH notes, DELETE soft-delete, resend/PATCH guards) and **`admin.astro`** to the existing **`web/src/lib/*`** helpers and Astro relays.
+**Alternatives considered:** Hard-delete only (rejected — operators asked to hide mistakes without losing audit trail). Separate **`internal_notes`** API resource (rejected — same **`PATCH /api/admin/bookings/:id`** keeps one surface for relays).
+**Why not the others:** One PATCH body supports pipeline + notes without extra routes; soft-delete stays operator-only and recoverable via SQL.
+
 ## 2026-04-11 — Production DB: Turso (libsql) instead of Render persistent disk
 
 **Context:** The API used **`bun:sqlite`** with **`DB_PATH`** on a Render **1 GB persistent disk** (`/data/sqlite.db`). That works but adds disk cost, ties DB to one instance, and Shell/SCP access is paywalled.

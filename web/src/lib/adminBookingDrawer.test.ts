@@ -60,5 +60,16 @@ describe('buildAdminBookingDrawerRows', () => {
     expect(rows.find((r) => r.label === 'Nombre')?.value).toBe('Test Band')
     expect(rows.find((r) => r.label === 'Seguimiento')?.value).toBe('Contactado')
     expect(rows.find((r) => r.label === 'Mensaje')?.value).toContain('Hello')
+    expect(rows.find((r) => r.label === 'Notas internas')?.value).toBe('—')
+  })
+
+  test('shows internal notes when present', () => {
+    const rows = buildAdminBookingDrawerRows({
+      id: 1,
+      name: 'A',
+      email: 'a@b.co',
+      internalNotes: 'Call back Tuesday',
+    })
+    expect(rows.find((r) => r.label === 'Notas internas')?.value).toContain('Call back Tuesday')
   })
 })

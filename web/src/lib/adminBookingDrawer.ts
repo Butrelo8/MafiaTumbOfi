@@ -73,6 +73,7 @@ export function buildAdminBookingDrawerRows(
       label: 'Último error de confirmación',
       value: asString(booking.confirmationLastError),
     },
+    { label: 'Notas internas', value: asString(booking.internalNotes) },
     { label: 'Drip 2 programado', value: formatAdminDrawerDate(booking.drip2DueAt) },
     { label: 'Drip 2 enviado', value: formatAdminDrawerDate(booking.drip2SentAt) },
     { label: 'Drip 3 programado', value: formatAdminDrawerDate(booking.drip3DueAt) },

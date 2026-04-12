@@ -1,6 +1,7 @@
 import { and, eq, isNotNull, isNull, lte } from 'drizzle-orm'
 import { db } from '../db'
 import { bookings } from '../db/schema'
+import { bookingNotSoftDeleted } from './bookingSoftDeleteFilter'
 import { buildDripEmail2, buildDripEmail3 } from './dripEmails'
 import { getResend } from './resend'
 import { logServerError, logServerErrorDetails } from './safeLog'
@@ -40,6 +41,7 @@ export async function processDripEmails(opts?: {
     .from(bookings)
     .where(
       and(
+        bookingNotSoftDeleted,
         eq(bookings.status, 'sent'),
         isNotNull(bookings.drip2DueAt),
         lte(bookings.drip2DueAt, now),
@@ -80,6 +82,7 @@ export async function processDripEmails(opts?: {
     .from(bookings)
     .where(
       and(
+        bookingNotSoftDeleted,
         eq(bookings.status, 'sent'),
         isNotNull(bookings.drip2SentAt),
         isNotNull(bookings.drip3DueAt),

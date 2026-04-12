@@ -1,10 +1,11 @@
-import { count, desc, eq, gte } from 'drizzle-orm'
+import { and, count, desc, eq, gte } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { db } from '../db'
 import { bookings } from '../db/schema'
 import { isAdminBookingExportAllowed } from '../lib/adminBookingExport'
 import { getAdminExportMaxRows, parseAdminBookingsListParams } from '../lib/adminBookingsQuery'
+import { bookingNotSoftDeleted } from '../lib/bookingSoftDeleteFilter'
 import { BOOKING_PIPELINE_STATUS_VALUES } from '../lib/bookingPipeline'
 import { errorResponse, successResponse } from '../lib/errors'
 import { estimatedPriceRange } from '../lib/estimatedPriceRange'
@@ -14,9 +15,29 @@ import { spanishErrorMap } from '../lib/zod-es'
 import { adminAuth } from '../middleware/adminAuth'
 import { authMiddleware } from '../middleware/auth'
 
-const patchPipelineBodySchema = z.object({
-  pipelineStatus: z.enum(BOOKING_PIPELINE_STATUS_VALUES),
-})
+const MAX_INTERNAL_NOTES_LEN = 10_000
+
+const patchBookingBodySchema = z
+  .object({
+    pipelineStatus: z.enum(BOOKING_PIPELINE_STATUS_VALUES).optional(),
+    internalNotes: z.union([z.string().max(MAX_INTERNAL_NOTES_LEN), z.null()]).optional(),
+  })
+  .superRefine((val, ctx) => {
+    if (val.pipelineStatus === undefined && val.internalNotes === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Se requiere pipelineStatus y/o internalNotes',
+        path: [],
+      })
+    }
+  })
+
+function parseRequiredBookingId(raw: string | undefined): number | null {
+  if (raw === undefined || raw === '') return null
+  const id = Number(raw)
+  if (!Number.isInteger(id) || id <= 0) return null
+  return id
+}
 
 export const adminRoutes = new Hono()
 
@@ -34,12 +55,16 @@ adminRoutes.get('/bookings', async (c) => {
   const { limit, offset } = parsed
 
   try {
-    const [countRow] = await db.select({ total: count() }).from(bookings)
+    const [countRow] = await db
+      .select({ total: count() })
+      .from(bookings)
+      .where(bookingNotSoftDeleted)
     const total = countRow?.total ?? 0
 
     const pageRows = await db
       .select()
       .from(bookings)
+      .where(bookingNotSoftDeleted)
       .orderBy(desc(bookings.createdAt))
       .limit(limit)
       .offset(offset)
@@ -67,9 +92,8 @@ adminRoutes.get('/bookings', async (c) => {
 })
 
 adminRoutes.patch('/bookings/:id', async (c) => {
-  const idParam = c.req.param('id')
-  const id = Number(idParam)
-  if (!idParam || Number.isNaN(id) || !Number.isInteger(id) || id <= 0) {
+  const id = parseRequiredBookingId(c.req.param('id'))
+  if (id === null) {
     return errorResponse(c, 400, 'VALIDATION_ERROR', 'Invalid booking id')
   }
 
@@ -80,42 +104,97 @@ adminRoutes.patch('/bookings/:id', async (c) => {
     return errorResponse(c, 400, 'INVALID_JSON', 'Invalid JSON body')
   }
 
-  const parsed = patchPipelineBodySchema.safeParse(body, { errorMap: spanishErrorMap })
+  const parsed = patchBookingBodySchema.safeParse(body, { errorMap: spanishErrorMap })
   if (!parsed.success) {
-    const first = parsed.error.flatten().fieldErrors
-    const message =
-      Object.entries(first)
-        .map(([, v]) => (Array.isArray(v) ? v[0] : v))
-        .join('; ') || 'Error de validación'
+    const flat = parsed.error.flatten()
+    const formMsg = flat.formErrors[0]
+    const fieldMsg = Object.entries(flat.fieldErrors)
+      .map(([, v]) => (Array.isArray(v) ? v[0] : v))
+      .filter(Boolean)
+      .join('; ')
+    const message = formMsg || fieldMsg || 'Error de validación'
     return errorResponse(c, 400, 'VALIDATION_ERROR', message)
   }
 
-  const { pipelineStatus } = parsed.data
+  const { pipelineStatus, internalNotes } = parsed.data
 
   try {
-    const existing = await db.select().from(bookings).where(eq(bookings.id, id)).get()
+    const existing = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.id, id), bookingNotSoftDeleted))
+      .get()
     if (!existing) {
       return errorResponse(c, 404, 'NOT_FOUND', 'Booking not found')
     }
 
-    await db.update(bookings).set({ pipelineStatus }).where(eq(bookings.id, id))
+    const setPayload: Partial<typeof bookings.$inferInsert> = {}
+    if (pipelineStatus !== undefined) {
+      setPayload.pipelineStatus = pipelineStatus
+    }
+    if (internalNotes !== undefined) {
+      setPayload.internalNotes = internalNotes === '' ? null : internalNotes
+    }
 
-    return successResponse(c, { id, pipelineStatus }, 200)
+    await db.update(bookings).set(setPayload).where(eq(bookings.id, id))
+
+    const responseData: {
+      id: number
+      pipelineStatus?: string
+      internalNotes?: string | null
+    } = { id }
+    if (pipelineStatus !== undefined) {
+      responseData.pipelineStatus = pipelineStatus
+    }
+    if (internalNotes !== undefined) {
+      responseData.internalNotes = internalNotes === '' ? null : internalNotes
+    }
+
+    return successResponse(c, responseData, 200)
   } catch (error) {
-    logServerError('admin', 'PATCH_BOOKING_PIPELINE_FAILED', error)
-    return errorResponse(c, 500, 'INTERNAL_ERROR', 'Failed to update pipeline status')
+    logServerError('admin', 'PATCH_BOOKING_FAILED', error)
+    return errorResponse(c, 500, 'INTERNAL_ERROR', 'Failed to update booking')
   }
 })
 
-adminRoutes.post('/bookings/:id/resend-confirmation', async (c) => {
-  const idParam = c.req.param('id')
-  const id = Number(idParam)
-  if (!idParam || Number.isNaN(id) || !Number.isInteger(id) || id <= 0) {
+adminRoutes.delete('/bookings/:id', async (c) => {
+  const id = parseRequiredBookingId(c.req.param('id'))
+  if (id === null) {
     return errorResponse(c, 400, 'VALIDATION_ERROR', 'Invalid booking id')
   }
 
   try {
-    const booking = await db.select().from(bookings).where(eq(bookings.id, id)).get()
+    const existing = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.id, id), bookingNotSoftDeleted))
+      .get()
+    if (!existing) {
+      return errorResponse(c, 404, 'NOT_FOUND', 'Booking not found')
+    }
+
+    const deletedAt = new Date()
+    await db.update(bookings).set({ deletedAt }).where(eq(bookings.id, id))
+
+    return successResponse(c, { id, deletedAt: deletedAt.toISOString() }, 200)
+  } catch (error) {
+    logServerError('admin', 'SOFT_DELETE_BOOKING_FAILED', error)
+    return errorResponse(c, 500, 'INTERNAL_ERROR', 'Failed to delete booking')
+  }
+})
+
+adminRoutes.post('/bookings/:id/resend-confirmation', async (c) => {
+  const id = parseRequiredBookingId(c.req.param('id'))
+  if (id === null) {
+    return errorResponse(c, 400, 'VALIDATION_ERROR', 'Invalid booking id')
+  }
+
+  try {
+    const booking = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.id, id), bookingNotSoftDeleted))
+      .get()
 
     if (!booking) {
       return errorResponse(c, 404, 'NOT_FOUND', 'Booking not found')
@@ -203,18 +282,22 @@ adminRoutes.get('/export/bookings', async (c) => {
     const exportCap = getAdminExportMaxRows()
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
 
-    const [totalRow] = await db.select({ total: count() }).from(bookings)
+    const [totalRow] = await db
+      .select({ total: count() })
+      .from(bookings)
+      .where(bookingNotSoftDeleted)
     const totalInDb = totalRow?.total ?? 0
 
     const [last24Row] = await db
       .select({ total: count() })
       .from(bookings)
-      .where(gte(bookings.createdAt, oneDayAgo))
+      .where(and(bookingNotSoftDeleted, gte(bookings.createdAt, oneDayAgo)))
     const last24hCount = last24Row?.total ?? 0
 
     const pageRows = await db
       .select()
       .from(bookings)
+      .where(bookingNotSoftDeleted)
       .orderBy(desc(bookings.createdAt))
       .limit(exportCap)
 

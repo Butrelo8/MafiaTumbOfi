@@ -9,6 +9,9 @@ import { formatLeadPriorityLabel } from '../../../src/lib/bookingLeadScore'
 import { normalizePublicApiBaseUrl } from '../lib/publicApiUrl'
 import { adminCanonical } from '../lib/publicSiteUrl'
 import { sanitizeResendDetail } from '../lib/sanitizeResendDetail'
+import { pipelineCountsForAdminRows } from '../lib/adminPipelinePageCounts'
+import { phoneToTelHref } from '../lib/adminQuickActions'
+import { staleNewBadgeState } from '../lib/adminStaleNewBadge'
 
 const { isAuthenticated, redirectToSignIn, getToken } = Astro.locals.auth()
 
@@ -50,11 +53,12 @@ if (pipelineParam === 'ok') {
   pipelineMessage = 'Solicitud inválida para actualizar seguimiento.'
 }
 
-let bookings: Array<{
+type AdminBookingRow = {
   id: number
   name: string
   email: string
   phone: string | null
+  city: string | null
   eventDate: string | null
   budget: string | null
   leadScore: number | null
@@ -63,10 +67,13 @@ let bookings: Array<{
   message: string | null
   status: string
   pipelineStatus?: string | null
+  internalNotes?: string | null
   confirmationLastError: string | null
   confirmationAttempts: number
   createdAt: number | Date
-}> = []
+}
+
+let bookings: AdminBookingRow[] = []
 let error: string | null = null
 const pageSize = 50
 const pageParam = Astro.url.searchParams.get('page')
@@ -116,6 +123,10 @@ try {
   error = e instanceof Error ? e.message : String(e)
   console.error('Failed to fetch bookings:', e)
 }
+
+const pipeCounts = pipelineCountsForAdminRows(bookings)
+const nowMs = Date.now()
+const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
 ---
 
 <MarketingLayout
@@ -130,6 +141,9 @@ try {
       <h1 class="admin-title">Solicitudes de contratación</h1>
 
       <p class="admin-actions">
+        <button type="button" id="admin-export-csv" class="btn-secondary admin-export-btn">
+          Descargar CSV (página visible)
+        </button>
         <a href="/admin/export-bookings" class="btn-secondary admin-export-btn">
           Exportar JSON (depuración)
         </a>
@@ -147,15 +161,20 @@ try {
       </div>
     )}
 
-    <div class="status-legend" role="note" aria-label="Correo vs seguimiento">
+    <div class="status-legend" role="note" aria-label="Leyenda del panel">
       <p>
-        <strong>Columna Status (correo):</strong>{' '}
-        <strong>sent</strong> = ambos correos enviados; <strong>pending</strong> = al cliente falló la
-        confirmación; <strong>failed</strong> = falló el correo al equipo.
+        <strong>Status (correo):</strong>{' '}
+        <strong>sent</strong> = confirmación ok; <strong>pending</strong> = falló al cliente;{' '}
+        <strong>failed</strong> = falló al equipo.
       </p>
       <p>
-        <strong>Seguimiento:</strong> Nuevo / Contactado / Cerrado — independiente del envío de correo.
-        Cambia con el menú; se guarda al elegir.
+        <strong>Seguimiento:</strong> Nuevo / Contactado / Cerrado — independiente del correo. El menú guarda al elegir.
+      </p>
+      <p>
+        <strong>CSV:</strong> exporta las filas visibles en esta página (filtros de búsqueda y pastillas aplicados).
+      </p>
+      <p>
+        <strong>Eliminar:</strong> oculta la solicitud del panel (soft-delete); no borra el historial en base de datos.
       </p>
     </div>
 
@@ -171,130 +190,241 @@ try {
 
     {!error && totalBookings > 0 && (
       <p class="admin-pagination-meta">
-        Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalBookings)} of {totalBookings}
- </p>
+        Mostrando {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalBookings)} de {totalBookings}
+      </p>
     )}
 
     {!error && bookings.length > 0 && (
-      <div class="table-container">
-        <table class="bookings-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Event Date</th>
-              <th class="sortable" data-sort="budget" scope="col">
-                Budget <span class="sort-indicator" aria-hidden="true"></span>
-              </th>
-              <th>Prioridad</th>
-              <th class="sortable" data-sort="leadScore" scope="col">
-                Lead score <span class="sort-indicator" aria-hidden="true"></span>
-              </th>
-              <th>Est. Price</th>
-              <th>Status</th>
-              <th>Seguimiento</th>
-                <th>Attempts</th>
-                <th>Last confirmation error</th>
-                <th>Operator</th>
-              <th class="sortable" data-sort="created" scope="col">
-                Created <span class="sort-indicator" aria-hidden="true"></span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookings.map((booking) => (
+      <>
+        <div class="admin-toolbar" aria-label="Filtros de la página actual">
+          <label class="admin-search-label">
+            <span class="admin-search-text">Buscar</span>
+            <input
+              id="admin-booking-search"
+              type="search"
+              class="admin-search-input"
+              placeholder="Nombre, correo o teléfono…"
+              autocomplete="off"
+            />
+          </label>
+          <div class="admin-pipeline-pills" role="toolbar" aria-label="Filtrar por seguimiento">
+            <button type="button" class="admin-pill is-active" data-pipeline-filter="all">
+              Todas ({bookings.length})
+            </button>
+            <button type="button" class="admin-pill" data-pipeline-filter="new">
+              Nuevo ({pipeCounts.new})
+            </button>
+            <button type="button" class="admin-pill" data-pipeline-filter="contacted">
+              Contactado ({pipeCounts.contacted})
+            </button>
+            <button type="button" class="admin-pill" data-pipeline-filter="closed">
+              Cerrado ({pipeCounts.closed})
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="bookings-table">
+            <thead>
               <tr>
-                <td>{booking.id}</td>
-                <td>{booking.name}</td>
-                <td>{booking.email}</td>
-                <td>{booking.phone ?? '-'}</td>
-                <td>{booking.eventDate ?? '-'}</td>
-                <td data-cell="budget" data-budget={booking.budget ?? ''}>
-                  {formatBudgetLabel(booking.budget)}
-                </td>
-                <td>{formatLeadPriorityLabel(booking.leadPriority)}</td>
-                <td data-cell="leadScore" data-lead-score={booking.leadScore ?? ''}>
-                  {booking.leadScore == null ? '-' : booking.leadScore}
-                </td>
-                <td>{booking.estimatedPriceRange ?? '-'}</td>
-                <td>
-                  <span class={`status-badge status-${booking.status}`}>
-                    {booking.status}
-                  </span>
-                </td>
-                <td>
-                  <form method="post" action="/admin/update-pipeline" class="pipeline-form">
-                    <input type="hidden" name="bookingId" value={booking.id} />
-                    <select
-                      name="pipelineStatus"
-                      class="pipeline-select"
-                      aria-label={`Seguimiento solicitud ${booking.id}`}
-                      onchange="this.form.requestSubmit()"
-                    >
-                      {BOOKING_PIPELINE_STATUS_VALUES.map((v) => (
-                        <option value={v} selected={(booking.pipelineStatus ?? 'new') === v}>
-                          {formatPipelineStatusLabel(v)}
-                        </option>
-                      ))}
-                    </select>
-                  </form>
-                </td>
-                <td>
-                  {booking.status === 'failed' ? '-' : booking.confirmationAttempts}
-                </td>
-                <td>
-                  {booking.confirmationLastError ? (
-                    <span title={booking.confirmationLastError}>
-                      {booking.confirmationLastError.length > 80
-                        ? `${booking.confirmationLastError.slice(0, 80)}...`
-                        : booking.confirmationLastError}
-                    </span>
-                  ) : (
-                    '-'
-                  )}
-                </td>
-                <td>
-                  {booking.status === 'pending' ? (
-                    <form method="post" action="/admin/resend-confirmation" class="resend-form">
-                      <input type="hidden" name="bookingId" value={booking.id} />
-                      <button type="submit" class="resend-button">Re-send confirmation</button>
-                    </form>
-                  ) : (
-                    '-'
-                  )}
-                </td>
-                <td
-                  data-cell="created"
-                  data-timestamp={new Date(booking.createdAt).getTime()}
-                >
-                  {new Date(booking.createdAt).toLocaleDateString('es-MX')}
-                </td>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Ciudad</th>
+                <th class="sortable" data-sort="eventDate" scope="col">
+                  Fecha evento <span class="sort-indicator" aria-hidden="true"></span>
+                </th>
+                <th class="sortable" data-sort="budget" scope="col">
+                  Presupuesto <span class="sort-indicator" aria-hidden="true"></span>
+                </th>
+                <th>Prioridad</th>
+                <th class="sortable" data-sort="leadScore" scope="col">
+                  Lead <span class="sort-indicator" aria-hidden="true"></span>
+                </th>
+                <th>Est. precio</th>
+                <th>Status</th>
+                <th>Seguimiento</th>
+                <th>Intentos</th>
+                <th>Error confirm.</th>
+                <th>Notas</th>
+                <th>Acciones</th>
+                <th class="sortable" data-sort="created" scope="col">
+                  Creado <span class="sort-indicator" aria-hidden="true"></span>
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {bookings.map((booking) => {
+                const pipelineKey = booking.pipelineStatus ?? 'new'
+                const createdMs = new Date(booking.createdAt).getTime()
+                const stale = staleNewBadgeState(pipelineKey, createdMs, nowMs)
+                const tel = phoneToTelHref(booking.phone)
+                const notesPreview =
+                  booking.internalNotes && booking.internalNotes.trim() !== ''
+                    ? booking.internalNotes.length > 40
+                      ? `${booking.internalNotes.slice(0, 40)}…`
+                      : booking.internalNotes
+                    : '—'
+                return (
+                  <tr
+                    key={booking.id}
+                    class="admin-booking-row"
+                    data-row-id={booking.id}
+                    data-pipeline-status={pipelineKey}
+                  >
+                    <td>{booking.id}</td>
+                    <td>{booking.name}</td>
+                    <td>{booking.email}</td>
+                    <td>
+                      {tel ? (
+                        <a href={tel} class="admin-tel-link">{booking.phone ?? '—'}</a>
+                      ) : (
+                        (booking.phone ?? '—')
+                      )}
+                    </td>
+                    <td>{booking.city ?? '—'}</td>
+                    <td data-cell="eventDate" data-event-date={booking.eventDate ?? ''}>
+                      {booking.eventDate ?? '—'}
+                    </td>
+                    <td data-cell="budget" data-budget={booking.budget ?? ''}>
+                      {formatBudgetLabel(booking.budget)}
+                    </td>
+                    <td>{formatLeadPriorityLabel(booking.leadPriority)}</td>
+                    <td data-cell="leadScore" data-lead-score={booking.leadScore ?? ''}>
+                      {booking.leadScore == null ? '—' : booking.leadScore}
+                    </td>
+                    <td>{booking.estimatedPriceRange ?? '—'}</td>
+                    <td>
+                      <span class={`status-badge status-${booking.status}`}>
+                        {booking.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="admin-pipeline-cell">
+                        {stale && (
+                          <span
+                            class={`admin-stale-badge admin-stale-${stale.severity}`}
+                            title={`${stale.days} días en Nuevo`}
+                          >
+                            {stale.days}d
+                          </span>
+                        )}
+                        <form method="post" action="/admin/update-pipeline" class="pipeline-form">
+                          <input type="hidden" name="bookingId" value={booking.id} />
+                          <select
+                            name="pipelineStatus"
+                            class="pipeline-select"
+                            aria-label={`Seguimiento solicitud ${booking.id}`}
+                            onchange="this.form.requestSubmit()"
+                            value={pipelineKey}
+                          >
+                            {BOOKING_PIPELINE_STATUS_VALUES.map((v) => (
+                              <option value={v}>{formatPipelineStatusLabel(v)}</option>
+                            ))}
+                          </select>
+                        </form>
+                      </div>
+                    </td>
+                    <td>
+                      {booking.status === 'failed' ? '—' : booking.confirmationAttempts}
+                    </td>
+                    <td>
+                      {booking.confirmationLastError ? (
+                        <span title={booking.confirmationLastError}>
+                          {booking.confirmationLastError.length > 80
+                            ? `${booking.confirmationLastError.slice(0, 80)}…`
+                            : booking.confirmationLastError}
+                        </span>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    <td class="admin-notes-preview" title={booking.internalNotes ?? ''}>
+                      {notesPreview}
+                    </td>
+                    <td class="admin-actions-cell">
+                      <div class="admin-actions-stack">
+                        <button
+                          type="button"
+                          class="admin-linkish"
+                          data-open-drawer={booking.id}
+                        >
+                          Ver detalle
+                        </button>
+                        {booking.status === 'pending' ? (
+                          <form method="post" action="/admin/resend-confirmation" class="resend-form">
+                            <input type="hidden" name="bookingId" value={booking.id} />
+                            <button type="submit" class="resend-button">Reenviar confirmación</button>
+                          </form>
+                        ) : null}
+                        <button
+                          type="button"
+                          class="admin-delete-btn"
+                          data-soft-delete={booking.id}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </td>
+                    <td
+                      data-cell="created"
+                      data-timestamp={createdMs}
+                    >
+                      {new Date(booking.createdAt).toLocaleDateString('es-MX')}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </>
     )}
 
     {!error && totalBookings > pageSize && (
-      <nav class="admin-pagination" aria-label="Booking pages">
+      <nav class="admin-pagination" aria-label="Paginación">
         {page > 1 ? (
-          <a href={`/admin?page=${page - 1}`} class="pagination-link">Previous</a>
+          <a href={`/admin?page=${page - 1}`} class="pagination-link">Anterior</a>
         ) : (
-          <span class="pagination-disabled">Previous</span>
+          <span class="pagination-disabled">Anterior</span>
         )}
-        <span class="pagination-page">Page {page} of {Math.ceil(totalBookings / pageSize)}</span>
+        <span class="pagination-page">Página {page} de {Math.ceil(totalBookings / pageSize)}</span>
         {hasMore ? (
-          <a href={`/admin?page=${page + 1}`} class="pagination-link">Next</a>
+          <a href={`/admin?page=${page + 1}`} class="pagination-link">Siguiente</a>
         ) : (
-          <span class="pagination-disabled">Next</span>
+          <span class="pagination-disabled">Siguiente</span>
         )}
       </nav>
     )}
     </div>
   </section>
+
+  <div id="admin-drawer" class="admin-drawer" hidden>
+    <div class="admin-drawer-backdrop" data-close-drawer aria-hidden="true"></div>
+    <div
+      class="admin-drawer-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="admin-drawer-title"
+    >
+      <div class="admin-drawer-head">
+        <h2 id="admin-drawer-title" class="admin-drawer-title">Detalle de solicitud</h2>
+        <button type="button" class="admin-drawer-close" data-close-drawer>
+          Cerrar
+        </button>
+      </div>
+      <div id="admin-drawer-fields" class="admin-drawer-fields"></div>
+      <div class="admin-drawer-notes-block">
+        <label class="admin-drawer-notes-label" for="admin-drawer-notes">Notas internas</label>
+        <textarea id="admin-drawer-notes" class="admin-drawer-notes" rows="5" maxlength="10000"></textarea>
+        <div class="admin-drawer-notes-actions">
+          <button type="button" class="btn-secondary" id="admin-drawer-save-notes">Guardar notas</button>
+        </div>
+        <p id="admin-drawer-status" class="admin-drawer-status" role="status"></p>
+      </div>
+    </div>
+  </div>
 
   <footer class="footer-bar">
     <div class="container">
@@ -305,21 +435,50 @@ try {
     </div>
   </footer>
 
+  <script is:inline type="application/json" id="admin-bookings-json" set:html={bookingsJson} />
+
   <script>
     import { BOOKING_BUDGET_SORT_RANK } from '../../../src/lib/bookingBudget'
+    import { buildAdminBookingDrawerRows } from '../lib/adminBookingDrawer'
+    import {
+      ADMIN_BOOKING_SEARCH_DEBOUNCE_MS,
+      bookingMatchesAdminSearchQuery,
+      normalizeAdminBookingSearchQuery,
+    } from '../lib/adminBookingSearch'
+    import { buildAdminBookingsCsv } from '../lib/adminExportCsv'
+    import { eventDateSortKeyMs } from '../../../src/lib/eventDateSortKey'
 
     const budgetRanks = BOOKING_BUDGET_SORT_RANK
+
+    function readBookingsFromDom(): Record<string, unknown>[] {
+      const el = document.getElementById('admin-bookings-json')
+      if (!el?.textContent) return []
+      try {
+        return JSON.parse(el.textContent) as Record<string, unknown>[]
+      } catch {
+        return []
+      }
+    }
+
+    const bookingsList = readBookingsFromDom()
+    const bookingsById = new Map(bookingsList.map((b) => [Number(b.id), b]))
+    let activePipeline: 'all' | 'new' | 'contacted' | 'closed' = 'all'
+    let searchTimer: ReturnType<typeof setTimeout> | null = null
+    let normalizedSearch = ''
+    let currentDrawerId: number | null = null
 
     ;(function () {
       const tbody = document.querySelector('.bookings-table tbody')
       if (!tbody) return
+
       const budgetTh = document.querySelector('.bookings-table th[data-sort="budget"]')
       const leadScoreTh = document.querySelector('.bookings-table th[data-sort="leadScore"]')
       const createdTh = document.querySelector('.bookings-table th[data-sort="created"]')
-      let activeKey = null
+      const eventDateTh = document.querySelector('.bookings-table th[data-sort="eventDate"]')
+      let activeKey: string | null = null
       let activeDir = 'asc'
 
-      function setIndicator(th, dir) {
+      function setIndicator(th: Element | null | undefined, dir: string) {
         document.querySelectorAll('.bookings-table th[data-sort] .sort-indicator').forEach((el) => {
           el.textContent = ''
         })
@@ -328,47 +487,224 @@ try {
         if (span) span.textContent = dir === 'asc' ? ' ▲' : ' ▼'
       }
 
-      function sortBy(key) {
+      function sortBy(key: string) {
         const dir = activeKey === key && activeDir === 'asc' ? 'desc' : 'asc'
         activeKey = key
         activeDir = dir
         const rows = Array.from(tbody.querySelectorAll('tr'))
-        const getVal =
-          key === 'budget'
-            ? (row) => {
-                const td = row.querySelector('td[data-cell="budget"]')
-                const b = td?.getAttribute('data-budget') ?? ''
-                return budgetRanks[b] ?? 0
-              }
-            : key === 'leadScore'
-              ? (row) => {
-                  const td = row.querySelector('td[data-cell="leadScore"]')
-                  const s = td?.getAttribute('data-lead-score') ?? ''
-                  const n = s === '' ? 0 : Number(s)
-                  return Number.isFinite(n) ? n : 0
-                }
-              : (row) => {
-                  const td = row.querySelector('td[data-cell="created"]')
-                  const t = td?.getAttribute('data-timestamp')
-                  const n = t ? Number(t) : 0
-                  return Number.isFinite(n) ? n : 0
-                }
+        const getVal = (row: HTMLTableRowElement) => {
+          if (key === 'budget') {
+            const td = row.querySelector('td[data-cell="budget"]')
+            const b = td?.getAttribute('data-budget') ?? ''
+            return budgetRanks[b] ?? 0
+          }
+          if (key === 'leadScore') {
+            const td = row.querySelector('td[data-cell="leadScore"]')
+            const s = td?.getAttribute('data-lead-score') ?? ''
+            const n = s === '' ? 0 : Number(s)
+            return Number.isFinite(n) ? n : 0
+          }
+          if (key === 'eventDate') {
+            const td = row.querySelector('td[data-cell="eventDate"]')
+            const s = td?.getAttribute('data-event-date') ?? ''
+            return eventDateSortKeyMs(s || null)
+          }
+          const td = row.querySelector('td[data-cell="created"]')
+          const t = td?.getAttribute('data-timestamp')
+          const n = t ? Number(t) : 0
+          return Number.isFinite(n) ? n : 0
+        }
         rows.sort((a, b) => {
-          const va = getVal(a)
-          const vb = getVal(b)
+          const va = getVal(a as HTMLTableRowElement)
+          const vb = getVal(b as HTMLTableRowElement)
           if (va === vb) return 0
           const cmp = va < vb ? -1 : 1
           return dir === 'asc' ? cmp : -cmp
         })
         rows.forEach((r) => tbody.appendChild(r))
         const activeTh =
-          key === 'budget' ? budgetTh : key === 'leadScore' ? leadScoreTh : createdTh
+          key === 'budget'
+            ? budgetTh
+            : key === 'leadScore'
+              ? leadScoreTh
+              : key === 'eventDate'
+                ? eventDateTh
+                : createdTh
         setIndicator(activeTh, dir)
       }
 
       budgetTh?.addEventListener('click', () => sortBy('budget'))
       leadScoreTh?.addEventListener('click', () => sortBy('leadScore'))
       createdTh?.addEventListener('click', () => sortBy('created'))
+      eventDateTh?.addEventListener('click', () => sortBy('eventDate'))
+
+      function applyRowFilters() {
+        for (const tr of tbody.querySelectorAll('tr')) {
+          const row = tr as HTMLTableRowElement
+          const id = Number(row.dataset.rowId)
+          const b = bookingsById.get(id)
+          if (!b) continue
+          const pipe = row.dataset.pipelineStatus || 'new'
+          const pipeOk = activePipeline === 'all' || pipe === activePipeline
+          const searchOk = bookingMatchesAdminSearchQuery(
+            { name: b.name, email: b.email, phone: b.phone as string | null },
+            normalizedSearch,
+          )
+          row.classList.toggle('admin-row-filtered-out', !(pipeOk && searchOk))
+        }
+      }
+
+      document.querySelectorAll('[data-pipeline-filter]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const v = (btn as HTMLElement).dataset.pipelineFilter as typeof activePipeline
+          if (!v) return
+          activePipeline = v
+          document.querySelectorAll('.admin-pill').forEach((p) => p.classList.remove('is-active'))
+          btn.classList.add('is-active')
+          applyRowFilters()
+        })
+      })
+
+      const searchInput = document.getElementById('admin-booking-search') as HTMLInputElement | null
+      searchInput?.addEventListener('input', () => {
+        if (searchTimer) clearTimeout(searchTimer)
+        searchTimer = setTimeout(() => {
+          normalizedSearch = normalizeAdminBookingSearchQuery(searchInput.value)
+          applyRowFilters()
+        }, ADMIN_BOOKING_SEARCH_DEBOUNCE_MS)
+      })
+
+      document.getElementById('admin-export-csv')?.addEventListener('click', () => {
+        const visible = [...tbody.querySelectorAll('tr')].filter(
+          (tr) => !(tr as HTMLElement).classList.contains('admin-row-filtered-out'),
+        )
+        const list = visible
+          .map((tr) => bookingsById.get(Number((tr as HTMLTableRowElement).dataset.rowId)))
+          .filter((x): x is Record<string, unknown> => Boolean(x))
+        const csv = buildAdminBookingsCsv(list)
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+        const a = document.createElement('a')
+        const url = URL.createObjectURL(blob)
+        a.href = url
+        a.download = `solicitudes-${new Date().toISOString().slice(0, 10)}.csv`
+        a.click()
+        URL.revokeObjectURL(url)
+      })
+
+      const drawer = document.getElementById('admin-drawer')
+      const drawerFields = document.getElementById('admin-drawer-fields')
+      const drawerNotes = document.getElementById('admin-drawer-notes') as HTMLTextAreaElement | null
+      const drawerStatus = document.getElementById('admin-drawer-status')
+
+      function setDrawerOpen(open: boolean) {
+        if (!drawer) return
+        drawer.hidden = !open
+        if (!open) currentDrawerId = null
+      }
+
+      document.querySelectorAll('[data-close-drawer]').forEach((el) => {
+        el.addEventListener('click', () => setDrawerOpen(false))
+      })
+
+      function renderDrawerFields(booking: Record<string, unknown>) {
+        if (!drawerFields) return
+        drawerFields.replaceChildren()
+        const dl = document.createElement('dl')
+        dl.className = 'admin-drawer-dl'
+        for (const { label, value } of buildAdminBookingDrawerRows(booking)) {
+          const dt = document.createElement('dt')
+          dt.textContent = label
+          const dd = document.createElement('dd')
+          dd.textContent = value
+          dl.appendChild(dt)
+          dl.appendChild(dd)
+        }
+        drawerFields.appendChild(dl)
+      }
+
+      tbody.addEventListener('click', (e) => {
+        const t = e.target as HTMLElement | null
+        const openId = t?.closest('[data-open-drawer]')?.getAttribute('data-open-drawer')
+        if (openId) {
+          const id = Number(openId)
+          const b = bookingsById.get(id)
+          if (!b || !drawerNotes) return
+          currentDrawerId = id
+          renderDrawerFields(b)
+          drawerNotes.value =
+            typeof b.internalNotes === 'string' ? b.internalNotes : b.internalNotes == null ? '' : String(b.internalNotes)
+          if (drawerStatus) drawerStatus.textContent = ''
+          setDrawerOpen(true)
+          drawerNotes.focus()
+          return
+        }
+        const delId = t?.closest('[data-soft-delete]')?.getAttribute('data-soft-delete')
+        if (delId) {
+          const id = Number(delId)
+          if (!Number.isInteger(id) || id <= 0) return
+          if (!confirm(`¿Ocultar solicitud #${id}? Podrás restaurarla por SQL si hace falta.`)) return
+          fetch('/admin/delete-booking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookingId: id }),
+          })
+            .then(async (res) => {
+              const j = (await res.json()) as { ok?: boolean; message?: string }
+              if (!res.ok || !j.ok) {
+                alert(j.message ?? 'No se pudo eliminar')
+                return
+              }
+              window.location.reload()
+            })
+            .catch(() => alert('Error de red al eliminar'))
+        }
+      })
+
+      document.getElementById('admin-drawer-save-notes')?.addEventListener('click', () => {
+        if (currentDrawerId == null || !drawerNotes) return
+        if (drawerStatus) drawerStatus.textContent = 'Guardando…'
+        fetch('/admin/save-internal-notes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bookingId: currentDrawerId,
+            internalNotes: drawerNotes.value.trim() === '' ? null : drawerNotes.value,
+          }),
+        })
+          .then(async (res) => {
+            const j = (await res.json()) as { ok?: boolean; message?: string }
+            if (!res.ok || !j.ok) {
+              if (drawerStatus) drawerStatus.textContent = j.message ?? 'Error al guardar'
+              return
+            }
+            const b = bookingsById.get(currentDrawerId!)
+            if (b) {
+              b.internalNotes =
+                drawerNotes.value.trim() === '' ? null : drawerNotes.value
+            }
+            if (drawerStatus) drawerStatus.textContent = 'Notas guardadas.'
+            const row = tbody.querySelector(`tr[data-row-id="${currentDrawerId}"]`)
+            const cell = row?.querySelector('.admin-notes-preview')
+            if (cell && b) {
+              const raw = typeof b.internalNotes === 'string' ? b.internalNotes : ''
+              cell.textContent =
+                raw.trim() === ''
+                  ? '—'
+                  : raw.length > 40
+                    ? `${raw.slice(0, 40)}…`
+                    : raw
+              ;(cell as HTMLElement).title = raw
+            }
+            renderDrawerFields(b ?? {})
+          })
+          .catch(() => {
+            if (drawerStatus) drawerStatus.textContent = 'Error de red'
+          })
+      })
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && drawer && !drawer.hidden) setDrawerOpen(false)
+      })
     })()
   </script>
 </MarketingLayout>
@@ -392,12 +728,79 @@ try {
   }
 
   .admin-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
     margin-bottom: 1.5rem;
   }
 
   .admin-export-btn {
     display: inline-flex;
     width: fit-content;
+  }
+
+  .admin-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .admin-search-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: min(100%, 16rem);
+  }
+
+  .admin-search-text {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted, #7a7267);
+  }
+
+  .admin-search-input {
+    font-size: 0.875rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 0.2rem;
+    border: 1px solid var(--border, #262420);
+    background: var(--bg, #0b0b0b);
+    color: var(--text, #ede8df);
+    color-scheme: dark;
+  }
+
+  .admin-pipeline-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .admin-pill {
+    font-family: var(--ff-body, system-ui, sans-serif);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid var(--border, #262420);
+    background: var(--surface, #111111);
+    color: var(--muted, #7a7267);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+
+  .admin-pill:hover {
+    border-color: var(--gold-dim, #8a6c1c);
+    color: var(--text, #ede8df);
+  }
+
+  .admin-pill.is-active {
+    border-color: rgba(196, 154, 42, 0.55);
+    color: var(--gold, #c49a2a);
+    background: rgba(196, 154, 42, 0.1);
   }
 
   .admin-empty {
@@ -506,7 +909,7 @@ try {
 
   .bookings-table {
     width: 100%;
-    min-width: 720px;
+    min-width: 980px;
     border-collapse: collapse;
     background: var(--surface, #111111);
     color: var(--text, #ede8df);
@@ -523,6 +926,10 @@ try {
 
   .bookings-table tbody tr:hover {
     background: var(--surface2, #191919);
+  }
+
+  .admin-row-filtered-out {
+    display: none;
   }
 
   .bookings-table th {
@@ -580,6 +987,101 @@ try {
     color: #f0c8c8;
   }
 
+  .admin-pipeline-cell {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .admin-stale-badge {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 0.12rem 0.35rem;
+    border-radius: 0.2rem;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+
+  .admin-stale-warn {
+    background: rgba(196, 154, 42, 0.2);
+    border-color: rgba(196, 154, 42, 0.45);
+    color: #e8d4a8;
+  }
+
+  .admin-stale-danger {
+    background: rgba(120, 40, 40, 0.35);
+    border-color: rgba(200, 100, 100, 0.45);
+    color: #f0c8c8;
+  }
+
+  .admin-tel-link {
+    color: var(--gold, #c49a2a);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+
+  .admin-tel-link:hover {
+    border-bottom-color: var(--gold-dim, #8a6c1c);
+  }
+
+  .admin-notes-preview {
+    max-width: 8rem;
+    font-size: 0.75rem;
+    color: var(--muted, #7a7267);
+    word-break: break-word;
+  }
+
+  .admin-actions-cell {
+    min-width: 7.5rem;
+  }
+
+  .admin-actions-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .admin-linkish {
+    font-family: var(--ff-body, system-ui, sans-serif);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--gold, #c49a2a);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .admin-linkish:hover {
+    color: var(--text, #ede8df);
+  }
+
+  .admin-delete-btn {
+    font-family: var(--ff-body, system-ui, sans-serif);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.45rem;
+    border-radius: 0.15rem;
+    border: 1px solid rgba(180, 90, 90, 0.55);
+    background: rgba(60, 24, 24, 0.35);
+    color: #f0c8c8;
+    cursor: pointer;
+  }
+
+  .admin-delete-btn:hover {
+    border-color: rgba(220, 120, 120, 0.75);
+    color: #fff;
+  }
+
   .resend-form,
   .pipeline-form {
     margin: 0;
@@ -598,14 +1100,14 @@ try {
 
   .resend-button {
     font-family: var(--ff-body, system-ui, sans-serif);
-    font-size: 0.68rem;
+    font-size: 0.62rem;
     font-weight: 500;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--gold, #c49a2a);
     background: transparent;
     border: 1px solid var(--gold-dim, #8a6c1c);
-    padding: 0.4rem 0.65rem;
+    padding: 0.3rem 0.5rem;
     border-radius: 0.15rem;
     cursor: pointer;
     transition: border-color 0.2s, color 0.2s, background 0.2s;
@@ -615,5 +1117,133 @@ try {
     border-color: var(--gold, #c49a2a);
     color: var(--text, #ede8df);
     background: rgba(196, 154, 42, 0.12);
+  }
+
+  .admin-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+  }
+
+  .admin-drawer[hidden] {
+    display: none;
+  }
+
+  .admin-drawer-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+  }
+
+  .admin-drawer-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(100%, 26rem);
+    background: var(--surface, #111111);
+    border-left: 1px solid var(--border, #262420);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.45);
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 1.1rem 1.25rem;
+    overflow: auto;
+  }
+
+  .admin-drawer-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .admin-drawer-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text, #ede8df);
+  }
+
+  .admin-drawer-close {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--border, #262420);
+    background: var(--bg, #0b0b0b);
+    color: var(--muted, #7a7267);
+    padding: 0.35rem 0.55rem;
+    border-radius: 0.15rem;
+    cursor: pointer;
+  }
+
+  .admin-drawer-close:hover {
+    color: var(--text, #ede8df);
+    border-color: var(--gold-dim, #8a6c1c);
+  }
+
+  .admin-drawer-fields {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .admin-drawer-dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 38%) 1fr;
+    gap: 0.35rem 0.65rem;
+    font-size: 0.8rem;
+  }
+
+  .admin-drawer-dl dt {
+    margin: 0;
+    color: var(--muted, #7a7267);
+    font-weight: 600;
+  }
+
+  .admin-drawer-dl dd {
+    margin: 0;
+    color: var(--text, #ede8df);
+    word-break: break-word;
+  }
+
+  .admin-drawer-notes-block {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border, #262420);
+  }
+
+  .admin-drawer-notes-label {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted, #7a7267);
+    margin-bottom: 0.35rem;
+  }
+
+  .admin-drawer-notes {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.85rem;
+    color: var(--text, #ede8df);
+    background: var(--bg, #0b0b0b);
+    border: 1px solid var(--border, #262420);
+    border-radius: 0.2rem;
+    padding: 0.5rem 0.55rem;
+    resize: vertical;
+    min-height: 5rem;
+    color-scheme: dark;
+  }
+
+  .admin-drawer-notes-actions {
+    margin-top: 0.5rem;
+  }
+
+  .admin-drawer-status {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    color: var(--muted, #7a7267);
+    min-height: 1.25em;
   }
 </style>

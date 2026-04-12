@@ -35,28 +35,27 @@ mock.module('../db', () => ({
         typeof fields === 'object' &&
         !Array.isArray(fields) &&
         'total' in (fields as Record<string, unknown>)
+      const sorted = [...mockBookings].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
       if (isCount) {
-        const fromResult = Object.assign(Promise.resolve([{ total: mockBookings.length }]), {
-          where: () => Promise.resolve([{ total: 0 }]),
-        })
         return {
-          from: () => fromResult,
+          from: () => ({
+            where: () => Promise.resolve([{ total: sorted.length }]),
+          }),
         }
       }
       return {
         from: () => ({
-          orderBy: () => ({
-            limit: (lim: number) => {
-              const sorted = [...mockBookings].sort(
-                (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-              )
-              const page = Promise.resolve(sorted.slice(0, lim))
-              return Object.assign(page, {
-                offset: (off: number) => Promise.resolve(sorted.slice(off, off + lim)),
-              })
-            },
-          }),
           where: () => ({
+            orderBy: () => ({
+              limit: (lim: number) => {
+                const slice0 = sorted.slice(0, lim)
+                return Object.assign(Promise.resolve(slice0), {
+                  offset: (off: number) => Promise.resolve(sorted.slice(off, off + lim)),
+                })
+              },
+            }),
             get: () => Promise.resolve(mockAdminUser),
           }),
         }),

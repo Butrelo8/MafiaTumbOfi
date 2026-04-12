@@ -91,6 +91,32 @@ describe('processDripEmails', () => {
     expect(sends).toBe(0)
   })
 
+  test('skips soft-deleted bookings', async () => {
+    const past = new Date('2020-01-01')
+    await testDb.insert(bookings).values({
+      name: 'Hidden',
+      email: 'h@b.com',
+      status: 'sent',
+      pipelineStatus: 'new',
+      drip2DueAt: past,
+      drip3DueAt: new Date('2099-01-01'),
+      deletedAt: new Date(),
+    })
+    let sends = 0
+    setResendForTesting({
+      emails: {
+        send: async () => {
+          sends += 1
+          return { data: { id: 'x' }, error: null }
+        },
+      },
+    } as Resend)
+    const r = await processDripEmails({ now: new Date('2025-01-01') })
+    expect(r.email2Sent).toBe(0)
+    expect(r.email3Sent).toBe(0)
+    expect(sends).toBe(0)
+  })
+
   test('sends Email 2 and sets drip2SentAt', async () => {
     const past = new Date('2020-01-01')
     await testDb.insert(bookings).values({
