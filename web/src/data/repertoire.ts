@@ -13,7 +13,7 @@ export const repertoireItems: RepertoireItem[] = [
   },
   {
     name: 'Norteño',
-    description: 'Clásicos y propios con acordeón y bajo sexto al frente.',
+    description: 'Clásicos reinventados con su inconfundible estilo sólido.',
   },
   {
     name: 'Regional mexicano',
@@ -21,7 +21,7 @@ export const repertoireItems: RepertoireItem[] = [
   },
   {
     name: 'Covers',
-    description: 'Selección curada para levantar la fiesta sin perder identidad.',
+    description: 'Selección curada para levantar la fiesta sin perder la esencia.',
   },
   {
     name: 'Canciones propias',

@@ -4,6 +4,7 @@ import '../styles/marketing-press.css'
 import { Show, UserButton, SignInButton, SignUpButton } from '@clerk/astro/components'
 import Seo from '../components/Seo.astro'
 import { bandSocialUrls } from '../data/socials'
+import { showPressAssetsSection } from '../lib/showPressAssets'
 
 interface Props {
   title: string
@@ -93,7 +94,7 @@ const { title, description, canonicalUrl, robots } = Astro.props
         <a href="/#redes" class="menu-link">Redes</a>
         <a href="/#musica" class="menu-link">Música</a>
         <a href="/#grupo" class="menu-link">Integrantes</a>
-        <a href="/#press" class="menu-link">Press kit</a>
+        {showPressAssetsSection ? <a href="/#press" class="menu-link">Press kit</a> : null}
         <a href="/#paquetes" class="menu-link">Paquetes</a>
         <a href="/booking" class="menu-link">Contrataciones</a>
         <Show when="signed-in">
