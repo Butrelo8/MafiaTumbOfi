@@ -24,8 +24,8 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **What:** Add tests for `verifyWebhookSignature` / `getStripe` error paths (mock Stripe SDK) when the webhook route exists.
 **Why:** Payment boundary should be covered before production traffic; helper is currently unused until POST /api/webhooks/stripe ships.
 **Context:** Pair with **Payments — Implement Stripe webhook handler**; reintroduce `stripe` SDK + helper module when that route ships (no `src/lib/stripe.ts` in repo until then — removed 2026-04-10).
-**Solution:** 
-**Done When:** 
+**Solution:** When Stripe SDK + helper restored, mock `stripe` module. Cover `verifyWebhookSignature`: valid signature → returns parsed event; bad signature → throws typed error; missing `STRIPE_WEBHOOK_SECRET` → throws with clear message; stale timestamp (replay window) → throws. Cover `getStripe` lazy init: first call instantiates, second returns same instance; missing `STRIPE_SECRET_KEY` → throws at call time, not module load. No live SDK traffic; all tests run offline.
+**Done When:** `src/lib/stripe.test.ts` exists and covers the four verification paths + both init paths; `bun test` green; no network calls in CI; failures produce readable diffs (structured error codes, not raw Stripe messages).
 **Effort:** S
 **Priority:** P3
 **Depends on:** Payments — Implement Stripe webhook handler
@@ -48,8 +48,8 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **What:** Create POST /api/webhooks/stripe endpoint
 **Why:** Required to handle subscription lifecycle events when ticket sales or merch are added
 **Context:** Add `bun add stripe`, lazy-init client + `constructEvent` verification (`STRIPE_WEBHOOK_SECRET`) before handling events. Idempotency keys for side effects. Prior stub `src/lib/stripe.ts` removed 2026-04-10 with unused dependency — restore pattern from git history or Stripe docs when implementing.
-**Solution:** 
-**Done When:** 
+**Solution:** Re-add `stripe` dep. Restore `src/lib/stripe.ts` (`getStripe` lazy singleton, `verifyWebhookSignature` wrapping `stripe.webhooks.constructEvent`). Add `POST /api/webhooks/stripe` in a new `src/routes/webhooks.ts` (mounted under a non-Clerk-gated path, body parsed as raw text before JSON middleware). Flow: read raw body + `stripe-signature` header → verify → switch on `event.type` → dispatch to typed handlers (`checkout.session.completed`, `customer.subscription.*`, etc., stubs OK until shop ships). Idempotency via new `stripe_events` table keyed on `event.id` (PK) with `receivedAt`; insert-if-not-exists before side effects, skip if row already exists. Return 400 on bad signature, 200 on ignored/duplicate, 500 on handler failure (lets Stripe retry). Scrub logs — no PII, no card data, no full event body in prod. Production gated via `ALLOW_STRIPE_WEBHOOK=true` env flag (mirrors existing export gate pattern).
+**Done When:** Route accepts signed test events via Stripe CLI (`stripe listen --forward-to localhost:3001/api/webhooks/stripe`); replay of same `event.id` returns 200 with no duplicate side effect; bad signature returns 400; disabled gate returns 503; `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `ALLOW_STRIPE_WEBHOOK` documented in `.env.example` and `DEPLOY.md`; idempotency table migration applied; `bun test` green with mocked SDK.
 **Effort:** M
 **Priority:** P3
 **Depends on:** If we ever do a shop. STRIPE_WEBHOOK_SECRET in .env
@@ -72,8 +72,8 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **What:** Run N8N as a local instance on the VPS (Docker or systemd); use it for scheduled tasks, optional notifications, and external API workflows; keep booking and Stripe in the app.
 **Why:** One place for cron-like and integration workflows without adding cron or a queue to the app; webhooks, emails/notifications, and external API glue live in N8N.
 **Context:** Boundary: app = DB, auth, booking, Stripe, critical path; N8N = schedules, inbound webhooks from external systems, optional emails/notifications, API glue. Secure N8N (auth, no public exposure or admin-only). Document in DEPLOY.md.
-**Solution:** 
-**Done When:** 
+**Solution:** Deploy N8N via Docker Compose on the VPS (image `n8nio/n8n`) behind the existing reverse proxy on a subdomain (e.g. `n8n.<band-domain>`). Auth: N8N basic auth + proxy IP allowlist, or front it with Tailscale/VPN for admin-only access (no public exposure). Persistent Docker volume for N8N's internal SQLite workflow DB. Env: `N8N_BASIC_AUTH_ACTIVE=true`, `N8N_BASIC_AUTH_USER`, `N8N_BASIC_AUTH_PASSWORD`, `N8N_HOST`, `WEBHOOK_URL`, `N8N_ENCRYPTION_KEY` (generated, stored in VPS secrets manager or `.env` on box). Initial workflows: (a) daily check for bookings with `pipeline_status=new` older than 48h → Slack/email nudge; (b) weekly lead digest to band email; (c) optional Resend bounce/complaint webhook sink. Boundary stays firm: app owns booking, auth, DB writes, Stripe; N8N only does schedules, integration glue, and optional notifications.
+**Done When:** N8N reachable at subdomain with TLS and auth; one scheduled workflow running in production (nudge or digest); workflow volume included in VPS backup cron; DEPLOY.md documents subdomain, auth model, backup strategy, and the app-vs-N8N boundary; workflows exported to JSON and committed under `docs/n8n/` for disaster recovery.
 **Effort:** M
 **Priority:** P4
 **Depends on:** None required; easiest co-location is after **Deploy — Migrate production to a VPS (future)** (same P3 backlog). N8N can also run on any other Docker-capable host if you do not migrate the app stack.
@@ -87,8 +87,8 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 - running Postgres migrations from a separate folder (e.g. `drizzle-postgres/`) at startup (idempotent/safe to re-run)
 **Why:** When the VPS is ready, production should use Postgres instead of the SQLite file to support better ops (backups/tooling/scaling).
 **Context:** Current setup is SQLite-only (`drizzle.config.ts` uses `dialect: 'sqlite'`, `scripts/run-migration.ts` applies `drizzle/*.sql`, and `scripts/check-db.ts` checks SQLite system tables).
-**Solution:** 
-**Done When:** 
+**Solution:** Introduce `DB_DIALECT` env var (`sqlite` | `postgres`, default `sqlite`). Add `postgres-js` + `drizzle-orm/postgres-js`. Separate Drizzle config `drizzle.config.pg.ts` pointing at `drizzle-postgres/` folder; existing `drizzle.config.ts` and `drizzle/` stay SQLite-only. Extend `src/db/detect.ts` to return a PG client when `DB_DIALECT=postgres` + `DATABASE_URL` (or `PG_*` vars) present; keep Turso/bun:sqlite paths untouched. Extract dialect-sensitive column types (timestamps as unix-int on SQLite vs `timestamp with time zone` on PG) into small helpers so `src/db/schema.ts` can emit both, or fork schema into `schema.sqlite.ts` + `schema.pg.ts` if cleaner. Update `scripts/run-migration.ts` and `scripts/check-db.ts` to branch on dialect (PG uses `information_schema.tables`). Keep SQLite default for dev + small VPS; switch to PG when ops requires it. Out of scope: live data migration from SQLite → PG (separate card with `sqlite3-to-postgres` or custom ETL).
+**Done When:** `DB_DIALECT=postgres` + `DATABASE_URL` boots the API against a Postgres instance locally (Docker); `bun run db:migrate` applies PG migrations from `drizzle-postgres/`; `bun run check-db` validates `users` + `bookings` on both dialects; `bun test` still green on SQLite default; smoke test (boot API, submit booking, read via admin) documented in DEPLOY.md under a "Postgres mode" section; rollback documented (switch `DB_DIALECT` back, keep Turso/SQLite as fallback until data migration card closes).
 **Effort:** L
 **Priority:** P4
 **Depends on:** “Postgres when we need multi-instance writes or ops wants a managed DB,” and keep SQLite as the default VPS path until then.
