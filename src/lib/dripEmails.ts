@@ -128,7 +128,7 @@ export function buildDripEmail3(name: string): DripEmailPayload {
     '',
     'Equipo Mafia Tumbada',
   ]
-  const text = lines.filter((line): line is string => line !== null).join('\n')
+  const text = lines.filter(Boolean).join('\n')
 
   const safeName = escapeHtml(name)
   const safeBookingUrl = escapeHtml(bookingUrl)

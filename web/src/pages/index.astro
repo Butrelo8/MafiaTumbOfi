@@ -9,6 +9,7 @@ import { packageTiers } from '../data/packages'
 import { repertoireItems } from '../data/repertoire'
 import { bandSocialUrls } from '../data/socials'
 import { testimonials } from '../data/testimonials'
+import { showPressAssetsSection } from '../lib/showPressAssets'
 import 'aos/dist/aos.css'
 
 const title = 'Mafia Tumbada — Oficial'
@@ -63,7 +64,7 @@ const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
       </p>
       <div class="hero-actions">
         <a href="#booking" class="btn-primary">Solicitar contratación</a>
-        <a href="#press" class="btn-secondary">Material de prensa</a>
+        {showPressAssetsSection ? <a href="#press" class="btn-secondary">Material de prensa</a> : null}
       </div>
     </div>
   </section>
@@ -81,7 +82,7 @@ const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
       </div>
       <div class="stat-item">
         <span class="stat-number">+</span>
-        <span class="stat-label">Presentaciones locales &amp; foráneas</span>
+        <span class="stat-label">Sonando en eventos locales y en todo México</span>
       </div>
       <div class="stat-item">
         <span class="stat-number">Xalapa.</span>
@@ -105,7 +106,7 @@ const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
             <line x1="5.5" y1="3.5" x2="5.5" y2="0.5"/>
           </svg>
         </span>
-        <span>+20 eventos en estos 4 años</span>
+        <span>Puro ambiente en cada escenario</span>
       </div>
       <div class="trust-item">
         <span class="trust-icon" aria-hidden="true">
@@ -573,70 +574,76 @@ const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
   </section>
   <hr class="divider" />
 
-  <!-- ─── ASSETS DE PRENSA ──────────────────────────────────── -->
-  <section class="section" id="press">
-    <div class="container">
-      <span class="section-label">Material de prensa</span>
-      <h2 class="section-heading">Descarga assets</h2>
+  {
+    showPressAssetsSection ? (
+      <>
+        <!-- ─── ASSETS DE PRENSA ──────────────────────────────────── -->
+        <section class="section" id="press">
+          <div class="container">
+            <span class="section-label">Material de prensa</span>
+            <h2 class="section-heading">Descarga assets</h2>
 
-      <div class="assets-grid">
-        <div class="asset-card">
-          <span class="asset-icon" aria-hidden="true">🖼</span>
-          <p class="asset-name">Fotografías oficiales</p>
-          <p class="asset-desc">
-            Fotos de alta resolución para imprenta y medios digitales. Uso libre con crédito al grupo.
-          </p>
-          {
-            photosUrl ? (
-              <a href={photosUrl} class="asset-btn" target="_blank" rel="noopener noreferrer">
-                ↓ Descargar
-              </a>
-            ) : (
-              <span class="asset-btn--pending" aria-disabled="true">Próximamente</span>
-            )
-          }
-        </div>
-        <div class="asset-card">
-          <span class="asset-icon" aria-hidden="true">◈</span>
-          <p class="asset-name">Logotipo</p>
-          <p class="asset-desc">PNG y SVG en versión oscura, clara y monocromática. Fondo transparente incluido.</p>
-          {
-            logoUrl ? (
-              <a href={logoUrl} class="asset-btn" target="_blank" rel="noopener noreferrer">
-                ↓ Descargar
-              </a>
-            ) : (
-              <span class="asset-btn--pending" aria-disabled="true">Próximamente</span>
-            )
-          }
-        </div>
-        <div class="asset-card">
-          <span class="asset-icon" aria-hidden="true">📄</span>
-          <p class="asset-name">Bio corta (texto)</p>
-          <p class="asset-desc">
-            Versión de 80 palabras lista para programas, redes y comunicados de prensa.
-          </p>
-          {
-            bioUrl ? (
-              <a href={bioUrl} class="asset-btn" target="_blank" rel="noopener noreferrer">
-                ↓ Descargar
-              </a>
-            ) : (
-              <span class="asset-btn--pending" aria-disabled="true">Próximamente</span>
-            )
-          }
-        </div>
-        <div class="asset-card">
-          <span class="asset-icon" aria-hidden="true">🎵</span>
-          <p class="asset-name">Singles en streaming</p>
-          <p class="asset-desc">
-            Spotify, Apple Music y YouTube. También disponibles stems para radio bajo solicitud.
-          </p>
-          <a href={bandSocialUrls.spotify} target="_blank" rel="noopener noreferrer" class="asset-btn">→ Escuchar</a>
-        </div>
-      </div>
-    </div>
-  </section>
+            <div class="assets-grid">
+              <div class="asset-card">
+                <span class="asset-icon" aria-hidden="true">🖼</span>
+                <p class="asset-name">Fotografías oficiales</p>
+                <p class="asset-desc">
+                  Fotos de alta resolución para imprenta y medios digitales. Uso libre con crédito al grupo.
+                </p>
+                {
+                  photosUrl ? (
+                    <a href={photosUrl} class="asset-btn" target="_blank" rel="noopener noreferrer">
+                      ↓ Descargar
+                    </a>
+                  ) : (
+                    <span class="asset-btn--pending" aria-disabled="true">Próximamente</span>
+                  )
+                }
+              </div>
+              <div class="asset-card">
+                <span class="asset-icon" aria-hidden="true">◈</span>
+                <p class="asset-name">Logotipo</p>
+                <p class="asset-desc">PNG y SVG en versión oscura, clara y monocromática. Fondo transparente incluido.</p>
+                {
+                  logoUrl ? (
+                    <a href={logoUrl} class="asset-btn" target="_blank" rel="noopener noreferrer">
+                      ↓ Descargar
+                    </a>
+                  ) : (
+                    <span class="asset-btn--pending" aria-disabled="true">Próximamente</span>
+                  )
+                }
+              </div>
+              <div class="asset-card">
+                <span class="asset-icon" aria-hidden="true">📄</span>
+                <p class="asset-name">Bio corta (texto)</p>
+                <p class="asset-desc">
+                  Versión de 80 palabras lista para programas, redes y comunicados de prensa.
+                </p>
+                {
+                  bioUrl ? (
+                    <a href={bioUrl} class="asset-btn" target="_blank" rel="noopener noreferrer">
+                      ↓ Descargar
+                    </a>
+                  ) : (
+                    <span class="asset-btn--pending" aria-disabled="true">Próximamente</span>
+                  )
+                }
+              </div>
+              <div class="asset-card">
+                <span class="asset-icon" aria-hidden="true">🎵</span>
+                <p class="asset-name">Singles en streaming</p>
+                <p class="asset-desc">
+                  Spotify, Apple Music y YouTube. También disponibles stems para radio bajo solicitud.
+                </p>
+                <a href={bandSocialUrls.spotify} target="_blank" rel="noopener noreferrer" class="asset-btn">→ Escuchar</a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </>
+    ) : null
+  }
 
   <!-- ─── BOOKING CTA ───────────────────────────────────────── -->
   <section class="booking section" id="booking">
@@ -729,6 +736,7 @@ const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
     max-width: 38rem;
     font-size: clamp(0.95rem, 2vw, 1.1rem);
     line-height: 1.6;
+    font-weight: 600;
     opacity: 0.85;
     margin: 1rem 0 0;
   }

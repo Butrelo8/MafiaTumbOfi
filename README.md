@@ -41,12 +41,12 @@ cp .env.example .env
 bun dev
 ```
 
-- API: http://localhost:3001  
-- Site: http://localhost:4321  
+- API: [http://localhost:3001](http://localhost:3001)  
+- Site: [http://localhost:4321](http://localhost:4321)
 
 ## Lint and format
 
-[Biome](https://biomejs.dev/) runs at the **repo root** on `src/**/*.ts`, `scripts/**/*.ts`, and `web/src/**/*.ts` only (`.astro` files are not linted/formatted by Biome yet). It respects **`.gitignore`** (including **`.code-review-graph/`**, which is ignored so local graph tooling does not break Biome’s UTF-8 reader).
+[Biome](https://biomejs.dev/) runs at the **repo root** on `src/**/*.ts`, `scripts/**/*.ts`, and `web/src/**/*.ts` only (`.astro` files are not linted/formatted by Biome yet). It respects `**.gitignore`** (including `**.code-review-graph/`**, which is ignored so local graph tooling does not break Biome’s UTF-8 reader).
 
 ```bash
 bun run lint        # check
@@ -56,10 +56,10 @@ bun run lint:fix    # check + safe/unsafe fixes (e.g. import cleanup)
 
 Run `bun run lint` before opening a PR or shipping.
 
-- Booking form: http://localhost:4321/booking  
-- Admin: http://localhost:4321/admin (Clerk sign-in required; API **`ADMIN_CLERK_ID`** must match your Clerk user id — see root **`.env.example`**; bookings load in pages of 50 via `GET /api/admin/bookings?limit=&offset=`). **Danger zone — vaciar todas las solicitudes:** `POST /api/admin/bookings/delete-all` hard-deletes every row in **`bookings`** (including soft-deleted). Gated like export: **`ALLOW_ADMIN_DELETE_ALL_BOOKINGS=true`** or **`NODE_ENV=development`** on the API; UI uses **`/admin/delete-all-bookings`** relay with phrase **`DELETE_ALL_BOOKINGS`** and optional **`dryRun`** for row count.
+- Booking form: [http://localhost:4321/booking](http://localhost:4321/booking)  
+- Admin: [http://localhost:4321/admin](http://localhost:4321/admin) (Clerk sign-in required; API `**ADMIN_CLERK_ID**` must match your Clerk user id — see root `**.env.example**`; bookings load in pages of 50 via `GET /api/admin/bookings?limit=&offset=`). **Danger zone — vaciar todas las solicitudes:** `POST /api/admin/bookings/delete-all` hard-deletes every row in `**bookings`** (including soft-deleted). Gated like export: `**ALLOW_ADMIN_DELETE_ALL_BOOKINGS=true`** or `**NODE_ENV=development`** on the API; UI uses `**/admin/delete-all-bookings`** relay with phrase `**DELETE_ALL_BOOKINGS`** and optional `**dryRun**` for row count.
 
-**Versioning:** Root `package.json` and `web/package.json` use the **same semver** for releases. Frontend `GET /health` and `GET /api/health` return `version` from `web/package.json`, overridable with `APP_VERSION` / `RELEASE_VERSION` (see `web/.env.example`; same semantics as the API `GET /health`). The Vercel adapter does not support `astro preview` locally; use **`bun run test:e2e`** (Playwright + `astro dev` on port **4329**) for a deterministic booking UI smoke, or `vercel dev` for production-like SSR.
+**Versioning:** Root `package.json` and `web/package.json` use the **same semver** for releases. Frontend `GET /health` and `GET /api/health` return `version` from `web/package.json`, overridable with `APP_VERSION` / `RELEASE_VERSION` (see `web/.env.example`; same semantics as the API `GET /health`). The Vercel adapter does not support `astro preview` locally; use `**bun run test:e2e`** (Playwright + `astro dev` on port **4329**) for a deterministic booking UI smoke, or `vercel dev` for production-like SSR.
 
 ### E2E (Playwright — booking smoke)
 
@@ -70,7 +70,7 @@ cd web && bunx playwright install chromium   # first machine only
 bun run test:e2e                             # from repo root, or: cd web && bun run test:e2e
 ```
 
-Tests mock `POST …/api/booking` in the browser (no real API, DB, or Resend). Playwright starts **`astro dev`** on **127.0.0.1:4329** so it does not collide with a dev server on 4321. Specs live under **`web/e2e/*.e2e.ts`** (that suffix keeps **Bun** from treating them as `bun test` files).
+Tests mock `POST …/api/booking` in the browser (no real API, DB, or Resend). Playwright starts `**astro dev**` on **127.0.0.1:4329** so it does not collide with a dev server on 4321. Specs live under `**web/e2e/*.e2e.ts`** (that suffix keeps **Bun** from treating them as `bun test` files).
 
 ## Project Structure
 
@@ -93,44 +93,50 @@ MafiaTumbadaOfi/
 
 ## Scripts (root)
 
-| Command | Description |
-|---|---|
-| `bun dev` | Start API with hot reload |
-| `bun start` | Start API (production) |
-| `bun test` | Run API + unit tests (`bun test`) |
-| `bun run test:e2e` | Playwright: booking form smoke (`web/`, mocked API) |
-| `bun run lint` | Biome check (`src/`, `scripts/`, `web/src/**/*.ts`) |
-| `bun run format` | Biome format (write) |
-| `bun run lint:fix` | Biome check with `--write --unsafe` |
-| `bun db:generate` | Generate Drizzle migrations |
-| `bun db:migrate` | Run pending migrations (applies `drizzle/*.sql` via `scripts/run-migration.ts`; same as `bun run migrate`) |
+
+| Command                        | Description                                                                                                                        |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `bun dev`                      | Start API with hot reload                                                                                                          |
+| `bun start`                    | Start API (production)                                                                                                             |
+| `bun test`                     | Run API + unit tests (`bun test`)                                                                                                  |
+| `bun run test:e2e`             | Playwright: booking form smoke (`web/`, mocked API)                                                                                |
+| `bun run lint`                 | Biome check (`src/`, `scripts/`, `web/src/**/*.ts`)                                                                                |
+| `bun run format`               | Biome format (write)                                                                                                               |
+| `bun run lint:fix`             | Biome check with `--write --unsafe`                                                                                                |
+| `bun db:generate`              | Generate Drizzle migrations                                                                                                        |
+| `bun db:migrate`               | Run pending migrations (applies `drizzle/*.sql` via `scripts/run-migration.ts`; same as `bun run migrate`)                         |
 | `bun db:upgrade-kit-snapshots` | Drizzle-kit only: upgrade internal migration journal/snapshot metadata (`drizzle-kit up:sqlite`); does **not** apply SQL to the DB |
-| `bun db:studio` | Open Drizzle Studio |
+| `bun db:studio`                | Open Drizzle Studio                                                                                                                |
+
 
 ## Scripts (web/)
 
-| Command | Description |
-|---|---|
-| `bun dev` | Start Astro dev server (port 4321) |
-| `bun build` | Build for Vercel (output in `.vercel/output/`) |
-| `bun preview` | Not supported with `@astrojs/vercel/serverless` — use `vercel dev` or **`bun run test:e2e`** for local checks |
-| `bun run test:e2e` | Playwright booking smoke (starts dev server on port 4329) |
-| `bun run test:e2e:install` | `playwright install chromium` (first-time browsers) |
+
+| Command                    | Description                                                                                                   |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `bun dev`                  | Start Astro dev server (port 4321)                                                                            |
+| `bun build`                | Build for Vercel (output in `.vercel/output/`)                                                                |
+| `bun preview`              | Not supported with `@astrojs/vercel/serverless` — use `vercel dev` or `**bun run test:e2e`** for local checks |
+| `bun run test:e2e`         | Playwright booking smoke (starts dev server on port 4329)                                                     |
+| `bun run test:e2e:install` | `playwright install chromium` (first-time browsers)                                                           |
+
 
 ## Environment Variables
 
 - **API:** See root `.env.example` (PORT, FRONTEND_URL, `DB_PATH`, `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN`, **ADMIN_CLERK_ID**, RESEND_API_KEY, BOOKING_NOTIFICATION_EMAIL).
-- **Frontend:** See `web/.env.example` (`PUBLIC_API_URL`, `PUBLIC_SITE_URL` for canonicals / absolute **OG image**, optional **`PUBLIC_ALLOW_INDEXING=false`** for **`noindex`** on previews).
+- **Frontend:** See `web/.env.example` (`PUBLIC_API_URL`, `PUBLIC_SITE_URL` for canonicals / absolute **OG image**, optional `**PUBLIC_ALLOW_INDEXING=false`** for `**noindex`** on previews).
 
 ## Email (Resend)
 
 Booking uses **two** sends from the API (`src/routes/booking.ts`):
 
-| Role | Env var (API / Render) | Notes |
-|------|------------------------|--------|
-| **Band inbox** — “new booking” alert | `BOOKING_NOTIFICATION_EMAIL` | Required. Any address you can **receive** at (Gmail, `bookinginfo@yourdomain` with Cloudflare Email Routing → Outlook, etc.). |
-| **From** — visible sender for both emails | `RESEND_FROM_EMAIL` | Optional. If unset, uses `onboarding@resend.dev`. For a real `@mafiatumbada.com` **From**, verify the domain in [Resend → Domains](https://resend.com/domains) (DNS in Cloudflare), then set e.g. `noreply@mafiatumbada.com`. |
-| **Customer “Recibimos tu solicitud”** | *(none)* | Always sent **to** the email the visitor typed in the form. Until a domain is verified in Resend, delivery to arbitrary addresses may be limited — see `DEPLOY.md` and `BUGS.md`. |
+
+| Role                                      | Env var (API / Render)       | Notes                                                                                                                                                                                                                         |
+| ----------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Band inbox** — “new booking” alert      | `BOOKING_NOTIFICATION_EMAIL` | Required. Any address you can **receive** at (Gmail, `bookinginfo@yourdomain` with Cloudflare Email Routing → Outlook, etc.).                                                                                                 |
+| **From** — visible sender for both emails | `RESEND_FROM_EMAIL`          | Optional. If unset, uses `onboarding@resend.dev`. For a real `@mafiatumbada.com` **From**, verify the domain in [Resend → Domains](https://resend.com/domains) (DNS in Cloudflare), then set e.g. `noreply@mafiatumbada.com`. |
+| **Customer “Recibimos tu solicitud”**     | *(none)*                     | Always sent **to** the email the visitor typed in the form. Until a domain is verified in Resend, delivery to arbitrary addresses may be limited — see `DEPLOY.md` and `BUGS.md`.                                             |
+
 
 **Production:** change values on **Render** (API service → Environment), not in the Resend dashboard alone. `RESEND_API_KEY` stays from Resend; rotate there if needed.
 
@@ -140,3 +146,4 @@ More deploy detail: [DEPLOY.md](./DEPLOY.md) (Resend domain, `PRODUCTION_URL` / 
 
 - **API:** Render (Bun + **Turso** / libsql). See `render.yaml` and [DEPLOY.md](./DEPLOY.md).
 - **Frontend:** Vercel (Astro SSR with `@astrojs/vercel`). Set root directory to `web/` and env vars as in DEPLOY.md.
+

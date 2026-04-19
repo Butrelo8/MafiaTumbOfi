@@ -2,6 +2,7 @@
 import '../styles/global.css'
 import { Show, UserButton, SignInButton, SignUpButton } from '@clerk/astro/components'
 import Seo from '../components/Seo.astro'
+import { showPressAssetsSection } from '../lib/showPressAssets'
 
 interface Props {
   title: string
@@ -33,7 +34,9 @@ const {
           <h1 class="text-xl font-bold text-brand">Mafia Tumbada</h1>
           <nav class="flex flex-wrap items-center gap-6" aria-label="Principal">
             <a href="/" class="text-stone-600 hover:text-brand transition-colors">Inicio</a>
-            <a href="/#press" class="text-stone-600 hover:text-brand transition-colors">Press kit</a>
+            {showPressAssetsSection ? (
+              <a href="/#press" class="text-stone-600 hover:text-brand transition-colors">Press kit</a>
+            ) : null}
             <a href="/booking" class="text-stone-600 hover:text-brand transition-colors">Contrataciones</a>
             <Show when="signed-in">
               <a href="/admin" class="text-stone-600 hover:text-brand transition-colors">Admin</a>
