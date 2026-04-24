@@ -10,7 +10,18 @@ import { repertoireItems } from '../data/repertoire'
 import { bandSocialUrls } from '../data/socials'
 import { testimonials } from '../data/testimonials'
 import { showPressAssetsSection } from '../lib/showPressAssets'
+import Marquee from '../components/Marquee.astro'
+import TourTable from '../components/TourTable.astro'
+import ArtworkShelf from '../components/ArtworkShelf.astro'
+import FilmStrip from '../components/FilmStrip.astro'
+import Eyebrow from '../components/Eyebrow.astro'
+import SignatureCTA from '../components/SignatureCTA.astro'
+import { normalizePublicApiBaseUrl } from '../lib/publicApiUrl'
+import { loadTourDates } from '../lib/tourDates'
 import 'aos/dist/aos.css'
+
+const apiBase = normalizePublicApiBaseUrl(import.meta.env.PUBLIC_API_URL)
+const tourDates = await loadTourDates(import.meta.env.PUBLIC_API_URL)
 
 const title = 'Mafia Tumbada — Oficial'
 const description =
@@ -21,6 +32,58 @@ const photosUrl  = import.meta.env.PUBLIC_PRESS_PHOTOS_URL
 const logoUrl    = import.meta.env.PUBLIC_PRESS_LOGO_URL
 const bioUrl     = import.meta.env.PUBLIC_PRESS_BIO_URL
 const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
+
+/** Cover art: Spotify oEmbed thumbnails (artist page track IDs) + Apple Music for Corazón */
+const artworkShelfItems = [
+  {
+    title: 'L.V.',
+    subtitle: 'Corrido tumbado',
+    href: 'https://open.spotify.com/intl-es/album/070MvKHW6m7CV17k0EeYjz?go=1&sp_cid=0d6d738c-4142-4435-ae8f-f760b4483f00&utm_source=spotify_web_player&utm_medium=mobile&sp_cid=0d6d738c-4142-4435-ae8f-f760b4483f00&fallback=getapp',
+    label: 'Spotify',
+    cover:
+      'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02e6486bbb6fe87cd413317314',
+  },
+  {
+    title: 'L.A. BUBU',
+    subtitle: 'Single',
+    href: 'https://open.spotify.com/intl-es/track/5djRHmBwycYgJbqtpF8FPN',
+    label: 'Spotify',
+    cover:
+      'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e0255518576a807e01106d1a8a4',
+  },
+  {
+    title: 'No Te He Olvidado',
+    subtitle: 'Regional',
+    href: 'https://music.apple.com/es/song/no-te-he-olvidado/1794933904',
+    label: 'Apple Music',
+    cover:
+      'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e022ec48e2f3aa0af92dcc2b79d',
+  },
+  {
+    title: 'Tal Vez',
+    subtitle: 'Corrido tumbado',
+    href:'https://open.spotify.com/intl-es/track/54nPL89TjXqZ2UYRO1PvBD?si=e276a7b6475d470c',
+    label: 'Spotify',
+    cover:
+      'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02c037fb8a3cd0c1aa9f0a6fd6',
+  },
+  {
+    title: 'Corazón',
+    subtitle: 'Regional',
+    href: 'https://music.apple.com/es/album/coraz%C3%B3n-single/1779090777',
+    label: 'Apple Music',
+    cover:
+      'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/ab/5b/43/ab5b432b-2af6-2bbb-40ad-1af0d02f770b/859796890896_cover.jpg/600x600bb.jpg',
+  },
+  {
+    title: 'Besos',
+    subtitle: 'Single',
+    href: 'https://youtu.be/kAdwJ-0F8mU?si=H2Y-8VBsuOdIdtQo',
+    label: 'YouTube',
+    cover:
+      'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e029f79aa3da0cf2d9654df2ce1',
+  },
+]
 ---
 
 <MarketingLayout title={title} description={description} canonicalUrl={canonicalUrl} hasHero={true}>
@@ -34,7 +97,8 @@ const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
   </Show>
 
   <!-- ─── HERO ─────────────────────────────────────────────── -->
-  <section class="hero">
+  <section class="hero hero--asymmetric">
+    <!-- Full-bleed background (Veracruz Noir: film + scrims + copy stack above) -->
     <video
       class="hero-video"
       autoplay
@@ -45,51 +109,42 @@ const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
     >
       <source src="/video/hero.mp4" type="video/mp4" />
     </video>
-    <div class="hero-deco-line" aria-hidden="true"></div>
-    <div class="container hero-content">
-      <p class="hero-eyebrow">Sitio Oficial</p>
-      <h1 class="hero-title">
-        <img src="/icon/mafiatumbada.png" alt="Mafia Tumbada" class="hero-logo-img" />
-      </h1>
-      <div class="hero-meta">
-        <span>Xalapa, Veracruz</span>
-        <span>Corridos Tumbados</span>
-        <span>Regional Mexicano</span>
-        <span>Desde 2021</span>
-      </div>
-      <p class="hero-blurb">
-        La Mafia Tumbada es un grupo de corridos tumbados y regional mexicano con base en Xalapa, Veracruz. Las
-        contrataciones cubren presentaciones en vivo, festivales, barras y eventos privados; aquí puedes conocer el
-        proyecto y solicitar una cotización sin compromiso.
-      </p>
-      <div class="hero-actions">
-        <a href="#booking" class="btn-primary">Solicitar contratación</a>
-        {showPressAssetsSection ? <a href="#press" class="btn-secondary">Material de prensa</a> : null}
+    <div class="hero-grain" aria-hidden="true"></div>
+    <div class="container hero-grid">
+      <div class="hero-copy hero-content">
+        <p class="hero-eyebrow">Sitio Oficial</p>
+        <h1 class="hero-title">
+          <img src="/icon/mafiatumbada.png" alt="Mafia Tumbada" class="hero-logo-img" />
+        </h1>
+        <div class="hero-meta">
+          <span>Xalapa, Veracruz</span>
+          <span>Corridos Tumbados</span>
+          <span>Regional Mexicano</span>
+          <span>Desde 2021</span>
+        </div>
+        <p class="hero-blurb">
+          La Mafia Tumbada es un grupo de corridos tumbados y regional mexicano con base en Xalapa, Veracruz. Las
+          contrataciones cubren presentaciones en vivo, festivales, barras y eventos privados; aquí puedes conocer el
+          proyecto y solicitar una cotización sin compromiso.
+        </p>
+        <div class="hero-actions">
+          <a href="/contratacion" class="btn-primary" id="hero-cta-contratacion">Solicitar contratación</a>
+          {showPressAssetsSection ? <a href="#press" class="btn-secondary">Material de prensa</a> : null}
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ─── STATS ─────────────────────────────────────────────── -->
-  <div class="stats-bar">
+  <Marquee />
+
+  <!-- ─── PRÓXIMAS FECHAS ───────────────────────────────────── -->
+  <section class="section section--fechas" id="fechas" aria-labelledby="fechas-heading">
     <div class="container">
-      <div class="stat-item">
-        <span class="stat-number">4</span>
-        <span class="stat-label">Años activos</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-number">8</span>
-        <span class="stat-label">Singles</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-number">+</span>
-        <span class="stat-label">Sonando en eventos locales y en todo México</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-number">Xalapa.</span>
-        <span class="stat-label">Base: Veracruz, Méx.</span>
-      </div>
+      <Eyebrow text="Calendario" />
+      <h2 id="fechas-heading" class="section-heading">Próximas fechas</h2>
+      <TourTable rows={tourDates} showAllHref="/contratacion" apiBase={apiBase} />
     </div>
-  </div>
+  </section>
 
   <!-- ─── TRUST STRIP ─────────────────────────────────────────── -->
   <section class="trust-strip" aria-labelledby="trust-heading">
@@ -244,7 +299,7 @@ const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
             <span>YouTube</span>
           </a>
         </div>
-        <a href="/booking" class="btn-primary repertoire-cta-booking">Solicitar contratación</a>
+        <a href="/contratacion" class="btn-primary repertoire-cta-booking">Solicitar contratación</a>
       </div>
     </div>
   </section>
@@ -450,6 +505,21 @@ const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
   </section>
   <hr class="divider" />
 
+  <!-- ─── DISCO / STREAMING SHELF + FILM ─────────────────────── -->
+  <section class="section section--shelf" id="streaming" aria-labelledby="streaming-heading">
+    <div class="container">
+      <Eyebrow text="Escucha" />
+      <h2 id="streaming-heading" class="section-heading">Singles y streaming</h2>
+      <p class="section-lede">
+        Portadas orientativas — enlaces directos a plataformas. El historial completo de presentaciones se comparte bajo
+        solicitud de contratación.
+      </p>
+      <ArtworkShelf items={artworkShelfItems} />
+    </div>
+  </section>
+  <FilmStrip />
+  <hr class="divider" />
+
   <!-- ─── INTEGRANTES ───────────────────────────────────────── -->
   <section class="section" id="grupo">
     <div class="container">
@@ -461,54 +531,6 @@ const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
           <MemberCard {...member} />
         ))}
       </div>
-    </div>
-  </section>
-  <hr class="divider" />
-
-  <!-- ─── PRESENTACIONES ────────────────────────────────────── -->
-  <section class="section" id="shows">
-    <div class="container">
-      <span class="section-label">En tarima</span>
-      <h2 class="section-heading">Presentaciones</h2>
-      <p class="shows-intro">
-        Desde los bares de Xalapa hasta plazas fuera del estado, la Mafia Tumbada ha construido su reputación tocando
-        en vivo. Cada fecha suma al historial de un grupo que trabaja en serio.
-      </p>
-
-      <div class="shows-list">
-        <div class="show-item" data-aos="fade-up">
-          <span class="show-dot"></span>
-          <div>
-            <p class="show-name">La Bohemia</p>
-            <p class="show-loc">Misantla, Veracruz</p>
-          </div>
-        </div>
-        <div class="show-item" data-aos="fade-up">
-          <span class="show-dot"></span>
-          <div>
-            <p class="show-name">San Benito</p>
-            <p class="show-loc">Xalapa, Veracruz</p>
-          </div>
-        </div>
-        <div class="show-item" data-aos="fade-up">
-          <span class="show-dot"></span>
-          <div>
-            <p class="show-name">Jala la Jarra</p>
-            <p class="show-loc">Xalapa, Veracruz</p>
-          </div>
-        </div>
-        <div class="show-item show-item--placeholder" data-aos="fade-up">
-          <span class="show-dot show-dot--muted"></span>
-          <div>
-            <p class="show-name show-name--muted">+ más fechas</p>
-            <p class="show-loc">Historial completo bajo solicitud</p>
-          </div>
-        </div>
-      </div>
-
-      <p class="shows-note">
-        * El historial completo de presentaciones se comparte bajo solicitud de booking.
-      </p>
     </div>
   </section>
   <hr class="divider" />
@@ -646,7 +668,7 @@ const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
   }
 
   <!-- ─── BOOKING CTA ───────────────────────────────────────── -->
-  <section class="booking section" id="booking">
+  <section class="booking section" id="contratacion">
     <div class="container">
       <div>
         <p class="booking-urgency">
@@ -660,9 +682,12 @@ const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
           Respondemos cotizaciones en menos de 24 horas. Incluye fecha, ciudad y tipo de evento para agilizar la
           respuesta.
         </p>
+        <p class="signature-cta-wrap">
+          <SignatureCTA />
+        </p>
       </div>
       <div class="booking-actions">
-        <a href="/booking" class="btn-primary">Solicitar cotización</a>
+        <a href="/contratacion" class="btn-primary">Solicitar cotización</a>
         {
           whatsappUrl ? (
             <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" class="btn-secondary">

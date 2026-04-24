@@ -1,5 +1,10 @@
-/** Primary "how we sound" video for nurture Email 2. */
-export const DRIP_EMAIL_2_VIDEO_URL = 'https://www.youtube.com/watch?v=7Sx0yDjGoq0'
+/** Fallback when `DRIP_VIDEO_URL` is unset (local/tests). Production should set `DRIP_VIDEO_URL` — see `.env.example`. */
+const DRIP_VIDEO_URL_FALLBACK = 'https://www.youtube.com/watch?v=7Sx0yDjGoq0'
+
+function resolveDripVideoUrl(): string {
+  const raw = process.env.DRIP_VIDEO_URL?.trim()
+  return raw ? raw : DRIP_VIDEO_URL_FALLBACK
+}
 
 export type DripEmailPayload = {
   subject: string
@@ -25,6 +30,7 @@ function bookingPageUrl(): string {
 }
 
 function resolveDripPrimaryCta(bookingUrl: string): DripCta {
+  // Email 3 primary CTA: same `PUBLIC_WHATSAPP_URL` as the public Astro site.
   const wa = process.env.PUBLIC_WHATSAPP_URL?.trim()
   if (wa) {
     return {
@@ -81,13 +87,14 @@ function renderPrimaryButton(label: string, url: string): string {
  */
 export function buildDripEmail2(name: string): DripEmailPayload {
   const bookingUrl = bookingPageUrl()
+  const videoUrl = resolveDripVideoUrl()
   const subject = 'Asi sonamos - Mafia Tumbada'
   const text = [
     `Hola ${name},`,
     '',
     'Gracias por tu interes.',
     'Aqui puedes escuchar como suena Mafia Tumbada en vivo:',
-    DRIP_EMAIL_2_VIDEO_URL,
+    videoUrl,
     '',
     `Seguir con mi solicitud: ${bookingUrl}`,
     '',
@@ -100,7 +107,7 @@ export function buildDripEmail2(name: string): DripEmailPayload {
     'Una muestra rapida para ayudarte a decidir.',
     `<p style="margin:0 0 12px;">Hola ${safeName},</p>
 <p style="margin:0 0 16px;">Gracias por tu interes. Te compartimos un video para que escuches como suena Mafia Tumbada en vivo.</p>
-${renderPrimaryButton('Ver video en YouTube', DRIP_EMAIL_2_VIDEO_URL)}
+${renderPrimaryButton('Ver video en YouTube', videoUrl)}
 <p style="margin:14px 0 10px;">Si ya tienes fecha en mente, puedes continuar aqui:</p>
 ${renderPrimaryButton('Seguir con mi solicitud', bookingUrl)}
 <p style="margin:16px 0 0;">Equipo Mafia Tumbada</p>`,
@@ -128,7 +135,7 @@ export function buildDripEmail3(name: string): DripEmailPayload {
     '',
     'Equipo Mafia Tumbada',
   ]
-  const text = lines.filter(Boolean).join('\n')
+  const text = lines.filter((line): line is string => line != null).join('\n')
 
   const safeName = escapeHtml(name)
   const safeBookingUrl = escapeHtml(bookingUrl)

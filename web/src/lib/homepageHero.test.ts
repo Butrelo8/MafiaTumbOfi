@@ -8,13 +8,20 @@ const indexPath = join(__dirname, '../pages/index.astro')
 const marketingCssPath = join(__dirname, '../styles/marketing-press.css')
 const packagesDataPath = join(__dirname, '../data/packages.ts')
 const marketingLayoutPath = join(__dirname, '../layouts/MarketingLayout.astro')
+const tourTablePath = join(__dirname, '../components/TourTable.astro')
 
 describe('marketing homepage hero', () => {
   test('includes hero video markup and public asset path', () => {
     const src = readFileSync(indexPath, 'utf8')
     expect(src).toContain('class="hero-video"')
     expect(src).toContain('/video/hero.mp4')
-    expect(src).toContain('hero-deco-line')
+    expect(src).toContain('hero--asymmetric')
+    expect(src).toContain('hero-grain')
+    const heroOpen = src.indexOf('class="hero hero--asymmetric"')
+    const videoClass = src.indexOf('class="hero-video"')
+    expect(heroOpen).toBeGreaterThan(-1)
+    expect(videoClass).toBeGreaterThan(heroOpen)
+    expect(src.indexOf('hero-grain')).toBeGreaterThan(videoClass)
     expect(src).toContain('aria-hidden="true"')
     expect(src).toContain('playsinline')
     expect(src).toContain('muted')
@@ -51,9 +58,15 @@ describe('marketing homepage hero', () => {
     expect(src).toContain('.admin-notice a:hover')
   })
 
-  test('includes above-the-fold blurb and trust strip after stats bar', () => {
+  test('includes above-the-fold blurb, marquee, fechas, and trust strip', () => {
     const src = readFileSync(indexPath, 'utf8')
     expect(src).toContain('class="hero-blurb"')
+    expect(src).toContain('<Marquee')
+    expect(src).toContain('id="fechas"')
+    expect(src).toContain('loadTourDates')
+    expect(src).toContain('normalizePublicApiBaseUrl')
+    expect(src).toContain('apiBase={apiBase}')
+    expect(src).toContain('rows={tourDates}')
     expect(src).toContain('class="trust-strip"')
     expect(src).toContain('id="trust-heading"')
     expect(src).toContain('class="trust-grid"')
@@ -65,10 +78,10 @@ describe('marketing homepage hero', () => {
     const actions = src.indexOf('class="hero-actions"')
     expect(blurb).toBeGreaterThan(heroMeta)
     expect(actions).toBeGreaterThan(blurb)
-    const statsEnd = src.indexOf('<!-- ─── TRUST STRIP')
+    const trustStart = src.indexOf('<!-- ─── TRUST STRIP')
     const bioStart = src.indexOf('<!-- ─── BIO')
-    expect(statsEnd).toBeGreaterThan(-1)
-    expect(bioStart).toBeGreaterThan(statsEnd)
+    expect(trustStart).toBeGreaterThan(-1)
+    expect(bioStart).toBeGreaterThan(trustStart)
   })
 })
 
@@ -92,10 +105,11 @@ describe('marketing homepage conversion blocks', () => {
     expect(paquetesBlock).toContain('href={pkg.cta.href}')
 
     const pkgSrc = readFileSync(packagesDataPath, 'utf8')
-    expect((pkgSrc.match(/href:\s*'\/booking'/g) ?? []).length).toBe(3)
+    expect((pkgSrc.match(/href:\s*'\/contratacion'/g) ?? []).length).toBe(3)
 
     const layoutSrc = readFileSync(marketingLayoutPath, 'utf8')
     expect(layoutSrc).toContain('href="/#paquetes"')
+    expect(layoutSrc).toContain('href="/contratacion"')
   })
 
   test('MarketingLayout defers closeMenu after menu-auth click so Clerk modals are not under z-index overlay', () => {
@@ -103,6 +117,18 @@ describe('marketing homepage conversion blocks', () => {
     expect(layoutSrc).toContain('class="menu-auth"')
     expect(layoutSrc).toContain("querySelector('.menu-auth')")
     expect(layoutSrc).toContain('window.setTimeout(() => closeMenu(), 0)')
+  })
+
+  test('Plausible hook: hero CTA id, layout snippet, and ticket CTA delegation', () => {
+    const indexSrc = readFileSync(indexPath, 'utf8')
+    expect(indexSrc).toContain('id="hero-cta-contratacion"')
+    const layoutSrc = readFileSync(marketingLayoutPath, 'utf8')
+    expect(layoutSrc).toContain('normalizePlausibleDataDomain')
+    expect(layoutSrc).toContain('plausible.io/js/script.js')
+    expect(layoutSrc).toContain("window.plausible?.('CTA Click'")
+    expect(layoutSrc).toContain("window.plausible?.('Ticket CTA'")
+    const tourSrc = readFileSync(tourTablePath, 'utf8')
+    expect(tourSrc).toContain('data-analytics-venue')
   })
 
   test('marketing CSS defines repertoire, testimonials, packages, and booking-urgency', () => {
@@ -114,5 +140,7 @@ describe('marketing homepage conversion blocks', () => {
     expect(css).toContain('.packages-grid')
     expect(css).toContain('.package-card--featured')
     expect(css).toContain('.booking-urgency')
+    expect(css).toContain('.marquee-wrap')
+    expect(css).toContain('.signature-cta')
   })
 })

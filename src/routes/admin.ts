@@ -1,19 +1,21 @@
-import { and, count, desc, eq, gte } from 'drizzle-orm'
+import { and, asc, count, desc, eq, gte, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
+import type { AdminTourRow } from '../data/tourDates'
 import { db } from '../db'
-import { bookings } from '../db/schema'
+import { bookings, tourDates } from '../db/schema'
 import { isAdminBookingExportAllowed } from '../lib/adminBookingExport'
+import { getAdminExportMaxRows, parseAdminBookingsListParams } from '../lib/adminBookingsQuery'
 import {
   ADMIN_DELETE_ALL_BOOKINGS_CONFIRM_PHRASE,
   isAdminDeleteAllBookingsAllowed,
 } from '../lib/adminDeleteAllBookings'
-import { getAdminExportMaxRows, parseAdminBookingsListParams } from '../lib/adminBookingsQuery'
-import { bookingNotSoftDeleted } from '../lib/bookingSoftDeleteFilter'
 import { BOOKING_PIPELINE_STATUS_VALUES } from '../lib/bookingPipeline'
+import { bookingNotSoftDeleted } from '../lib/bookingSoftDeleteFilter'
 import { errorResponse, successResponse } from '../lib/errors'
 import { estimatedPriceRange } from '../lib/estimatedPriceRange'
 import { getResend } from '../lib/resend'
+import { parseJsonRequestBody } from '../lib/parseJsonRequestBody'
 import { logServerError, logServerErrorDetails } from '../lib/safeLog'
 import { spanishErrorMap } from '../lib/zod-es'
 import { adminAuth } from '../middleware/adminAuth'
@@ -81,11 +83,13 @@ adminRoutes.get('/bookings', async (c) => {
       .where(bookingNotSoftDeleted)
     const total = countRow?.total ?? 0
 
+    const leadPriorityRank = sql`(CASE ${bookings.leadPriority} WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END)`
+
     const pageRows = await db
       .select()
       .from(bookings)
       .where(bookingNotSoftDeleted)
-      .orderBy(desc(bookings.createdAt))
+      .orderBy(asc(leadPriorityRank), desc(bookings.createdAt))
       .limit(limit)
       .offset(offset)
 
@@ -111,6 +115,102 @@ adminRoutes.get('/bookings', async (c) => {
   }
 })
 
+function mapTourRowToAdmin(row: typeof tourDates.$inferSelect): AdminTourRow {
+  const s = row.status
+  const status: AdminTourRow['status'] = s === 'tentative' || s === 'cancelled' ? s : 'confirmed'
+  return {
+    id: row.id,
+    date: row.date,
+    time: row.time ?? null,
+    city: row.city,
+    venue: row.venue,
+    status,
+    ticketUrl: row.ticketUrl ?? null,
+    soldOut: row.soldOut,
+    notes: row.internalNotes ?? null,
+  }
+}
+
+adminRoutes.get('/tours', async (c) => {
+  try {
+    const rows = await db.select().from(tourDates).orderBy(asc(tourDates.date))
+    const payload: AdminTourRow[] = rows.map(mapTourRowToAdmin)
+    return successResponse(c, payload)
+  } catch (error) {
+    logServerError('admin', 'FETCH_TOURS_FAILED', error)
+    return errorResponse(c, 500, 'INTERNAL_ERROR', 'Failed to fetch tour dates')
+  }
+})
+
+const createTourBodySchema = z
+  .object({
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    time: z.union([z.string().max(32), z.literal(''), z.null()]).optional(),
+    city: z.string().trim().min(1).max(200),
+    venue: z.string().trim().min(1).max(300),
+    status: z.enum(['confirmed', 'tentative', 'cancelled']).default('confirmed'),
+    ticketUrl: z.union([z.string().url(), z.literal(''), z.null()]).optional(),
+    soldOut: z.boolean().optional(),
+    notes: z.union([z.string().max(10000), z.null()]).optional(),
+  })
+  .strict()
+
+adminRoutes.post('/tours', async (c) => {
+  let body: unknown
+  try {
+    body = parseJsonRequestBody(await c.req.text())
+  } catch {
+    return errorResponse(c, 400, 'INVALID_JSON', 'Invalid JSON body')
+  }
+
+  const parsed = createTourBodySchema.safeParse(body, { errorMap: spanishErrorMap })
+  if (!parsed.success) {
+    const flat = parsed.error.flatten()
+    const formMsg = flat.formErrors[0]
+    const fieldMsg = Object.entries(flat.fieldErrors)
+      .map(([k, v]) => (Array.isArray(v) ? `${k}: ${v[0]}` : `${k}: ${v}`))
+      .filter(Boolean)[0]
+    return errorResponse(
+      c,
+      400,
+      'VALIDATION_ERROR',
+      fieldMsg ?? formMsg ?? 'Datos inválidos',
+    )
+  }
+
+  const v = parsed.data
+  const time = v.time === '' || v.time === undefined || v.time === null ? null : v.time
+  const ticketUrl =
+    v.ticketUrl === '' || v.ticketUrl === undefined || v.ticketUrl === null ? null : v.ticketUrl
+  const notes = v.notes === '' || v.notes === undefined || v.notes === null ? null : v.notes
+
+  try {
+    const insertedRows = await db
+      .insert(tourDates)
+      .values({
+        date: v.date,
+        time,
+        city: v.city,
+        venue: v.venue,
+        status: v.status,
+        ticketUrl,
+        soldOut: v.soldOut ?? false,
+        internalNotes: notes,
+      })
+      .returning()
+
+    const row = insertedRows[0]
+    if (!row) {
+      logServerError('admin', 'INSERT_TOUR_EMPTY', new Error('insert returned no row'))
+      return errorResponse(c, 500, 'INTERNAL_ERROR', 'No se pudo crear la fecha')
+    }
+    return successResponse(c, mapTourRowToAdmin(row))
+  } catch (error) {
+    logServerError('admin', 'CREATE_TOUR_FAILED', error)
+    return errorResponse(c, 500, 'INTERNAL_ERROR', 'No se pudo crear la fecha')
+  }
+})
+
 adminRoutes.patch('/bookings/:id', async (c) => {
   const id = parseRequiredBookingId(c.req.param('id'))
   if (id === null) {
@@ -119,7 +219,7 @@ adminRoutes.patch('/bookings/:id', async (c) => {
 
   let body: unknown
   try {
-    body = await c.req.json()
+    body = parseJsonRequestBody(await c.req.text())
   } catch {
     return errorResponse(c, 400, 'INVALID_JSON', 'Invalid JSON body')
   }
@@ -216,7 +316,7 @@ adminRoutes.post('/bookings/delete-all', async (c) => {
 
   let body: unknown
   try {
-    body = await c.req.json()
+    body = parseJsonRequestBody(await c.req.text())
   } catch {
     return errorResponse(c, 400, 'INVALID_JSON', 'Invalid JSON body')
   }
@@ -381,11 +481,13 @@ adminRoutes.get('/export/bookings', async (c) => {
       .where(and(bookingNotSoftDeleted, gte(bookings.createdAt, oneDayAgo)))
     const last24hCount = last24Row?.total ?? 0
 
+    const leadPriorityRankExport = sql`(CASE ${bookings.leadPriority} WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END)`
+
     const pageRows = await db
       .select()
       .from(bookings)
       .where(bookingNotSoftDeleted)
-      .orderBy(desc(bookings.createdAt))
+      .orderBy(asc(leadPriorityRankExport), desc(bookings.createdAt))
       .limit(exportCap)
 
     const enriched = pageRows.map((b) => ({

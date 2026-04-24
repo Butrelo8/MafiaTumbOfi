@@ -29,6 +29,15 @@ describe('admin page marketing shell', () => {
     expect(src).toContain('ADMIN_DELETE_ALL_BOOKINGS_CONFIRM_PHRASE')
   })
 
+  test('bookings toolbar scopes pipeline and lead-priority filters with badges', () => {
+    const src = readFileSync(adminPath, 'utf8')
+    expect(src).toContain('id="admin-bookings-toolbar"')
+    expect(src).toContain('data-priority-filter="high"')
+    expect(src).toContain('admin-priority-badge')
+    expect(src).toContain('admin-priority-high')
+    expect(src).toContain('data-lead-priority=')
+  })
+
   test('detail drawer stacks above fixed marketing header', () => {
     const adminSrc = readFileSync(adminPath, 'utf8')
     const marketingPath = join(__dirname, '../styles/marketing-press.css')

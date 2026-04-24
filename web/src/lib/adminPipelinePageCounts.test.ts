@@ -1,5 +1,8 @@
 import { describe, expect, test } from 'bun:test'
-import { pipelineCountsForAdminRows } from './adminPipelinePageCounts'
+import {
+  leadPriorityCountsForAdminRows,
+  pipelineCountsForAdminRows,
+} from './adminPipelinePageCounts'
 
 describe('pipelineCountsForAdminRows', () => {
   test('empty list yields zeros', () => {
@@ -20,5 +23,23 @@ describe('pipelineCountsForAdminRows', () => {
         { pipelineStatus: 'garbage' },
       ]),
     ).toEqual({ new: 3, contacted: 1, closed: 1 })
+  })
+})
+
+describe('leadPriorityCountsForAdminRows', () => {
+  test('empty list yields zeros', () => {
+    expect(leadPriorityCountsForAdminRows([])).toEqual({ high: 0, medium: 0, low: 0 })
+  })
+
+  test('counts only valid stored priorities', () => {
+    expect(
+      leadPriorityCountsForAdminRows([
+        { leadPriority: 'high' },
+        { leadPriority: 'medium' },
+        { leadPriority: 'low' },
+        { leadPriority: null },
+        { leadPriority: 'nope' },
+      ]),
+    ).toEqual({ high: 1, medium: 1, low: 1 })
   })
 })

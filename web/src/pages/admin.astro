@@ -9,7 +9,10 @@ import { formatLeadPriorityLabel } from '../../../src/lib/bookingLeadScore'
 import { normalizePublicApiBaseUrl } from '../lib/publicApiUrl'
 import { adminCanonical } from '../lib/publicSiteUrl'
 import { sanitizeResendDetail } from '../lib/sanitizeResendDetail'
-import { pipelineCountsForAdminRows } from '../lib/adminPipelinePageCounts'
+import {
+  leadPriorityCountsForAdminRows,
+  pipelineCountsForAdminRows,
+} from '../lib/adminPipelinePageCounts'
 import { phoneToTelHref } from '../lib/adminQuickActions'
 import { staleNewBadgeState } from '../lib/adminStaleNewBadge'
 
@@ -137,9 +140,64 @@ try {
   console.error('Failed to fetch bookings:', e)
 }
 
+type AdminTourRow = {
+  id: number
+  date: string
+  time: string | null
+  city: string
+  venue: string
+  status: 'confirmed' | 'tentative' | 'cancelled'
+  ticketUrl: string | null
+  soldOut: boolean
+  notes: string | null
+}
+
+let adminTours: AdminTourRow[] = []
+let toursError: string | null = null
+
+try {
+  const tokenTours = await getToken()
+  const toursUrl = `${apiUrl}/api/admin/tours`
+  const toursRes = await fetch(toursUrl, {
+    headers: tokenTours ? { Authorization: `Bearer ${tokenTours}` } : {},
+  })
+
+  if (toursRes.status === 401) {
+    return redirectToSignIn({ returnBackUrl: '/admin' })
+  }
+
+  if (toursRes.status === 403) {
+    return new Response('', {
+      status: 303,
+      headers: { Location: '/' },
+    })
+  }
+
+  if (!toursRes.ok) {
+    toursError = `API error: ${toursRes.status}`
+  } else {
+    const tr = (await toursRes.json()) as { data?: unknown }
+    const data = tr.data
+    adminTours = Array.isArray(data) ? (data as AdminTourRow[]) : []
+  }
+} catch (e) {
+  toursError = e instanceof Error ? e.message : String(e)
+  console.error('Failed to fetch admin tours:', e)
+}
+
 const pipeCounts = pipelineCountsForAdminRows(bookings)
+const priorityCounts = leadPriorityCountsForAdminRows(bookings)
+
+function leadPriorityBadgeClass(p: string | null | undefined): string {
+  const base = 'admin-priority-badge'
+  if (p === 'high') return `${base} admin-priority-high`
+  if (p === 'medium') return `${base} admin-priority-medium`
+  if (p === 'low') return `${base} admin-priority-low`
+  return `${base} admin-priority-unknown`
+}
 const nowMs = Date.now()
 const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
+const adminToursJson = JSON.stringify(adminTours).replace(/</g, '\\u003c')
 ---
 
 <MarketingLayout
@@ -161,6 +219,33 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
           Exportar JSON (depuración)
         </a>
       </p>
+
+      <div class="admin-tabs" role="tablist" aria-label="Secciones del panel">
+        <button
+          type="button"
+          class="admin-tab is-active"
+          role="tab"
+          aria-selected="true"
+          aria-controls="solicitudes-panel"
+          id="admin-tab-solicitudes"
+          data-tab="solicitudes"
+        >
+          Solicitudes ({totalBookings})
+        </button>
+        <button
+          type="button"
+          class="admin-tab"
+          role="tab"
+          aria-selected="false"
+          aria-controls="fechas-panel"
+          id="admin-tab-fechas"
+          data-tab="fechas"
+        >
+          Fechas ({adminTours.length})
+        </button>
+      </div>
+
+      <div id="solicitudes-panel" class="admin-tab-panel" role="tabpanel" aria-labelledby="admin-tab-solicitudes">
 
     {resendMessage && (
       <div class={`resend-banner ${resendIsOk ? 'resend-ok' : 'resend-error'}`}>
@@ -286,19 +371,35 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
               autocomplete="off"
             />
           </label>
-          <div class="admin-pipeline-pills" role="toolbar" aria-label="Filtrar por seguimiento">
-            <button type="button" class="admin-pill is-active" data-pipeline-filter="all">
-              Todas ({bookings.length})
-            </button>
-            <button type="button" class="admin-pill" data-pipeline-filter="new">
-              Nuevo ({pipeCounts.new})
-            </button>
-            <button type="button" class="admin-pill" data-pipeline-filter="contacted">
-              Contactado ({pipeCounts.contacted})
-            </button>
-            <button type="button" class="admin-pill" data-pipeline-filter="closed">
-              Cerrado ({pipeCounts.closed})
-            </button>
+          <div id="admin-bookings-toolbar" class="admin-bookings-toolbar">
+            <div class="admin-pipeline-pills" role="toolbar" aria-label="Filtrar por seguimiento">
+              <button type="button" class="admin-pill is-active" data-pipeline-filter="all">
+                Todas ({bookings.length})
+              </button>
+              <button type="button" class="admin-pill" data-pipeline-filter="new">
+                Nuevo ({pipeCounts.new})
+              </button>
+              <button type="button" class="admin-pill" data-pipeline-filter="contacted">
+                Contactado ({pipeCounts.contacted})
+              </button>
+              <button type="button" class="admin-pill" data-pipeline-filter="closed">
+                Cerrado ({pipeCounts.closed})
+              </button>
+            </div>
+            <div class="admin-priority-pills admin-pipeline-pills" role="toolbar" aria-label="Filtrar por prioridad de lead">
+              <button type="button" class="admin-pill is-active" data-priority-filter="all">
+                Prioridad: todas ({bookings.length})
+              </button>
+              <button type="button" class="admin-pill" data-priority-filter="high">
+                Alta ({priorityCounts.high})
+              </button>
+              <button type="button" class="admin-pill" data-priority-filter="medium">
+                Media ({priorityCounts.medium})
+              </button>
+              <button type="button" class="admin-pill" data-priority-filter="low">
+                Baja ({priorityCounts.low})
+              </button>
+            </div>
           </div>
         </div>
 
@@ -351,6 +452,7 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
                     class="admin-booking-row"
                     data-row-id={booking.id}
                     data-pipeline-status={pipelineKey}
+                    data-lead-priority={booking.leadPriority ?? ''}
                   >
                     <td>{booking.id}</td>
                     <td>{booking.name}</td>
@@ -369,7 +471,11 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
                     <td data-cell="budget" data-budget={booking.budget ?? ''}>
                       {formatBudgetLabel(booking.budget)}
                     </td>
-                    <td>{formatLeadPriorityLabel(booking.leadPriority)}</td>
+                    <td data-cell="leadPriority">
+                      <span class={leadPriorityBadgeClass(booking.leadPriority)}>
+                        {formatLeadPriorityLabel(booking.leadPriority)}
+                      </span>
+                    </td>
                     <td data-cell="leadScore" data-lead-score={booking.leadScore ?? ''}>
                       {booking.leadScore == null ? '—' : booking.leadScore}
                     </td>
@@ -477,6 +583,126 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
       </nav>
     )}
     </div>
+
+    <section
+      id="fechas-panel"
+      class="admin-tab-panel fechas-panel"
+      role="tabpanel"
+      aria-labelledby="admin-tab-fechas"
+      hidden
+      data-tours-error={toursError ?? ''}
+    >
+      <div class="fechas-source-card">
+        <p>
+          <strong>Fuente:</strong> tabla <code>tour_dates</code> (API <code>/api/admin/tours</code>)
+        </p>
+      </div>
+
+      {toursError && (
+        <div class="fechas-fallback-banner" role="alert">
+          Error al cargar fechas: {toursError}
+        </div>
+      )}
+
+      {!toursError && adminTours.length === 0 && (
+        <p class="fechas-empty-banner">
+          No hay fechas en la base. El sitio público mostrará el calendario vacío hasta que agregues fechas aquí.
+        </p>
+      )}
+
+      <div id="fechas-next-show" class="fechas-next-show" hidden></div>
+
+      <div class="fechas-toolbar">
+        <div class="admin-pipeline-pills fechas-filter-pills" role="toolbar" aria-label="Filtrar fechas">
+          <button type="button" class="admin-pill is-active" data-fechas-filter="upcoming">
+            Próximas (<span id="fechas-count-upcoming">0</span>)
+          </button>
+          <button type="button" class="admin-pill" data-fechas-filter="past">
+            Pasadas (<span id="fechas-count-past">0</span>)
+          </button>
+          <button type="button" class="admin-pill" data-fechas-filter="all">
+            Todas (<span id="fechas-count-all">0</span>)
+          </button>
+        </div>
+        <div class="fechas-toolbar-actions">
+          <button type="button" class="btn-primary" id="fechas-add-open">
+            Agregar fecha
+          </button>
+          <button type="button" class="btn-secondary" id="fechas-refresh">
+            Recargar
+          </button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="fechas-table" aria-label="Fechas de gira">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Ciudad</th>
+              <th>Venue</th>
+              <th>Estado</th>
+              <th>Enlace</th>
+              <th>Notas</th>
+            </tr>
+          </thead>
+          <tbody id="fechas-tbody"></tbody>
+        </table>
+      </div>
+
+      <dialog id="fechas-add-dialog" class="fechas-add-dialog">
+        <form id="fechas-add-form" novalidate>
+          <h3 class="fechas-add-title">Nueva fecha</h3>
+          <p id="fechas-add-error" class="fechas-add-error" role="alert" hidden></p>
+          <div class="fechas-add-grid">
+            <label class="fechas-add-field">
+              Fecha
+              <input type="date" name="date" required />
+            </label>
+            <label class="fechas-add-field">
+              Hora
+              <input type="text" name="time" placeholder="ej. 21:00" maxlength="32" autocomplete="off" />
+            </label>
+            <label class="fechas-add-field">
+              Ciudad
+              <input type="text" name="city" required maxlength="200" autocomplete="off" />
+            </label>
+            <label class="fechas-add-field">
+              Venue
+              <input type="text" name="venue" required maxlength="300" autocomplete="off" />
+            </label>
+            <label class="fechas-add-field">
+              Estado
+              <select name="status">
+                <option value="confirmed">Confirmada</option>
+                <option value="tentative">Tentativa</option>
+                <option value="cancelled">Cancelada</option>
+              </select>
+            </label>
+            <label class="fechas-add-field fechas-add-field--wide">
+              Enlace boletos (opcional)
+              <input type="url" name="ticketUrl" placeholder="https://…" />
+            </label>
+            <label class="fechas-add-field fechas-add-check">
+              <input type="checkbox" name="soldOut" />
+              Agotado
+            </label>
+            <label class="fechas-add-field fechas-add-field--wide">
+              Notas internas
+              <textarea name="notes" rows="3" maxlength="10000"></textarea>
+            </label>
+          </div>
+          <div class="fechas-add-actions">
+            <button type="button" class="btn-secondary" id="fechas-add-cancel">
+              Cancelar
+            </button>
+            <button type="submit" class="btn-primary" id="fechas-add-submit">Guardar</button>
+          </div>
+        </form>
+      </dialog>
+    </section>
+    </div>
   </section>
 
   <div id="admin-drawer" class="admin-drawer" hidden>
@@ -515,6 +741,304 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
   </footer>
 
   <script is:inline type="application/json" id="admin-bookings-json" set:html={bookingsJson} />
+  <script is:inline type="application/json" id="admin-tours-json" set:html={adminToursJson} />
+
+  <script is:inline>
+    ;(function () {
+      var solicitudesPanel = document.getElementById('solicitudes-panel')
+      var fechasPanel = document.getElementById('fechas-panel')
+      var tabSolicitudes = document.getElementById('admin-tab-solicitudes')
+      var tabFechas = document.getElementById('admin-tab-fechas')
+      if (!solicitudesPanel || !fechasPanel || !tabSolicitudes || !tabFechas) return
+
+      function setTab(name) {
+        var isSol = name === 'solicitudes'
+        solicitudesPanel.hidden = !isSol
+        fechasPanel.hidden = isSol
+        tabSolicitudes.classList.toggle('is-active', isSol)
+        tabFechas.classList.toggle('is-active', !isSol)
+        tabSolicitudes.setAttribute('aria-selected', isSol ? 'true' : 'false')
+        tabFechas.setAttribute('aria-selected', isSol ? 'false' : 'true')
+      }
+      tabSolicitudes.addEventListener('click', function () {
+        setTab('solicitudes')
+      })
+      tabFechas.addEventListener('click', function () {
+        setTab('fechas')
+      })
+
+      function todayIso() {
+        var d = new Date()
+        var y = d.getFullYear()
+        var m = String(d.getMonth() + 1).padStart(2, '0')
+        var day = String(d.getDate()).padStart(2, '0')
+        return y + '-' + m + '-' + day
+      }
+
+      var rows = []
+      var filter = 'upcoming'
+
+      function readToursFromDom() {
+        var el = document.getElementById('admin-tours-json')
+        if (!el || !el.textContent) return []
+        try {
+          return JSON.parse(el.textContent)
+        } catch {
+          return []
+        }
+      }
+
+      function filtered() {
+        var t = todayIso()
+        if (filter === 'all') return rows.slice()
+        return rows.filter(function (r) {
+          return filter === 'past' ? r.date < t : r.date >= t
+        })
+      }
+
+      function renderCounts() {
+        var t = todayIso()
+        var up = rows.filter(function (r) {
+          return r.date >= t
+        }).length
+        var past = rows.filter(function (r) {
+          return r.date < t
+        }).length
+        var elUp = document.getElementById('fechas-count-upcoming')
+        var elPast = document.getElementById('fechas-count-past')
+        var elAll = document.getElementById('fechas-count-all')
+        if (elUp) elUp.textContent = String(up)
+        if (elPast) elPast.textContent = String(past)
+        if (elAll) elAll.textContent = String(rows.length)
+      }
+
+      function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] || c
+        })
+      }
+
+      function renderNextShow() {
+        var box = document.getElementById('fechas-next-show')
+        if (!box) return
+        var t = todayIso()
+        var upcoming = rows
+          .filter(function (r) {
+            return r.date >= t && r.status !== 'cancelled'
+          })
+          .sort(function (a, b) {
+            return a.date.localeCompare(b.date)
+          })
+        var next = upcoming[0]
+        if (!next) {
+          box.hidden = true
+          box.innerHTML = ''
+          return
+        }
+        var d0 = new Date(next.date + 'T12:00:00')
+        var days = Math.max(0, Math.ceil((d0.getTime() - Date.now()) / 86400000))
+        box.hidden = false
+        box.innerHTML =
+          '<div class="fechas-next-card"><p class="fechas-next-label">Próximo show</p><p class="fechas-next-title">' +
+          escapeHtml(next.city) +
+          ' · ' +
+          escapeHtml(next.venue) +
+          '</p><p class="fechas-next-meta">' +
+          escapeHtml(next.date) +
+          (next.time ? ' · ' + escapeHtml(next.time) : '') +
+          '</p><p class="fechas-next-countdown">En ' +
+          days +
+          ' día(s)</p></div>'
+      }
+
+      function renderTable() {
+        var tbody = document.getElementById('fechas-tbody')
+        if (!tbody) return
+        tbody.replaceChildren()
+        var list = filtered()
+        for (var i = 0; i < list.length; i++) {
+          var r = list[i]
+          var tr = document.createElement('tr')
+          var ticketCell = r.ticketUrl
+            ? '<button type="button" class="admin-linkish fechas-copy" data-url="' +
+              escapeHtml(r.ticketUrl) +
+              '">Copiar enlace</button>'
+            : '—'
+          tr.innerHTML =
+            '<td>' +
+            escapeHtml(r.date) +
+            '</td><td>' +
+            (r.time ? escapeHtml(r.time) : '—') +
+            '</td><td>' +
+            escapeHtml(r.city) +
+            '</td><td>' +
+            escapeHtml(r.venue) +
+            '</td><td><span class="fechas-status fechas-status-' +
+            escapeHtml(r.status) +
+            '">' +
+            escapeHtml(r.status) +
+            '</span></td><td>' +
+            ticketCell +
+            '</td><td class="fechas-notes">' +
+            (r.notes
+              ? escapeHtml(r.notes.length > 80 ? r.notes.slice(0, 80) + '…' : r.notes)
+              : '—') +
+            '</td>'
+          tbody.appendChild(tr)
+        }
+        tbody.querySelectorAll('.fechas-copy').forEach(function (btn) {
+          btn.addEventListener('click', async function () {
+            var url = btn.getAttribute('data-url')
+            if (!url) return
+            try {
+              await navigator.clipboard.writeText(url)
+              alert('Enlace copiado')
+            } catch {
+              window.prompt('Copiar enlace:', url)
+            }
+          })
+        })
+      }
+
+      function fullRender() {
+        rows = readToursFromDom()
+        renderCounts()
+        renderNextShow()
+        renderTable()
+      }
+
+      document.querySelectorAll('[data-fechas-filter]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          filter = btn.getAttribute('data-fechas-filter') || 'upcoming'
+          document.querySelectorAll('[data-fechas-filter]').forEach(function (b) {
+            b.classList.toggle('is-active', b === btn)
+          })
+          renderTable()
+        })
+      })
+
+      async function refreshToursFromServer() {
+        try {
+          var res = await fetch('/admin/tours')
+          var j = await res.json()
+          if (!res.ok) {
+            alert((j && j.error && j.error.message) || 'Error')
+            return false
+          }
+          var data = j.data
+          if (!Array.isArray(data)) return false
+          var el = document.getElementById('admin-tours-json')
+          if (el) el.textContent = JSON.stringify(data)
+          rows = data
+          renderCounts()
+          renderNextShow()
+          renderTable()
+          if (tabFechas) tabFechas.textContent = 'Fechas (' + data.length + ')'
+          return true
+        } catch {
+          alert('Error de red')
+          return false
+        }
+      }
+
+      document.getElementById('fechas-refresh')?.addEventListener('click', function () {
+        refreshToursFromServer()
+      })
+
+      var addDialog = document.getElementById('fechas-add-dialog')
+      var addForm = document.getElementById('fechas-add-form')
+      var addError = document.getElementById('fechas-add-error')
+      var addSubmit = document.getElementById('fechas-add-submit')
+
+      document.getElementById('fechas-add-open')?.addEventListener('click', function () {
+        if (addError) {
+          addError.hidden = true
+          addError.textContent = ''
+        }
+        if (addDialog && typeof addDialog.showModal === 'function') addDialog.showModal()
+      })
+
+      document.getElementById('fechas-add-cancel')?.addEventListener('click', function () {
+        if (addForm) addForm.reset()
+        if (addError) {
+          addError.hidden = true
+          addError.textContent = ''
+        }
+        if (addDialog && typeof addDialog.close === 'function') addDialog.close()
+      })
+
+      addForm?.addEventListener('submit', async function (e) {
+        e.preventDefault()
+        if (!addForm || !addDialog) return
+        if (addError) {
+          addError.hidden = true
+          addError.textContent = ''
+        }
+        var fd = new FormData(addForm)
+        var dateVal = fd.get('date')
+        var cityVal = String(fd.get('city') || '').trim()
+        var venueVal = String(fd.get('venue') || '').trim()
+        if (!dateVal || !cityVal || !venueVal) {
+          if (addError) {
+            addError.textContent = 'Completa fecha, ciudad y venue.'
+            addError.hidden = false
+          }
+          return
+        }
+        var payload = {
+          date: String(dateVal),
+          city: cityVal,
+          venue: venueVal,
+          status: String(fd.get('status') || 'confirmed'),
+          soldOut: fd.get('soldOut') === 'on',
+        }
+        var timeTrim = String(fd.get('time') || '').trim()
+        if (timeTrim) payload.time = timeTrim
+        var ticketTrim = String(fd.get('ticketUrl') || '').trim()
+        if (ticketTrim) payload.ticketUrl = ticketTrim
+        var notesTrim = String(fd.get('notes') || '').trim()
+        if (notesTrim) payload.notes = notesTrim
+        if (addSubmit) {
+          addSubmit.disabled = true
+          addSubmit.textContent = 'Guardando…'
+        }
+        try {
+          var res = await fetch('/admin/tours', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          })
+          var j = await res.json()
+          if (!res.ok) {
+            var msg =
+              (j && j.error && j.error.message) ||
+              (j && j.message) ||
+              'No se pudo guardar'
+            if (addError) {
+              addError.textContent = msg
+              addError.hidden = false
+            }
+            return
+          }
+          addForm.reset()
+          if (typeof addDialog.close === 'function') addDialog.close()
+          await refreshToursFromServer()
+        } catch {
+          if (addError) {
+            addError.textContent = 'Error de red'
+            addError.hidden = false
+          }
+        } finally {
+          if (addSubmit) {
+            addSubmit.disabled = false
+            addSubmit.textContent = 'Guardar'
+          }
+        }
+      })
+
+      fullRender()
+    })()
+  </script>
 
   <script>
     import { ADMIN_DELETE_ALL_BOOKINGS_CONFIRM_PHRASE } from '../../../src/lib/adminDeleteAllBookings'
@@ -543,6 +1067,7 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
     const bookingsList = readBookingsFromDom()
     const bookingsById = new Map(bookingsList.map((b) => [Number(b.id), b]))
     let activePipeline: 'all' | 'new' | 'contacted' | 'closed' = 'all'
+    let activePriority: 'all' | 'high' | 'medium' | 'low' = 'all'
     let searchTimer: ReturnType<typeof setTimeout> | null = null
     let normalizedSearch = ''
     let currentDrawerId: number | null = null
@@ -626,24 +1151,44 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
           if (!b) continue
           const pipe = row.dataset.pipelineStatus || 'new'
           const pipeOk = activePipeline === 'all' || pipe === activePipeline
+          const pr = row.dataset.leadPriority ?? ''
+          const priorityOk = activePriority === 'all' || pr === activePriority
           const searchOk = bookingMatchesAdminSearchQuery(
             { name: b.name, email: b.email, phone: b.phone as string | null },
             normalizedSearch,
           )
-          row.classList.toggle('admin-row-filtered-out', !(pipeOk && searchOk))
+          row.classList.toggle('admin-row-filtered-out', !(pipeOk && priorityOk && searchOk))
         }
       }
 
-      document.querySelectorAll('[data-pipeline-filter]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          const v = (btn as HTMLElement).dataset.pipelineFilter as typeof activePipeline
-          if (!v) return
-          activePipeline = v
-          document.querySelectorAll('.admin-pill').forEach((p) => p.classList.remove('is-active'))
-          btn.classList.add('is-active')
-          applyRowFilters()
+      const bookingsToolbar = document.getElementById('admin-bookings-toolbar')
+      if (bookingsToolbar) {
+        bookingsToolbar.querySelectorAll('[data-pipeline-filter]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const v = (btn as HTMLElement).dataset.pipelineFilter as typeof activePipeline
+            if (!v) return
+            activePipeline = v
+            bookingsToolbar.querySelectorAll('[data-pipeline-filter]').forEach((p) => {
+              p.classList.remove('is-active')
+            })
+            btn.classList.add('is-active')
+            applyRowFilters()
+          })
         })
-      })
+
+        bookingsToolbar.querySelectorAll('[data-priority-filter]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const v = (btn as HTMLElement).dataset.priorityFilter as typeof activePriority
+            if (!v) return
+            activePriority = v
+            bookingsToolbar.querySelectorAll('[data-priority-filter]').forEach((p) => {
+              p.classList.remove('is-active')
+            })
+            btn.classList.add('is-active')
+            applyRowFilters()
+          })
+        })
+      }
 
       const searchInput = document.getElementById('admin-booking-search') as HTMLInputElement | null
       searchInput?.addEventListener('input', () => {
@@ -925,6 +1470,272 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
     max-width: 1200px;
   }
 
+  .admin-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 1.25rem;
+    border-bottom: 1px solid var(--border, #262420);
+    padding-bottom: 0.65rem;
+  }
+
+  .admin-tab {
+    font-family: var(--ff-body, system-ui, sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.45rem 0.85rem;
+    border-radius: 0.2rem;
+    border: 1px solid var(--border, #262420);
+    background: var(--surface, #111111);
+    color: var(--muted, #7a7267);
+    cursor: pointer;
+    transition:
+      border-color 0.2s,
+      color 0.2s,
+      background 0.2s;
+  }
+
+  .admin-tab:hover {
+    border-color: var(--gold-dim, #8a6c1c);
+    color: var(--text, #ede8df);
+  }
+
+  .admin-tab.is-active {
+    border-color: rgba(196, 154, 42, 0.55);
+    color: var(--gold, #c49a2a);
+    background: rgba(196, 154, 42, 0.1);
+  }
+
+  .fechas-panel {
+    margin-top: 0.5rem;
+  }
+
+  .fechas-source-card {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface, #111111);
+    border: 1px solid var(--border, #262420);
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    color: var(--muted, #7a7267);
+  }
+
+  .fechas-source-card code {
+    font-size: 0.78rem;
+  }
+
+  .fechas-fallback-banner,
+  .fechas-empty-banner {
+    margin: 0 0 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.25rem;
+    border: 1px solid #5c2a2a;
+    background: rgba(60, 24, 24, 0.35);
+    color: #f0c4c4;
+    font-size: 0.9rem;
+  }
+
+  .fechas-empty-banner {
+    border-color: var(--border, #262420);
+    background: var(--surface2, #191919);
+    color: var(--muted, #7a7267);
+  }
+
+  .fechas-next-show {
+    margin-bottom: 1rem;
+  }
+
+  .fechas-next-card {
+    padding: 1rem 1.1rem;
+    border: 1px solid rgba(196, 154, 42, 0.35);
+    border-radius: 0.25rem;
+    background: rgba(196, 154, 42, 0.08);
+  }
+
+  .fechas-next-label {
+    margin: 0 0 0.35rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold, #c49a2a);
+  }
+
+  .fechas-next-title {
+    margin: 0 0 0.35rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text, #ede8df);
+  }
+
+  .fechas-next-meta,
+  .fechas-next-countdown {
+    margin: 0.2rem 0 0;
+    font-size: 0.875rem;
+    color: var(--muted, #7a7267);
+  }
+
+  .fechas-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .fechas-toolbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .fechas-add-dialog {
+    max-width: min(32rem, calc(100vw - 2rem));
+    padding: 0;
+    border: 1px solid var(--border, #262420);
+    border-radius: 0.35rem;
+    background: var(--surface, #111111);
+    color: var(--text, #ede8df);
+  }
+
+  .fechas-add-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.65);
+  }
+
+  .fechas-add-dialog form {
+    padding: 1.25rem 1.35rem;
+  }
+
+  .fechas-add-title {
+    margin: 0 0 1rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .fechas-add-error {
+    margin: 0 0 0.75rem;
+    padding: 0.5rem 0.65rem;
+    border-radius: 0.25rem;
+    border: 1px solid #5c2a2a;
+    background: rgba(60, 24, 24, 0.35);
+    color: #f0c4c4;
+    font-size: 0.85rem;
+  }
+
+  .fechas-add-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .fechas-add-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .fechas-add-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--muted, #7a7267);
+  }
+
+  .fechas-add-field--wide {
+    grid-column: 1 / -1;
+  }
+
+  .fechas-add-field input,
+  .fechas-add-field select,
+  .fechas-add-field textarea {
+    padding: 0.45rem 0.55rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--border, #262420);
+    background: var(--surface2, #191919);
+    color: var(--text, #ede8df);
+    font-size: 0.9rem;
+  }
+
+  .fechas-add-check {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .fechas-add-check input {
+    width: auto;
+  }
+
+  .fechas-add-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+  }
+
+  .fechas-table {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+    background: var(--surface, #111111);
+    color: var(--text, #ede8df);
+    font-size: 0.8125rem;
+  }
+
+  .fechas-table th,
+  .fechas-table td {
+    padding: 0.55rem 0.65rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border, #262420);
+    vertical-align: top;
+  }
+
+  .fechas-table th {
+    background: var(--bg, #0b0b0b);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold, #c49a2a);
+  }
+
+  .fechas-notes {
+    max-width: 12rem;
+    font-size: 0.75rem;
+    color: var(--muted, #7a7267);
+    word-break: break-word;
+  }
+
+  .fechas-status {
+    display: inline-block;
+    padding: 0.15rem 0.45rem;
+    border-radius: 9999px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border: 1px solid var(--border, #262420);
+  }
+
+  .fechas-status-confirmed {
+    border-color: rgba(80, 160, 110, 0.45);
+    color: #c5e8d4;
+  }
+
+  .fechas-status-tentative {
+    border-color: rgba(196, 154, 42, 0.45);
+    color: #e8d4a8;
+  }
+
+  .fechas-status-cancelled {
+    border-color: rgba(200, 100, 100, 0.45);
+    color: #f0c8c8;
+  }
+
   .admin-title {
     font-family: var(--ff-display, 'Cormorant Garamond', Georgia, serif);
     font-size: clamp(1.85rem, 4vw, 2.75rem);
@@ -982,6 +1793,45 @@ const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
+  }
+
+  .admin-bookings-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    flex: 1;
+    min-width: min(100%, 28rem);
+  }
+
+  .admin-priority-badge {
+    display: inline-block;
+    padding: 0.2em 0.65em;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 1px solid var(--border, #262420);
+    font-family: var(--ff-body, system-ui, sans-serif);
+  }
+
+  .admin-priority-high {
+    color: oklch(96% 0.01 90);
+    background: color-mix(in oklch, var(--accent-hot, oklch(60% 0.22 30)) 82%, transparent);
+    border-color: var(--accent-hot, oklch(60% 0.22 30));
+  }
+
+  .admin-priority-medium {
+    color: var(--gold, #c49a2a);
+    background: color-mix(in oklch, var(--gold, oklch(72% 0.14 82)) 14%, transparent);
+    border-color: var(--gold-dim, oklch(55% 0.1 82));
+  }
+
+  .admin-priority-low,
+  .admin-priority-unknown {
+    color: var(--text-muted, oklch(65% 0.01 90));
+    background: var(--bg-raised, oklch(16% 0 0));
+    border-color: var(--border, oklch(24% 0.005 90));
   }
 
   .admin-pill {

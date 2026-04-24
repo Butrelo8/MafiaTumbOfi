@@ -49,3 +49,7 @@ web/blob-report/
 
 # Videos
 herovid/
+
+# Cursor
+.cursor/
+.gstack/

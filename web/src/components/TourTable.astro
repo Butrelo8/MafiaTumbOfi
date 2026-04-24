@@ -1,0 +1,65 @@
+---
+import type { TourDateRow } from '../data/tourDates'
+import { formatTourDateLabel } from '../lib/tourDateDisplay'
+
+interface Props {
+  rows: TourDateRow[]
+  showAllHref?: string
+  /** When set, the browser refetches GET {apiBase}/api/tours/upcoming after paint (fixes SSR when the server cannot reach the API). */
+  apiBase?: string
+}
+const { rows, showAllHref = '/contratacion', apiBase } = Astro.props
+const upcomingApiUrl = apiBase ? `${apiBase.replace(/\/+$/, '')}/api/tours/upcoming` : undefined
+---
+
+<div class="tour-table-wrap" data-tour-upcoming-api={upcomingApiUrl}>
+  <table class="tour-table">
+    <caption class="sr-only">Próximas fechas</caption>
+    <thead>
+      <tr>
+        <th scope="col">Fecha</th>
+        <th scope="col">Ciudad</th>
+        <th scope="col">Venue</th>
+        <th scope="col"><span class="sr-only">Acción</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.length === 0 ? (
+        <tr class="tour-table__empty">
+          <td colspan="4">No hay fechas anunciadas por ahora.</td>
+        </tr>
+      ) : (
+        rows.map((row) => (
+          <tr class:list={[{ 'tour-table__soldout': row.soldOut }]}>
+            <td class="tour-table__date">{formatTourDateLabel(row.date)}</td>
+            <td>{row.city}</td>
+            <td>{row.venue}</td>
+            <td class="tour-table__cta">
+              {row.soldOut ? (
+                <span class="tour-tag-soldout">SOLD OUT</span>
+              ) : (
+                <a
+                  href={row.cta.href}
+                  class="tour-ticket-btn"
+                  data-analytics-venue={row.venue}
+                >
+                  {row.cta.label}
+                </a>
+              )}
+            </td>
+          </tr>
+        ))
+      )}
+    </tbody>
+  </table>
+  <p class="tour-table-foot">
+    <a href={showAllHref} class="tour-table-more">Ver historial y más fechas</a>
+  </p>
+</div>
+
+{upcomingApiUrl ? (
+  <script>
+    import { hydrateTourTablesFromApi } from '../lib/tourTableHydrate'
+    void hydrateTourTablesFromApi()
+  </script>
+) : null}

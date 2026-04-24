@@ -1,0 +1,48 @@
+---
+interface ShelfItem {
+  title: string
+  subtitle?: string
+  href: string
+  label: string
+  cover?: string
+}
+interface Props {
+  items: ShelfItem[]
+}
+const { items } = Astro.props
+---
+
+<div class="artwork-shelf" role="region" aria-label="Discografía y streaming">
+  <ul class="artwork-shelf-track">
+    {
+      items.map((item) => (
+        <li class="artwork-shelf-item">
+          <a href={item.href} class="artwork-shelf-card" target="_blank" rel="noopener noreferrer">
+            <div class="artwork-shelf-cover">
+              {item.cover ? (
+                <img
+                  src={item.cover}
+                  alt={item.title}
+                  width="80"
+                  height="80"
+                  loading="lazy"
+                  decoding="async"
+                  class="artwork-shelf-img"
+                />
+              ) : (
+                <span class="artwork-shelf-initial" aria-hidden="true">
+                  {item.title.slice(0, 2).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div class="artwork-shelf-meta">
+              <span class="artwork-shelf-title">{item.title}</span>
+              {item.subtitle ? <span class="artwork-shelf-sub">{item.subtitle}</span> : null}
+              <span class="artwork-shelf-cta">{item.label} →</span>
+            </div>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>

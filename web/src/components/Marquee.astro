@@ -1,0 +1,12 @@
+---
+const line =
+  Astro.props.text ??
+  'CORRIDOS TUMBADOS · XALAPA · DESDE 2021 · CORRIDOS TUMBADOS · XALAPA · DESDE 2021 · '
+---
+
+<div class="marquee-wrap" role="presentation" aria-hidden="true">
+  <div class="marquee-track">
+    <span class="marquee-text">{line}</span>
+    <span class="marquee-text" aria-hidden="true">{line}</span>
+  </div>
+</div>

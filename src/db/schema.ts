@@ -47,3 +47,19 @@ export const bookings = sqliteTable('bookings', {
   /** When set, row is hidden from admin list/export and follow-up actions. */
   deletedAt: integer('deleted_at', { mode: 'timestamp' }),
 })
+
+export const tourDates = sqliteTable('tour_dates', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  date: text('date').notNull(),
+  time: text('time'),
+  city: text('city').notNull(),
+  venue: text('venue').notNull(),
+  status: text('status').notNull().default('confirmed'),
+  ticketUrl: text('ticket_url'),
+  soldOut: integer('sold_out', { mode: 'boolean' }).notNull().default(false),
+  internalNotes: text('internal_notes'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .$defaultFn(() => new Date())
+    .$onUpdateFn(() => new Date()),
+})

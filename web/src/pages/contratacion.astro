@@ -1,0 +1,332 @@
+---
+import MarketingLayout from '../layouts/MarketingLayout.astro'
+import BookingForm from '../components/BookingForm.astro'
+import Eyebrow from '../components/Eyebrow.astro'
+import { normalizePublicApiBaseUrl } from '../lib/publicApiUrl'
+import { bookingCanonical } from '../lib/publicSiteUrl'
+import { bandSocialUrls } from '../data/socials'
+
+const apiUrl = normalizePublicApiBaseUrl(import.meta.env.PUBLIC_API_URL)
+const whatsappUrl = import.meta.env.PUBLIC_WHATSAPP_URL
+const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)
+
+const title = 'Contrataciones — Press kit — Mafia Tumbada'
+const description =
+  'Solicita cotización para tu evento. Bio, rider técnico resumido y formulario — respuesta en menos de 24 horas. Xalapa, Veracruz.'
+---
+
+<MarketingLayout title={title} description={description} canonicalUrl={canonicalUrl}>
+  <div class="contratacion-orientation">
+    <div class="container contratacion-orientation-inner">
+      <Eyebrow
+        text="Para promotores y organizadores de eventos"
+        class="contratacion-orientation-eyebrow"
+      />
+      <a href="/" class="contratacion-home-ghost">← Volver al sitio</a>
+    </div>
+  </div>
+
+  <section class="press-cover" aria-label="Encabezado press kit">
+    <div class="press-cover-grain" aria-hidden="true"></div>
+    <div class="container press-cover-inner">
+      <p class="press-cover-eyebrow">Press kit</p>
+      <h1 class="press-cover-title">Mafia Tumbada</h1>
+      <p class="press-cover-lede">
+        Corridos tumbados y regional mexicano · Xalapa, Veracruz · Desde 2021
+      </p>
+    </div>
+  </section>
+
+  <section class="section booking-page press-spread">
+    <div class="container">
+      <div class="booking-layout press-editorial">
+        <aside class="booking-sidebar press-sidebar">
+          <span class="section-label">La banda</span>
+          <h2 class="booking-title">
+            Editorial<br /><em>Veracruz noir</em>
+          </h2>
+
+          <p class="booking-intro">
+            La Mafia Tumbada es un grupo de Xalapa, Veracruz, con cuatro años en escena dentro del regional mexicano
+            contemporáneo. Mezclan corridos tumbados y norteño con ocho singles propios y un repertorio en vivo que
+            adaptan a bares, festivales y eventos privados en Veracruz y fuera del estado.
+          </p>
+          <p class="booking-intro">
+            Disponibles para presentaciones con equipo propio y coordinación previa por correo o WhatsApp. Cotización
+            sin compromiso; la fecha se aparta con anticipo acordado en la propuesta formal.
+          </p>
+
+          <div class="press-social-row">
+            <span class="press-social-label">Escucha</span>
+            <a href={bandSocialUrls.spotify} target="_blank" rel="noopener noreferrer">Spotify</a>
+            <span class="press-social-sep">·</span>
+            <a href={bandSocialUrls.appleMusic} target="_blank" rel="noopener noreferrer">Apple Music</a>
+            <span class="press-social-sep">·</span>
+            <a href={bandSocialUrls.youtube} target="_blank" rel="noopener noreferrer">YouTube</a>
+          </div>
+
+          <h3 class="press-rider-heading">Rider técnico (resumen)</h3>
+          <ul class="press-rider-list">
+            <li>Formación estándar del grupo + equipo de sonido propio disponible</li>
+            <li>Espacio mínimo de tarima y toma de corriente — detalle en cotización</li>
+            <li>Montaje y prueba de sonido coordinados previo al show</li>
+          </ul>
+          <p class="press-rider-note">Rider completo y PDF bajo solicitud tras primer contacto.</p>
+
+          {
+            whatsappUrl ? (
+              <div class="booking-whatsapp">
+                <p class="booking-whatsapp-label">¿Prefieres hablar directo?</p>
+                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" class="btn-secondary">
+                  WhatsApp directo
+                </a>
+              </div>
+            ) : null
+          }
+        </aside>
+
+        <div class="press-form-column">
+          <span class="section-label">Cotización</span>
+          <h2 class="press-form-title">Solicitar <em>fecha</em></h2>
+          <p class="booking-intro press-form-lede">
+            Completa el formulario: respondemos en menos de 24 horas hábiles.
+          </p>
+          <BookingForm apiUrl={apiUrl} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section faq-section" aria-labelledby="faq-heading">
+    <div class="container">
+      <span class="section-label">Contrataciones</span>
+      <h2 id="faq-heading" class="section-heading">Preguntas frecuentes</h2>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>¿En cuánto tiempo recibo la cotización?</summary>
+          <p>
+            Respondemos solicitudes en menos de 24 horas hábiles. Incluye fecha tentativa, ciudad y tipo de evento para
+            agilizar la respuesta.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Con cuánta anticipación debo reservar?</summary>
+          <p>
+            Los fines de semana suelen reservarse con 3 a 4 semanas de anticipación. Para fechas pico o foráneas,
+            conviene escribir lo antes posible.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary>¿En qué zonas tocan?</summary>
+          <p>
+            Base en Xalapa, Veracruz: tocan en el estado y en eventos foráneos. La logística y el rider se ajustan según
+            ciudad y venue.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Qué tipos de evento cubren?</summary>
+          <p>
+            Bodas, quinceañeras, bares y antros, festivales, eventos privados, giras y taquilla. Si tu formato no está
+            en la lista, descríbelo en el mensaje.
+          </p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Cómo funciona el anticipo y el pago?</summary>
+          <p>
+            Tras acordar fecha y condiciones se solicita un anticipo para apartar el día; el saldo y la forma de pago se
+            definen en la cotización formal, antes del evento.
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer-bar">
+    <div class="container">
+      <span class="footer-brand">Mafia Tumbada</span>
+      <p class="footer-copy">
+        © {new Date().getFullYear()} · Xalapa, Veracruz · Todos los derechos reservados
+      </p>
+    </div>
+  </footer>
+</MarketingLayout>
+
+<style>
+  .contratacion-orientation {
+    padding-block: 0.65rem 0.5rem;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .contratacion-orientation-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.35rem 1.25rem;
+  }
+
+  .contratacion-orientation-eyebrow {
+    margin-bottom: 0;
+  }
+
+  .contratacion-home-ghost {
+    font-family: var(--ff-body);
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .contratacion-home-ghost:hover {
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .press-cover {
+    position: relative;
+    min-height: min(42vh, 420px);
+    display: flex;
+    align-items: flex-end;
+    padding-block: var(--space-lg);
+    background: var(--bg-sunk);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .press-cover-grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.07;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+
+  .press-cover-inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .press-cover-eyebrow {
+    font-family: var(--ff-body);
+    font-size: var(--fs-eyebrow);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+  }
+
+  .press-cover-title {
+    font-family: var(--ff-display);
+    font-size: var(--fs-h2);
+    font-weight: 700;
+    line-height: var(--lh-tight);
+    letter-spacing: var(--tracking-display);
+    margin: 0 0 0.5rem;
+  }
+
+  .press-cover-lede {
+    font-size: var(--fs-lede);
+    color: var(--text-muted);
+    max-width: 36rem;
+    line-height: var(--lh-body);
+    margin: 0;
+  }
+
+  .press-spread {
+    padding-block: var(--space-lg);
+  }
+
+  .press-editorial.booking-layout {
+    gap: var(--space-lg);
+  }
+
+  .press-sidebar .booking-title {
+    margin-top: 0.25rem;
+  }
+
+  .press-social-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.5rem;
+    font-size: 0.85rem;
+    margin: 1.5rem 0 0;
+    color: var(--text-muted);
+  }
+
+  .press-social-row a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .press-social-row a:hover {
+    color: var(--gold);
+  }
+
+  .press-social-label {
+    width: 100%;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .press-social-sep {
+    opacity: 0.4;
+  }
+
+  .press-rider-heading {
+    font-family: var(--ff-body);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin: 2rem 0 0.75rem;
+    color: var(--gold);
+  }
+
+  .press-rider-list {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--text);
+    opacity: 0.92;
+  }
+
+  .press-rider-list li {
+    margin-bottom: 0.35rem;
+  }
+
+  .press-rider-note {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0.75rem 0 0;
+  }
+
+  .press-form-column {
+    min-width: 0;
+  }
+
+  .press-form-title {
+    font-family: var(--ff-display);
+    font-size: var(--fs-h3);
+    font-weight: 700;
+    line-height: 1.15;
+    margin: 0.35rem 0 0;
+  }
+
+  .press-form-title em {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--gold);
+  }
+
+  .press-form-lede {
+    margin-bottom: 1.25rem;
+  }
+</style>

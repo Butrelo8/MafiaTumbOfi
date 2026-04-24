@@ -13,7 +13,7 @@ export function escapeXml(text: string): string {
 }
 
 /** Path segments after the public origin; `''` = homepage (same URL as `base`, no trailing slash). */
-const INDEXABLE_PATHS = ['', '/booking'] as const
+const INDEXABLE_PATHS = ['', '/contratacion'] as const
 
 /**
  * @param baseUrl Public site base, e.g. `https://example.com` (trailing slash optional; stripped).

@@ -19,6 +19,30 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **Priority:** P2
 **Depends on:** Decision to run more than one API instance/process; do when migrating to more robust hosting.
 
+### Design — change band icon/logo from main section/web.
+
+**What:** Replace current's band logo with the actual one.
+**Why:** It's looks like the band actually has a logo, so the one I created with AI is garbage.
+**Context:** Watching bands Instagram page I looked at the original logo.
+**Solution:** Drop replacement file at `web/public/icon/mafiatumbada.png` (same filename — no code changes needed; already referenced in `web/src/layouts/MarketingLayout.astro:63` and `web/src/pages/index.astro:117`). Source options: (1) ask band manager for transparent-background PNG ≥512×512px; (2) crop logo from Instagram post, upscale with Topaz Gigapixel or Adobe Firefly to ≥512×512px, export as PNG with transparent bg.
+**Done When:** Web page shows band real logo.
+**Effort:** S
+**Priority:** P1
+**Depends on:** Obtaining real logo file from band manager or Instagram.
+
+---
+
+### Mobile — Real device QA on Android mid-range before v2 ship
+
+**What:** Test hero video autoplay, TourTable horizontal layout, ArtworkShelf scroll-snap, and FilmStrip on actual Android device (not devtools emulation). Min breakpoints: 360px, 390px.
+**Why:** Devtools lies. Android autoplay policy, scroll-snap behavior, and video rendering differ from Safari iOS and desktop Chrome. Currently only tested on iPhone.
+**Context:** Found in grill session 2026-04-20. Ship blocker for v2 given Mexico audience is heavily Android mid-range.
+**Solution:** Run `cd web && bun run test:e2e` with Playwright at 360px/390px viewports first (`--project=chromium` with `viewport: { width: 360, height: 780 }`). Then verify on real device or BrowserStack (Chrome Android, Galaxy A-series). Checklist: (1) hero `<video>` has `autoplay muted playsinline` attrs and `<img>` poster visible under `prefers-reduced-motion: reduce`; (2) TourTable has `overflow-x: auto` and no clipped columns at 360px; (3) ArtworkShelf `scroll-snap-type` fires on touch — test swipe in DevTools touch mode; (4) FilmStrip has `overflow: hidden` on parent, no `width: 100vw` bleed causing scroll. Fix overflow with `max-width: 100%` or `overflow-x: hidden` on offending containers. Run `bun run build` after fixes.
+**Done When:** All four components verified at 360px and 390px on Chrome Android; no horizontal overflow; video poster fallback works; issues fixed and `bun run build` green.
+**Effort:** S
+**Priority:** P2
+**Depends on:** feat/desegin-consultation-redo merged
+
 ---
 
 ### Tests — Unit tests for Stripe webhook verification helper
@@ -65,7 +89,7 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **What:** Add Sentry (or similar) for error tracking; ensure logs are checked after each deploy.
 **Why:** Catch production errors and failed deploys early; avoid blind debugging.
 **Context:** Root `**.env.example`** has optional `**SENTRY_DSN`** (API). Wire Sentry in API (Hono) and/or frontend (Astro). **On VPS:** check VPS logs (e.g. systemd/journald or your reverse proxy logs) after deploy. If still on Render/Vercel, check their logs. Same habit either way.
-**Solution:** **(1) API (required for this ticket’s minimum):** Add `**@sentry/bun`** (or `**@sentry/node`** if Bun adapter lags), call `**Sentry.init({ dsn: process.env.SENTRY_DSN, environment: NODE_ENV, tracesSampleRate: 0 … })`** only when `**SENTRY_DSN**` is set, as early as possible in `**src/index.ts**` (before routes). Hook `**src/middleware/error.ts**` (or top-level Hono `**onError**`) to `**Sentry.captureException**` for **5xx** / unexpected errors; use `**beforeSend`** / `**ignoreErrors`** to strip `**Authorization`**, cookies, and known noisy client errors. Set `**SENTRY_DSN**` on **Render** (same service as API). **(2) Web (optional same slice or follow-up):** If SSR errors matter on Vercel, add `**@sentry/astro`** (or server-only `**Sentry.init`** in Astro middleware) with DSN from **Vercel env** — avoid shipping a **public** DSN unless you accept client replay budget. **(3) Process:** Add a short **“After deploy”** subsection to `**DEPLOY.md`**: open Render + Vercel deploy logs, confirm 200 on `**GET /health`** (API) and homepage, then skim **Sentry → Issues** for new spikes in the first 15–30 minutes. Same checklist applies later on a VPS (replace dashboard names with journald / proxy).
+**Solution:** **(1) API (required for this ticket’s minimum):** Add `**@sentry/bun`** (or `**@sentry/node`** if Bun adapter lags), call `**Sentry.init({ dsn: process.env.SENTRY_DSN, environment: NODE_ENV, tracesSampleRate: 0 … })`** only when `**SENTRY_DSN`** is set, as early as possible in `**src/index.ts**` (before routes). Hook `**src/middleware/error.ts**` (or top-level Hono `**onError**`) to `**Sentry.captureException**` for **5xx** / unexpected errors; use `**beforeSend`** / `**ignoreErrors`** to strip `**Authorization`**, cookies, and known noisy client errors. Set `**SENTRY_DSN`** on Render (same service as API). (2) Web (optional same slice or follow-up): If SSR errors matter on Vercel, add `**@sentry/astro**` (or server-only `**Sentry.init`** in Astro middleware) with DSN from **Vercel env** — avoid shipping a **public** DSN unless you accept client replay budget. **(3) Process:** Add a short **“After deploy”** subsection to `**DEPLOY.md`**: open Render + Vercel deploy logs, confirm 200 on `**GET /health`** (API) and homepage, then skim **Sentry → Issues** for new spikes in the first 15–30 minutes. Same checklist applies later on a VPS (replace dashboard names with journald / proxy).
 **Done When:** `**SENTRY_DSN`** documented in `**.env.example`** / `**DEPLOY.md`** as **Render** (and **Vercel** if web wired) secret; API sends at least one **verified** test event to Sentry (e.g. temporary `**throw`** behind a dev-only route or Sentry’s “send test” flow) without logging the DSN; production **5xx** from the global error path appear in Sentry with scrubbed headers; `**DEPLOY.md`** includes the **post-deploy log + Sentry** checklist; `**bun test`** still green (init must no-op when DSN unset in CI).
 **Effort:** S
 **Priority:** P4
@@ -103,12 +127,80 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ---
 
+### Design — `/contratacion` redesign: Veracruz Noir + photo hero behind Press Kit header
+
+**What:** Redesign `/contratacion` to match updated `DESIGN.md` (deeper matte-black surfaces, metallic gold gradient CTAs, burgundy cinematic glow, turquoise demoted to links/focus). Add full-bleed photo/band-image hero behind the Press Kit header block ("Mafia Tumbada / Corridos tumbados y regional mexicano · Xalapa, Veracruz · Desde 2021").
+**Why:** Page currently uses old surface values and generic layout; palette update + photo hero elevates the promoter-first press-kit feel.
+**Context:** `DESIGN.md` updated 2026-04-22 — new tokens (`--bg` `oklch(8%)`, `--bg-sunk` `oklch(5%)`, `--gold-mid`, `--gold-shadow`, `--burgundy-glow`, `--burgundy-hot`). Primary CTA gradient: `linear-gradient(135deg, var(--gold-shadow), var(--gold), var(--gold-mid))`. Burgundy only as `filter: drop-shadow` or `box-shadow`. Turquoise only for link hover + focus rings. Cover photo: use real band photo (ask manager) — drop at `web/public/band/cover.jpg`; fallback is `--bg-sunk` solid canvas. Page lives at `web/src/pages/contratacion.astro`.
+**Solution:**
+1. Update surface tokens in `contratacion.astro` scoped styles — replace any hardcoded `oklch`/hex surface values with `var(--bg)` / `var(--bg-sunk)`.
+2. Wrap existing Press Kit hero block in `<section class="press-hero">` with `position: relative`. Add full-bleed `<img>` (`web/public/band/cover.jpg`, `object-fit: cover`, `loading="eager"`, `fetchpriority="high"`) behind it. Overlay: dark gradient scrim `linear-gradient(to bottom, oklch(5% 0 0 / 0.7), oklch(5% 0 0 / 0.95))` so text stays legible.
+3. Film grain overlay (6% SVG noise, `mix-blend-mode: overlay`) on `.press-hero` only — consistent with `DESIGN.md` decoration rules.
+4. Primary booking CTA: `background: linear-gradient(135deg, var(--gold-shadow), var(--gold), var(--gold-mid))`, dark text, `border-radius: var(--radius-pill)`.
+5. CTA hover: `filter: drop-shadow(0 0 24px var(--burgundy-glow))` — cinematic glow, never flat fill.
+6. Secondary links: `color: var(--accent)` (turquoise) on hover + focus only.
+7. Hairline dividers: `1px solid var(--gold-dim)`.
+8. Fan orientation strip (already present) — verify tokens updated.
+9. `bun run build` green + Lighthouse on `/contratacion` (LCP < 2.5s, CLS < 0.1).
+Plan saved to docs/superpowers/plans/2026-04-22-contratacion-redesign.md.
+**Done When:** `/contratacion` matches Veracruz Noir premium palette; photo hero behind Press Kit header; metallic gold gradient on primary CTA; burgundy cinematic glow on hover; turquoise only on links/focus; `bun run build` green; zero WCAG AA violations on text over photo scrim.
+**Effort:** M
+**Priority:** P1
+**Depends on:** `feat/desegin-consultation-redo` merged (tokens in `marketing-press.css`). Band cover photo from manager (fallback to `--bg-sunk` until available).
+
+---
+
 ## Completed
+
+### Design — change profile pictures of members in integrantes section (2026-04-22)
+
+**What:** Change placeholder images on members/integrantes section.
+**Done When:** Integrantes section show profile pictures. ✅ Already showing.
+
+### Frontend — ArtworkShelf CD cover art (2026-04-21)
+
+**What:** Optional `**cover?: string**` on shelf items; `**ArtworkShelf.astro**` renders `**<img>**` (explicit width/height 80, `**loading="lazy"**`, `**decoding="async"**`) when set, else initials. `**web/src/styles/marketing-press.css**` — `**.artwork-shelf-img**` (`**object-fit: cover**`, `**border-radius: inherit**`). `**web/src/pages/index.astro**` — `**artworkShelfItems**` all six singles get CDN URLs (Spotify oEmbed thumbnails + Apple Music artwork for Corazón).
+**Plan:** `**docs/superpowers/plans/2026-04-21-artwork-shelf-cd-covers.md**`.
+**Done When:** Met — `**cd web && bun run build**` green; `**bun test**` (root) green.
+
+### Design — Code-review fixes (Veracruz Noir / marketing) (2026-04-21)
+
+**What:** Closed P1 review (2026-04-21) on `feat/desegin-consultation-redo`: removed hex fallbacks on **`BookingForm.astro`** / **`gracias.astro`**; **`--color-success`** / **`--color-error`** in **`DESIGN.md`** + **`web/src/styles/marketing-press.css`**; form + budget radii → **`var(--radius-card)`**; **`SOLD OUT`** tag + hydrate + DESIGN localisation note; **`todayIsoDateUtc()`** (`toISOString().slice(0, 10)`) in **`src/routes/tours.ts`**; **`.eyebrow`** → **`var(--tracking-eyebrow)`**; **`is:global`** comment; **`contratacion.astro`** / gracias spacing tokens; Marquee reduced-motion already in **`marketing-press.css`**; expanded **`web/e2e/tours.e2e.ts`** (mocked **`/api/tours/upcoming`** — run Playwright locally after **`playwright install`**).
+**Done When:** Met for code + unit tests + **`web`** build; Lighthouse + axe on **`/`** and **`/contratacion`** remain pre-merge operator checklist per **`DESIGN.md`** §Verification.
+
+### Design — Pre-merge polish (follow-up) (2026-04-21)
+
+**What:** **`BookingForm.astro`** `option:checked` text color **`#0b0b0b`** → **`var(--bg)`**. Confirmed **`.eyebrow`** uses **`var(--tracking-eyebrow)`**; **`contratacion.astro`** has no remaining **`clamp()`** spacing (uses **`var(--space-lg)`** etc.); **`web/e2e/tours.e2e.ts`** already covers empty state, SOLD OUT, hydration mock.
+**Done When:** Code items met; **`DESIGN.md`** §Verification (Lighthouse, Playwright + axe, reduced-motion, breakpoints) still operator-run before merge.
+
+### Analytics — Plausible conversion tracking on booking funnel (2026-04-20)
+
+**What:** Plausible when `**PUBLIC_PLAUSIBLE_DOMAIN**` is set: deferred `**script.js**` + queue stub in `**MarketingLayout.astro**`. Custom events: `**Booking Submit**` on successful booking `**POST**` in `**BookingForm.astro**` (`**trackPlausible**`); `**CTA Click**` / `**target: contratacion**` on `**#hero-cta-contratacion**`; `**Ticket CTA**` / `**venue**` on delegated `**a.tour-ticket-btn**` (venue from `**data-analytics-venue**` on TourTable + hydrate). `**web/.env.example**` documents the env var.
+**Done When:** Code + tests in place; operator enables domain in Plausible and sets env for live dashboard events. Run `**bun test**` and `**bun run build**` in `**web/**` before ship.
+
+### UX — `/contratacion` fan orientation signal (2026-04-20)
+
+**What:** `**Eyebrow**` (“Para promotores y organizadores de eventos”) + ghost link “← Volver al sitio” → `**/**` in a slim strip above the press cover; `**--text-muted**` + small type on link (`**marketing-press.css**` tokens via scoped CSS).
+**Code:** `**web/src/pages/contratacion.astro**`, `**web/src/lib/bookingPageCopy.test.ts**`.
+**Done When:** Met — `**bun test**` green.
+
+### Admin — Lead priority badges + default sort + filters (2026-04-20)
+
+**What:** **Prioridad** column uses chips mapped from stored `**lead_priority**` (`**high**` / `**medium**` / `**low**`): **high** → **`--accent-hot`**, **medium** → **`--gold`**, **low** / unknown → **`--text-muted`**. **`GET /api/admin/bookings`** and admin JSON export order by priority rank then **`createdAt`** desc. Second pill row filters by priority; **`#admin-bookings-toolbar`** scopes active-state toggles so **fechas** pills are unaffected.
+**Code:** `**src/routes/admin.ts**`, `**web/src/pages/admin.astro**`, `**web/src/lib/adminPipelinePageCounts.ts**` + tests (`**adminPipelinePageCounts.test.ts**`, `**adminPageTheme.test.ts**`, `**admin-bookings-pagination.test.ts**`).
+**Done When:** Met — `**bun test**` green.
+
+### Config — Move drip video URL + WhatsApp to env vars (2026-04-20)
+
+**What:** Nurture Email 2 uses **`DRIP_VIDEO_URL`** from env (code fallback only when unset so local/tests never ship empty links). Email 3 primary CTA uses **`PUBLIC_WHATSAPP_URL`** (same as public site; already env-driven).
+**Why:** Band manager can fix link rot (dead YouTube, rotated WhatsApp) on Render without redeploy.
+**Code:** `**src/lib/dripEmails.ts**`, `**dripEmails.test.ts**`, `**.env.example**`, `**DEPLOY.md**` (Render env table + drip §5).
+**Done When:** Met — `**bun test**` green.
 
 ### Admin — Bulk delete all booking records (danger zone) (2026-04-11)
 
 **What:** Admin-only hard delete of **all** rows in `**bookings`** (including soft-deleted) in one action; optional dry-run count; phrase confirmation; env gate in production like export.
-**Code:** `**POST /api/admin/bookings/delete-all`** in `**src/routes/admin.ts`**; `**src/lib/adminDeleteAllBookings.ts`**, `**adminDeleteAllBookings.test.ts**`; `**src/routes/admin-delete-all-bookings.test.ts**`; `**src/routes/admin-auth.test.ts**` (non-admin 403); relay `**web/src/pages/admin/delete-all-bookings.ts**`; `**web/src/pages/admin.astro`** (zona peligrosa + modal + banner `**bulkDeleted`**); `**adminPageTheme.test.ts**`. `**.env.example**` `**ALLOW_ADMIN_DELETE_ALL_BOOKINGS**`; `**README.md**`, `**DEPLOY.md**`, `**CHANGELOG.md**`, `**DECISIONS.md**`.
+**Code:** `**POST /api/admin/bookings/delete-all`** in `**src/routes/admin.ts`**; `**src/lib/adminDeleteAllBookings.ts`**, `**adminDeleteAllBookings.test.ts**`; `**src/routes/admin-delete-all-bookings.test.ts**`; `**src/routes/admin-auth.test.ts**` (non-admin 403); relay `**web/src/pages/admin/delete-all-bookings.ts**`; `**web/src/pages/admin.astro`** (zona peligrosa + modal + banner `**bulkDeleted`**); `**adminPageTheme.test.ts`**. `**.env.example**` `**ALLOW_ADMIN_DELETE_ALL_BOOKINGS**`; `**README.md**`, `**DEPLOY.md**`, `**CHANGELOG.md**`, `**DECISIONS.md**`.
 Done When: Met — UI + API + tests + docs; `**bun test**` green.
 
 ### DB — Turso (libsql) for production SQLite (2026-04-11)
@@ -119,7 +211,7 @@ Code: `**src/db/detect.ts**`, `**detect.test.ts**`, `**src/db/index.ts**`, `**sc
 
 ### Auth — Admin via `ADMIN_CLERK_ID` (no first-user heuristic) (2026-04-11)
 
-**What:** Replaced “first `users` row is admin” SQL with `**ADMIN_CLERK_ID`** (trimmed) matching Clerk `**sub`** for `**is_admin`** on insert; when env is set, `**getOrCreateUser**` reconciles `**is_admin**` on read. Migration `**drizzle/0010_admin_explicit_clerk_ids.sql**` for known legacy `**clerk_id**` rows.
+**What:** Replaced “first `users` row is admin” SQL with `**ADMIN_CLERK_ID`** (trimmed) matching Clerk `**sub`** for `**is_admin`** on insert; when env is set, `**getOrCreateUser`** reconciles `**is_admin**` on read. Migration `**drizzle/0010_admin_explicit_clerk_ids.sql**` for known legacy `**clerk_id**` rows.
 **Why:** Second signup could steal admin; registration order is not a security boundary.
 **Code:** `**src/lib/adminClerkConfig.ts`**, `**adminClerkConfig.test.ts`**; `**src/lib/users.ts**`, `**users.test.ts**`; `**src/middleware/adminAuth.ts**` comment. `**.env.example**`, `**render.yaml**`, `**DEPLOY.md**`, `**README.md**`, `**CHANGELOG.md**`, `**DECISIONS.md**`.
 Done When: Set `**ADMIN_CLERK_ID**` on API (local + Render) to the band Clerk user id; only that user passes admin middleware; other accounts stay non-admin; `**bun test**` green.
@@ -127,7 +219,7 @@ Done When: Set `**ADMIN_CLERK_ID**` on API (local + Render) to the band Clerk us
 ### Product roadmap — Lead generation & booking (P1 closed) (2026-04-11)
 
 **What:** Umbrella for prioritized funnel + light CRM vertical slices **(1)–(4)** (budget already on booking form; marketing, post-submit, admin triage, drip).
-**Done When (met):** All four slices recorded below; production path `**/`** → `**/booking`** → `**/booking/gracias`** + WhatsApp CTA → `**/admin**` (lead score, priority, `**pipeline_status**`); no parallel spreadsheet for core triage; `**bun test**` green end-to-end.
+**Done When (met):** All four slices recorded below; production path `**/`** → `**/booking`** → `**/booking/gracias`** + WhatsApp CTA → `**/admin`** (lead score, priority, `**pipeline_status**`); no parallel spreadsheet for core triage; `**bun test**` green end-to-end.
 
 - **(1)** **Marketing — Video hero + packages + conversion blocks** (2026-04-11) — this section.
 - **(2)** **Booking UX — Thank-you page + WhatsApp follow-up CTA** (2026-04-11) — this section.
@@ -137,7 +229,7 @@ Done When: Set `**ADMIN_CLERK_ID**` on API (local + Render) to the band Clerk us
 
 ### Content / SEO — Homepage & booking copy pass (2026-04-11)
 
-- `**web/src/pages/index.astro`:** `**hero-blurb`** (band + contrataciones + cotización sin compromiso), `**trust-strip`** (`**.trust-grid`** / `**.trust-item**` + SVG icons) after stats bar; scoped `**.hero-blurb**`, `**.sr-only**`, trust strip layout. Hero CTA unchanged (`**#booking**` / material prensa).
+- `**web/src/pages/index.astro`:** `**hero-blurb`** (band + contrataciones + cotización sin compromiso), `**trust-strip`** (`**.trust-grid`** / `**.trust-item`** + SVG icons) after stats bar; scoped `**.hero-blurb**`, `**.sr-only**`, trust strip layout. Hero CTA unchanged (`**#booking**` / material prensa).
 - `**web/src/pages/booking.astro`:** `**booking-intro`**, `**h2.form-section-heading`** (“Datos de contacto” / “Detalles del evento”), `**faq-section**` with five `**<details>**` (respuesta, anticipación, cobertura, tipos de evento, anticipo/pago). Form script + `**POST**` URL untouched.
 - **Tests:** `**homepageHero.test.ts`** (blurb + trust order), `**bookingPageCopy.test.ts`**. `**CHANGELOG.md`** [Unreleased].
 
@@ -148,7 +240,7 @@ Done When: Set `**ADMIN_CLERK_ID**` on API (local + Render) to the band Clerk us
 
 ### UI — Booking thank-you: YouTube embed instead of local video (2026-04-11)
 
-- `**web/src/pages/booking/gracias.astro**` — lazy **YouTube** iframe `**HTA31yUX41A`** (16:9, ~600px); `**prefers-reduced-motion: reduce`** → link to watch URL; no `**hero.mp4`** on gracias (`**hero.mp4**` stays on homepage only).
+- `**web/src/pages/booking/gracias.astro**` — lazy **YouTube** iframe `**HTA31yUX41A`** (16:9, ~600px); `**prefers-reduced-motion: reduce`** → link to watch URL; no `**hero.mp4`** on gracias (`**hero.mp4`** stays on homepage only).
 - `**web/src/lib/bookingThanksPresentation.ts**` + `**bookingThanksPresentation.test.ts**` — embed/watch URLs + iframe title.
 - `**web/e2e/booking.e2e.ts**` — asserts embed `**src**`. `**CHANGELOG.md**` [Unreleased].
 
@@ -156,9 +248,9 @@ Done When: Set `**ADMIN_CLERK_ID**` on API (local + Render) to the band Clerk us
 
 - **DB:** `**drizzle/0009_booking_drip.sql`** — `**drip2_due_at`**, `**drip2_sent_at`**, `**drip3_due_at**`, `**drip3_sent_at**` on `**bookings**`; `**src/db/schema.ts**`.
 - **Schedule:** `**src/lib/dripSchedule.ts`** + `**dripSchedule.test.ts`** — defaults **+24h** / **+72h** from booking; env `**DRIP_EMAIL_2_DELAY_HOURS`**, `**DRIP_EMAIL_3_DELAY_HOURS`**.
-- **Content:** `**src/lib/dripEmails.ts`** + `**dripEmails.test.ts`** — Email 2 video `**https://www.youtube.com/watch?v=7Sx0yDjGoq0`**; Email 3 urgency + `**/booking**` (+ optional `**PUBLIC_WHATSAPP_URL**`).
-- **Worker:** `**src/lib/dripProcessor.ts`** + `**dripProcessor.test.ts`** — only `**status === 'sent'`**; idempotent `**drip*_sent_at**` after Resend OK; `**DRIP_BATCH_SIZE**`.
-- **API:** `**POST /api/booking`** sets `**createdAt`** + due columns (`**src/routes/booking.ts`**). `**POST /api/internal/process-drip**` (`**src/routes/internal.ts**`, `**internal.test.ts**`) — Bearer `**DRIP_CRON_SECRET**`.
+- **Content:** `**src/lib/dripEmails.ts`** + `**dripEmails.test.ts`** — Email 2 video via **`DRIP_VIDEO_URL`** (see **Config — Move drip video URL + WhatsApp to env vars** above); Email 3 urgency + `**/booking`** (+ optional `**PUBLIC_WHATSAPP_URL**`).
+- **Worker:** `**src/lib/dripProcessor.ts`** + `**dripProcessor.test.ts`** — only `**status === 'sent'`**; idempotent `**drip*_sent_at`** after Resend OK; `**DRIP_BATCH_SIZE**`.
+- **API:** `**POST /api/booking`** sets `**createdAt`** + due columns (`**src/routes/booking.ts`**). `**POST /api/internal/process-drip`** (`**src/routes/internal.ts**`, `**internal.test.ts**`) — Bearer `**DRIP_CRON_SECRET**`.
 - **Deploy:** `**render.yaml`** — `**mto-drip-cron`** `**curl`**s `**DRIP_PROCESS_URL`**; web `**DRIP_CRON_SECRET**`. `**.env.example**`, `**DEPLOY.md**`, `**DECISIONS.md**`, `**CHANGELOG.md**`.
 
 ### Booking UX — Thank-you page + WhatsApp follow-up CTA (2026-04-11)
@@ -192,14 +284,14 @@ Done When: Set `**ADMIN_CLERK_ID**` on API (local + Render) to the band Clerk us
 ### API — DRY origins + `/users/me` success envelope (2026-04-11)
 
 - `**src/lib/allowedOrigins.ts`** — raw origin list (localhost + `FRONTEND_URL` / `STAGING_URL` / `PRODUCTION_URL`).
-- `**src/index.ts**` — `expandCorsAllowedOrigins(rawAllowedOrigins)` for CORS allowlist (unchanged behavior vs inline array).
+- `**src/index.ts`** — `expandCorsAllowedOrigins(rawAllowedOrigins)` for CORS allowlist (unchanged behavior vs inline array).
 - `**src/middleware/auth.ts**` — Clerk `**authorizedParties**` imports same module.
 - `**src/routes/users.ts**` — `**GET /api/users/me**` → `**successResponse(c, user)**` (same JSON shape `**{ data }**`).
 - `**CHANGELOG.md**` [Unreleased]. `**bun test**` green (163).
 
 ### Booking — Workflow statuses / `pipeline_status` (2026-04-10)
 
-- **DB:** `**drizzle/0008_booking_pipeline_status.sql`** — `**pipeline_status`** on `**bookings`** (default `**new`**); `**src/db/schema.ts**`.
+- **DB:** `**drizzle/0008_booking_pipeline_status.sql`** — `**pipeline_status`** on `**bookings`** (default `**new`**); `**src/db/schema.ts`**.
 - **API:** `**POST /api/booking`** sets `**pipelineStatus: 'new'`**; `**PATCH /api/admin/bookings/:id`** — `**{ pipelineStatus }**` only; `**bookings.status**` unchanged (resend still `**pending**` only). `**src/lib/bookingPipeline.ts**` + `**bookingPipeline.test.ts**`.
 - **Web:** `**web/src/pages/admin.astro`** — **Seguimiento** column + legend (**Correo** vs **Seguimiento**); `**web/src/pages/admin/update-pipeline.ts`** relay (Clerk server-side).
 - **Tests:** `**src/routes/admin-bookings-pipeline.test.ts`** (SQLite + migrations; dynamic booking id). `**src/routes/booking.test.ts`** — default `**pipelineStatus`**. `**src/routes/admin-auth.test.ts`** — non-admin **PATCH** **403**.

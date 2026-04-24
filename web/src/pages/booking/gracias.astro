@@ -67,11 +67,11 @@ const description =
               </a>
             ) : (
               <p class="thanks-whatsapp-fallback">
-                Escríbenos por el formulario de contacto en <a href="/booking">Contrataciones</a> si necesitas otro canal.
+                Escríbenos por el formulario de contacto en <a href="/contratacion">Contrataciones</a> si necesitas otro canal.
               </p>
             )
           }
-          <a href="/booking" class="btn-secondary">Nueva solicitud</a>
+          <a href="/contratacion" class="btn-secondary">Nueva solicitud</a>
           <a href="/" class="btn-secondary">Volver al inicio</a>
         </div>
       </div>
@@ -90,13 +90,13 @@ const description =
 
 <style>
   .thanks-page {
-    padding-block: clamp(3rem, 8vw, 5rem);
+    padding-block: var(--space-lg);
     min-height: 50vh;
   }
 
   .thanks-checking-text {
     font-size: 0.95rem;
-    color: var(--muted, #7a7267);
+    color: var(--muted);
   }
 
   .thanks-content[hidden] {
@@ -104,7 +104,7 @@ const description =
   }
 
   .thanks-title {
-    font-family: var(--ff-display, 'Cormorant Garamond', Georgia, serif);
+    font-family: var(--ff-display);
     font-size: clamp(2rem, 5vw, 3rem);
     font-weight: 700;
     line-height: 1.1;
@@ -114,14 +114,14 @@ const description =
   .thanks-message {
     font-size: 1.05rem;
     line-height: 1.65;
-    color: var(--text, #ede8df);
+    color: var(--text);
     margin: 0 0 1rem;
     max-width: 40rem;
   }
 
   .thanks-sub {
     font-size: 0.88rem;
-    color: var(--muted, #7a7267);
+    color: var(--muted);
     margin: 0 0 2rem;
     max-width: 36rem;
   }
@@ -135,8 +135,8 @@ const description =
     aspect-ratio: 16 / 9;
     width: 100%;
     max-width: 600px;
-    border-radius: 0.375rem;
-    border: 1px solid var(--border, #262420);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
     background: #000;
     overflow: hidden;
   }
@@ -152,7 +152,7 @@ const description =
     display: none;
     margin: 0.75rem 0 0;
     font-size: 0.85rem;
-    color: var(--muted, #7a7267);
+    color: var(--muted);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -173,7 +173,7 @@ const description =
   }
 
   .thanks-video-link {
-    color: var(--gold, #c49a2a);
+    color: var(--gold);
     text-decoration: underline;
     text-underline-offset: 2px;
   }
@@ -187,13 +187,13 @@ const description =
 
   .thanks-whatsapp-fallback {
     font-size: 0.9rem;
-    color: var(--muted, #7a7267);
+    color: var(--muted);
     max-width: 32rem;
     margin: 0;
   }
 
   .thanks-whatsapp-fallback a {
-    color: var(--gold, #c49a2a);
+    color: var(--gold);
     text-decoration: underline;
   }
 </style>
@@ -219,7 +219,7 @@ const description =
   const stored = parseBookingThanksStored(raw)
 
   if (!stored || !messageEl || !content || !checking) {
-    window.location.replace('/booking')
+    window.location.replace('/contratacion')
   } else {
     const { confirmation } = stored
     sessionStorage.removeItem(BOOKING_THANKS_SESSION_KEY)
