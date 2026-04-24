@@ -16,4 +16,10 @@ describe('normalizePublicApiBaseUrl', () => {
   test('leaves host without slash unchanged', () => {
     expect(normalizePublicApiBaseUrl('https://api.example.com')).toBe('https://api.example.com')
   })
+
+  test('strips trailing /api so callers do not produce /api/api/...', () => {
+    expect(normalizePublicApiBaseUrl('http://localhost:3001/api')).toBe('http://localhost:3001')
+    expect(normalizePublicApiBaseUrl('http://localhost:3001/api/')).toBe('http://localhost:3001')
+    expect(normalizePublicApiBaseUrl('https://render.example.com/api')).toBe('https://render.example.com')
+  })
 })

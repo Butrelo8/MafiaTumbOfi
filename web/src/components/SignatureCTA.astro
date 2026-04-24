@@ -1,0 +1,8 @@
+---
+interface Props {
+  href?: string
+}
+const { href = '/contratacion' } = Astro.props
+---
+
+<a href={href} class="signature-cta">Contrátanos.</a>

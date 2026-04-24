@@ -1,0 +1,27 @@
+---
+const frames = [
+  { src: '/band/band-1.jpg', alt: 'Mafia Tumbada en tarima — imagen 1 de 3' },
+  { src: '/band/band-2.jpg', alt: 'Mafia Tumbada en tarima — imagen 2 de 3' },
+  { src: '/band/band-3.jpg', alt: 'Mafia Tumbada en tarima — imagen 3 de 3' },
+]
+---
+
+<section class="film-strip" aria-label="Detrás de cámaras">
+  <div class="film-strip-inner">
+    {
+      frames.map((f) => (
+        <div class="film-strip-frame">
+          <img
+            src={f.src}
+            alt={f.alt}
+            class="film-strip-img"
+            loading="lazy"
+            decoding="async"
+            width="560"
+            height="420"
+          />
+        </div>
+      ))
+    }
+  </div>
+</section>

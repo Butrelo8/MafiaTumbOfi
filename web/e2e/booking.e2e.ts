@@ -16,7 +16,7 @@ test.describe('public booking flow', () => {
       })
     })
 
-    await page.goto('/booking')
+    await page.goto('/contratacion')
     await page.getByLabel(/Nombre/i).fill('Playwright smoke')
     await page.getByLabel(/^Email/i).fill('pw-smoke@example.com')
     await page.getByLabel(/Ciudad \/ Estado/i).fill('Xalapa, Veracruz')
@@ -50,7 +50,7 @@ test.describe('public booking flow', () => {
       })
     })
 
-    await page.goto('/booking')
+    await page.goto('/contratacion')
     await page.getByLabel(/Nombre/i).fill('Playwright pending')
     await page.getByLabel(/^Email/i).fill('pw-pending@example.com')
     await page.getByLabel(/Ciudad \/ Estado/i).fill('Xalapa, Veracruz')
@@ -63,9 +63,9 @@ test.describe('public booking flow', () => {
     )
   })
 
-  test('thank-you page without sessionStorage redirects to /booking', async ({ page }) => {
+  test('thank-you page without sessionStorage redirects to /contratacion', async ({ page }) => {
     await page.goto('/booking/gracias')
-    await page.waitForURL((url) => url.pathname === '/booking', { timeout: 15_000 })
+    await page.waitForURL((url) => url.pathname === '/contratacion', { timeout: 15_000 })
   })
 
   test('POST /api/booking 400 shows error status (API mocked)', async ({ page }) => {
@@ -87,7 +87,7 @@ test.describe('public booking flow', () => {
       })
     })
 
-    await page.goto('/booking')
+    await page.goto('/contratacion')
     await page.getByLabel(/Nombre/i).fill('Playwright smoke')
     await page.getByLabel(/^Email/i).fill('pw-smoke@example.com')
     await page.getByLabel(/Ciudad \/ Estado/i).fill('Xalapa, Veracruz')

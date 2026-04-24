@@ -1,0 +1,378 @@
+---
+import {
+  BOOKING_BUDGET_EMPTY_OPTION_LABEL,
+  BOOKING_BUDGET_HINTS_WITH_EMPTY,
+  BOOKING_BUDGET_OPTIONS,
+} from '../../../src/lib/bookingBudget'
+
+interface Props {
+  apiUrl: string
+}
+const { apiUrl } = Astro.props
+---
+
+<div class="booking-form-wrap">
+  <form
+    id="booking-form"
+    class="booking-form"
+    novalidate
+    data-api-url={apiUrl}
+    data-budget-hints={JSON.stringify(BOOKING_BUDGET_HINTS_WITH_EMPTY)}
+  >
+    <div class="hidden" aria-hidden="true">
+      <label for="website">Website</label>
+      <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
+    </div>
+    <h2 class="form-section-heading">Datos de contacto</h2>
+    <div class="field">
+      <label for="name" class="field-label">Nombre *</label>
+      <input id="name" name="name" type="text" required placeholder="Tu nombre completo" class="field-input" />
+    </div>
+    <div class="field">
+      <label for="email" class="field-label">Email *</label>
+      <input id="email" name="email" type="email" required placeholder="correo@ejemplo.com" class="field-input" />
+    </div>
+    <div class="field">
+      <label for="phone" class="field-label">Teléfono</label>
+      <input id="phone" name="phone" type="tel" placeholder="10 dígitos" class="field-input" />
+    </div>
+    <h2 class="form-section-heading">Detalles del evento</h2>
+    <div class="field-row">
+      <div class="field">
+        <label for="eventDate" class="field-label">Fecha del evento</label>
+        <input id="eventDate" name="eventDate" type="date" class="field-input" />
+      </div>
+      <div class="field">
+        <label for="city" class="field-label">Ciudad / Estado *</label>
+        <input id="city" name="city" type="text" required placeholder="Xalapa, Veracruz" class="field-input" />
+      </div>
+    </div>
+    <div class="field">
+      <label for="eventType" class="field-label">Tipo de evento *</label>
+      <select id="eventType" name="eventType" required class="field-input field-select">
+        <option value="" disabled selected>Selecciona una opción</option>
+        <option value="boda">Boda</option>
+        <option value="quinceañera">Quinceañera</option>
+        <option value="bar_antro">Bar / Antro</option>
+        <option value="festival">Festival</option>
+        <option value="evento_privado">Evento privado</option>
+        <option value="gira">Gira / Taquilla</option>
+        <option value="otro">Otro</option>
+      </select>
+    </div>
+    <div class="field field-budget">
+      <label for="budget" class="field-label">
+        Presupuesto orientativo <span class="field-optional">(opcional)</span>
+      </label>
+      <p id="budget-hint" class="field-hint">
+        Solo una referencia en pesos mexicanos (MXN). Si aún no lo tienes claro, elige &quot;Lo vemos después&quot; — lo
+        afinamos contigo sin compromiso.
+      </p>
+      <select id="budget" name="budget" class="field-input field-select" aria-describedby="budget-hint">
+        <option value="">{BOOKING_BUDGET_EMPTY_OPTION_LABEL}</option>
+        {BOOKING_BUDGET_OPTIONS.map(({ value, label }) => (
+          <option value={value}>{label}</option>
+        ))}
+      </select>
+      <p id="budget-context" class="budget-context budget-context--inactive" role="status" aria-live="polite" aria-atomic="true" />
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="duration" class="field-label">Duración del show</label>
+        <select id="duration" name="duration" class="field-input field-select">
+          <option value="" disabled selected>Selecciona</option>
+          <option value="1h">1 hora</option>
+          <option value="2h">2 horas</option>
+          <option value="3h_mas">3+ horas</option>
+          <option value="no_definido">Por definir</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="showType" class="field-label">Tipo de show</label>
+        <select id="showType" name="showType" class="field-input field-select">
+          <option value="" disabled selected>Selecciona</option>
+          <option value="corridos">Corridos tumbados</option>
+          <option value="mix">Mix (corridos + norteño)</option>
+          <option value="personalizado">Show personalizado</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="attendees" class="field-label">Asistentes aproximados</label>
+        <select id="attendees" name="attendees" class="field-input field-select">
+          <option value="" disabled selected>Estimado</option>
+          <option value="menos_100">Menos de 100</option>
+          <option value="100_300">100 – 300</option>
+          <option value="300_500">300 – 500</option>
+          <option value="500_1000">500 – 1,000</option>
+          <option value="mas_1000">Más de 1,000</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">¿El venue tiene sonido?</label>
+        <div class="radio-group">
+          <label class="radio-label"><input type="radio" name="venueSound" value="si" class="radio-input" /> Sí</label>
+          <label class="radio-label"><input type="radio" name="venueSound" value="no" class="radio-input" /> No</label>
+          <label class="radio-label">
+            <input type="radio" name="venueSound" value="no_se" class="radio-input" checked /> No sé
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label for="message" class="field-label">Detalles adicionales</label>
+      <textarea id="message" name="message" rows="4" placeholder="Horario tentativo, tema del evento, requerimientos especiales…" class="field-input" />
+    </div>
+    <button type="submit" id="submit-btn" class="btn-primary submit-btn">Enviar solicitud</button>
+  </form>
+  <p id="form-status" class="form-status" aria-live="polite" />
+</div>
+
+<style is:global>
+  /* is:global: descendant selectors must pierce Astro’s scoped attribute; form markup lives under page wrapper. */
+  .booking-form-wrap .booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    color-scheme: dark;
+  }
+  .booking-form-wrap .form-section-heading {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.5;
+    margin: 1rem 0 0.25rem;
+    border: none;
+    line-height: 1.2;
+    color: var(--text);
+  }
+  .booking-form-wrap .booking-form > .form-section-heading:first-of-type {
+    margin-top: 0;
+  }
+  .booking-form-wrap .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .booking-form-wrap .field-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    opacity: 0.95;
+  }
+  .booking-form-wrap .field-optional {
+    font-weight: 400;
+    font-size: 0.8rem;
+    opacity: 0.65;
+  }
+  .booking-form-wrap .field-hint {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--muted);
+    margin: 0 0 0.5rem;
+    max-width: 40rem;
+  }
+  .booking-form-wrap .field-budget {
+    margin-block: 0.35rem 0.65rem;
+  }
+  .booking-form-wrap .budget-context {
+    margin: 0.5rem 0 0;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--text);
+    background: color-mix(in srgb, var(--gold) 12%, transparent);
+    border-radius: var(--radius-card);
+    border-left: 3px solid var(--gold);
+  }
+  .booking-form-wrap .budget-context--inactive {
+    display: none;
+  }
+  .booking-form-wrap .field-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 0.6rem 0.75rem;
+    font-size: 0.95rem;
+    background: transparent;
+    color: inherit;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+  }
+  .booking-form-wrap .field-input:focus {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 4px;
+    border-color: var(--gold-dim);
+  }
+  .booking-form-wrap .field-select {
+    cursor: pointer;
+    appearance: none;
+    background-color: var(--surface);
+    color: var(--text);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c49a2a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2.25rem;
+  }
+  .booking-form-wrap .field-select option {
+    background-color: var(--surface2);
+    color: var(--text);
+  }
+  .booking-form-wrap .field-select option:checked {
+    background-color: var(--accent);
+    color: var(--bg);
+  }
+  .booking-form-wrap .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 480px) {
+    .booking-form-wrap .field-row {
+      grid-template-columns: 1fr;
+    }
+    .booking-form-wrap .field-select {
+      min-height: 2.75rem;
+    }
+  }
+  .booking-form-wrap .radio-group {
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+    padding: 0.6rem 0;
+  }
+  .booking-form-wrap .radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    color: var(--text);
+  }
+  .booking-form-wrap .radio-input {
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .booking-form-wrap .submit-btn {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+  }
+  .booking-form-wrap .form-status {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    min-height: 1.25rem;
+  }
+  .booking-form-wrap .form-status[data-state='success'] {
+    color: var(--color-success);
+  }
+  .booking-form-wrap .form-status[data-state='error'] {
+    color: var(--color-error);
+  }
+  .booking-form-wrap .form-status[data-state='loading'] {
+    opacity: 0.6;
+  }
+  .booking-form-wrap .hidden {
+    display: none !important;
+  }
+</style>
+
+<script>
+  import {
+    BOOKING_THANKS_SESSION_KEY,
+    normalizeBookingConfirmation,
+  } from '../lib/bookingThanksSession'
+  import { trackPlausible } from '../lib/plausibleClient'
+
+  const form = document.getElementById('booking-form') as HTMLFormElement | null
+  if (!form) throw new Error('booking-form missing')
+
+  const apiUrl = form.dataset.apiUrl ?? ''
+  let budgetHints: Record<string, string> = {}
+  try {
+    budgetHints = JSON.parse(form.dataset.budgetHints || '{}') as Record<string, string>
+  } catch {
+    budgetHints = {}
+  }
+
+  const formEl = form
+  const status = document.getElementById('form-status')
+  const btn = document.getElementById('submit-btn') as HTMLButtonElement | null
+  const budgetSelect = document.getElementById('budget')
+  const budgetContext = document.getElementById('budget-context')
+
+  function syncBudgetHint() {
+    if (!budgetSelect || !budgetContext) return
+    const key = (budgetSelect as HTMLSelectElement).value
+    const line = budgetHints[key] || ''
+    if (line) {
+      budgetContext.textContent = line
+      budgetContext.classList.remove('budget-context--inactive')
+    } else {
+      budgetContext.textContent = ''
+      budgetContext.classList.add('budget-context--inactive')
+    }
+  }
+
+  budgetSelect?.addEventListener('change', syncBudgetHint)
+  syncBudgetHint()
+
+  formEl.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    if (!btn) return
+    btn.disabled = true
+    btn.textContent = 'Enviando…'
+    setStatus('loading', 'Enviando…')
+
+    const fd = new FormData(formEl)
+    const body = {
+      name: fd.get('name'),
+      email: fd.get('email'),
+      phone: fd.get('phone') || undefined,
+      eventDate: fd.get('eventDate') || undefined,
+      city: fd.get('city') || undefined,
+      eventType: fd.get('eventType') || undefined,
+      attendees: fd.get('attendees') || undefined,
+      venueSound: fd.get('venueSound') || undefined,
+      duration: fd.get('duration') || undefined,
+      showType: fd.get('showType') || undefined,
+      budget: fd.get('budget') || undefined,
+      message: fd.get('message') || undefined,
+      website: fd.get('website') || undefined,
+    }
+
+    try {
+      const res = await fetch(`${apiUrl}/api/booking`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const data = await res.json().catch(() => ({}))
+
+      if (res.ok) {
+        const confirmation = data?.data?.confirmation ?? data?.confirmation
+        const normalized = normalizeBookingConfirmation(confirmation)
+        sessionStorage.setItem(BOOKING_THANKS_SESSION_KEY, JSON.stringify({ confirmation: normalized }))
+        formEl.reset()
+        syncBudgetHint()
+        trackPlausible('Booking Submit')
+        window.location.assign('/booking/gracias')
+        return
+      } else {
+        setStatus('error', data?.error?.message || `Error ${res.status}. Vuelve a intentar.`)
+      }
+    } catch {
+      setStatus('error', 'Error de conexión. Revisa tu internet e intenta de nuevo.')
+    } finally {
+      btn.disabled = false
+      btn.textContent = 'Enviar solicitud'
+    }
+  })
+
+  function setStatus(state: string, text: string) {
+    if (!status) return
+    status.textContent = text
+    status.dataset.state = state
+  }
+</script>

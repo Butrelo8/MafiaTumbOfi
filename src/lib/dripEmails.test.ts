@@ -1,11 +1,14 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
-import { buildDripEmail2, buildDripEmail3, DRIP_EMAIL_2_VIDEO_URL } from './dripEmails'
+import { buildDripEmail2, buildDripEmail3 } from './dripEmails'
+
+const DEFAULT_DRIP_VIDEO_URL = 'https://www.youtube.com/watch?v=7Sx0yDjGoq0'
 
 afterEach(() => {
   delete process.env.PUBLIC_SITE_URL
   delete process.env.PRODUCTION_URL
   delete process.env.FRONTEND_URL
   delete process.env.PUBLIC_WHATSAPP_URL
+  delete process.env.DRIP_VIDEO_URL
 })
 
 beforeEach(() => {
@@ -19,10 +22,19 @@ describe('buildDripEmail2', () => {
     process.env.PUBLIC_SITE_URL = 'https://example.com'
     const e = buildDripEmail2('Ana')
     expect(e.subject).toContain('Mafia Tumbada')
-    expect(e.html).toContain(DRIP_EMAIL_2_VIDEO_URL)
-    expect(e.text).toContain(DRIP_EMAIL_2_VIDEO_URL)
+    expect(e.html).toContain(DEFAULT_DRIP_VIDEO_URL)
+    expect(e.text).toContain(DEFAULT_DRIP_VIDEO_URL)
     expect(e.html).toContain('Ana')
     expect(e.text).toContain('https://example.com/booking')
+  })
+
+  test('uses DRIP_VIDEO_URL when set', () => {
+    process.env.PUBLIC_SITE_URL = 'https://example.com'
+    process.env.DRIP_VIDEO_URL = 'https://www.youtube.com/watch?v=customid'
+    const e = buildDripEmail2('Ana')
+    expect(e.html).toContain('https://www.youtube.com/watch?v=customid')
+    expect(e.text).toContain('https://www.youtube.com/watch?v=customid')
+    expect(e.html).not.toContain(DEFAULT_DRIP_VIDEO_URL)
   })
 })
 

@@ -5,10 +5,7 @@ const { name, role, image, featured = false, instagram = "#", youtube = "#" } = 
 
 <div class={`member-card ${featured ? "featured" : ""}`} data-aos="fade-up">
   <div class="member-image">
-    <!-- Usamos img estándar porque las imágenes vienen de una URL externa (ui-avatars).
-         Si luego agregas imágenes locales (.jpg), puedes usar <Image /> de "astro:assets"
-         importándolas directamente en el componente o data. -->
-    <img src={image} alt={name} loading="lazy" width="90" height="90" />
+    <img src={image} alt={name} loading="lazy" width="180" height="180" decoding="async" />
   </div>
 
   <span class="member-role">{role}</span>

@@ -4,6 +4,7 @@ import '../styles/marketing-press.css'
 import { Show, UserButton, SignInButton, SignUpButton } from '@clerk/astro/components'
 import Seo from '../components/Seo.astro'
 import { bandSocialUrls } from '../data/socials'
+import { normalizePlausibleDataDomain } from '../lib/plausibleClient'
 import { showPressAssetsSection } from '../lib/showPressAssets'
 
 interface Props {
@@ -16,6 +17,18 @@ interface Props {
 }
 
 const { title, description, canonicalUrl, robots } = Astro.props
+
+const navItems = [
+  { href: '/', label: 'Inicio' },
+  { href: '/#redes', label: 'Redes' },
+  { href: '/#musica', label: 'Música' },
+  { href: '/#grupo', label: 'Integrantes' },
+  ...(showPressAssetsSection ? [{ href: '/#press', label: 'Press kit' }] : []),
+  { href: '/#paquetes', label: 'Paquetes' },
+  { href: '/contratacion', label: 'Contrataciones' },
+]
+
+const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN)
 ---
 <!DOCTYPE html>
 <html lang="es">
@@ -27,15 +40,30 @@ const { title, description, canonicalUrl, robots } = Astro.props
       title={title}
       description={description}
       canonicalUrl={canonicalUrl}
-      themeColor="#0b0b0b"
+      themeColor="#0a0a0c"
       robots={robots}
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300&family=Jost:wght@300;400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    {
+      plausibleDataDomain ? (
+        <>
+          <script is:inline define:vars={{ plausibleDataDomain }}>
+            window.plausible =
+              window.plausible ||
+              function () {
+                ;(window.plausible.q = window.plausible.q || []).push(arguments)
+              }
+          </script>
+          <script defer data-domain={plausibleDataDomain} src="https://plausible.io/js/script.js"
+          ></script>
+        </>
+      ) : null
+    }
   </head>
   <body class="marketing-body">
 
@@ -82,34 +110,78 @@ const { title, description, canonicalUrl, robots } = Astro.props
     </header>
 
     <!-- ─── FULLSCREEN MENU ────────────────────────────────── -->
-    <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
-      <button class="menu-close-btn" id="menu-close-btn" aria-label="Cerrar menú">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    <div
+      class="mobile-menu"
+      id="mobile-menu"
+      aria-hidden="true"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Menú principal"
+    >
+      <div class="menu-grain" aria-hidden="true"></div>
+
+      <button
+        type="button"
+        class="menu-close-btn"
+        id="menu-close-btn"
+        aria-label="Cerrar menú"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
 
-      <nav class="menu-nav" aria-label="Menú principal">
-        <a href="/" class="menu-link">Inicio</a>
-        <a href="/#redes" class="menu-link">Redes</a>
-        <a href="/#musica" class="menu-link">Música</a>
-        <a href="/#grupo" class="menu-link">Integrantes</a>
-        {showPressAssetsSection ? <a href="/#press" class="menu-link">Press kit</a> : null}
-        <a href="/#paquetes" class="menu-link">Paquetes</a>
-        <a href="/booking" class="menu-link">Contrataciones</a>
-        <Show when="signed-in">
-          <a href="/admin" class="menu-link">Admin</a>
-        </Show>
-      </nav>
+      <div class="menu-grid">
+        <nav class="menu-numbers" aria-label="Navegación">
+          <ol class="menu-nav">
+            {navItems.map((item, i) => (
+              <li class="menu-item" style={`--i:${i}`}>
+                <a href={item.href} class="menu-link">
+                  <span class="menu-num">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="menu-label">{item.label}</span>
+                </a>
+              </li>
+            ))}
+            <Show when="signed-in">
+              <li class="menu-item" style={`--i:${navItems.length}`}>
+                <a href="/admin" class="menu-link">
+                  <span class="menu-num">{String(navItems.length + 1).padStart(2, '0')}</span>
+                  <span class="menu-label">Admin</span>
+                </a>
+              </li>
+            </Show>
+          </ol>
+        </nav>
 
-      <div class="menu-auth">
-        <Show when="signed-out">
-          <SignInButton mode="modal" />
-          <SignUpButton mode="modal" />
-        </Show>
-        <Show when="signed-in">
-          <UserButton />
-        </Show>
+        <aside class="menu-meta">
+          <p class="menu-eyebrow">Mafia Tumbada · Xalapa, Ver.</p>
+          <p class="menu-tagline">
+            Corridos tumbados<br /><em>desde 2021.</em>
+          </p>
+
+          <nav class="menu-socials" aria-label="Redes sociales">
+            <a href={bandSocialUrls.instagram} target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href={bandSocialUrls.tiktok} target="_blank" rel="noopener noreferrer">TikTok</a>
+            <a href={bandSocialUrls.spotify} target="_blank" rel="noopener noreferrer">Spotify</a>
+            <a href={bandSocialUrls.youtube} target="_blank" rel="noopener noreferrer">YouTube</a>
+          </nav>
+
+          <a href="/contratacion" class="menu-cta">
+            <span class="menu-cta-eyebrow">Contrataciones</span>
+            <span class="menu-cta-label">Contrátanos<em>.</em></span>
+          </a>
+
+          <div class="menu-auth">
+            <Show when="signed-out">
+              <SignInButton mode="modal" />
+              <SignUpButton mode="modal" />
+            </Show>
+            <Show when="signed-in">
+              <UserButton />
+            </Show>
+          </div>
+        </aside>
       </div>
     </div>
 
@@ -119,20 +191,23 @@ const { title, description, canonicalUrl, robots } = Astro.props
 
     <script>
       const hamburgerBtn = document.getElementById('hamburger-btn');
-      const closeBtn = document.getElementById('menu-close-btn');
       const menu = document.getElementById('mobile-menu');
 
       function openMenu() {
         menu?.classList.add('is-open');
         menu?.setAttribute('aria-hidden', 'false');
+        hamburgerBtn?.classList.add('is-open');
         hamburgerBtn?.setAttribute('aria-expanded', 'true');
+        hamburgerBtn?.setAttribute('aria-label', 'Cerrar menú');
         document.body.style.overflow = 'hidden';
       }
 
       function closeMenu() {
         menu?.classList.remove('is-open');
         menu?.setAttribute('aria-hidden', 'true');
+        hamburgerBtn?.classList.remove('is-open');
         hamburgerBtn?.setAttribute('aria-expanded', 'false');
+        hamburgerBtn?.setAttribute('aria-label', 'Abrir menú');
         document.body.style.overflow = '';
       }
 
@@ -149,8 +224,15 @@ const { title, description, canonicalUrl, robots } = Astro.props
       window.addEventListener('scroll', checkScroll);
       checkScroll();
 
-      hamburgerBtn?.addEventListener('click', openMenu);
-      closeBtn?.addEventListener('click', closeMenu);
+      hamburgerBtn?.addEventListener('click', () => {
+        if (menu?.classList.contains('is-open')) closeMenu();
+        else openMenu();
+      });
+
+      const menuCloseBtn = document.getElementById('menu-close-btn');
+      menuCloseBtn?.addEventListener('click', () => {
+        closeMenu();
+      });
 
       // Clerk modals render on `body`; this overlay is z-index 200 — close it after SignIn/SignUp/UserButton
       // so the modal is not covered (otherwise the flow looks "stuck" / unrelated page copy can show through).
@@ -166,6 +248,19 @@ const { title, description, canonicalUrl, robots } = Astro.props
       // Close on Escape
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeMenu();
+      });
+
+      document.getElementById('hero-cta-contratacion')?.addEventListener('click', () => {
+        window.plausible?.('CTA Click', { props: { target: 'contratacion' } });
+      });
+
+      document.body.addEventListener('click', (e) => {
+        const t = e.target;
+        if (!(t instanceof Element)) return;
+        const a = t.closest('a.tour-ticket-btn');
+        if (!a) return;
+        const venue = (a.getAttribute('data-analytics-venue') || 'unknown').trim().slice(0, 120);
+        window.plausible?.('Ticket CTA', { props: { venue } });
       });
     </script>
   </body>

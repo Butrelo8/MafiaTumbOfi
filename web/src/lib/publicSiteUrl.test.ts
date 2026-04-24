@@ -40,8 +40,8 @@ describe('pressKitCanonical', () => {
 })
 
 describe('bookingCanonical', () => {
-  test('appends /booking to resolved base', () => {
-    expect(bookingCanonical('https://x.com/', 'http://local')).toBe('https://x.com/booking')
+  test('appends /contratacion to resolved base', () => {
+    expect(bookingCanonical('https://x.com/', 'http://local')).toBe('https://x.com/contratacion')
   })
 })
 

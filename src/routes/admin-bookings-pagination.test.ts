@@ -117,6 +117,51 @@ describe('admin bookings list + export pagination', () => {
     expect(body.data.hasMore).toBe(false)
   })
 
+  test('GET /api/admin/bookings orders by lead priority (high first) then createdAt desc', async () => {
+    await testDb.delete(bookings)
+    const tOld = new Date('2024-01-01T12:00:00Z')
+    const tNew = new Date('2025-06-15T12:00:00Z')
+    await testDb.insert(bookings).values({
+      name: 'LowRow',
+      email: 'low@t.com',
+      status: 'pending',
+      leadPriority: 'low',
+      createdAt: tNew,
+    })
+    await testDb.insert(bookings).values({
+      name: 'HighOld',
+      email: 'ho@t.com',
+      status: 'pending',
+      leadPriority: 'high',
+      createdAt: tOld,
+    })
+    await testDb.insert(bookings).values({
+      name: 'HighNew',
+      email: 'hn@t.com',
+      status: 'pending',
+      leadPriority: 'high',
+      createdAt: tNew,
+    })
+    await testDb.insert(bookings).values({
+      name: 'MedRow',
+      email: 'med@t.com',
+      status: 'pending',
+      leadPriority: 'medium',
+      createdAt: tNew,
+    })
+    const res = await app.request('/api/admin/bookings?limit=10&offset=0', {
+      headers: { Authorization: 'Bearer valid_token' },
+    })
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.data.bookings.map((b: { name: string }) => b.name)).toEqual([
+      'HighNew',
+      'HighOld',
+      'MedRow',
+      'LowRow',
+    ])
+  })
+
   test('GET /api/admin/bookings 400 for negative offset', async () => {
     const res = await app.request('/api/admin/bookings?offset=-1', {
       headers: { Authorization: 'Bearer valid_token' },

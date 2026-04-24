@@ -24,12 +24,12 @@ export function pressKitCanonical(
   return `${resolvePublicBaseUrl(publicSiteUrl, fallbackOrigin)}/press-kit`
 }
 
-/** Canonical URL for the booking (contrataciones) page. */
+/** Canonical URL for the booking / press-kit page (`/contratacion`). */
 export function bookingCanonical(
   publicSiteUrl: string | undefined,
   fallbackOrigin: string,
 ): string {
-  return `${resolvePublicBaseUrl(publicSiteUrl, fallbackOrigin)}/booking`
+  return `${resolvePublicBaseUrl(publicSiteUrl, fallbackOrigin)}/contratacion`
 }
 
 /** Canonical URL for the post-submit thank-you page (`noindex` in layout). */

@@ -12,11 +12,24 @@ export function setClerkClientForTesting(
   clerkClientOverride = client
 }
 
+function clerkPublishableKeyFromEnv(): string | undefined {
+  const fromPk = process.env.CLERK_PUBLISHABLE_KEY?.trim()
+  if (fromPk) return fromPk
+  return process.env.PUBLIC_CLERK_PUBLISHABLE_KEY?.trim() || undefined
+}
+
 export function getClerkClient() {
   if (clerkClientOverride) return clerkClientOverride
+  const secretKey = process.env.CLERK_SECRET_KEY?.trim()
+  const publishableKey = clerkPublishableKeyFromEnv()
+  if (secretKey && !publishableKey) {
+    throw new Error(
+      'Clerk publishable key is missing on the API. Set CLERK_PUBLISHABLE_KEY (or PUBLIC_CLERK_PUBLISHABLE_KEY) in the root .env — use the same publishable key as web/.env PUBLIC_CLERK_PUBLISHABLE_KEY. See .env.example.',
+    )
+  }
   return createClerkClient({
-    secretKey: process.env.CLERK_SECRET_KEY,
-    publishableKey: process.env.CLERK_PUBLISHABLE_KEY ?? process.env.PUBLIC_CLERK_PUBLISHABLE_KEY,
+    secretKey,
+    publishableKey,
   })
 }
 

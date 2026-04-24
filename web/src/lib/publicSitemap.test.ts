@@ -8,10 +8,10 @@ describe('escapeXml', () => {
 })
 
 describe('buildPublicSitemapXml', () => {
-  test('includes homepage and booking only', () => {
+  test('includes homepage and contratacion only', () => {
     const xml = buildPublicSitemapXml('https://mafiatumbada.com')
     expect(xml).toContain('<loc>https://mafiatumbada.com</loc>')
-    expect(xml).toContain('<loc>https://mafiatumbada.com/booking</loc>')
+    expect(xml).toContain('<loc>https://mafiatumbada.com/contratacion</loc>')
     expect(xml).not.toContain('/admin')
     expect(xml).toContain('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"')
   })
@@ -19,6 +19,6 @@ describe('buildPublicSitemapXml', () => {
   test('strips trailing slash on base', () => {
     const xml = buildPublicSitemapXml('https://example.com/')
     expect(xml).toContain('<loc>https://example.com</loc>')
-    expect(xml).toContain('<loc>https://example.com/booking</loc>')
+    expect(xml).toContain('<loc>https://example.com/contratacion</loc>')
   })
 })

@@ -21,7 +21,7 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     command: `bun run dev -- --host 127.0.0.1 --port ${e2eSitePort}`,
-    url: `http://127.0.0.1:${e2eSitePort}/booking`,
+    url: `http://127.0.0.1:${e2eSitePort}/contratacion`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {
