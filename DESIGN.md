@@ -147,7 +147,7 @@ Each lives in `web/src/components/` and must respect the tokens above.
 4. `**<Marquee>`** — single-use per page, CSS `@keyframes` translate, pausable on hover
 5. `**<FilmStrip>`** — 3-photo BTS row, bleed to page edges
 6. `**<PressKitSpread>`** — 2-col editorial for `/contratacion`, feels InDesign
-7. `**<Eyebrow>**` — ALL CAPS Inter, gold, tracked `0.18em`
+7. `**<Eyebrow>`** — ALL CAPS Inter, gold, tracked `0.18em`
 8. `**<SignatureCTA>**` — mono-italic "Contrátanos." placeholder; upgrade to handwritten SVG later
 
 ## Decoration
