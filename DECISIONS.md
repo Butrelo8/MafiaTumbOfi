@@ -7,127 +7,127 @@ Updated automatically by the AI agent when decisions are made.
 
 ## 2026-04-11 — Admin bulk hard-delete: env gate + confirm phrase
 
-**Context:** Operators need a one-shot empty of **`bookings`** for demos and test resets; per-row soft-delete is slow and leaves hidden rows in the table.
-**Decision:** **`POST /api/admin/bookings/delete-all`** accepts **`{ dryRun: true }`** (count only) or **`{ confirm: "DELETE_ALL_BOOKINGS" }`** to run a transaction that counts then **`delete(bookings)`** (all rows, including soft-deleted). Default-deny on production-like hosts unless **`ALLOW_ADMIN_DELETE_ALL_BOOKINGS=true`** or **`NODE_ENV=development`**, mirroring **`ALLOW_ADMIN_BOOKING_EXPORT`**. Success emits one **`console.log`** audit JSON line (**`admin_bookings_delete_all`**, **`deletedCount`**, **`userId`**, **`sessionId`**).
+**Context:** Operators need a one-shot empty of `**bookings`** for demos and test resets; per-row soft-delete is slow and leaves hidden rows in the table.
+**Decision:** `**POST /api/admin/bookings/delete-all`** accepts `**{ dryRun: true }**` (count only) or `**{ confirm: "DELETE_ALL_BOOKINGS" }**` to run a transaction that counts then `**delete(bookings)**` (all rows, including soft-deleted). Default-deny on production-like hosts unless `**ALLOW_ADMIN_DELETE_ALL_BOOKINGS=true**` or `**NODE_ENV=development**`, mirroring `**ALLOW_ADMIN_BOOKING_EXPORT**`. Success emits one `**console.log**` audit JSON line (`**admin_bookings_delete_all**`, `**deletedCount**`, `**userId**`, `**sessionId**`).
 **Alternatives considered:** Document SQL-only cleanup (rejected — no in-app audit, easy to run wrong DB). Soft-delete entire table (rejected — spec asked hard delete for true empty / demo speed).
 **Why not the others:** Same env pattern as export keeps prod safe; explicit phrase + POST avoids accidental clears.
 
 ## 2026-04-12 — Admin: Drizzle `bookings` columns for migrations 0011 / 0012
 
-**Context:** SQL migrations **`0011_booking_internal_notes.sql`** and **`0012_booking_soft_delete.sql`** were merged, but **`src/db/schema.ts`** omitted **`internal_notes`** and **`deleted_at`**, so **`bookingSoftDeleteFilter`** and PATCH relays could not type-check against real columns and production behavior depended on raw SQL only.
-**Decision:** Add **`internalNotes`** and **`deletedAt`** to the Drizzle **`bookings`** table definition; wire **`admin.ts`** (list/export counts, PATCH notes, DELETE soft-delete, resend/PATCH guards) and **`admin.astro`** to the existing **`web/src/lib/*`** helpers and Astro relays.
-**Alternatives considered:** Hard-delete only (rejected — operators asked to hide mistakes without losing audit trail). Separate **`internal_notes`** API resource (rejected — same **`PATCH /api/admin/bookings/:id`** keeps one surface for relays).
+**Context:** SQL migrations `**0011_booking_internal_notes.sql`** and `**0012_booking_soft_delete.sql**` were merged, but `**src/db/schema.ts**` omitted `**internal_notes**` and `**deleted_at**`, so `**bookingSoftDeleteFilter**` and PATCH relays could not type-check against real columns and production behavior depended on raw SQL only.
+**Decision:** Add `**internalNotes`** and `**deletedAt**` to the Drizzle `**bookings**` table definition; wire `**admin.ts**` (list/export counts, PATCH notes, DELETE soft-delete, resend/PATCH guards) and `**admin.astro**` to the existing `**web/src/lib/***` helpers and Astro relays.
+**Alternatives considered:** Hard-delete only (rejected — operators asked to hide mistakes without losing audit trail). Separate `**internal_notes`** API resource (rejected — same `**PATCH /api/admin/bookings/:id**` keeps one surface for relays).
 **Why not the others:** One PATCH body supports pipeline + notes without extra routes; soft-delete stays operator-only and recoverable via SQL.
 
 ## 2026-04-11 — Production DB: Turso (libsql) instead of Render persistent disk
 
-**Context:** The API used **`bun:sqlite`** with **`DB_PATH`** on a Render **1 GB persistent disk** (`/data/sqlite.db`). That works but adds disk cost, ties DB to one instance, and Shell/SCP access is paywalled.
-**Decision:** Production uses **Turso** via **`@libsql/client`** + **`drizzle-orm/libsql`**, with **`TURSO_DATABASE_URL`** and **`TURSO_AUTH_TOKEN`** on Render (**no** **`DB_PATH`** on the web service). **`detectDbMode()`** in **`src/db/detect.ts`**: remote Turso when both Turso vars set and **`DB_PATH`** unset; **embedded replica** when Turso vars + **`DB_PATH`** set (local dev); **`bun:sqlite`** when Turso vars unset (tests, offline). **`scripts/run-migration.ts`** and **`scripts/check-db.ts`** support both drivers. **`render.yaml`** drops the disk block and documents Turso env vars.
-**Alternatives considered:** Keep Render disk only (rejected for this cut — ongoing cost / single-box coupling). **Neon / Supabase Postgres** (deferred — dialect + migration churn vs current **`sqlite-core`** schema). **VPS SQLite** (separate TODOS card).
-**Why not the others:** libsql keeps the existing **`drizzle/*.sql`** and **`sqlite-core`** schema; Turso is the smallest jump from file SQLite.
+**Context:** The API used `**bun:sqlite`** with `**DB_PATH**` on a Render **1 GB persistent disk** (`/data/sqlite.db`). That works but adds disk cost, ties DB to one instance, and Shell/SCP access is paywalled.
+**Decision:** Production uses **Turso** via `**@libsql/client`** + `**drizzle-orm/libsql**`, with `**TURSO_DATABASE_URL**` and `**TURSO_AUTH_TOKEN**` on Render (**no** `**DB_PATH`** on the web service). `**detectDbMode()**` in `**src/db/detect.ts**`: remote Turso when both Turso vars set and `**DB_PATH**` unset; **embedded replica** when Turso vars + `**DB_PATH`** set (local dev); `**bun:sqlite**` when Turso vars unset (tests, offline). `**scripts/run-migration.ts**` and `**scripts/check-db.ts**` support both drivers. `**render.yaml**` drops the disk block and documents Turso env vars.
+**Alternatives considered:** Keep Render disk only (rejected for this cut — ongoing cost / single-box coupling). **Neon / Supabase Postgres** (deferred — dialect + migration churn vs current `**sqlite-core`** schema). **VPS SQLite** (separate TODOS card).
+**Why not the others:** libsql keeps the existing `**drizzle/*.sql`** and `**sqlite-core**` schema; Turso is the smallest jump from file SQLite.
 
 ## 2026-04-11 — Admin: `ADMIN_CLERK_ID` env instead of first-user heuristic
 
-**Context:** The API used a SQL subquery so the first inserted **`users`** row became **`is_admin`**, which granted admin to whoever signed up second in a misordered or multi-tester environment.
-**Decision:** **`ADMIN_CLERK_ID`** on the API (trimmed) must match the Clerk **`sub`** for **`is_admin`** on insert. When the env is set, **`getOrCreateUser`** updates existing rows so **`is_admin`** matches the env (no Render Shell required on free tier). A one-time migration **`0010_admin_explicit_clerk_ids.sql`** fixes known **`clerk_id`** values in existing DBs.
-**Alternatives considered:** Clerk **`publicMetadata.role`** only (deferred — extra Dashboard/webhook ops). Manual SQL on production disk only (rejected — free tier has no Shell; env sync covers drift).
+**Context:** The API used a SQL subquery so the first inserted `**users`** row became `**is_admin**`, which granted admin to whoever signed up second in a misordered or multi-tester environment.
+**Decision:** `**ADMIN_CLERK_ID`** on the API (trimmed) must match the Clerk `**sub**` for `**is_admin**` on insert. When the env is set, `**getOrCreateUser**` updates existing rows so `**is_admin**` matches the env (no Render Shell required on free tier). A one-time migration `**0010_admin_explicit_clerk_ids.sql**` fixes known `**clerk_id**` values in existing DBs.
+**Alternatives considered:** Clerk `**publicMetadata.role`** only (deferred — extra Dashboard/webhook ops). Manual SQL on production disk only (rejected — free tier has no Shell; env sync covers drift).
 **Why not the others:** Single env var is easy to rotate with the band account and is testable without Clerk metadata writes.
 
 ## 2026-04-11 — Admin UI: `MarketingLayout` instead of light `Layout`
 
-**Context:** **`/admin`** used **`Layout.astro`** (white header, Tailwind-ish light shell) while the public site uses **`MarketingLayout`** + **`marketing-press.css`** dark theme — internal page felt broken/off-brand.
-**Decision:** Render admin with **`MarketingLayout`**, same **`footer-bar`** pattern as **`/booking`**, scoped table/banner/pagination styles using existing CSS variables (**`--surface`**, **`--gold`**, etc.), **`robots="noindex,nofollow"`** always on admin. Export uses **`btn-secondary`**.
-**Alternatives considered:** Only restyle **`Layout.astro`** children while keeping light global chrome (rejected — still mismatched header). Duplicate marketing header markup inside admin (rejected — drift).
+**Context:** `**/admin`** used `**Layout.astro**` (white header, Tailwind-ish light shell) while the public site uses `**MarketingLayout**` + `**marketing-press.css**` dark theme — internal page felt broken/off-brand.
+**Decision:** Render admin with `**MarketingLayout`**, same `**footer-bar**` pattern as `**/booking**`, scoped table/banner/pagination styles using existing CSS variables (`**--surface**`, `**--gold**`, etc.), `**robots="noindex,nofollow"**` always on admin. Export uses `**btn-secondary**`.
+**Alternatives considered:** Only restyle `**Layout.astro`** children while keeping light global chrome (rejected — still mismatched header). Duplicate marketing header markup inside admin (rejected — drift).
 **Why not the others:** One layout component keeps nav, fonts, and Clerk controls aligned with the rest of the marketing surface.
 
 ## 2026-04-11 — Clerk `authorizedParties`: expand www ↔ apex (match CORS)
 
-**Context:** Production users on **`https://www.mafiatumbada.com`** could sign in (Clerk on Astro) but **`GET /api/admin/bookings`** returned **401** because the API passed only raw env URLs into **`authenticateRequest({ authorizedParties })`**, while CORS already used **`expandCorsAllowedOrigins`**. Vercel logs showed **`admin.astro`** list fetch **`status:401`** and rapid **307** loops; Clerk sometimes logged handshake JWT expiry during the storm.
-**Decision:** Export **`clerkAuthorizedParties`** from **`src/lib/allowedOrigins.ts`** as **`expandCorsAllowedOrigins(allowedOrigins)`**, include **`PUBLIC_SITE_URL`** in the raw list when set, and pass **`clerkAuthorizedParties`** from **`src/middleware/auth.ts`**.
-**Alternatives considered:** Require operators to set both apex and www explicitly in env (rejected — easy to misconfigure). Remove **`redirectToSignIn` on API 401** in **`admin.astro`** only (rejected — masks real auth failures).
-**Why not the others:** One expansion pipeline matches **`DEPLOY.md`** guidance and **`corsOrigins.ts`** behavior.
+**Context:** Production users on `**https://www.mafiatumbada.com`** could sign in (Clerk on Astro) but `**GET /api/admin/bookings**` returned **401** because the API passed only raw env URLs into `**authenticateRequest({ authorizedParties })`**, while CORS already used `**expandCorsAllowedOrigins**`. Vercel logs showed `**admin.astro**` list fetch `**status:401**` and rapid **307** loops; Clerk sometimes logged handshake JWT expiry during the storm.
+**Decision:** Export `**clerkAuthorizedParties`** from `**src/lib/allowedOrigins.ts**` as `**expandCorsAllowedOrigins(allowedOrigins)**`, include `**PUBLIC_SITE_URL**` in the raw list when set, and pass `**clerkAuthorizedParties**` from `**src/middleware/auth.ts**`.
+**Alternatives considered:** Require operators to set both apex and www explicitly in env (rejected — easy to misconfigure). Remove `**redirectToSignIn` on API 401** in `**admin.astro`** only (rejected — masks real auth failures).
+**Why not the others:** One expansion pipeline matches `**DEPLOY.md`** guidance and `**corsOrigins.ts**` behavior.
 
 ## 2026-04-11 — Booking nurture drip: Resend + columns + Render cron → internal HTTP
 
 **Context:** Post-confirmation nurture (Email 2 “how we sound” + video, Email 3 urgency) must be **idempotent**, **testable without network**, and compatible with **SQLite on the API Web Service disk** on Render.
-**Decision:** Persist **`drip2_due_at` / `drip2_sent_at` / `drip3_due_at` / `drip3_sent_at`** on **`bookings`**. Only process rows where **`bookings.status === 'sent'`** (customer got transactional confirmation). **`processDripEmails`** runs inside the API, sends via **`getResend()`**, sets **`drip*_sent_at` only after Resend success**. **`POST /api/internal/process-drip`** is gated by **`Authorization: Bearer $DRIP_CRON_SECRET`**. A separate Render **`type: cron`** service (**`mto-drip-cron`**) runs **`curl`** to **`DRIP_PROCESS_URL`** (full URL to that route) every 15 minutes — **no second container with DB disk**. Delays default **24h / 72h**, overridable via env.
+**Decision:** Persist `**drip2_due_at` / `drip2_sent_at` / `drip3_due_at` / `drip3_sent_at`** on `**bookings**`. Only process rows where `**bookings.status === 'sent'**` (customer got transactional confirmation). `**processDripEmails**` runs inside the API, sends via `**getResend()**`, sets `**drip*_sent_at` only after Resend success**. `**POST /api/internal/process-drip`** is gated by `**Authorization: Bearer $DRIP_CRON_SECRET**`. A separate Render `**type: cron**` service (`**mto-drip-cron**`) runs `**curl**` to `**DRIP_PROCESS_URL**` (full URL to that route) every 15 minutes — **no second container with DB disk**. Delays default **24h / 72h**, overridable via env.
 **Alternatives considered:** Render cron process running SQL against `DB_PATH` (rejected — cron job has **no access** to the web service’s mounted SQLite volume). **N8N on VPS** (deferred — TODOS kept as optional migration path). **Resend-only `scheduled_at`** without DB markers (rejected — harder to prove idempotency and retry semantics in one place).
 **Why not the others:** Row-level sent markers + secret-gated in-process worker matches existing Resend patterns (`setResendForTesting`) and keeps a single source of truth on the booking row.
 
 ## 2026-04-11 — Booking thank-you: `sessionStorage` + `/booking/gracias`
 
-**Context:** After **`POST /api/booking`** succeeds, promoters should land on a dedicated thank-you screen (video + WhatsApp) without overloading **`/booking`** or exposing confirmation state in the URL.
-**Decision:** Stable route **`/booking/gracias`** (`bookingThanksCanonical` in **`publicSiteUrl.ts`**). On success, client writes **`sessionStorage`** key **`mto_booking_thanks`** with JSON **`{ confirmation: 'sent' | 'pending' | 'default' }`** (normalized from API), then **`location.assign('/booking/gracias')`**. Thank-you page script: if parse fails or key missing → **`location.replace('/booking')`**; on success, fill copy (same three strings as before), then **`sessionStorage.removeItem`** immediately so **refresh or bookmark** does not show a stale thank-you without a new submit; **direct visits** without payload also bounce to **`/booking`**. Page uses **`MarketingLayout`** with **`robots="noindex,nofollow"`** (passed to **`Seo`**). WhatsApp CTA only when **`PUBLIC_WHATSAPP_URL`** is set.
+**Context:** After `**POST /api/booking`** succeeds, promoters should land on a dedicated thank-you screen (video + WhatsApp) without overloading `**/booking**` or exposing confirmation state in the URL.
+**Decision:** Stable route `**/booking/gracias`** (`bookingThanksCanonical` in `**publicSiteUrl.ts**`). On success, client writes `**sessionStorage**` key `**mto_booking_thanks**` with JSON `**{ confirmation: 'sent' | 'pending' | 'default' }**` (normalized from API), then `**location.assign('/booking/gracias')**`. Thank-you page script: if parse fails or key missing → `**location.replace('/booking')**`; on success, fill copy (same three strings as before), then `**sessionStorage.removeItem**` immediately so **refresh or bookmark** does not show a stale thank-you without a new submit; **direct visits** without payload also bounce to `**/booking`**. Page uses `**MarketingLayout**` with `**robots="noindex,nofollow"**` (passed to `**Seo**`). WhatsApp CTA only when `**PUBLIC_WHATSAPP_URL**` is set.
 **Alternatives considered:** Thank-you state only in URL query (rejected — shareable/leaky). Server session cookie (rejected — extra API surface for static marketing host).
-**Why not the others:** **`sessionStorage`** is same-origin, tab-scoped, and clears naturally when the tab closes; **`noindex`** keeps organic focus on **`/booking`**.
+**Why not the others:** `**sessionStorage`** is same-origin, tab-scoped, and clears naturally when the tab closes; `**noindex**` keeps organic focus on `**/booking**`.
 
 ## 2026-04-11 — Homepage marketing blocks: typed `web/src/data/*` modules
 
 **Context:** `/` needed **repertoire**, **testimonials**, and **packages** sections plus booking **urgency** copy without new backend or CMS.
-**Decision:** Add **`web/src/data/repertoire.ts`**, **`testimonials.ts`**, and **`packages.ts`** — exported typed arrays (same pattern as **`members.ts`** / **`socials.ts`**). **`index.astro`** maps over them; styles live in **`marketing-press.css`**. Placeholder testimonials and package bullets until the band replaces copy.
-**Alternatives considered:** Inline all strings in **`index.astro`** only (rejected — noisy, harder to review). Headless CMS (deferred — no operational need yet).
+**Decision:** Add `**web/src/data/repertoire.ts`**, `**testimonials.ts**`, and `**packages.ts**` — exported typed arrays (same pattern as `**members.ts**` / `**socials.ts**`). `**index.astro**` maps over them; styles live in `**marketing-press.css**`. Placeholder testimonials and package bullets until the band replaces copy.
+**Alternatives considered:** Inline all strings in `**index.astro`** only (rejected — noisy, harder to review). Headless CMS (deferred — no operational need yet).
 **Why not the others:** Keeps markup thin and edits localized to data files.
 
 ## 2026-04-11 — Shared SEO head: `Seo.astro` + URL helpers
 
-**Context:** **`MarketingLayout.astro`** already had partial Open Graph tags; **`Layout.astro`** (admin) had only **`<title>`** / description, so link previews and parity were inconsistent.
-**Decision:** Add **`web/src/components/Seo.astro`** with shared **OG + Twitter Card** tags, **`theme-color`**, **`og:image`** (absolute URL via **`absoluteAssetUrl(pageCanonical, '/icon/mafiatumbada.png')`**), optional **`robots`** override, and env **`PUBLIC_ALLOW_INDEXING=false`** → **`noindex,nofollow`**. **`adminCanonical()`** in **`publicSiteUrl.ts`** supplies admin canonical. Marketing uses **`theme-color`** **`#0b0b0b`**; app shell uses **`#ffffff`** default.
+**Context:** `**MarketingLayout.astro`** already had partial Open Graph tags; `**Layout.astro**` (admin) had only `**<title>**` / description, so link previews and parity were inconsistent.
+**Decision:** Add `**web/src/components/Seo.astro`** with shared **OG + Twitter Card** tags, `**theme-color`**, `**og:image**` (absolute URL via `**absoluteAssetUrl(pageCanonical, '/icon/mafiatumbada.png')**`), optional `**robots**` override, and env `**PUBLIC_ALLOW_INDEXING=false**` → `**noindex,nofollow**`. `**adminCanonical()**` in `**publicSiteUrl.ts**` supplies admin canonical. Marketing uses `**theme-color**` `**#0b0b0b**`; app shell uses `**#ffffff**` default.
 **Alternatives considered:** Duplicate meta blocks in each layout (rejected — drift). Nuxt-style `@astrojs/seo` integration (deferred — small surface; custom partial is enough).
-**Why not the others:** One partial keeps OG/Twitter/locale/site_name aligned with **`canonicalUrl`** passed from existing page helpers.
+**Why not the others:** One partial keeps OG/Twitter/locale/site_name aligned with `**canonicalUrl`** passed from existing page helpers.
 
 ## 2026-04-10 — Bookings: `status` vs `pipeline_status` (two axes)
 
-**Context:** Operators want light CRM triage (`new` / `contacted` / `closed`) without breaking confirmation email semantics already stored in **`bookings.status`** (`pending` \| `sent` \| `failed`).
-**Decision:** Keep **`bookings.status`** strictly for **email delivery / confirmation** (POST booking, resend, admin “Correo” legend). Add **`bookings.pipeline_status`** (`new` \| `contacted` \| `closed`, default **`new`**) for **sales follow-up** only. Admin updates pipeline via **`PATCH /api/admin/bookings/:id`** with body **`{ pipelineStatus }`**; resend confirmation remains gated on **`status === 'pending'`** only.
-**Alternatives considered:** Overload **`status`** with combined values (rejected — breaks resend and existing admin copy). Separate **`sales_status`** table (rejected — unnecessary join for current volume).
-**Why not the others:** Two columns keep transactional state and human triage independent; export/list use **`select()`** so **`pipelineStatus`** appears alongside **`status`**.
+**Context:** Operators want light CRM triage (`new` / `contacted` / `closed`) without breaking confirmation email semantics already stored in `**bookings.status`** (`pending`  `sent`  `failed`).
+**Decision:** Keep `**bookings.status`** strictly for **email delivery / confirmation** (POST booking, resend, admin “Correo” legend). Add `**bookings.pipeline_status`** (`new`  `contacted`  `closed`, default `**new**`) for **sales follow-up** only. Admin updates pipeline via `**PATCH /api/admin/bookings/:id`** with body `**{ pipelineStatus }**`; resend confirmation remains gated on `**status === 'pending'**` only.
+**Alternatives considered:** Overload `**status`** with combined values (rejected — breaks resend and existing admin copy). Separate `**sales_status**` table (rejected — unnecessary join for current volume).
+**Why not the others:** Two columns keep transactional state and human triage independent; export/list use `**select()`** so `**pipelineStatus**` appears alongside `**status**`.
 
 ## 2026-04-10 — Booking lead score frozen at insert
 
 **Context:** Operators want a stable queue rank (`lead_score` + `lead_priority`) without past leads jumping when weights are tuned, and without scattering scoring `if` chains across routes.
-**Decision:** Add **`computeBookingLeadScore`** in **`src/lib/bookingLeadScore.ts`** (weights + city local/foraneo reuse **`PRICE_CONSTANTS`** from **`estimatedPriceRange.ts`**; budget ranks from **`bookingBudget.ts`**). Persist **`lead_score`** (0–1000) and **`lead_priority`** (`low` \| `medium` \| `high`) on **`POST /api/booking`** only. **No** automatic recompute on read or admin list. Optional future: `PATCH` override + `lead_score_rule_version` column if audits need it.
-**Alternatives considered:** Recompute on every **`GET /api/admin/bookings`** (rejected — history would shift when constants change). Single `priority` enum without numeric score (rejected — score enables finer client-side sort and future thresholds).
+**Decision:** Add `**computeBookingLeadScore`** in `**src/lib/bookingLeadScore.ts**` (weights + city local/foraneo reuse `**PRICE_CONSTANTS**` from `**estimatedPriceRange.ts**`; budget ranks from `**bookingBudget.ts**`). Persist `**lead_score**` (0–1000) and `**lead_priority**` (`low`  `medium`  `high`) on `**POST /api/booking**` only. **No** automatic recompute on read or admin list. Optional future: `PATCH` override + `lead_score_rule_version` column if audits need it.
+**Alternatives considered:** Recompute on every `**GET /api/admin/bookings`** (rejected — history would shift when constants change). Single `priority` enum without numeric score (rejected — score enables finer client-side sort and future thresholds).
 **Why not the others:** Frozen snapshot matches “what we knew at intake”; module is the single place to change weights.
 
 ## 2026-04-11 — Apple Music icon: one `<svg>` on homepage
 
-**Context:** The “Redes sociales” Apple Music card in **`index.astro`** wrapped a Simple Icons–style **`<svg><title>…</title><path/></svg>`** inside another **`<svg>`**, producing invalid nested SVGs and redundant accessible naming vs the link’s **`aria-label`**.
-**Decision:** Keep the outer decorative **`<svg>`** (inside **`aria-hidden`** `span`) and **move only the `<path>`** into it; drop inner **`role`**, **`xmlns`**, and **`<title>`**. Add a small **string slice test** in **`homepageHero.test.ts`** so the regression does not return.
+**Context:** The “Redes sociales” Apple Music card in `**index.astro`** wrapped a Simple Icons–style `**<svg><title>…</title><path/></svg>**` inside another `**<svg>**`, producing invalid nested SVGs and redundant accessible naming vs the link’s `**aria-label**`.
+**Decision:** Keep the outer decorative `**<svg>`** (inside `**aria-hidden**` `span`) and **move only the `<path>`** into it; drop inner `**role**`, `**xmlns**`, and `**<title>**`. Add a small **string slice test** in `**homepageHero.test.ts`** so the regression does not return.
 **Alternatives considered:** Duplicate Simple Icons markup only at outer level without path extraction (same outcome). Use an `<img>` for the logo (rejected for this pass — would change styling from `currentColor`).
 **Why not the others:** Minimal DOM fix; matches Spotify/Instagram card structure.
 
 ## 2026-04-11 — Official band social URLs in `web/src/data/socials.ts`
 
-**Context:** Spotify, TikTok, YouTube, Instagram, Facebook, and Apple Music URLs were copy-pasted in **`MarketingLayout.astro`** and **`index.astro`**, so link updates risked drift.
-**Decision:** Add **`bandSocialUrls`** in **`web/src/data/socials.ts`** and import it from both files. Keep **per-member Instagram** in **`members.ts`** unchanged.
+**Context:** Spotify, TikTok, YouTube, Instagram, Facebook, and Apple Music URLs were copy-pasted in `**MarketingLayout.astro`** and `**index.astro**`, so link updates risked drift.
+**Decision:** Add `**bandSocialUrls`** in `**web/src/data/socials.ts**` and import it from both files. Keep **per-member Instagram** in `**members.ts`** unchanged.
 **Alternatives considered:** Env vars for each URL (more deploy surface for static marketing links). Inline duplication (status quo).
 **Why not the others:** One TypeScript module is easy to edit and covered by Biome; no need for runtime config for stable public links.
 
 ## 2026-04-11 — Biome for lint/format (TS only; no `.astro` in v1)
 
 **Context:** No shared formatter/linter; drift risk as the repo grows. ESLint + Prettier + Astro plugin is heavier for a small monorepo (API + `web/`).
-**Decision:** Add **Biome** at the **repo root** with `files.includes` limited to **`src/**/*.ts`**, **`scripts/**/*.ts`**, **`web/src/**/*.ts`**. Do **not** lint/format **`.astro`** in this slice (editor + Astro defaults until a follow-up). Disable **`suspicious/noControlCharactersInRegex`** for the intentional control-strip regex in `web/src/lib/sanitizeResendDetail.ts`. **VCS `useIgnoreFile`:** temporarily off when Biome crashed on a non–UTF-8 `.gitignore` under **`.code-review-graph/`**; **follow-up (2026-04-11):** add **`.code-review-graph/`** to root **`.gitignore`** and turn **`vcs.enabled` + `useIgnoreFile` back on** — `bun run lint` passes.
+**Decision:** Add **Biome** at the **repo root** with `files.includes` limited to `**src/**/*.ts`**, `**scripts/**/*.ts**`, `**web/src/**/*.ts**`. Do **not** lint/format `**.astro`** in this slice (editor + Astro defaults until a follow-up). Disable `**suspicious/noControlCharactersInRegex**` for the intentional control-strip regex in `web/src/lib/sanitizeResendDetail.ts`. **VCS `useIgnoreFile`:** temporarily off when Biome crashed on a non–UTF-8 `.gitignore` under `**.code-review-graph/`**; **follow-up (2026-04-11):** add `**.code-review-graph/`** to root `**.gitignore**` and turn `**vcs.enabled` + `useIgnoreFile` back on** — `bun run lint` passes.
 **Alternatives considered:** ESLint + `eslint-plugin-astro` + Prettier (best Astro coverage, more config). Leave VCS off forever (rejected — loses `.gitignore` alignment for Biome).
 **Why not the others:** One fast tool, one config file, matches “minimal baseline”; Astro can wait.
 
 ## 2026-04-11 — No GitHub Actions (CI or keep-alive)
 
 **Context:** The repo had a scheduled **Keep Render Alive** workflow pinging the Render URL; a **CI** todo proposed `bun test` on push/PR. Neither is part of the maintainer’s current workflow.
-**Decision:** Remove **`.github/workflows/keep-alive.yml`** and drop the **CI on GitHub** todo. Rely on **local `bun test`** (and host/platform monitoring as needed) instead of Actions for gates or uptime.
+**Decision:** Remove `**.github/workflows/keep-alive.yml`** and drop the **CI on GitHub** todo. Rely on **local `bun test`** (and host/platform monitoring as needed) instead of Actions for gates or uptime.
 **Alternatives considered:** Add `ci.yml` only; keep keep-alive and skip CI (rejected: keep-alive still unused). External uptime (e.g. Better Stack) without Actions (deferred until needed).
 **Why not the others:** Fewer moving parts and no dependency on GitHub scheduler/credits for a ping the team does not use.
 
 ## 2026-04-10 — Remove unimplemented `/api/auth/*` API routes
 
 **Context:** `src/routes/auth.ts` exposed `POST /api/auth/login` and `POST /api/auth/logout` returning **501** while still applying `rateLimitAuth` (in-memory bucket per client). Real sign-in is Clerk on the frontend; API uses `src/middleware/auth.ts` for `/api/users` and `/api/admin`.
-**Decision:** Delete the stub routes and `rateLimitAuth`; remove the `/auth` mount from `src/routes/index.ts`. Keep rate-limit coverage on **`POST /api/booking`** (5/min) in **`src/routes/booking.test.ts`** with mocked `db` + Resend so the suite does not write real rows or hit Resend through the full API app.
+**Decision:** Delete the stub routes and `rateLimitAuth`; remove the `/auth` mount from `src/routes/index.ts`. Keep rate-limit coverage on `**POST /api/booking`** (5/min) in `**src/routes/booking.test.ts**` with mocked `db` + Resend so the suite does not write real rows or hit Resend through the full API app.
 **Alternatives considered:** Keep routes with README “reserved” note and disable rate limiting until implemented (rejected: extra public surface, wasted limiter state). Implement custom login/logout on the API (rejected: duplicates Clerk).
 **Why not the others:** Fewer unexplained endpoints; aligns public API with actual auth architecture.
 
 ## 2026-04-11 — Web `package.json` version tracks root; health uses `getWebAppVersion`
 
 **Context:** `web/package.json` stayed at `0.1.0` while root was `0.5.0`; `/health` and `/api/health` hardcoded `0.4.0`; `preview` ran `astro dev`, which does not validate production build output.
-**Decision:** Bump **`web/package.json` `version`** to match root for each release. Add **`getWebAppVersion()`** reading `web/package.json` with **`APP_VERSION` / `RELEASE_VERSION`** overrides (same order as API `getAppVersion`). Set **`preview`** to **`astro preview`**. Document in **README** and **`web/.env.example`**. **API `GET /health`:** call **`getAppVersion()`** inside the handler (not once at module load) so runtime env overrides match documented behavior and tests.
+**Decision:** Bump `**web/package.json` `version`** to match root for each release. Add `**getWebAppVersion()**` reading `web/package.json` with `**APP_VERSION` / `RELEASE_VERSION**` overrides (same order as API `getAppVersion`). Set `**preview**` to `**astro preview**`. Document in **README** and `**web/.env.example`**. **API `GET /health`:** call `**getAppVersion()`** inside the handler (not once at module load) so runtime env overrides match documented behavior and tests.
 **Alternatives considered:** Independent web semver with README-only explanation (rejected for this repo — one product, two deploy targets). Inject version only via `import.meta.env` at build time (rejected — file read keeps local `bun dev` honest without extra env wiring).
 **Why not the others:** Matching numbers reduces ops confusion; env overrides keep CI/sha parity with the API pattern already in use.
 
@@ -154,8 +154,8 @@ Updated automatically by the AI agent when decisions are made.
 
 ## 2026-04-10 — Admin bookings: offset pagination + capped export
 
-**Context:** `GET /api/admin/bookings` and export loaded all rows; large SQLite tables risk memory and slow TTFB. Export computed **`last24hCount`** by filtering the full in-memory list.
-**Decision:** List route uses **`limit`/`offset`** (defaults 50 / 0, max limit 200), separate **`count(*)`** for **`data.total`**, and **`hasMore`**. Export uses two SQL **`count`** queries (all rows + rows with **`createdAt >= now - 24h`**) and a **`select`** ordered by **`createdAt` desc** with **`limit ADMIN_EXPORT_MAX_ROWS`** (default 10000, parsed in **`getAdminExportMaxRows`**, hard cap 50000). When **`total > cap`**, response includes **`truncated`**, **`returnedCount`**, **`totalInDb`**, **`warning`**. Admin UI: fixed page size 50 with **`?page=`** SSR links.
+**Context:** `GET /api/admin/bookings` and export loaded all rows; large SQLite tables risk memory and slow TTFB. Export computed `**last24hCount`** by filtering the full in-memory list.
+**Decision:** List route uses `**limit`/`offset`** (defaults 50 / 0, max limit 200), separate `**count(*)**` for `**data.total**`, and `**hasMore**`. Export uses two SQL `**count**` queries (all rows + rows with `**createdAt >= now - 24h**`) and a `**select**` ordered by `**createdAt` desc** with `**limit ADMIN_EXPORT_MAX_ROWS`** (default 10000, parsed in `**getAdminExportMaxRows**`, hard cap 50000). When `**total > cap**`, response includes `**truncated**`, `**returnedCount**`, `**totalInDb**`, `**warning**`. Admin UI: fixed page size 50 with `**?page=**` SSR links.
 **Alternatives considered:** Cursor-based pagination (deferred until offset proves insufficient). Streaming NDJSON export (deferred; cap + env is enough for admin debugging).
 **Why not the others:** Offset matches the stated TODO and is simplest for an internal admin table at ~1k–10k rows.
 
@@ -211,7 +211,7 @@ Updated automatically by the AI agent when decisions are made.
 ## 2026-03-23 — Press kit: dedicated marketing layout and `/press-kit`
 
 **Context:** The main app layout (`Layout.astro`) is light-themed, max-width content, and tuned for booking/admin. A promoter-facing press page needs a distinct visual treatment and full-width sections without rewriting the whole site theme.
-**Decision:** Add `MarketingLayout.astro` plus `marketing-press.css` for the dark “press kit” aesthetic and full-bleed sections; expose the page at `/press-kit`. Keep Clerk header affordances on that layout. Canonical and `og:url` use `PUBLIC_SITE_URL` when set, otherwise the request origin (dev/preview-safe). Optional `PUBLIC_*` env vars gate WhatsApp and downloadable asset links; missing links show a non-clickable “Próximamente” state.
+**Decision:** Add `MarketingLayout.astro` plus `marketing-press.css` for the dark “press kit” aesthetic and full-bleed sections; expose the page at `/press-kit`. Keep Clerk header affordances on that layout. Canonical and `og:url` use `PUBLIC_SITE_URL` when set, otherwise the request origin (dev/preview-safe). Optional `PUBLIC_`* env vars gate WhatsApp and downloadable asset links; missing links show a non-clickable “Próximamente” state.
 **Alternatives considered:** Reuse `Layout.astro` only (rejected: would fight Tailwind/global light body styles and narrow main column); route only `/prensa` (deferred: can add redirect/alias later).
 **Why not the others:** A second layout isolates marketing CSS from app pages and avoids conditional theme branching in one file.
 
@@ -275,6 +275,7 @@ Updated automatically by the AI agent when decisions are made.
 **Decision:** Hono + Bun + PostgreSQL + Drizzle + Clerk + Stripe
 **Alternatives considered:** Express + Node, Fastify + Node
 **Why not the others:**
+
 - Express: not TypeScript-native, slower, more boilerplate
 - Fastify: more config overhead, less edge-ready than Hono
 - Node: Bun is faster, TypeScript-native, simpler DX
@@ -320,7 +321,7 @@ Updated automatically by the AI agent when decisions are made.
 ## 2025-03-16 — Clerk authentication with minimal admin
 
 **Context:** Need to protect backend routes and provide a way for the band to view booking requests without relying solely on email.
-**Decision:** Implement Clerk for authentication. Backend uses @clerk/backend with authenticateRequest for JWT verification. Frontend uses @clerk/astro with prebuilt components (SignInButton, UserButton, Show). Admin panel is a simple Astro page at /admin that fetches bookings from GET /api/admin/bookings. Auth middleware supports setClerkClientForTesting for tests. Sign-in is email + password (and optional social); phone/SMS for Mexico is not enabled (Clerk free tier requires contacting support@clerk.dev to activate that country).
+**Decision:** Implement Clerk for authentication. Backend uses @clerk/backend with authenticateRequest for JWT verification. Frontend uses @clerk/astro with prebuilt components (SignInButton, UserButton, Show). Admin panel is a simple Astro page at /admin that fetches bookings from GET /api/admin/bookings. Auth middleware supports setClerkClientForTesting for tests. Sign-in is email + password (and optional social); phone/SMS for Mexico is not enabled (Clerk free tier requires contacting [support@clerk.dev](mailto:support@clerk.dev) to activate that country).
 **Alternatives considered:** Custom JWT auth, Auth0, Supabase Auth.
 **Why not the others:** Clerk has the best DX for this stack, prebuilt UI components reduce frontend work, and it's free for the expected scale. Custom JWT is more work; Auth0/Supabase don't have Astro integrations as mature as Clerk's.
 
@@ -352,22 +353,25 @@ Updated automatically by the AI agent when decisions are made.
 **Why not the others:** Single-band MVP with one or few admins; first sign-up as admin is zero-config and matches “band member signs up first” without extra env or Clerk org setup.
 
 ---
+
 ## 2026-03-18 — Security hardening: body-size cap + HTTPS guard
-**Context:** Public endpoints are exposed to untrusted clients and reverse proxies may omit `Content-Length` or `x-forwarded-proto`. Header-dependent enforcement can create gaps (DoS via large/chunked bodies) or availability issues (redirect loops / broken health checks).
+
+## **Context:** Public endpoints are exposed to untrusted clients and reverse proxies may omit `Content-Length` or `x-forwarded-proto`. Header-dependent enforcement can create gaps (DoS via large/chunked bodies) or availability issues (redirect loops / broken health checks).
 **Decision:** Update `bodyLimit` to enforce the 100KB cap even when `Content-Length` is missing by streaming a cloned request body and canceling once the limit is exceeded. Update `enforceHttps` to redirect only when `x-forwarded-proto` is present and not `https` (and when `host` is available).
 **Alternatives considered:** Rely only on `Content-Length`; enforce limits purely at the reverse proxy/WAF; always redirect in production regardless of header presence; remove app-level HTTPS enforcement entirely.
 **Why not the others:** This keeps protection robust at the app boundary (defense-in-depth) without adding dependencies, and avoids redirect behavior when the proxy contract isn’t met.
----
+
 ## 2026-03-18 — Booking confirmations: explicit contract + throw safety
-**Context:** The booking form UX depends on the backend telling the truth about email delivery. If the customer confirmation email fails (or Resend throws), the API could still return a 2xx and the frontend would claim success, while DB status stays `pending`.
+
+## **Context:** The booking form UX depends on the backend telling the truth about email delivery. If the customer confirmation email fails (or Resend throws), the API could still return a 2xx and the frontend would claim success, while DB status stays `pending`.
 **Decision:** In `POST /api/booking`, keep returning `201` when the band notification succeeds, but include `data.confirmation` (`sent` | `pending`) and ensure both “error returned” and “throw” cases for the customer confirmation send result in booking status `pending`.
 **Alternatives considered:** Change status codes to non-2xx on confirmation failure (forces client errors, risk of duplicates without idempotency); always return 2xx but hide confirmation outcome (reintroduces silent UX mismatch).
 **Why not the others:** Explicitly returning the confirmation outcome keeps the API contract consistent and avoids duplicate inserts/idempotency work while preventing misleading user messaging.
----
+
 ## 2026-03-18 — Operator resend: auth-safe frontend relay
-**Context:** Admin operators need to re-send customer confirmation, but the Clerk bearer token is server-only. A direct browser call to the backend admin endpoint would either expose credentials or require client-side token plumbing.
+
+## **Context:** Admin operators need to re-send customer confirmation, but the Clerk bearer token is server-only. A direct browser call to the backend admin endpoint would either expose credentials or require client-side token plumbing.
 **Decision:** Add `web/src/pages/admin/resend-confirmation.ts` as a server-side relay that reads the Clerk token server-side, calls `POST /api/admin/bookings/:id/resend-confirmation`, and then redirects back to `/admin`.
 **Alternatives considered:** Call backend admin endpoint directly from browser using a client token; make backend rely on cookies/session instead of bearer tokens.
 **Why not the others:** Browser-side bearer token access is unsafe and increases auth complexity; switching to cookie/session auth would change the auth boundary more than needed for this MVP operator workflow.
----
-<!-- Add new decisions above this line -->
+

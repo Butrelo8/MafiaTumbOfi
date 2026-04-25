@@ -5,34 +5,38 @@ export const members = [
     image: '/members/hector-baez.jpg',
     featured: true,
     instagram:
-      'https://www.instagram.com/hector_baezzzmt_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==',
+      'https://www.instagram.com/hector_baezzzmt_/',
   },
   {
     name: 'Alexandro Montal',
     role: 'Requintista & Vocal',
     image: '/members/alexandro-montal.jpg',
+    featured: false,
     instagram:
-      'https://www.instagram.com/alexandromontal?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==',
+      'https://www.instagram.com/alexandromontal/',
   },
   {
     name: 'Diego Cerecer',
-    role: 'Guitarra',
+    role: 'Guitarra & Coros',
     image: '/members/diego-cerecer.jpg',
+    featured: false,
     instagram:
-      'https://www.instagram.com/diegocerecer?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==',
+      'https://www.instagram.com/diegocerecer/',
   },
   {
     name: 'Luis C.',
-    role: 'Piano, Bajo & Tololoche',
+    role: 'Tololoche & Bajo',
     image: '/members/luis-c.jpg',
+    featured: false,
     instagram:
-      'https://www.instagram.com/diegocerecer?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==',
+      'https://www.instagram.com/the_keytar/',
   },
   {
     name: 'Diego Mora',
     role: 'Trombón',
     image: '/members/dimora.jpg',
+    featured: false,
     instagram:
-      'https://www.instagram.com/di_moratb/?utm_source=ig_web_button_share_sheet',
+      'https://www.instagram.com/di_moratb/',
   },
 ]
