@@ -63,10 +63,9 @@ describe('marketing homepage hero', () => {
     expect(src).toContain('class="hero-blurb"')
     expect(src).toContain('<Marquee')
     expect(src).toContain('id="fechas"')
-    expect(src).toContain('loadTourDates')
     expect(src).toContain('normalizePublicApiBaseUrl')
     expect(src).toContain('apiBase={apiBase}')
-    expect(src).toContain('rows={tourDates}')
+    expect(src).toContain('rows={[]}')
     expect(src).toContain('class="trust-strip"')
     expect(src).toContain('id="trust-heading"')
     expect(src).toContain('class="trust-grid"')
@@ -108,7 +107,7 @@ describe('marketing homepage conversion blocks', () => {
     expect((pkgSrc.match(/href:\s*'\/contratacion'/g) ?? []).length).toBe(3)
 
     const layoutSrc = readFileSync(marketingLayoutPath, 'utf8')
-    expect(layoutSrc).toContain('href="/#paquetes"')
+    expect(layoutSrc).toContain("'/#paquetes'")
     expect(layoutSrc).toContain('href="/contratacion"')
   })
 

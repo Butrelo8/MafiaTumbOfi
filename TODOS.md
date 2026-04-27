@@ -8,50 +8,6 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ## Open
 
-### Perf — Defer tour dates API call (SSR waterfall fix)
-
-- **What:** Remove blocking `await loadTourDates(PUBLIC_API_URL)` from SSR render of `index.astro`. Load tour data client-side after page renders.
-- **Why:** Render free tier cold start = up to 30s. This `await` blocks HTML delivery until Render API wakes. Entire page delays for one section.
-- **Context:** `index.astro:24` — `const tourDates = await loadTourDates(import.meta.env.PUBLIC_API_URL)`. Render API (mto-api) spins down after inactivity.
-- **Solution:** Remove SSR await. Add `data-api-url` attr to `<TourTable>` component. In a `<script>` tag, fetch tour dates client-side after `DOMContentLoaded` with a 3s timeout fallback. On timeout/error, show "Próximas fechas no disponibles" gracefully. Alternative: `Promise.race([loadTourDates(url), timeout(2000)])` in SSR and render empty state if API slow.
-- **Done When:** Homepage HTML delivers without waiting for tour API. TourTable shows loading state then populates. Lighthouse TTFB unaffected by Render cold start.
-- **Effort:** S
-- **Priority:** P1
-- **Depends on:** Nothing.
-
-### Perf — Self-host Google Fonts (remove render-blocking request)
-
-- **What:** Replace Google Fonts CDN `<link>` in `MarketingLayout.astro` with locally served font files via `@fontsource` npm packages.
-- **Why:** External `fonts.googleapis.com` request = extra DNS + RTT + render-blocking. Causes FOUT.
-- **Context:** `MarketingLayout.astro:46-49` loads Cormorant Garamond + Inter + JetBrains Mono from googleapis.com synchronously.
-- **Solution:** `bun add @fontsource/cormorant-garamond @fontsource/inter @fontsource/jetbrains-mono`. Import only needed weights in `MarketingLayout.astro` (e.g. `import '@fontsource/inter/400.css'`). Remove `<link rel="preconnect">` and googleapis `<link>` tags. DESIGN.md: JetBrains Mono only for tabular data — omit from marketing layout if unused on homepage.
-- **Done When:** No external font requests in Network tab. Fonts load from same origin. FOUT eliminated. Lighthouse flags no render-blocking resources.
-- **Effort:** S
-- **Priority:** P1
-- **Depends on:** Nothing.
-
-### Perf — Convert member images to WebP + add lazy loading
-
-- **What:** Re-export all `web/public/members/*.jpg` as WebP. Update `<img>` references in `MemberCard.astro`. Add `loading="lazy"` and explicit dimensions.
-- **Why:** `dimora.jpg` = 717KB. Combined member images ~1.5MB unoptimized. No `width`/`height` attrs → CLS. WebP 30–50% smaller.
-- **Context:** `web/public/members/` — 5 JPEGs (84KB–717KB). `MemberCard.astro` renders without dimensions.
-- **Solution:** Batch convert: `for f in web/public/members/*.jpg; do cwebp -q 82 "$f" -o "${f%.jpg}.webp"; done`. Update `MemberCard.astro` to `<picture>` with WebP source + JPEG fallback. Add `width` + `height`. Add `loading="lazy"`. Keep originals for press kit download links only.
-- **Done When:** Member images served as WebP. CLS < 0.1. Lighthouse image audit passes.
-- **Effort:** S
-- **Priority:** P2
-- **Depends on:** Nothing.
-
-### Perf — Remove/lazy-load AOS library
-
-- **What:** Replace AOS with native CSS `@keyframes` + `IntersectionObserver`, or lazy-load after page interactive.
-- **Why:** `import 'aos/dist/aos.css'` in critical CSS path. AOS JS synchronous on load. DESIGN.md explicitly bans "AOS zoom/flip" — library is the root cause.
-- **Context:** `index.astro:21` imports AOS CSS globally. `index.astro:722` runs `AOS.init()` synchronously.
-- **Solution:** Remove `import 'aos/dist/aos.css'` and `import AOS from 'aos'`. Replace `data-aos` attrs with CSS classes using `@keyframes` (fade-up, fade-in). Use `IntersectionObserver` to toggle `.is-visible`. Alternative: `const { default: AOS } = await import('aos')` after `load` event.
-- **Done When:** No AOS CSS in critical path. Animations still work. Bundle size reduced (verify via Astro build output). DESIGN.md AOS violations cleared.
-- **Effort:** S
-- **Priority:** P2
-- **Depends on:** Nothing.
-
 ### Infra — Distributed rate limiting for multiple API instances
 
 **What:** Replace or back in-memory booking (and future route-scoped) rate limit stores with a shared limiter (e.g. Redis, Upstash) or document single-instance requirement in DEPLOY.md.
@@ -183,6 +139,15 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 ---
 
 ## Completed
+
+### Perf — Frontend performance pass (2026-04-27)
+
+**What:** Multi-step performance optimization pass (executing `2026-04-26-frontend-perf-pass.md`).
+- **Fonts:** Self-hosted via `@fontsource` (Inter, Cormorant Garamond, JetBrains Mono); removed Google Fonts CDN `<link>` blocks.
+- **Tour Dates:** Deferred SSR `loadTourDates` call to client-side; removed waterfall block on `index.astro`.
+- **AOS Removal:** Replaced AOS library with native CSS `@keyframes` + `IntersectionObserver` via `data-reveal`. Removed `aos` dependency.
+- **WebP Support:** Converted member headshots to WebP; updated `MemberCard.astro` to use `<picture>` with JPG fallback.
+**Done When:** Lighthouse performance score improved; no render-blocking external fonts; no synchronous AOS JS/CSS; member images served as WebP; TTFB reduced on homepage.
 
 ### Design — `/contratacion` redesign: Veracruz Noir + photo hero behind Press Kit header (2026-04-26)
 
