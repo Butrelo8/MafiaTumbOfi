@@ -21,7 +21,7 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ### Design — change band icon/logo from main section/web.
 
-**What:** Replace current's band logo with the actual one.
+**What:** Replace current's one made with AI with the real one.
 **Why:** It's looks like the band actually has a logo, so the one I created with AI is garbage.
 **Context:** Watching bands Instagram page I looked at the original logo.
 **Solution:** Drop replacement file at `web/public/icon/mafiatumbada.png` (same filename — no code changes needed; already referenced in `web/src/layouts/MarketingLayout.astro:63` and `web/src/pages/index.astro:117`). Source options: (1) ask band manager for transparent-background PNG ≥512×512px; (2) crop logo from Instagram post, upscale with Topaz Gigapixel or Adobe Firefly to ≥512×512px, export as PNG with transparent bg.
@@ -29,6 +29,17 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **Effort:** S
 **Priority:** P1
 **Depends on:** Obtaining real logo file from band manager or Instagram.
+
+### Design — Change confianza / testimonios section with real info.
+
+**What:** Replace section placeholders with real customers review.
+**Why:** Placeholders in place, so it looks fake.
+**Context:** People are looking for live experiences or some tipe of review.
+**Solution:** Drop replacement/update lines at `web/src/data/testimonials`.
+**Done When:** Web page shows real testimonies for band appearances.
+**Effort:** S
+**Priority:** P1
+**Depends on:** That the band managers give me some information on past presentations.
 
 ---
 
@@ -127,30 +138,26 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ---
 
-### Design — `/contratacion` redesign: Veracruz Noir + photo hero behind Press Kit header
+## Completed
+
+### Perf — Frontend performance pass (2026-04-27)
+
+**What:** Multi-step performance optimization pass (executing `2026-04-26-frontend-perf-pass.md`).
+- **Fonts:** Self-hosted via `@fontsource` (Inter, Cormorant Garamond, JetBrains Mono); removed Google Fonts CDN `<link>` blocks.
+- **Tour Dates:** Deferred SSR `loadTourDates` call to client-side; removed waterfall block on `index.astro`.
+- **AOS Removal:** Replaced AOS library with native CSS `@keyframes` + `IntersectionObserver` via `data-reveal`. Removed `aos` dependency.
+- **WebP Support:** Converted member headshots to WebP; updated `MemberCard.astro` to use `<picture>` with JPG fallback.
+**Done When:** Lighthouse performance score improved; no render-blocking external fonts; no synchronous AOS JS/CSS; member images served as WebP; TTFB reduced on homepage.
+
+### Design — `/contratacion` redesign: Veracruz Noir + photo hero behind Press Kit header (2026-04-26)
 
 **What:** Redesign `/contratacion` to match updated `DESIGN.md` (deeper matte-black surfaces, metallic gold gradient CTAs, burgundy cinematic glow, turquoise demoted to links/focus). Add full-bleed photo/band-image hero behind the Press Kit header block ("Mafia Tumbada / Corridos tumbados y regional mexicano · Xalapa, Veracruz · Desde 2021").
-**Why:** Page currently uses old surface values and generic layout; palette update + photo hero elevates the promoter-first press-kit feel.
-**Context:** `DESIGN.md` updated 2026-04-22 — new tokens (`--bg` `oklch(8%)`, `--bg-sunk` `oklch(5%)`, `--gold-mid`, `--gold-shadow`, `--burgundy-glow`, `--burgundy-hot`). Primary CTA gradient: `linear-gradient(135deg, var(--gold-shadow), var(--gold), var(--gold-mid))`. Burgundy only as `filter: drop-shadow` or `box-shadow`. Turquoise only for link hover + focus rings. Cover photo: use real band photo (ask manager) — drop at `web/public/band/cover.jpg`; fallback is `--bg-sunk` solid canvas. Page lives at `web/src/pages/contratacion.astro`.
-**Solution:**
-1. Update surface tokens in `contratacion.astro` scoped styles — replace any hardcoded `oklch`/hex surface values with `var(--bg)` / `var(--bg-sunk)`.
-2. Wrap existing Press Kit hero block in `<section class="press-hero">` with `position: relative`. Add full-bleed `<img>` (`web/public/band/cover.jpg`, `object-fit: cover`, `loading="eager"`, `fetchpriority="high"`) behind it. Overlay: dark gradient scrim `linear-gradient(to bottom, oklch(5% 0 0 / 0.7), oklch(5% 0 0 / 0.95))` so text stays legible.
-3. Film grain overlay (6% SVG noise, `mix-blend-mode: overlay`) on `.press-hero` only — consistent with `DESIGN.md` decoration rules.
-4. Primary booking CTA: `background: linear-gradient(135deg, var(--gold-shadow), var(--gold), var(--gold-mid))`, dark text, `border-radius: var(--radius-pill)`.
-5. CTA hover: `filter: drop-shadow(0 0 24px var(--burgundy-glow))` — cinematic glow, never flat fill.
-6. Secondary links: `color: var(--accent)` (turquoise) on hover + focus only.
-7. Hairline dividers: `1px solid var(--gold-dim)`.
-8. Fan orientation strip (already present) — verify tokens updated.
-9. `bun run build` green + Lighthouse on `/contratacion` (LCP < 2.5s, CLS < 0.1).
-Plan saved to docs/superpowers/plans/2026-04-22-contratacion-redesign.md.
 **Done When:** `/contratacion` matches Veracruz Noir premium palette; photo hero behind Press Kit header; metallic gold gradient on primary CTA; burgundy cinematic glow on hover; turquoise only on links/focus; `bun run build` green; zero WCAG AA violations on text over photo scrim.
-**Effort:** M
-**Priority:** P1
-**Depends on:** `feat/desegin-consultation-redo` merged (tokens in `marketing-press.css`). Band cover photo from manager (fallback to `--bg-sunk` until available).
 
----
+### Perf — Compress hero.mp4 (47MB → <5MB) (2026-04-26)
 
-## Completed
+- **What:** Re-encode `web/public/video/hero.mp4` to H.264/AVC at target ≤5MB. Add WebM fallback. Update `<source>` tags in `index.astro`.
+- **Done When:** hero.mp4 ≤5MB on disk. Page loads without waiting for video. LCP measurably improved via Lighthouse.
 
 ### Design — change profile pictures of members in integrantes section (2026-04-22)
 

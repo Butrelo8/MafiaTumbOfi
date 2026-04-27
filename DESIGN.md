@@ -233,6 +233,7 @@ Before any design-adjacent PR ships:
 
 ## History
 
+- 2026-04-26 — `/contratacion` bio section restructured: wall-of-text split into lede (Cormorant italic, `--gold-shadow` left hairline), body paragraph, and styled `<ul>` with em-dash gold markers. Confirms token roles: `--accent` (turquoise) = links/focus only; gold gradient = CTAs/labels; `--gold-shadow` = decorative hairlines.
 - 2026-04-22 — Palette elevated to premium: `--bg` deepened to `oklch(8%)`, `--bg-sunk` to `oklch(5%)`. Gold expanded to 4-stop metallic gradient range (`--gold`, `--gold-mid`, `--gold-shadow`, `--gold-dim`). `--accent-hot` replaced by `--burgundy-glow` (glow-only) + `--burgundy-hot` (marquee/SOLD OUT). Turquoise demoted from CTA primary to link/focus only.
 - 2026-04-21 — Semantic `--color-success` / `--color-error`; tour sold-out tag copy locked to English `SOLD OUT` (see `<TourTable>`).
 - 2026-04-18 — Initial DESIGN.md written via `/design-consultation`. Audience locked: fans lead, promoters deep-link. Accent locked: Veracruz turquoise. Type system locked: Cormorant demoted, Inter + JetBrains Mono added.

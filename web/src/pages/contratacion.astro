@@ -13,6 +13,9 @@ const canonicalUrl = bookingCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url
 const title = 'Contrataciones — Press kit — Mafia Tumbada'
 const description =
   'Solicita cotización para tu evento. Bio, rider técnico resumido y formulario — respuesta en menos de 24 horas. Xalapa, Veracruz.'
+
+// Cover photo lives at web/public/band/cover.jpg — falls back to --bg-sunk solid canvas if missing.
+const coverPhoto = '/band/cover.jpg'
 ---
 
 <MarketingLayout title={title} description={description} canonicalUrl={canonicalUrl}>
@@ -26,14 +29,42 @@ const description =
     </div>
   </div>
 
-  <section class="press-cover" aria-label="Encabezado press kit">
-    <div class="press-cover-grain" aria-hidden="true"></div>
-    <div class="container press-cover-inner">
-      <p class="press-cover-eyebrow">Press kit</p>
-      <h1 class="press-cover-title">Mafia Tumbada</h1>
-      <p class="press-cover-lede">
+  <section class="press-hero" aria-label="Encabezado press kit">
+    <img
+      src={coverPhoto}
+      alt=""
+      class="press-hero-photo"
+      loading="eager"
+      fetchpriority="high"
+      decoding="async"
+      aria-hidden="true"
+    />
+    <div class="press-hero-scrim" aria-hidden="true"></div>
+    <div class="press-hero-grain" aria-hidden="true"></div>
+
+    <div class="container press-hero-inner">
+      <p class="press-hero-eyebrow">Press kit</p>
+      <h1 class="press-hero-title">Mafia Tumbada</h1>
+      <p class="press-hero-lede">
         Corridos tumbados y regional mexicano · Xalapa, Veracruz · Desde 2021
       </p>
+
+      <div class="press-hero-meta" role="list">
+        <span role="listitem" class="press-hero-chip">
+          <span class="press-hero-chip-key">Base</span>
+          <span class="press-hero-chip-val">Xalapa, Ver.</span>
+        </span>
+        <span class="press-hero-divider" aria-hidden="true"></span>
+        <span role="listitem" class="press-hero-chip">
+          <span class="press-hero-chip-key">Activos</span>
+          <span class="press-hero-chip-val">Desde 2021</span>
+        </span>
+        <span class="press-hero-divider" aria-hidden="true"></span>
+        <span role="listitem" class="press-hero-chip">
+          <span class="press-hero-chip-key">Respuesta</span>
+          <span class="press-hero-chip-val">&lt; 24 h</span>
+        </span>
+      </div>
     </div>
   </section>
 
@@ -46,15 +77,23 @@ const description =
             Editorial<br /><em>Veracruz noir</em>
           </h2>
 
-          <p class="booking-intro">
-            La Mafia Tumbada es un grupo de Xalapa, Veracruz, con cuatro años en escena dentro del regional mexicano
-            contemporáneo. Mezclan corridos tumbados y norteño con ocho singles propios y un repertorio en vivo que
-            adaptan a bares, festivales y eventos privados en Veracruz y fuera del estado.
+          <p class="press-bio-lede">
+            Con cuatro años rompiendo la escena, La Mafia Tumbada es un proyecto xalapeño con una visión clara: evolucionar el regional mexicano contemporáneo.
           </p>
-          <p class="booking-intro">
-            Disponibles para presentaciones con equipo propio y coordinación previa por correo o WhatsApp. Cotización
-            sin compromiso; la fecha se aparta con anticipo acordado en la propuesta formal.
+
+          <p class="press-bio-body">
+            Más allá del repertorio tradicional, ofrecemos un show en vivo potente con instrumentación completa — arreglos de metales y trombón, música 100% original, ocho sencillos propios que el público ya corea y colaboraciones a nivel nacional. Hemos llevado nuestro evento con éxito a foros, bares y escenarios en Veracruz y Puebla.
           </p>
+
+          <ul class="press-bio-list" aria-label="Sobre la contratación">
+            <li>Equipo propio para logística y producción</li>
+            <li>Show versátil — festivales, foros privados o eventos masivos</li>
+            <li>Cotizaciones sin compromiso, ajustadas al evento</li>
+            <li>Fecha asegurada con anticipo y propuesta formal</li>
+            <li>Coordinación directa vía correo o WhatsApp</li>
+          </ul>
+
+          <div class="press-divider" aria-hidden="true"></div>
 
           <div class="press-social-row">
             <span class="press-social-label">Escucha</span>
@@ -77,7 +116,7 @@ const description =
             whatsappUrl ? (
               <div class="booking-whatsapp">
                 <p class="booking-whatsapp-label">¿Prefieres hablar directo?</p>
-                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" class="btn-secondary">
+                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" class="btn-secondary press-whatsapp">
                   WhatsApp directo
                 </a>
               </div>
@@ -152,10 +191,13 @@ const description =
 </MarketingLayout>
 
 <style>
+  /* ─────────────────────────────────────────────────────────────
+     Orientation strip — promoter-first banner
+     ───────────────────────────────────────────────────────────── */
   .contratacion-orientation {
     padding-block: 0.65rem 0.5rem;
     background: var(--bg);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--gold-dim);
   }
 
   .contratacion-orientation-inner {
@@ -176,67 +218,183 @@ const description =
     color: var(--text-muted);
     text-decoration: none;
     white-space: nowrap;
+    transition: color 200ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .contratacion-home-ghost:hover {
-    color: var(--text);
+  .contratacion-home-ghost:hover,
+  .contratacion-home-ghost:focus-visible {
+    color: var(--accent);
     text-decoration: underline;
     text-underline-offset: 3px;
   }
 
-  .press-cover {
+  /* ─────────────────────────────────────────────────────────────
+     Press hero — full-bleed photo + cinematic scrim + film grain
+     ───────────────────────────────────────────────────────────── */
+  .press-hero {
     position: relative;
-    min-height: min(42vh, 420px);
+    isolation: isolate;
+    min-height: clamp(420px, 62vh, 640px);
     display: flex;
     align-items: flex-end;
     padding-block: var(--space-lg);
-    background: var(--bg-sunk);
-    border-bottom: 1px solid var(--border);
+    background: var(--bg-sunk); /* fallback canvas if photo missing */
+    border-bottom: 1px solid var(--gold-dim);
     overflow: hidden;
   }
 
-  .press-cover-grain {
+  .press-hero-photo {
     position: absolute;
     inset: 0;
-    opacity: 0.07;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 35%;
+    z-index: 0;
+    /* Slight desaturation + lift so any photo lands in palette */
+    filter: saturate(0.85) contrast(1.05);
+  }
+
+  /* If the image fails to load (no cover.jpg yet), let --bg-sunk show through */
+  .press-hero-photo:not([src]),
+  .press-hero-photo[src=""] {
+    display: none;
+  }
+
+  .press-hero-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        to bottom,
+        oklch(5% 0 0 / 0.7) 0%,
+        oklch(5% 0 0 / 0.78) 50%,
+        oklch(5% 0 0 / 0.95) 100%
+      );
+  }
+
+  /* Cinematic burgundy bloom from bottom-left — drop-shadow style atmosphere */
+  .press-hero::after {
+    content: '';
+    position: absolute;
+    left: -10%;
+    bottom: -30%;
+    width: 70%;
+    height: 80%;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at center,
+      var(--burgundy-glow) 0%,
+      transparent 60%
+    );
+    opacity: 0.35;
+    mix-blend-mode: screen;
+  }
+
+  .press-hero-grain {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    opacity: 0.06;
     pointer-events: none;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     mix-blend-mode: overlay;
   }
 
-  .press-cover-inner {
+  .press-hero-inner {
     position: relative;
-    z-index: 1;
+    z-index: 3;
+    width: 100%;
   }
 
-  .press-cover-eyebrow {
+  .press-hero-eyebrow {
     font-family: var(--ff-body);
     font-size: var(--fs-eyebrow);
+    font-weight: 600;
     letter-spacing: var(--tracking-eyebrow);
     text-transform: uppercase;
     color: var(--gold);
-    margin-bottom: 0.75rem;
+    margin: 0 0 1rem;
+    /* Subtle metallic shimmer on the label only */
+    background: linear-gradient(
+      135deg,
+      var(--gold-shadow),
+      var(--gold),
+      var(--gold-mid)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
-  .press-cover-title {
+  .press-hero-title {
     font-family: var(--ff-display);
-    font-size: var(--fs-h2);
-    font-weight: 700;
+    font-size: var(--fs-h1);
+    font-weight: 600;
     line-height: var(--lh-tight);
     letter-spacing: var(--tracking-display);
-    margin: 0 0 0.5rem;
+    margin: 0 0 0.75rem;
+    text-wrap: balance;
+    color: var(--text);
   }
 
-  .press-cover-lede {
+  .press-hero-lede {
     font-size: var(--fs-lede);
     color: var(--text-muted);
-    max-width: 36rem;
+    max-width: 38rem;
     line-height: var(--lh-body);
-    margin: 0;
+    margin: 0 0 1.75rem;
+    text-wrap: pretty;
   }
 
+  .press-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--gold-dim);
+    max-width: 38rem;
+  }
+
+  .press-hero-chip {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .press-hero-chip-key {
+    font-family: var(--ff-body);
+    font-size: 0.6875rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .press-hero-chip-val {
+    font-family: var(--ff-mono);
+    font-size: 0.875rem;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .press-hero-divider {
+    align-self: stretch;
+    width: 1px;
+    background: var(--gold-dim);
+    margin: 0.15rem 0;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     Editorial spread — bio left, form right
+     ───────────────────────────────────────────────────────────── */
   .press-spread {
     padding-block: var(--space-lg);
+    background: var(--bg);
   }
 
   .press-editorial.booking-layout {
@@ -247,86 +405,417 @@ const description =
     margin-top: 0.25rem;
   }
 
+  .press-sidebar .booking-title em {
+    color: var(--gold);
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  /* ── Bio editorial blocks ─────────────────────────────────── */
+  .press-bio-lede {
+    font-size: var(--fs-lede);
+    font-family: var(--ff-display);
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.45;
+    text-wrap: pretty;
+    margin: 0 0 1.5rem;
+    padding-left: 1.25rem;
+    border-left: 2px solid var(--gold-shadow);
+  }
+
+  .press-bio-body {
+    font-size: var(--fs-body);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+    text-wrap: pretty;
+    margin: 0 0 1.5rem;
+  }
+
+  .press-bio-list {
+    list-style: none;
+    margin: 0 0 0.5rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .press-bio-list li {
+    font-size: var(--fs-body);
+    color: var(--text-muted);
+    line-height: var(--lh-body);
+    padding-left: 1.5rem;
+    position: relative;
+  }
+
+  .press-bio-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--gold-shadow);
+    font-family: var(--ff-mono);
+    font-size: 0.85em;
+    top: 0.05em;
+  }
+
+  .press-divider {
+    height: 1px;
+    background: var(--gold-dim);
+    margin: 1.75rem 0 1.25rem;
+    width: 100%;
+    max-width: 100%;
+  }
+
   .press-social-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.35rem 0.5rem;
-    font-size: 0.85rem;
-    margin: 1.5rem 0 0;
+    font-size: 0.875rem;
+    margin: 0;
     color: var(--text-muted);
+    font-family: var(--ff-body);
   }
 
   .press-social-row a {
-    color: var(--accent);
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px solid var(--gold-dim);
+    padding-bottom: 1px;
+    transition: color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .press-social-row a:hover {
-    color: var(--gold);
+  .press-social-row a:hover,
+  .press-social-row a:focus-visible {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
   }
 
   .press-social-label {
     width: 100%;
-    font-size: 0.7rem;
-    letter-spacing: 0.14em;
+    font-size: 0.6875rem;
+    letter-spacing: var(--tracking-eyebrow);
     text-transform: uppercase;
-    opacity: 0.7;
+    color: var(--gold);
+    font-weight: 600;
+    margin-bottom: 0.35rem;
   }
 
   .press-social-sep {
-    opacity: 0.4;
+    color: var(--text-faint);
   }
 
   .press-rider-heading {
     font-family: var(--ff-body);
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.12em;
+    letter-spacing: var(--tracking-eyebrow);
     text-transform: uppercase;
-    margin: 2rem 0 0.75rem;
+    margin: 2.25rem 0 0.85rem;
     color: var(--gold);
   }
 
   .press-rider-list {
     margin: 0;
     padding-left: 1.1rem;
-    font-size: 0.88rem;
-    line-height: 1.55;
+    font-size: 0.9rem;
+    line-height: 1.6;
     color: var(--text);
-    opacity: 0.92;
+    list-style: none;
+    padding-left: 0;
   }
 
   .press-rider-list li {
-    margin-bottom: 0.35rem;
+    position: relative;
+    padding-left: 1.25rem;
+    margin-bottom: 0.5rem;
+    text-wrap: pretty;
+  }
+
+  .press-rider-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.65em;
+    width: 0.5rem;
+    height: 1px;
+    background: var(--gold-dim);
   }
 
   .press-rider-note {
-    font-size: 0.8rem;
+    font-size: 0.8125rem;
     color: var(--text-muted);
-    margin: 0.75rem 0 0;
+    margin: 0.85rem 0 0;
+    font-style: italic;
   }
 
+  /* ─────────────────────────────────────────────────────────────
+     Right column — form
+     ───────────────────────────────────────────────────────────── */
   .press-form-column {
     min-width: 0;
   }
 
   .press-form-title {
     font-family: var(--ff-display);
-    font-size: var(--fs-h3);
-    font-weight: 700;
-    line-height: 1.15;
+    font-size: var(--fs-h2);
+    font-weight: 600;
+    line-height: var(--lh-tight);
+    letter-spacing: var(--tracking-display);
     margin: 0.35rem 0 0;
+    text-wrap: balance;
   }
 
   .press-form-title em {
     font-style: italic;
     font-weight: 500;
-    color: var(--gold);
+    background: linear-gradient(
+      135deg,
+      var(--gold-shadow),
+      var(--gold),
+      var(--gold-mid)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .press-form-lede {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-muted);
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     Primary CTA — metallic gold gradient + burgundy glow on hover
+     Scoped overrides so any .btn-primary inside <BookingForm /> picks
+     up the new treatment without a global sweep.
+     ───────────────────────────────────────────────────────────── */
+  .press-form-column :global(.btn-primary),
+  .press-form-column :global(button[type='submit']) {
+    background: linear-gradient(
+      135deg,
+      var(--gold-shadow),
+      var(--gold),
+      var(--gold-mid)
+    );
+    color: oklch(12% 0.01 90);
+    border: none;
+    border-radius: var(--radius-pill, 999px);
+    padding: 0.95rem 1.85rem;
+    font-family: var(--ff-body);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition:
+      transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      filter 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .press-form-column :global(.btn-primary:hover),
+  .press-form-column :global(button[type='submit']:hover),
+  .press-form-column :global(.btn-primary:focus-visible),
+  .press-form-column :global(button[type='submit']:focus-visible) {
+    transform: translateY(-2px);
+    filter: drop-shadow(0 0 24px var(--burgundy-glow));
+  }
+
+  .press-form-column :global(.btn-primary:focus-visible),
+  .press-form-column :global(button[type='submit']:focus-visible) {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 4px;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     Secondary CTA — WhatsApp ghost button
+     ───────────────────────────────────────────────────────────── */
+  .booking-whatsapp {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--gold-dim);
+  }
+
+  .booking-whatsapp-label {
+    font-size: 0.6875rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+    margin: 0 0 0.65rem;
+  }
+
+  .press-whatsapp.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--gold-dim);
+    border-radius: var(--radius-pill, 999px);
+    padding: 0.7rem 1.25rem;
+    font-family: var(--ff-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition:
+      border-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .press-whatsapp.btn-secondary:hover,
+  .press-whatsapp.btn-secondary:focus-visible {
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .press-whatsapp.btn-secondary:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 4px;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     FAQ section — gold-dim hairline dividers, editorial details
+     ───────────────────────────────────────────────────────────── */
+  .faq-section {
+    background: var(--bg);
+    padding-block: var(--space-section);
+    border-top: 1px solid var(--gold-dim);
+  }
+
+  .faq-list {
+    margin-top: var(--space-md);
+    border-top: 1px solid var(--gold-dim);
+  }
+
+  .faq-item {
+    border-bottom: 1px solid var(--gold-dim);
+    padding: 1.25rem 0;
+  }
+
+  .faq-item summary {
+    font-family: var(--ff-display);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-item summary::after {
+    content: '+';
+    font-family: var(--ff-mono);
+    font-size: 1.25rem;
+    color: var(--gold);
+    transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .faq-item[open] summary::after {
+    content: '−';
+  }
+
+  .faq-item summary:hover,
+  .faq-item summary:focus-visible {
+    color: var(--accent);
+  }
+
+  .faq-item summary:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 4px;
+  }
+
+  .faq-item p {
+    font-family: var(--ff-body);
+    font-size: 0.95rem;
+    line-height: var(--lh-body);
+    color: var(--text-muted);
+    margin: 0.85rem 0 0;
+    max-width: 56ch;
+    text-wrap: pretty;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     Footer — minimal, gold-dim hairline only
+     ───────────────────────────────────────────────────────────── */
+  .footer-bar {
+    background: var(--bg-sunk);
+    border-top: 1px solid var(--gold-dim);
+    padding-block: var(--space-md);
+  }
+
+  .footer-bar .container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+  }
+
+  .footer-brand {
+    font-family: var(--ff-display);
+    font-size: 1.125rem;
+    color: var(--text);
+    letter-spacing: var(--tracking-display);
+  }
+
+  .footer-copy {
+    font-family: var(--ff-mono);
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    margin: 0;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     Reduced motion
+     ───────────────────────────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .contratacion-home-ghost,
+    .press-social-row a,
+    .press-whatsapp.btn-secondary,
+    .faq-item summary,
+    .faq-item summary::after,
+    .press-form-column :global(.btn-primary),
+    .press-form-column :global(button[type='submit']) {
+      transition: none;
+    }
+
+    .press-form-column :global(.btn-primary:hover),
+    .press-form-column :global(button[type='submit']:hover),
+    .press-whatsapp.btn-secondary:hover {
+      transform: none;
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     Mobile
+     ───────────────────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .press-hero {
+      min-height: clamp(360px, 56vh, 480px);
+    }
+
+    .press-hero-meta {
+      gap: 0.5rem 0.75rem;
+    }
+
+    .press-hero-divider {
+      display: none;
+    }
+
+    .faq-item summary {
+      font-size: 1.0625rem;
+    }
   }
 </style>

@@ -20,7 +20,7 @@ describe('booking / contratación pages', () => {
     expect(src).toContain('Para promotores y organizadores de eventos')
     expect(src).toContain('class="contratacion-home-ghost"')
     expect(src).toContain('>← Volver al sitio</a>')
-    expect(src).toContain('class="booking-intro"')
+    expect(src).toContain('class="booking-intro press-form-lede"')
     expect(src).toContain('<BookingForm')
     expect(src).toContain('section faq-section')
     expect(src).toContain('id="faq-heading"')
