@@ -74,13 +74,13 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
     {
       plausibleDataDomain ? (
         <>
-          <script is:inline define:vars={{ plausibleDataDomain }}>
-            window.plausible =
-              window.plausible ||
-              function () {
-                ;(window.plausible.q = window.plausible.q || []).push(arguments)
-              }
-          </script>
+        <script is:inline>
+          window.plausible =
+            window.plausible ||
+            function () {
+              ;(window.plausible.q = window.plausible.q || []).push(arguments)
+            }
+        </script>
           <script defer data-domain={plausibleDataDomain} src="https://plausible.io/js/script.js"
           ></script>
         </>
