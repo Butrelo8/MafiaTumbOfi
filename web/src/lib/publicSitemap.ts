@@ -12,17 +12,32 @@ export function escapeXml(text: string): string {
     .replace(/'/g, '&apos;')
 }
 
-/** Path segments after the public origin; `''` = homepage (same URL as `base`, no trailing slash). */
-const INDEXABLE_PATHS = ['', '/contratacion'] as const
+interface SitemapEntry {
+  /** Path segment after the public origin. `''` = homepage. */
+  path: string
+  changefreq: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never'
+  priority: string
+}
+
+const INDEXABLE_ENTRIES: SitemapEntry[] = [
+  { path: '', changefreq: 'weekly', priority: '1.0' },
+  { path: '/contratacion', changefreq: 'monthly', priority: '0.8' },
+]
 
 /**
  * @param baseUrl Public site base, e.g. `https://example.com` (trailing slash optional; stripped).
  */
 export function buildPublicSitemapXml(baseUrl: string): string {
   const base = baseUrl.trim().replace(/\/$/, '')
-  const lines = INDEXABLE_PATHS.map((path) => {
+  const lines = INDEXABLE_ENTRIES.map(({ path, changefreq, priority }) => {
     const loc = path === '' ? base : `${base}${path}`
-    return `  <url><loc>${escapeXml(loc)}</loc></url>`
+    return [
+      '  <url>',
+      `    <loc>${escapeXml(loc)}</loc>`,
+      `    <changefreq>${changefreq}</changefreq>`,
+      `    <priority>${priority}</priority>`,
+      '  </url>',
+    ].join('\n')
   }).join('\n')
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

@@ -53,6 +53,24 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
       themeColor="#0a0a0c"
       robots={robots}
     />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'MusicGroup',
+      name: 'Mafia Tumbada',
+      genre: ['Corridos Tumbados', 'Regional Mexicano'],
+      foundingLocation: {
+        '@type': 'Place',
+        name: 'Xalapa, Veracruz, México',
+      },
+      url: canonicalUrl,
+      sameAs: [
+        bandSocialUrls.instagram,
+        bandSocialUrls.tiktok,
+        bandSocialUrls.spotify,
+        bandSocialUrls.youtube,
+        bandSocialUrls.appleMusic,
+      ],
+    })}></script>
     {
       plausibleDataDomain ? (
         <>

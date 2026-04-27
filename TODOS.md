@@ -8,6 +8,28 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ## Open
 
+---
+
+### SEO — Create OG image at 1200×630 + add dimension meta
+
+**What:** Design/export social card at 1200×630 pixels (replaces current `/icon/mafiatumbada.png` which is 1536×1024); add `og:image:width`, `og:image:height`, and `og:image:type` meta tags.
+**Why:** Current OG image has wrong aspect ratio (3:2 vs 1.91:1 standard); no dimension hints in meta; logo is not a designed social card.
+**Context:** `web/src/components/Seo.astro` uses `/icon/mafiatumbada.png` as default `ogImagePath`. Change to `/og/og-default.jpg` at standard social card dimensions.
+**Solution:** (1) Create visual at 1200×630px (use DESIGN.md tokens: veracruz noir palette, minimal type, Mafia Tumbada branding). Export as JPEG to `web/public/og/og-default.jpg`. (2) Update `Seo.astro` default `ogImagePath` from `/icon/mafiatumbada.png` to `/og/og-default.jpg`. (3) Add dimension meta tags in the `og:image` block:
+```html
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/jpeg" />
+```
+**Done When:** OG image file exists at `web/public/og/og-default.jpg` (1200×630 JPEG); `Seo.astro` uses it by default; social share preview via Twitter Card validator or Open Graph checker shows the new card image.
+**Effort:** S
+**Priority:** P1
+**Depends on:** DESIGN.md finalized
+
+---
+
+---
+
 ### Infra — Distributed rate limiting for multiple API instances
 
 **What:** Replace or back in-memory booking (and future route-scoped) rate limit stores with a shared limiter (e.g. Redis, Upstash) or document single-instance requirement in DEPLOY.md.
@@ -139,6 +161,16 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 ---
 
 ## Completed
+
+### SEO — Foundational SEO improvements (2026-04-27)
+
+**What:** Multi-step SEO foundation pass.
+- **Robots.txt:** Created `web/public/robots.txt` with sitemap pointer and `/admin` / `/api` disallows.
+- **JSON-LD:** Added `MusicGroup` structured data to `MarketingLayout.astro` for band entity recognition.
+- **Sitemap:** Enhanced `sitemap.xml` with `<changefreq>` and `<priority>` for all indexable routes.
+- **Content:** Clarified `/contratacion` H1 to "Contratar a Mafia Tumbada" and updated title tag to "Contratar a Mafia Tumbada — Xalapa, Veracruz" to match search intent.
+**Done When:** `robots.txt` live; JSON-LD renders without errors; sitemap includes enhanced tags; `/contratacion` uses descriptive, intent-aligned H1 and title; `bun test` and `bun run build` green.
+
 
 ### Perf — Frontend performance pass (2026-04-27)
 

@@ -21,4 +21,16 @@ describe('buildPublicSitemapXml', () => {
     expect(xml).toContain('<loc>https://example.com</loc>')
     expect(xml).toContain('<loc>https://example.com/contratacion</loc>')
   })
+
+  test('includes changefreq and priority for homepage', () => {
+    const xml = buildPublicSitemapXml('https://mafiatumbada.com')
+    expect(xml).toContain('<changefreq>weekly</changefreq>')
+    expect(xml).toContain('<priority>1.0</priority>')
+  })
+
+  test('includes changefreq and priority for contratacion', () => {
+    const xml = buildPublicSitemapXml('https://mafiatumbada.com')
+    expect(xml).toContain('<changefreq>monthly</changefreq>')
+    expect(xml).toContain('<priority>0.8</priority>')
+  })
 })
