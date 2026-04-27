@@ -13,6 +13,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 bun dev              # API dev server on :3001 (hot reload)
 bun test             # Unit + integration tests
+bun test --watch     # Watch mode (re-run on file change)
+bun test src/routes/booking.test.ts  # Single test file
 bun run lint         # Biome check
 bun run format       # Biome format --write
 bun run lint:fix     # Biome check --write --unsafe
@@ -31,33 +33,28 @@ bun run db:studio    # Drizzle Studio GUI
 ```bash
 cd web && bun dev            # Astro dev server on :4321
 cd web && bun build          # Production build (Vercel adapter)
-cd web && bun run test:e2e   # Playwright booking smoke test (mocked API, port 4329)
-```
-
-### Single test file
-
-```bash
-bun test src/routes/booking.test.ts
+cd web && bun run test:e2e   # Playwright smoke test (requires: API running on :3001 + mocked data)
 ```
 
 ## Architecture
 
 Two separate runtimes, deployed independently:
 
-`**src/` — Hono + Bun API** (Render)
+**src/** — Hono + Bun API (Render)
 
 - Entry: `src/index.ts` — middleware setup + route mount
 - Routes: `src/routes/` — `booking.ts` (public), `admin.ts` (Clerk-gated), `internal.ts` (drip cron)
 - DB: `src/db/schema.ts` (Drizzle/libsql), auto-detects Turso vs local file via env vars
-- Libs: `src/lib/` — lead scoring, drip scheduling, Resend email helpers, Zod Spanish error messages
+- Libs: `src/lib/` — `score.ts` (lead scoring 0–1000), `drip.ts` (schedule dates), `email.ts` (Resend helpers), `errors.ts` (Zod Spanish messages)
 
-`**web/` — Astro SSR** (Vercel)
+**web/** — Astro SSR (Vercel)
 
 - Pages: `web/src/pages/` — marketing, booking form, admin dashboard, API relay routes
 - Admin relay routes in `web/src/pages/admin/*.ts` proxy to the Hono API (avoids CORS in admin UI)
 - Auth via Clerk middleware: `web/src/middleware.ts`
+- Components: `web/src/components/` — layout sections, form inputs, admin panels
 
-`**drizzle/` — Migrations** — edit `src/db/schema.ts` → `db:generate` → `db:migrate`
+**drizzle/** — Migrations — edit `src/db/schema.ts` → `db:generate` → `db:migrate`
 
 ## Key Patterns
 
@@ -97,10 +94,18 @@ See `.env.example` (root) and `web/.env.example`. Critical:
 - Hono routes follow REST naming
 - Drizzle schema is source of truth for types
 
+## Project Files
+
+- `STATE.md` — session continuity (current branch, blockers, next steps)
+- `DECISIONS.md` — architecture decisions log
+- `TODOS.md` — ticket queue for Cursor handoffs (read before handing off)
+- `DESIGN.md` — visual system + tokens (read before UI changes)
+
 ## Workflow
 
 - Claude executes code; user plans and architects
 - Plans in ticket format: What / Why / Context / Solution / Done When / Effort / Priority / Depends On
+- Tickets go into `TODOS.md` for Cursor to implement
 - No code generated unless explicitly asked
 
 ## Conventions

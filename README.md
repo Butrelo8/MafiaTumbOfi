@@ -6,16 +6,36 @@ Built for regional Mexican bands who want to look serious to promoters without n
 
 ## Stack
 
-- **Frontend:** Astro (static site, SEO, fast load)
-- **API:** Hono + Bun
-- **Database:** SQLite + Drizzle ORM (MVP)
-- **Email:** Resend (booking form → email to band)
-
-Clerk (auth) and Stripe (payments) are available in the codebase if you add an admin panel or ticket sales later.
+- **Frontend:** Astro SSR — Vercel
+- **API:** Hono + Bun — Render
+- **Database:** SQLite (dev) / Turso libsql (prod) + Drizzle ORM
+- **Email:** Resend — booking alerts + drip campaign
+- **Auth:** Clerk — admin dashboard gate
 
 ## Booking flow
 
-Form on site → `POST /api/booking` → validate → insert into SQLite (status `pending`) → Resend to band → confirmation email to requester → update status to `sent` or `failed`. Bookings are stored in the `bookings` table; band can reply from inbox or use a future admin to view them.
+```
+Form → POST /api/booking → Zod validate
+  → compute leadScore (0–1000) + leadPriority (hot/warm/cold)
+  → insert bookings table (status: pending)
+  → Resend: band alert + requester confirmation
+  → schedule drip follow-up dates
+  → status: sent | failed
+```
+
+## Admin CRM
+
+Clerk-gated dashboard at `/admin`. `ADMIN_CLERK_ID` env var must match the Clerk JWT `sub` of the admin user.
+
+Features:
+- Paginated booking list (`GET /api/admin/bookings?limit=&offset=`)
+- Lead score + priority visible per booking
+- Soft-delete (sets `deletedAt`; all queries filter it out)
+- Hard-delete all: `POST /api/admin/bookings/delete-all` — requires `ALLOW_ADMIN_DELETE_ALL_BOOKINGS=true` or `NODE_ENV=development`; UI relay at `/admin/delete-all-bookings` with confirmation phrase `DELETE_ALL_BOOKINGS`
+
+## Drip campaign
+
+Render cron POSTs `POST /api/internal/process-drip` hourly with `Authorization: Bearer <DRIP_CRON_SECRET>`. Processes up to `DRIP_BATCH_SIZE` (default 20) bookings per batch. Sends scheduled follow-up emails via Resend.
 
 ## Getting Started
 
@@ -78,7 +98,7 @@ Tests mock `POST …/api/booking` in the browser (no real API, DB, or Resend). P
 MafiaTumbadaOfi/
 ├── src/                 # Hono API
 │   ├── index.ts
-│   ├── routes/          # booking, users, admin
+│   ├── routes/          # booking.ts (public), admin.ts (Clerk-gated), internal.ts (drip cron)
 │   ├── middleware/
 │   ├── db/               # SQLite + Drizzle schema
 │   └── lib/
@@ -99,6 +119,7 @@ MafiaTumbadaOfi/
 | `bun dev`                      | Start API with hot reload                                                                                                          |
 | `bun start`                    | Start API (production)                                                                                                             |
 | `bun test`                     | Run API + unit tests (`bun test`)                                                                                                  |
+| `bun test --watch`             | Watch mode — re-run on file change                                                                                                 |
 | `bun run test:e2e`             | Playwright: booking form smoke (`web/`, mocked API)                                                                                |
 | `bun run lint`                 | Biome check (`src/`, `scripts/`, `web/src/**/*.ts`)                                                                                |
 | `bun run format`               | Biome format (write)                                                                                                               |

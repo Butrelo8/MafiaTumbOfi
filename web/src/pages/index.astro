@@ -17,11 +17,8 @@ import FilmStrip from '../components/FilmStrip.astro'
 import Eyebrow from '../components/Eyebrow.astro'
 import SignatureCTA from '../components/SignatureCTA.astro'
 import { normalizePublicApiBaseUrl } from '../lib/publicApiUrl'
-import { loadTourDates } from '../lib/tourDates'
-import 'aos/dist/aos.css'
 
 const apiBase = normalizePublicApiBaseUrl(import.meta.env.PUBLIC_API_URL)
-const tourDates = await loadTourDates(import.meta.env.PUBLIC_API_URL)
 
 const title = 'Mafia Tumbada — Oficial'
 const description =
@@ -142,7 +139,7 @@ const artworkShelfItems = [
     <div class="container">
       <Eyebrow text="Calendario" />
       <h2 id="fechas-heading" class="section-heading">Próximas fechas</h2>
-      <TourTable rows={tourDates} showAllHref="/contratacion" apiBase={apiBase} />
+      <TourTable rows={[]} showAllHref="/contratacion" apiBase={apiBase} />
     </div>
   </section>
 
@@ -202,7 +199,7 @@ const artworkShelfItems = [
   <section class="section">
     <div class="container">
       <div class="bio-grid">
-        <div class="bio-sidebar" data-aos="fade-up">
+        <div class="bio-sidebar" data-reveal>
           <span class="section-label">Quiénes somos</span>
           <h2>El sonido de<br /> <em>Xalapa</em></h2>
           <div class="bio-tags">
@@ -214,7 +211,7 @@ const artworkShelfItems = [
           </div>
         </div>
 
-        <div class="bio-body" data-aos="fade-up">
+        <div class="bio-body" data-reveal>
           <p>
             La Mafia Tumbada es un grupo de Xalapa, Veracruz que lleva cuatro años construyendo su propio espacio
             dentro del regional mexicano contemporáneo. Con raíces en el corrido tumbado y el norteño, y sin perder el
@@ -246,7 +243,7 @@ const artworkShelfItems = [
 
       <div class="repertoire-grid">
         {repertoireItems.map((item) => (
-          <article class="repertoire-card" data-aos="fade-up">
+          <article class="repertoire-card" data-reveal>
             <h3 class="repertoire-name">{item.name}</h3>
             <p class="repertoire-desc">{item.description}</p>
           </article>
@@ -546,7 +543,7 @@ const artworkShelfItems = [
 
       <div class="testimonials-grid">
         {testimonials.map((t) => (
-          <blockquote class="testimonial-card" data-aos="fade-up">
+          <blockquote class="testimonial-card" data-reveal>
             <p class="testimonial-quote">{t.quote}</p>
             <footer class="testimonial-footer">
               <cite class="testimonial-author">{t.author}</cite>
@@ -572,7 +569,7 @@ const artworkShelfItems = [
         {packageTiers.map((pkg) => (
           <article
             class:list={['package-card', { 'package-card--featured': pkg.featured }]}
-            data-aos="fade-up"
+            data-reveal
             aria-labelledby={`pkg-title-${pkg.id}`}
           >
             {pkg.featured ? <span class="package-badge">Más pedido</span> : null}
@@ -719,10 +716,22 @@ const artworkShelfItems = [
 </MarketingLayout>
 
 <script>
-  import AOS from 'aos';
-  AOS.init({
-    duration: 800,
-    once: true,
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('[data-reveal]').forEach((el) => {
+    observer.observe(el);
   });
 </script>
 

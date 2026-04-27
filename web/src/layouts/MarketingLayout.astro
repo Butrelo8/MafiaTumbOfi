@@ -6,6 +6,16 @@ import Seo from '../components/Seo.astro'
 import { bandSocialUrls } from '../data/socials'
 import { normalizePlausibleDataDomain } from '../lib/plausibleClient'
 import { showPressAssetsSection } from '../lib/showPressAssets'
+import '@fontsource/cormorant-garamond/300.css'
+import '@fontsource/cormorant-garamond/300-italic.css'
+import '@fontsource/cormorant-garamond/600.css'
+import '@fontsource/cormorant-garamond/700.css'
+import '@fontsource/inter/400.css'
+import '@fontsource/inter/500.css'
+import '@fontsource/inter/600.css'
+import '@fontsource/inter/700.css'
+import '@fontsource/jetbrains-mono/400.css'
+import '@fontsource/jetbrains-mono/500.css'
 
 interface Props {
   title: string
@@ -42,12 +52,6 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
       canonicalUrl={canonicalUrl}
       themeColor="#0a0a0c"
       robots={robots}
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
     />
     {
       plausibleDataDomain ? (

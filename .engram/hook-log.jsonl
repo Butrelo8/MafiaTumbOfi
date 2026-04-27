@@ -1,0 +1,154 @@
+{"ts":"2026-04-26T11:27:17.875Z","event":"PostToolUse","tool":"ToolSearch","outputSize":173,"success":true}
+{"ts":"2026-04-26T11:27:32.207Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_batch_execute","outputSize":19570,"success":true}
+{"ts":"2026-04-26T23:09:18.289Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-26T23:09:24.256Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-26T23:09:29.636Z","event":"PostToolUse","tool":"Bash","outputSize":468,"success":true}
+{"ts":"2026-04-26T23:09:33.738Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-26T23:09:37.130Z","event":"PostToolUse","tool":"Bash","outputSize":384,"success":true}
+{"ts":"2026-04-26T23:09:38.152Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-26T23:09:42.535Z","event":"PostToolUse","tool":"Bash","outputSize":150,"success":true}
+{"ts":"2026-04-26T23:09:43.563Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-26T23:09:46.802Z","event":"PostToolUse","tool":"Bash","outputSize":256,"success":true}
+{"ts":"2026-04-26T23:09:47.913Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-26T23:09:52.241Z","event":"PostToolUse","tool":"Bash","outputSize":326,"success":true}
+{"ts":"2026-04-26T23:16:19.863Z","event":"PostToolUse","tool":"ToolSearch","outputSize":109,"success":true}
+{"ts":"2026-04-26T23:17:08.994Z","event":"PostToolUse","tool":"mcp__serena__find_symbol","outputSize":757,"success":true}
+{"ts":"2026-04-26T23:17:10.002Z","event":"PostToolUse","tool":"mcp__serena__find_symbol","outputSize":15,"success":true}
+{"ts":"2026-04-26T23:17:10.840Z","event":"PostToolUse","tool":"mcp__serena__find_symbol","outputSize":181,"success":true}
+{"ts":"2026-04-26T23:17:54.035Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/.claude/settings.json","decision":"passthrough"}
+{"ts":"2026-04-26T23:17:58.947Z","event":"PreToolUse","tool":"Write","path":"/Users/trelo/Cursor Projects/MTO/.claude/settings.json","decision":"passthrough"}
+{"ts":"2026-04-26T23:18:04.710Z","event":"PostToolUse","tool":"Write","path":"/Users/trelo/Cursor Projects/MTO/.claude/settings.json","outputSize":1147,"success":true}
+{"ts":"2026-04-26T23:18:38.440Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/.claude/settings.json","decision":"passthrough"}
+{"ts":"2026-04-26T23:18:40.673Z","event":"PostToolUse","tool":"Read","path":"/Users/trelo/.claude/settings.json","outputSize":3296,"success":true}
+{"ts":"2026-04-26T23:18:46.850Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/.claude/settings.json","decision":"passthrough"}
+{"ts":"2026-04-26T23:18:49.363Z","event":"PostToolUse","tool":"Edit","path":"/Users/trelo/.claude/settings.json","outputSize":4986,"success":true}
+{"ts":"2026-04-26T23:18:50.285Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/.claude/settings.json","decision":"passthrough"}
+{"ts":"2026-04-26T23:18:50.931Z","event":"PostToolUse","tool":"Edit","path":"/Users/trelo/.claude/settings.json","outputSize":4833,"success":true}
+{"ts":"2026-04-26T23:18:51.897Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/.claude/settings.json","decision":"passthrough"}
+{"ts":"2026-04-26T23:18:52.466Z","event":"PostToolUse","tool":"Edit","path":"/Users/trelo/.claude/settings.json","outputSize":5063,"success":true}
+{"ts":"2026-04-26T23:38:10.358Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_batch_execute","outputSize":21990,"success":true}
+{"ts":"2026-04-26T23:39:44.044Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/TODOS.md","decision":"passthrough"}
+{"ts":"2026-04-26T23:39:44.362Z","event":"PostToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/TODOS.md","outputSize":3365,"success":true}
+{"ts":"2026-04-26T23:40:29.542Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/TODOS.md","decision":"passthrough"}
+{"ts":"2026-04-26T23:40:29.821Z","event":"PostToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/TODOS.md","outputSize":894,"success":true}
+{"ts":"2026-04-26T23:41:05.124Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/TODOS.md","decision":"passthrough"}
+{"ts":"2026-04-26T23:41:44.499Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/TODOS.md","decision":"passthrough"}
+{"ts":"2026-04-26T23:41:44.910Z","event":"PostToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/TODOS.md","outputSize":69624,"success":true}
+{"ts":"2026-04-26T23:46:56.588Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-26T23:47:00.722Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-26T23:47:06.348Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-26T23:47:09.419Z","event":"PostToolUse","tool":"Bash","outputSize":111,"success":true}
+{"ts":"2026-04-26T23:47:16.265Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-26T23:47:16.964Z","event":"PostToolUse","tool":"Bash","outputSize":137,"success":true}
+{"ts":"2026-04-27T02:19:10.394Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/TODOS.md","decision":"passthrough"}
+{"ts":"2026-04-27T02:19:18.454Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/TODOS.md","decision":"passthrough"}
+{"ts":"2026-04-27T02:19:19.049Z","event":"PostToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/TODOS.md","outputSize":66622,"success":true}
+{"ts":"2026-04-27T02:41:44.623Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-27T02:41:45.134Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-27T02:41:51.341Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/src/middleware/error.ts","decision":"passthrough"}
+{"ts":"2026-04-27T02:41:51.655Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/src/middleware/auth.ts","decision":"deny"}
+{"ts":"2026-04-27T02:41:51.672Z","event":"PostToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/src/middleware/error.ts","outputSize":1292,"success":true}
+{"ts":"2026-04-27T02:41:56.677Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/src/middleware/auth.ts","decision":"passthrough"}
+{"ts":"2026-04-27T02:41:56.982Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/src/routes/booking.ts","decision":"passthrough"}
+{"ts":"2026-04-27T02:41:57.265Z","event":"PostToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/src/routes/booking.ts","outputSize":1774,"success":true}
+{"ts":"2026-04-27T02:42:05.129Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-27T02:42:05.510Z","event":"PostToolUse","tool":"Bash","outputSize":86,"success":true}
+{"ts":"2026-04-27T02:42:26.914Z","event":"PreToolUse","tool":"Write","path":"/Users/trelo/Cursor Projects/MTO/.cursor/rules/hono-conventions.mdc","decision":"passthrough"}
+{"ts":"2026-04-27T02:42:50.414Z","event":"PreToolUse","tool":"Write","path":"/Users/trelo/Cursor Projects/MTO/.cursor/rules/hono-conventions.mdc","decision":"passthrough"}
+{"ts":"2026-04-27T02:42:50.762Z","event":"PostToolUse","tool":"Write","path":"/Users/trelo/Cursor Projects/MTO/.cursor/rules/hono-conventions.mdc","outputSize":3319,"success":true}
+{"ts":"2026-04-27T02:48:59.406Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-27T02:48:59.787Z","event":"PostToolUse","tool":"Bash","outputSize":143,"success":true}
+{"ts":"2026-04-27T02:49:03.839Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/.claude/skills/generate-conventions/SKILL.md","decision":"passthrough"}
+{"ts":"2026-04-27T02:49:04.117Z","event":"PostToolUse","tool":"Read","path":"/Users/trelo/.claude/skills/generate-conventions/SKILL.md","outputSize":4846,"success":true}
+{"ts":"2026-04-27T02:49:32.639Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/.claude/skills/generate-conventions/SKILL.md","decision":"passthrough"}
+{"ts":"2026-04-27T02:50:05.975Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/.claude/skills/generate-conventions/SKILL.md","decision":"passthrough"}
+{"ts":"2026-04-27T02:50:08.679Z","event":"PostToolUse","tool":"Edit","path":"/Users/trelo/.claude/skills/generate-conventions/SKILL.md","outputSize":14846,"success":true}
+{"ts":"2026-04-27T02:51:58.218Z","event":"PreToolUse","tool":"Write","path":"/Users/trelo/Cursor Projects/MTO/.cursor/rules/hono-conventions.mdc","decision":"passthrough"}
+{"ts":"2026-04-27T02:51:58.566Z","event":"PostToolUse","tool":"Write","path":"/Users/trelo/Cursor Projects/MTO/.cursor/rules/hono-conventions.mdc","outputSize":13265,"success":true}
+{"ts":"2026-04-27T02:52:59.058Z","event":"PreToolUse","tool":"Write","path":"/Users/trelo/Cursor Projects/MTO/GEMINI.md","decision":"passthrough"}
+{"ts":"2026-04-27T02:56:07.593Z","event":"PostToolUse","tool":"mcp__serena__check_onboarding_performed","outputSize":229,"success":true}
+{"ts":"2026-04-27T02:56:10.490Z","event":"PostToolUse","tool":"mcp__serena__initial_instructions","outputSize":5441,"success":true}
+{"ts":"2026-04-27T02:56:14.845Z","event":"PostToolUse","tool":"mcp__serena__onboarding","outputSize":2102,"success":true}
+{"ts":"2026-04-27T02:56:20.496Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/STATE.md","decision":"passthrough"}
+{"ts":"2026-04-27T02:56:20.733Z","event":"PostToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/STATE.md","outputSize":6703,"success":true}
+{"ts":"2026-04-27T02:56:32.359Z","event":"PostToolUse","tool":"mcp__serena__write_memory","outputSize":54,"success":true}
+{"ts":"2026-04-27T02:56:39.055Z","event":"PostToolUse","tool":"mcp__serena__write_memory","outputSize":55,"success":true}
+{"ts":"2026-04-27T02:56:46.604Z","event":"PostToolUse","tool":"mcp__serena__write_memory","outputSize":63,"success":true}
+{"ts":"2026-04-27T02:56:53.053Z","event":"PostToolUse","tool":"mcp__serena__write_memory","outputSize":61,"success":true}
+{"ts":"2026-04-27T02:57:07.531Z","event":"PostToolUse","tool":"mcp__serena__write_memory","outputSize":55,"success":true}
+{"ts":"2026-04-27T02:57:14.917Z","event":"PostToolUse","tool":"mcp__serena__write_memory","outputSize":63,"success":true}
+{"ts":"2026-04-27T02:57:26.946Z","event":"PostToolUse","tool":"mcp__serena__write_memory","outputSize":71,"success":true}
+{"ts":"2026-04-27T02:57:36.928Z","event":"PostToolUse","tool":"mcp__serena__write_memory","outputSize":58,"success":true}
+{"ts":"2026-04-27T02:57:40.545Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-27T04:12:45.843Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_execute","outputSize":473,"success":true}
+{"ts":"2026-04-27T04:32:54.694Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_execute","outputSize":956,"success":true}
+{"ts":"2026-04-27T04:33:04.807Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_execute","outputSize":836,"success":true}
+{"ts":"2026-04-27T04:33:08.266Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/.claude/settings.json","decision":"passthrough"}
+{"ts":"2026-04-27T04:33:08.536Z","event":"PostToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/.claude/settings.json","outputSize":1136,"success":true}
+{"ts":"2026-04-27T04:33:16.404Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_execute","outputSize":828,"success":true}
+{"ts":"2026-04-27T04:36:48.613Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_batch_execute","outputSize":7000,"success":true}
+{"ts":"2026-04-27T04:36:59.689Z","event":"PostToolUse","tool":"mcp__serena__get_symbols_overview","outputSize":74,"success":true}
+{"ts":"2026-04-27T04:37:02.330Z","event":"PostToolUse","tool":"mcp__serena__find_symbol","outputSize":402,"success":true}
+{"ts":"2026-04-27T04:37:04.784Z","event":"PostToolUse","tool":"mcp__serena__find_symbol","outputSize":998,"success":true}
+{"ts":"2026-04-27T04:37:07.108Z","event":"PostToolUse","tool":"mcp__serena__get_symbols_overview","outputSize":188,"success":true}
+{"ts":"2026-04-27T04:37:09.808Z","event":"PostToolUse","tool":"mcp__serena__find_symbol","outputSize":647,"success":true}
+{"ts":"2026-04-27T04:37:12.063Z","event":"PostToolUse","tool":"mcp__serena__get_symbols_overview","outputSize":44,"success":true}
+{"ts":"2026-04-27T04:37:14.484Z","event":"PostToolUse","tool":"mcp__serena__find_symbol","outputSize":793,"success":true}
+{"ts":"2026-04-27T04:37:16.654Z","event":"PostToolUse","tool":"mcp__serena__get_symbols_overview","outputSize":73,"success":true}
+{"ts":"2026-04-27T04:37:19.150Z","event":"PostToolUse","tool":"mcp__serena__get_symbols_overview","outputSize":402,"success":true}
+{"ts":"2026-04-27T04:37:21.859Z","event":"PostToolUse","tool":"mcp__serena__find_symbol","outputSize":902,"success":true}
+{"ts":"2026-04-27T04:37:24.259Z","event":"PostToolUse","tool":"mcp__serena__get_symbols_overview","outputSize":41,"success":true}
+{"ts":"2026-04-27T04:37:26.676Z","event":"PostToolUse","tool":"mcp__serena__find_symbol","outputSize":202,"success":true}
+{"ts":"2026-04-27T04:37:34.548Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_execute","outputSize":348,"success":true}
+{"ts":"2026-04-27T04:37:42.291Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_execute","outputSize":412,"success":true}
+{"ts":"2026-04-27T04:37:51.629Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_execute","outputSize":49,"success":true}
+{"ts":"2026-04-27T04:37:55.802Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/.cursor/rules/hono-conventions.mdc","decision":"passthrough"}
+{"ts":"2026-04-27T04:37:56.064Z","event":"PostToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/.cursor/rules/hono-conventions.mdc","outputSize":5433,"success":true}
+{"ts":"2026-04-27T04:38:17.260Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/.cursor/rules/hono-conventions.mdc","decision":"passthrough"}
+{"ts":"2026-04-27T04:38:31.072Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/.cursor/rules/hono-conventions.mdc","decision":"passthrough"}
+{"ts":"2026-04-27T04:38:31.719Z","event":"PostToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/.cursor/rules/hono-conventions.mdc","outputSize":8247,"success":true}
+{"ts":"2026-04-27T04:38:38.615Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/.cursor/rules/hono-conventions.mdc","decision":"passthrough"}
+{"ts":"2026-04-27T04:38:39.037Z","event":"PostToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/.cursor/rules/hono-conventions.mdc","outputSize":7176,"success":true}
+{"ts":"2026-04-27T04:38:46.311Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/.cursor/rules/hono-conventions.mdc","decision":"passthrough"}
+{"ts":"2026-04-27T04:38:47.237Z","event":"PostToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/.cursor/rules/hono-conventions.mdc","outputSize":7326,"success":true}
+{"ts":"2026-04-27T04:44:09.030Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/TODOS.md","decision":"passthrough"}
+{"ts":"2026-04-27T04:44:09.308Z","event":"PostToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/TODOS.md","outputSize":6046,"success":true}
+{"ts":"2026-04-27T04:44:24.330Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_batch_execute","outputSize":16504,"success":true}
+{"ts":"2026-04-27T04:45:09.795Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_execute","outputSize":3824,"success":true}
+{"ts":"2026-04-27T04:45:29.880Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_execute","outputSize":3213,"success":true}
+{"ts":"2026-04-27T04:45:42.058Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_execute","outputSize":1675,"success":true}
+{"ts":"2026-04-27T04:46:07.654Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/DESIGN.md","decision":"passthrough"}
+{"ts":"2026-04-27T04:46:08.236Z","event":"PostToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/DESIGN.md","outputSize":11070,"success":true}
+{"ts":"2026-04-27T04:46:08.357Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/web/src/pages/contratacion.astro","decision":"passthrough"}
+{"ts":"2026-04-27T04:46:08.669Z","event":"PostToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/web/src/pages/contratacion.astro","outputSize":2944,"success":true}
+{"ts":"2026-04-27T04:46:35.199Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/web/src/pages/contratacion.astro","decision":"passthrough"}
+{"ts":"2026-04-27T04:46:37.475Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-27T04:46:40.323Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/web/src/pages/contratacion.astro","decision":"passthrough"}
+{"ts":"2026-04-27T04:46:40.620Z","event":"PostToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/web/src/pages/contratacion.astro","outputSize":4168,"success":true}
+{"ts":"2026-04-27T04:46:43.575Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-27T04:46:44.002Z","event":"PostToolUse","tool":"Bash","outputSize":85,"success":true}
+{"ts":"2026-04-27T04:46:45.705Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/web/src/pages/contratacion.astro","decision":"passthrough"}
+{"ts":"2026-04-27T04:46:45.988Z","event":"PostToolUse","tool":"Read","path":"/Users/trelo/Cursor Projects/MTO/web/src/pages/contratacion.astro","outputSize":2876,"success":true}
+{"ts":"2026-04-27T04:47:35.964Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/web/src/pages/contratacion.astro","decision":"passthrough"}
+{"ts":"2026-04-27T04:47:54.360Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/web/src/pages/contratacion.astro","decision":"passthrough"}
+{"ts":"2026-04-27T04:47:54.911Z","event":"PostToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/web/src/pages/contratacion.astro","outputSize":29640,"success":true}
+{"ts":"2026-04-27T04:48:06.671Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/web/src/pages/contratacion.astro","decision":"passthrough"}
+{"ts":"2026-04-27T04:48:08.078Z","event":"PostToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/web/src/pages/contratacion.astro","outputSize":26537,"success":true}
+{"ts":"2026-04-27T04:48:09.181Z","event":"PreToolUse","tool":"Write","path":"/Users/trelo/Cursor Projects/MTO/docs/superpowers/plans/2026-04-26-frontend-perf-pass.md","decision":"passthrough"}
+{"ts":"2026-04-27T04:48:16.067Z","event":"PreToolUse","tool":"Bash","decision":"passthrough"}
+{"ts":"2026-04-27T04:48:16.961Z","event":"PostToolUse","tool":"Bash","outputSize":421,"success":true}
+{"ts":"2026-04-27T04:48:17.215Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/DESIGN.md","decision":"passthrough"}
+{"ts":"2026-04-27T04:48:26.913Z","event":"PreToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/DESIGN.md","decision":"passthrough"}
+{"ts":"2026-04-27T04:48:27.299Z","event":"PostToolUse","tool":"Edit","path":"/Users/trelo/Cursor Projects/MTO/DESIGN.md","outputSize":12665,"success":true}
+{"ts":"2026-04-27T04:49:42.007Z","event":"PreToolUse","tool":"Write","path":"/Users/trelo/Cursor Projects/MTO/docs/superpowers/plans/2026-04-26-frontend-perf-pass.md","decision":"passthrough"}
+{"ts":"2026-04-27T04:49:42.304Z","event":"PostToolUse","tool":"Write","path":"/Users/trelo/Cursor Projects/MTO/docs/superpowers/plans/2026-04-26-frontend-perf-pass.md","outputSize":14749,"success":true}
+{"ts":"2026-04-27T04:58:14.835Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_execute","outputSize":401,"success":true}
+{"ts":"2026-04-27T04:58:23.671Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_execute","outputSize":58228,"success":true}
+{"ts":"2026-04-27T04:58:30.252Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_execute","outputSize":1180,"success":true}
+{"ts":"2026-04-27T04:58:54.043Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_execute","outputSize":3672,"success":true}
+{"ts":"2026-04-27T04:59:46.190Z","event":"PostToolUse","tool":"mcp__plugin_context-mode_context-mode__ctx_execute","outputSize":404,"success":true}
+{"ts":"2026-04-27T04:59:57.061Z","event":"PreToolUse","tool":"Read","path":"/Users/trelo/.gemini/antigravity/mcp_config.json","decision":"passthrough"}
+{"ts":"2026-04-27T05:08:24.747Z","event":"PostToolUse","tool":"Read","path":"/Users/trelo/.gemini/antigravity/mcp_config.json","outputSize":141,"success":true}
+{"ts":"2026-04-27T05:08:33.099Z","event":"PreToolUse","tool":"Write","path":"/Users/trelo/.gemini/antigravity/mcp_config.json","decision":"passthrough"}
+{"ts":"2026-04-27T05:08:45.304Z","event":"PreToolUse","tool":"Write","path":"/Users/trelo/.gemini/antigravity/mcp_config.json","decision":"passthrough"}
+{"ts":"2026-04-27T05:08:48.363Z","event":"PostToolUse","tool":"Write","path":"/Users/trelo/.gemini/antigravity/mcp_config.json","outputSize":1111,"success":true}

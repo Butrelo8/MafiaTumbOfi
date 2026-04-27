@@ -3,9 +3,12 @@
 const { name, role, image, featured = false, instagram = "#", youtube = "#" } = Astro.props;
 ---
 
-<div class={`member-card ${featured ? "featured" : ""}`} data-aos="fade-up">
+<div class={`member-card ${featured ? "featured" : ""}`} data-reveal>
   <div class="member-image">
-    <img src={image} alt={name} loading="lazy" width="180" height="180" decoding="async" />
+    <picture>
+      <source srcset={image.replace('.jpg', '.webp')} type="image/webp" />
+      <img src={image} alt={name} loading="lazy" width="180" height="180" decoding="async" />
+    </picture>
   </div>
 
   <span class="member-role">{role}</span>
