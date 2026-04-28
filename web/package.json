@@ -12,13 +12,13 @@
     "test:e2e:install": "playwright install chromium"
   },
   "dependencies": {
-    "@astrojs/node": "9.0.0",
-    "@astrojs/vercel": "^5.2.0",
-    "@clerk/astro": "^3.0.4",
+    "@astrojs/node": "^9.1.1",
+    "@astrojs/vercel": "^10.0.5",
+    "@clerk/astro": "^3.0.21",
     "@fontsource/cormorant-garamond": "^5.2.11",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
-    "astro": "^4.16.0"
+    "astro": "^6.1.9"
   },
   "devDependencies": {
     "@astrojs/tailwind": "^5.1.0",
