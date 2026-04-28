@@ -26,11 +26,29 @@ const { apiUrl } = Astro.props
     <h2 class="form-section-heading">Datos de contacto</h2>
     <div class="field">
       <label for="name" class="field-label">Nombre *</label>
-      <input id="name" name="name" type="text" required placeholder="Tu nombre completo" class="field-input" />
+      <input
+        id="name"
+        name="name"
+        type="text"
+        required
+        placeholder="Tu nombre completo"
+        class="field-input"
+        aria-describedby="error-name"
+      />
+      <span id="error-name" class="field-error" role="alert" aria-live="polite"></span>
     </div>
     <div class="field">
       <label for="email" class="field-label">Email *</label>
-      <input id="email" name="email" type="email" required placeholder="correo@ejemplo.com" class="field-input" />
+      <input
+        id="email"
+        name="email"
+        type="email"
+        required
+        placeholder="correo@ejemplo.com"
+        class="field-input"
+        aria-describedby="error-email"
+      />
+      <span id="error-email" class="field-error" role="alert" aria-live="polite"></span>
     </div>
     <div class="field">
       <label for="phone" class="field-label">Teléfono</label>
@@ -276,6 +294,16 @@ const { apiUrl } = Astro.props
   .booking-form-wrap .hidden {
     display: none !important;
   }
+  .booking-form-wrap .field-error {
+    display: block;
+    min-height: 1.25em;
+    color: var(--color-error, #e53e3e);
+    font-size: 0.8125rem;
+    margin-top: 0.25rem;
+  }
+  .booking-form-wrap .field-error:empty {
+    display: none;
+  }
 </style>
 
 <script>
@@ -321,14 +349,36 @@ const { apiUrl } = Astro.props
   formEl.addEventListener('submit', async (e) => {
     e.preventDefault()
     if (!btn) return
+
+    // Clear previous field errors
+    const errName = document.getElementById('error-name')
+    const errEmail = document.getElementById('error-email')
+    if (errName) errName.textContent = ''
+    if (errEmail) errEmail.textContent = ''
+
+    const fd = new FormData(formEl)
+    const nameVal = (fd.get('name') as string | null)?.trim() ?? ''
+    const emailVal = (fd.get('email') as string | null)?.trim() ?? ''
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+    let hasError = false
+    if (!nameVal) {
+      if (errName) errName.textContent = 'El nombre es obligatorio'
+      hasError = true
+    }
+    if (!emailVal || !emailRegex.test(emailVal)) {
+      if (errEmail) errEmail.textContent = 'Email no válido'
+      hasError = true
+    }
+    if (hasError) return
+
     btn.disabled = true
     btn.textContent = 'Enviando…'
     setStatus('loading', 'Enviando…')
 
-    const fd = new FormData(formEl)
     const body = {
-      name: fd.get('name'),
-      email: fd.get('email'),
+      name: nameVal,
+      email: emailVal,
       phone: fd.get('phone') || undefined,
       eventDate: fd.get('eventDate') || undefined,
       city: fd.get('city') || undefined,
