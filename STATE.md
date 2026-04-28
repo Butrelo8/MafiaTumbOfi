@@ -7,8 +7,8 @@
   - **Astro v6 Upgrade:** Migrated from Astro 4.16.19 to 6.1.9; updated `@astrojs/vercel` (import path fix) and `@astrojs/node` adapters.
   - **XSS Fix (Astro/GHSA-j687-52p2-xcff):** Removed unused `define:vars` from `MarketingLayout.astro`.
   - **XSS Fix (Stored):** Created `safeJsonForScript` helper to escape `<`, `>`, and `&` in JSON script tags; applied to `admin.astro` to prevent admin session hijacking.
-  - **Rate Limit Fix:** Updated `getClientId.ts` to use the last entry in `X-Forwarded-For` (prevents IP spoofing on Render); added `Retry-After` header to 429 responses.
-- **Last completed:** Stored XSS fix in `admin.astro` (2026-04-28).
+  - **Dependency Upgrade:** Bumped `drizzle-orm` to `v0.45.2` to fix SQL injection vulnerability (GHSA-gpj5-g38j-94v9).
+- **Last completed:** drizzle-orm security upgrade (2026-04-28).
 - **Next up:** SEO improvements (OG image) or continuing with the design consultation redo PR.
 - **Tests:** Last verified **2026-04-28:** `cd web && bun run build` passed cleanly with Astro v6. `bun test` in API root also passing.
 - **Working tree:** Mostly clean after commits.
@@ -30,7 +30,8 @@
 - **E2E:** Run **`cd web && bunx playwright test`** when dev server available if you need full confidence beyond unit tests.
 
 ## Session Notes
-- **Saved:** **2026-04-28** — **Stored XSS Fix** in `admin.astro` completed. `safeJsonForScript` helper added with tests.
+- **Saved:** **2026-04-28** — **drizzle-orm upgrade** to `v0.45.2` completed. Fixes GHSA-gpj5-g38j-94v9.
+- **Saved:** **2026-04-28** — **Stored XSS Fix** in `admin.astro` completed.
 - **Saved:** **2026-04-28** — **Astro v6 Upgrade** completed.
 - **Saved:** **2026-04-27** — **Rate Limit Fix** shipped. Prevents IP spoofing on Render proxy. Added `Retry-After`.
 - **Saved:** **2026-04-22** — **save state** after **fullscreen menu** redesign.

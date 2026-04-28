@@ -9,15 +9,6 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 ## Open
 
 
-### Upgrade drizzle-orm past 0.45.2 (GHSA-gpj5-g38j-94v9)
-- **What:** Bump `drizzle-orm` to ≥0.45.2 to close the SQL injection via improperly escaped SQL identifiers CVE.
-- **Why:** Direct dependency, HIGH-severity CVE. Current codebase uses hardcoded schema columns so immediate exploitability is low, but the vulnerable version is a risk as the code evolves.
-- **Context:** `package.json` direct dep. `bun audit` flags GHSA-gpj5-g38j-94v9. Column refs in `src/routes/admin.ts:86,484` use schema columns (not user input).
-- **Solution:** `bun update drizzle-orm` → `bun audit` clean → `bun test` passes.
-- **Done When:** `bun audit` no longer flags GHSA-gpj5-g38j-94v9; all existing tests green.
-- **Effort:** S (human: ~15m / CC: ~5 min)
-- **Priority:** P1 — known CVE in direct dep
-- **Depends on:** Nothing
 
 
 ---
@@ -174,6 +165,10 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 ---
 
 ## Completed
+
+### Security — Upgrade drizzle-orm past 0.45.2 (GHSA-gpj5-g38j-94v9) (2026-04-28)
+- **Fix:** Upgraded `drizzle-orm` from `v0.30.0` to `v0.45.2`.
+- **Verification:** Verified `bun audit` no longer flags the SQL injection vulnerability and all tests passed.
 
 ### Security — Fix Stored XSS in admin.astro JSON script tags (2026-04-28)
 - **Fix:** Created `safeJsonForScript` helper to escape `<`, `>`, and `&` characters in JSON embedded in `<script>` tags.
