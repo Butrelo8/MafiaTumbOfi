@@ -8,32 +8,6 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ## Open
 
-
-
-
----
-
-
----
-
-### SEO — Create OG image at 1200×630 + add dimension meta
-
-**What:** Design/export social card at 1200×630 pixels (replaces current `/icon/mafiatumbada.png` which is 1536×1024); add `og:image:width`, `og:image:height`, and `og:image:type` meta tags.
-**Why:** Current OG image has wrong aspect ratio (3:2 vs 1.91:1 standard); no dimension hints in meta; logo is not a designed social card.
-**Context:** `web/src/components/Seo.astro` uses `/icon/mafiatumbada.png` as default `ogImagePath`. Change to `/og/og-default.jpg` at standard social card dimensions.
-**Solution:** (1) Create visual at 1200×630px (use DESIGN.md tokens: veracruz noir palette, minimal type, Mafia Tumbada branding). Export as JPEG to `web/public/og/og-default.jpg`. (2) Update `Seo.astro` default `ogImagePath` from `/icon/mafiatumbada.png` to `/og/og-default.jpg`. (3) Add dimension meta tags in the `og:image` block:
-```html
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta property="og:image:type" content="image/jpeg" />
-```
-**Done When:** OG image file exists at `web/public/og/og-default.jpg` (1200×630 JPEG); `Seo.astro` uses it by default; social share preview via Twitter Card validator or Open Graph checker shows the new card image.
-**Effort:** S
-**Priority:** P1
-**Depends on:** DESIGN.md finalized
-
----
-
 ### Infra — Distributed rate limiting for multiple API instances
 
 **What:** Replace or back in-memory booking (and future route-scoped) rate limit stores with a shared limiter (e.g. Redis, Upstash) or document single-instance requirement in DEPLOY.md.
@@ -165,6 +139,26 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 ---
 
 ## Completed
+
+### Perf — Optimize hero + marketing images for LCP (2026-04-28)
+- **Fix:** Converted `marketing-grunge-texture.png` (4.5 MB) and `mafiatumbada.png` (1.2 MB) to WebP; logo resized to display dimensions. Commit: 5492f6e.
+- **Verification:** `bun run build` green; images ≤200 KB each.
+
+### QA — Fix form validation: prevent API call on empty submit (2026-04-28)
+- **Fix:** Client-side name + email guard added before `fetch()` in booking form. Per-field error `<span>` with `aria-describedby` on each required input. Commit: 0ec3925.
+- **Verification:** Empty submit fires no network request; error appears immediately.
+
+### QA — Host Spotify/Apple Music album art locally (2026-04-28)
+- **Fix:** Downloaded 6 album covers; stored at `web/public/music/`; replaced CDN URLs in `index.astro`. Commit: 92a0ee5.
+- **Verification:** All six covers render; no external CDN image requests.
+
+### QA — Per-field form validation errors (2026-04-28)
+- **Fix:** Individual error `<span>` under each required input with `aria-describedby`. Commit: 0ec3925.
+- **Verification:** Each field shows its own error on validation failure.
+
+### SEO — Create OG image at 1200×630 + add dimension meta (2026-04-28)
+- **Fix:** Created `web/public/og/og-default.jpg` (1200×630); updated `Seo.astro` default `ogImagePath`; added `og:image:width/height/type` meta tags. Commit: bb12da2.
+- **Verification:** Social card renders at correct aspect ratio; meta tags present in `<head>`.
 
 ### Security — Upgrade drizzle-orm past 0.45.2 (GHSA-gpj5-g38j-94v9) (2026-04-28)
 - **Fix:** Upgraded `drizzle-orm` from `v0.30.0` to `v0.45.2`.

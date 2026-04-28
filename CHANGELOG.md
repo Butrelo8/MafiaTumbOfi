@@ -9,6 +9,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **SEO — OG social card:** `web/public/og/og-default.jpg` at 1200×630 (Veracruz Noir palette). `web/src/components/Seo.astro` — default `ogImagePath` → `/og/og-default.jpg`; added `og:image:width` (1200), `og:image:height` (630), `og:image:type` (image/jpeg) meta tags.
+
+### Changed
+
+- **Perf — WebP image optimization:** `marketing-grunge-texture.png` (4.5 MB) + `mafiatumbada.png` (1.2 MB logo) → WebP; logo resized to display dimensions. ~5.7 MB removed from initial page load.
+
+### Fixed
+
+- **Album art (local):** 6 album cover images downloaded to `web/public/music/`; Spotify/Apple CDN URLs removed from `web/src/pages/index.astro`. Resolves broken covers in ArtworkShelf.
+- **Booking form validation:** Client-side `name` + `email` guard before `fetch()` — no wasted round trip on empty submit. Per-field error `<span>` elements added with `aria-describedby` on all required inputs.
+
+---
+
+### Added
+
 - **Marketing — Member photos (local):** `**web/src/data/members.ts**` — `**image**` paths `**/members/<slug>.jpg**` (no `ui-avatars`). `**web/public/members/**` — four **180×180** JPEGs. `**web/src/components/MemberCard.astro**` — `**<img>**` intrinsic **180×180**, `**decoding="async"**`, display still **90×90** via CSS. Spec: `**docs/superpowers/specs/2026-04-21-member-photos-design.md**`.
 - **Marketing — ArtworkShelf CD covers:** `**web/src/components/ArtworkShelf.astro**` — optional `**cover**` on each item; lazy `**<img>**` with explicit 80×80 attrs when present, initials fallback when omitted. `**web/src/styles/marketing-press.css**` — `**.artwork-shelf-img**`. `**web/src/pages/index.astro**` — per-single cover URLs (Spotify / Apple CDN) on `**artworkShelfItems**`. Spec: `**docs/superpowers/plans/2026-04-21-artwork-shelf-cd-covers.md**`.
 - **Admin — borrar todas las solicitudes:** API `**POST /api/admin/bookings/delete-all`** — cuerpo `**{ dryRun: true }**` devuelve conteo de filas (todas) sin borrar; `**{ confirm: "DELETE_ALL_BOOKINGS" }**` borra en transacción y escribe `**audit**` `admin_bookings_delete_all` (incluye `**deletedCount**`). Default-deny en producción salvo `**ALLOW_ADMIN_DELETE_ALL_BOOKINGS=true**` o `**NODE_ENV=development**` (`**src/lib/adminDeleteAllBookings.ts**`). Relay Astro `**web/src/pages/admin/delete-all-bookings.ts**`. `**web/src/pages/admin.astro**` — zona peligrosa + modal (frase + vista previa + deshabilitar en vuelo). `**DEPLOY.md**` §7 Option C — documentación del endpoint y flags. Tests: `**admin-delete-all-bookings.test.ts**`, `**adminDeleteAllBookings.test.ts**`, `**admin-auth.test.ts**` (403 no-admin), `**adminPageTheme.test.ts**` (strings peligro).

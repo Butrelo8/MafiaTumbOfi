@@ -1,17 +1,18 @@
 # Project State
 
 ## Current Position
-- **Branch:** `main` (Recent critical security fixes)
-- **Phase:** Security Hardening & Astro v6 Migration — Fixed GHSA-j687-52p2-xcff (Astro XSS) and Rate Limit IP spoofing.
-- **Recently shipped (code):** 
-  - **Astro v6 Upgrade:** Migrated from Astro 4.16.19 to 6.1.9; updated `@astrojs/vercel` (import path fix) and `@astrojs/node` adapters.
-  - **XSS Fix (Astro/GHSA-j687-52p2-xcff):** Removed unused `define:vars` from `MarketingLayout.astro`.
-  - **XSS Fix (Stored):** Created `safeJsonForScript` helper to escape `<`, `>`, and `&` in JSON script tags; applied to `admin.astro` to prevent admin session hijacking.
-  - **Dependency Upgrade:** Bumped `drizzle-orm` to `v0.45.2` to fix SQL injection vulnerability (GHSA-gpj5-g38j-94v9).
-- **Last completed:** drizzle-orm security upgrade (2026-04-28).
-- **Next up:** SEO improvements (OG image) or continuing with the design consultation redo PR.
-- **Tests:** Last verified **2026-04-28:** `cd web && bun run build` passed cleanly with Astro v6. `bun test` in API root also passing.
-- **Working tree:** Mostly clean after commits.
+- **Branch:** `main`
+- **Phase:** QA/SEO/Perf pass complete — security hardening done; image optimization, form UX, and OG card all shipped.
+- **Recently shipped (code):**
+  - **OG Social Card:** `web/public/og/og-default.jpg` 1200×630; `Seo.astro` now emits `og:image:width/height/type` meta tags (bb12da2).
+  - **WebP Image Optimization:** `marketing-grunge-texture.png` (4.5 MB) + `mafiatumbada.png` (1.2 MB) → WebP; logo resized to display dimensions (5492f6e).
+  - **Album Art (local):** 6 cover images downloaded, hosted at `web/public/music/`; Spotify/Apple CDN URLs removed from `index.astro` (92a0ee5).
+  - **Form Validation:** Client-side name+email guard before `fetch()`; per-field error `<span>` with `aria-describedby` on each required input (0ec3925).
+  - **Security (prior):** drizzle-orm 0.45.2 (GHSA-gpj5-g38j-94v9), stored XSS in `admin.astro`, Astro v6 (GHSA-j687-52p2-xcff), rate-limit IP-spoofing fix.
+- **Last completed:** form client-side validation + per-field errors (2026-04-28).
+- **Next up:** Design — change band icon/logo (TODOS open). Design — Confianza/Testimonios real content. Mobile QA on Android mid-range.
+- **Tests:** Last verified **2026-04-28:** `cd web && bun run build` green. `bun test` passing.
+- **Working tree:** Unstaged changes in `src/middleware/` (rate limit refactor in progress); untracked `web/.astro/` generated files.
 
 ## Accumulated Decisions
 - **2026-04-22 (fullscreen menu nav):** Inside **`.mobile-menu`**, primary **`.menu-link`** hovers use **motion + gold underline** only; **do not** use **`--accent`** for large nav type or underline — keeps Veracruz Noir hierarchy; socials use gold-border hover + **`--text`**.
@@ -30,9 +31,10 @@
 - **E2E:** Run **`cd web && bunx playwright test`** when dev server available if you need full confidence beyond unit tests.
 
 ## Session Notes
+- **Saved:** **2026-04-28** — **OG card** (1200×630), **WebP images**, **local album art**, **form validation + per-field errors** all shipped.
 - **Saved:** **2026-04-28** — **drizzle-orm upgrade** to `v0.45.2` completed. Fixes GHSA-gpj5-g38j-94v9.
 - **Saved:** **2026-04-28** — **Stored XSS Fix** in `admin.astro` completed.
 - **Saved:** **2026-04-28** — **Astro v6 Upgrade** completed.
 - **Saved:** **2026-04-27** — **Rate Limit Fix** shipped. Prevents IP spoofing on Render proxy. Added `Retry-After`.
 - **Saved:** **2026-04-22** — **save state** after **fullscreen menu** redesign.
-- **Resume with:** SEO — Create OG image at 1200×630 + add dimension meta (TODOS P1).
+- **Resume with:** Design — change band icon/logo or Confianza/Testimonios real content (next open TODOS).
