@@ -5,9 +5,10 @@
 - **Phase:** Security Hardening & Astro v6 Migration — Fixed GHSA-j687-52p2-xcff (Astro XSS) and Rate Limit IP spoofing.
 - **Recently shipped (code):** 
   - **Astro v6 Upgrade:** Migrated from Astro 4.16.19 to 6.1.9; updated `@astrojs/vercel` (import path fix) and `@astrojs/node` adapters.
-  - **XSS Fix:** Removed unused `define:vars` from `MarketingLayout.astro` as a surgical workaround for GHSA-j687-52p2-xcff.
+  - **XSS Fix (Astro/GHSA-j687-52p2-xcff):** Removed unused `define:vars` from `MarketingLayout.astro`.
+  - **XSS Fix (Stored):** Created `safeJsonForScript` helper to escape `<`, `>`, and `&` in JSON script tags; applied to `admin.astro` to prevent admin session hijacking.
   - **Rate Limit Fix:** Updated `getClientId.ts` to use the last entry in `X-Forwarded-For` (prevents IP spoofing on Render); added `Retry-After` header to 429 responses.
-- **Last completed:** Astro XSS Fix + Rate Limit Hardening (2026-04-28).
+- **Last completed:** Stored XSS fix in `admin.astro` (2026-04-28).
 - **Next up:** SEO improvements (OG image) or continuing with the design consultation redo PR.
 - **Tests:** Last verified **2026-04-28:** `cd web && bun run build` passed cleanly with Astro v6. `bun test` in API root also passing.
 - **Working tree:** Mostly clean after commits.
@@ -29,7 +30,8 @@
 - **E2E:** Run **`cd web && bunx playwright test`** when dev server available if you need full confidence beyond unit tests.
 
 ## Session Notes
-- **Saved:** **2026-04-28** — **Astro v6 Upgrade** completed. Build passing. `TODOS.md` updated. GHSA-j687-52p2-xcff closed via surgical workaround + major version bump.
+- **Saved:** **2026-04-28** — **Stored XSS Fix** in `admin.astro` completed. `safeJsonForScript` helper added with tests.
+- **Saved:** **2026-04-28** — **Astro v6 Upgrade** completed.
 - **Saved:** **2026-04-27** — **Rate Limit Fix** shipped. Prevents IP spoofing on Render proxy. Added `Retry-After`.
 - **Saved:** **2026-04-22** — **save state** after **fullscreen menu** redesign.
 - **Resume with:** SEO — Create OG image at 1200×630 + add dimension meta (TODOS P1).

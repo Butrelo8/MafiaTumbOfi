@@ -15,6 +15,7 @@ import {
 } from '../lib/adminPipelinePageCounts'
 import { phoneToTelHref } from '../lib/adminQuickActions'
 import { staleNewBadgeState } from '../lib/adminStaleNewBadge'
+import { safeJsonForScript } from '../lib/safeJson'
 
 const { isAuthenticated, redirectToSignIn, getToken } = Astro.locals.auth()
 
@@ -196,8 +197,8 @@ function leadPriorityBadgeClass(p: string | null | undefined): string {
   return `${base} admin-priority-unknown`
 }
 const nowMs = Date.now()
-const bookingsJson = JSON.stringify(bookings).replace(/</g, '\\u003c')
-const adminToursJson = JSON.stringify(adminTours).replace(/</g, '\\u003c')
+const bookingsJson = safeJsonForScript(bookings)
+const adminToursJson = safeJsonForScript(adminTours)
 ---
 
 <MarketingLayout
