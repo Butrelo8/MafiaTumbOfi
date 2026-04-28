@@ -105,7 +105,18 @@ const artworkShelfItems = [
       <div class="hero-copy hero-content">
         <p class="hero-eyebrow">Sitio Oficial</p>
         <h1 class="hero-title">
-          <img src="/icon/mafiatumbada.png" alt="Mafia Tumbada" class="hero-logo-img" />
+          <picture>
+            <source srcset="/icon/mafiatumbada.webp" type="image/webp" />
+            <img
+              src="/icon/mafiatumbada.png"
+              alt="Mafia Tumbada"
+              class="hero-logo-img"
+              width="397"
+              height="264"
+              fetchpriority="high"
+              loading="eager"
+            />
+          </picture>
         </h1>
         <div class="hero-meta">
           <span>Xalapa, Veracruz</span>

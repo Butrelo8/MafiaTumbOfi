@@ -103,7 +103,7 @@ body.marketing-body::after {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background: url('/marketing-grunge-texture.png') center / 320px 320px repeat fixed;
+  background: url('/marketing-grunge-texture.webp') center / 320px 320px repeat fixed;
   opacity: 0.18;
   mix-blend-mode: screen;
 }
@@ -1742,7 +1742,7 @@ body.marketing-body img {
 .marquee-track {
   display: flex;
   width: max-content;
-  gap: 2rem;
+  gap: 0;
   padding-block: 0.65rem;
   animation: marquee-scroll 42s linear infinite;
 }
@@ -1754,6 +1754,7 @@ body.marketing-body img {
   text-transform: uppercase;
   color: var(--burgundy-hot);
   white-space: nowrap;
+  padding-inline-end: 2rem;
 }
 
 @keyframes marquee-scroll {
@@ -1780,6 +1781,7 @@ body.marketing-body img {
     white-space: normal;
     text-align: center;
     letter-spacing: 0.12em;
+    padding-inline-end: 0;
   }
 
   .marquee-text:last-child {
