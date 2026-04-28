@@ -10,6 +10,9 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 
 ---
 
+
+---
+
 ### SEO — Create OG image at 1200×630 + add dimension meta
 
 **What:** Design/export social card at 1200×630 pixels (replaces current `/icon/mafiatumbada.png` which is 1536×1024); add `og:image:width`, `og:image:height`, and `og:image:type` meta tags.
@@ -25,8 +28,6 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 **Effort:** S
 **Priority:** P1
 **Depends on:** DESIGN.md finalized
-
----
 
 ---
 
@@ -161,6 +162,16 @@ Track open work and completed items by version. See CHANGELOG.md for full releas
 ---
 
 ## Completed
+
+### Security — Upgrade Astro to fix define:vars XSS (GHSA-j687-52p2-xcff) (2026-04-28)
+- **Fix:** Upgraded `astro` from `v4` to `v6.1.9` and updated `@astrojs/vercel` and `@astrojs/node` adapters.
+- **Hardening:** Removed unused `define:vars` from `MarketingLayout.astro` as a surgical workaround to eliminate the XSS surface (GHSA-j687-52p2-xcff).
+- **Verification:** Verified `bun run build` passes cleanly and confirmed Astro version via script.
+
+### Security — Rate-limit bypass via X-Forwarded-For spoofing (2026-04-27)
+- **Fix:** `getClientId.ts` now uses the last (rightmost) value in `X-Forwarded-For` to prevent IP spoofing on Render.
+- **Hardening:** Added `Retry-After` header to 429 responses to indicate wait time.
+- **Verification:** Updated unit tests to verify the fix and the new header.
 
 ### SEO — Foundational SEO improvements (2026-04-27)
 
