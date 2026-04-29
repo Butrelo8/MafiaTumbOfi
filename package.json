@@ -1,6 +1,6 @@
 {
   "name": "mafia-tumbada-ofi",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "scripts": {
     "dev": "bun run --watch src/index.ts",
