@@ -1,6 +1,5 @@
 ---
 import MarketingLayout from '../layouts/MarketingLayout.astro'
-import { Show } from '@clerk/astro/components'
 import { homeCanonical } from '../lib/publicSiteUrl'
 
 import MemberCard from '../components/MemberCard.astro'
@@ -19,6 +18,8 @@ import SignatureCTA from '../components/SignatureCTA.astro'
 import { normalizePublicApiBaseUrl } from '../lib/publicApiUrl'
 
 const apiBase = normalizePublicApiBaseUrl(import.meta.env.PUBLIC_API_URL)
+
+const { userId } = Astro.locals.auth?.() ?? {}
 
 const title = 'Mafia Tumbada — Oficial'
 const description =
@@ -80,25 +81,26 @@ const artworkShelfItems = [
 <MarketingLayout title={title} description={description} canonicalUrl={canonicalUrl} hasHero={true}>
 
   <!-- Admin notice (solo visible si hay sesión) -->
-  <Show when="signed-in">
+  {userId ? (
     <div class="admin-notice">
       <span>Panel de admin:</span>
       <a href="/admin">Ver solicitudes</a>
     </div>
-  </Show>
+  ) : null}
 
   <!-- ─── HERO ─────────────────────────────────────────────── -->
   <section class="hero hero--asymmetric">
     <!-- Full-bleed background (Veracruz Noir: film + scrims + copy stack above) -->
     <video
       class="hero-video"
-      autoplay
       muted
       playsinline
       loop
       aria-hidden="true"
+      poster="/video/hero-poster.webp"
+      preload="none"
     >
-      <source src="/video/hero.mp4" type="video/mp4" />
+      <source data-src="/video/hero.mp4" type="video/mp4" />
     </video>
     <div class="hero-grain" aria-hidden="true"></div>
     <div class="container hero-grid">
@@ -714,6 +716,8 @@ const artworkShelfItems = [
       </div>
       <p class="footer-copy">
         © {new Date().getFullYear()} · Xalapa, Veracruz · Todos los derechos reservados
+        <span style="margin: 0 0.5rem; opacity: 0.5;">·</span>
+        <a href="https://github.com/Butrelo8/MafiaTumbOfi" target="_blank" rel="noopener noreferrer" class="footer-github-link" aria-label="Repositorio de GitHub">Código abierto</a>
       </p>
     </div>
   </footer>
@@ -721,6 +725,8 @@ const artworkShelfItems = [
 </MarketingLayout>
 
 <script>
+  import { mountHeroVideo } from '../lib/heroVideo'
+
   const observerOptions = {
     threshold: 0.1,
     rootMargin: '0px 0px -50px 0px'
@@ -738,6 +744,8 @@ const artworkShelfItems = [
   document.querySelectorAll('[data-reveal]').forEach((el) => {
     observer.observe(el);
   });
+
+  mountHeroVideo(document);
 </script>
 
 <style>

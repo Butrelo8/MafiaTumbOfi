@@ -1,21 +1,20 @@
 ---
 import '../styles/global.css'
 import '../styles/marketing-press.css'
-import { Show, UserButton, SignInButton, SignUpButton } from '@clerk/astro/components'
 import Seo from '../components/Seo.astro'
 import { bandSocialUrls } from '../data/socials'
 import { normalizePlausibleDataDomain } from '../lib/plausibleClient'
 import { showPressAssetsSection } from '../lib/showPressAssets'
-import '@fontsource/cormorant-garamond/300.css'
-import '@fontsource/cormorant-garamond/300-italic.css'
-import '@fontsource/cormorant-garamond/600.css'
-import '@fontsource/cormorant-garamond/700.css'
-import '@fontsource/inter/400.css'
-import '@fontsource/inter/500.css'
-import '@fontsource/inter/600.css'
-import '@fontsource/inter/700.css'
-import '@fontsource/jetbrains-mono/400.css'
-import '@fontsource/jetbrains-mono/500.css'
+import '@fontsource/cormorant-garamond/latin-300.css'
+import '@fontsource/cormorant-garamond/latin-300-italic.css'
+import '@fontsource/cormorant-garamond/latin-600.css'
+import '@fontsource/cormorant-garamond/latin-700.css'
+import '@fontsource/inter/latin-400.css'
+import '@fontsource/inter/latin-500.css'
+import '@fontsource/inter/latin-600.css'
+import '@fontsource/inter/latin-700.css'
+import '@fontsource/jetbrains-mono/latin-400.css'
+import '@fontsource/jetbrains-mono/latin-500.css'
 
 interface Props {
   title: string
@@ -27,6 +26,8 @@ interface Props {
 }
 
 const { title, description, canonicalUrl, robots } = Astro.props
+
+const { userId } = Astro.locals.auth?.() ?? {}
 
 const navItems = [
   { href: '/', label: 'Inicio' },
@@ -53,6 +54,8 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
       themeColor="#0a0a0c"
       robots={robots}
     />
+    <link rel="preconnect" href="https://plausible.io" />
+    <link rel="preload" as="image" href="/video/hero-poster.webp" />
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'MusicGroup',
@@ -92,7 +95,10 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
     <!-- ─── HEADER ──────────────────────────────────────────── -->
     <header class="site-header" id="site-header">
       <a href="/" class="header-logo" aria-label="Mafia Tumbada — Inicio">
-        <img src="/icon/mafiatumbada.png" alt="Mafia Tumbada" class="header-logo-img" />
+        <picture>
+          <source srcset="/icon/mafiatumbada.webp" type="image/webp" />
+          <img src="/icon/mafiatumbada.png" alt="Mafia Tumbada" class="header-logo-img" width="200" height="60" />
+        </picture>
       </a>
 
       <div class="header-right">
@@ -165,14 +171,14 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
                 </a>
               </li>
             ))}
-            <Show when="signed-in">
+            {userId ? (
               <li class="menu-item" style={`--i:${navItems.length}`}>
                 <a href="/admin" class="menu-link">
                   <span class="menu-num">{String(navItems.length + 1).padStart(2, '0')}</span>
                   <span class="menu-label">Admin</span>
                 </a>
               </li>
-            </Show>
+            ) : null}
           </ol>
         </nav>
 
@@ -195,13 +201,9 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
           </a>
 
           <div class="menu-auth">
-            <Show when="signed-out">
-              <SignInButton mode="modal" />
-              <SignUpButton mode="modal" />
-            </Show>
-            <Show when="signed-in">
-              <UserButton />
-            </Show>
+            {userId ? (
+              <a href="/admin" class="menu-cta">Admin</a>
+            ) : null}
           </div>
         </aside>
       </div>
@@ -235,15 +237,22 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
 
       const header = document.getElementById('site-header');
 
+      let ticking = false;
       function checkScroll() {
-        if (window.scrollY > 50) {
-          header?.classList.add('is-scrolled');
-        } else {
-          header?.classList.remove('is-scrolled');
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            if (window.scrollY > 50) {
+              header?.classList.add('is-scrolled');
+            } else {
+              header?.classList.remove('is-scrolled');
+            }
+            ticking = false;
+          });
+          ticking = true;
         }
       }
 
-      window.addEventListener('scroll', checkScroll);
+      window.addEventListener('scroll', checkScroll, { passive: true });
       checkScroll();
 
       hamburgerBtn?.addEventListener('click', () => {
@@ -256,11 +265,7 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
         closeMenu();
       });
 
-      // Clerk modals render on `body`; this overlay is z-index 200 — close it after SignIn/SignUp/UserButton
-      // so the modal is not covered (otherwise the flow looks "stuck" / unrelated page copy can show through).
-      document.querySelector('.menu-auth')?.addEventListener('click', () => {
-        window.setTimeout(() => closeMenu(), 0);
-      });
+
 
       // Close on link click
       menu?.querySelectorAll('.menu-link').forEach(link => {

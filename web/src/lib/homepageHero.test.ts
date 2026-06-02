@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { shouldLoadHeroVideo } from './heroVideo'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const indexPath = join(__dirname, '../pages/index.astro')
@@ -25,14 +26,16 @@ describe('marketing homepage hero', () => {
     expect(src).toContain('aria-hidden="true"')
     expect(src).toContain('playsinline')
     expect(src).toContain('muted')
+    expect(src).toContain('poster="/video/hero-poster.webp"')
+    expect(src).toContain('preload="none"')
   })
 
-  test('marketing CSS defines video layer, scrim, deco line, and reduced-motion fallback', () => {
+  test('marketing CSS defines video layer, scrim, deco line, poster fade-in, and reduced-motion fallback', () => {
     const css = readFileSync(marketingCssPath, 'utf8')
     expect(css).toContain('.hero-video')
     expect(css).toMatch(/\.hero-video\s*\{[^}]*pointer-events:\s*none/s)
-    expect(css).toContain('blur(2px)')
-    expect(css).toContain('brightness(1.1)')
+    expect(css).toContain('opacity: 0')
+    expect(css).toContain('.hero-video[data-loaded]')
     expect(css).toContain('rgba(0, 0, 0, 0.2)')
     expect(css).toContain('rgba(0, 0, 0, 0.5)')
     expect(css).toContain('.hero-deco-line')
@@ -84,6 +87,42 @@ describe('marketing homepage hero', () => {
   })
 })
 
+describe('heroVideo capability gate', () => {
+  test('returns false when prefers-reduced-motion is set', () => {
+    const win = { matchMedia: () => ({ matches: true }), navigator: {} } as unknown as Window
+    expect(shouldLoadHeroVideo(win)).toBe(false)
+  })
+
+  test('returns false when saveData is true', () => {
+    const win = {
+      matchMedia: () => ({ matches: false }),
+      navigator: { connection: { saveData: true, effectiveType: '4g' } },
+    } as unknown as Window
+    expect(shouldLoadHeroVideo(win)).toBe(false)
+  })
+
+  test('returns false on 2g connection', () => {
+    const win = {
+      matchMedia: () => ({ matches: false }),
+      navigator: { connection: { saveData: false, effectiveType: '2g' } },
+    } as unknown as Window
+    expect(shouldLoadHeroVideo(win)).toBe(false)
+  })
+
+  test('returns true on capable device', () => {
+    const win = {
+      matchMedia: () => ({ matches: false }),
+      navigator: { connection: { saveData: false, effectiveType: '4g' } },
+    } as unknown as Window
+    expect(shouldLoadHeroVideo(win)).toBe(true)
+  })
+
+  test('returns true when navigator.connection is undefined', () => {
+    const win = { matchMedia: () => ({ matches: false }), navigator: {} } as unknown as Window
+    expect(shouldLoadHeroVideo(win)).toBe(true)
+  })
+})
+
 describe('marketing homepage conversion blocks', () => {
   test('index includes repertoire, testimonials, packages, and booking urgency markup', () => {
     const src = readFileSync(indexPath, 'utf8')
@@ -111,11 +150,14 @@ describe('marketing homepage conversion blocks', () => {
     expect(layoutSrc).toContain('href="/contratacion"')
   })
 
-  test('MarketingLayout defers closeMenu after menu-auth click so Clerk modals are not under z-index overlay', () => {
+  test('MarketingLayout renders admin link server-side, no Clerk client components', () => {
     const layoutSrc = readFileSync(marketingLayoutPath, 'utf8')
     expect(layoutSrc).toContain('class="menu-auth"')
-    expect(layoutSrc).toContain("querySelector('.menu-auth')")
-    expect(layoutSrc).toContain('window.setTimeout(() => closeMenu(), 0)')
+    expect(layoutSrc).not.toContain('from \'@clerk/astro/components\'')
+    expect(layoutSrc).not.toContain('SignInButton')
+    expect(layoutSrc).not.toContain('UserButton')
+    expect(layoutSrc).not.toContain('window.setTimeout(() => closeMenu(), 0)')
+    expect(layoutSrc).toContain('Astro.locals.auth')
   })
 
   test('Plausible hook: hero CTA id, layout snippet, and ticket CTA delegation', () => {

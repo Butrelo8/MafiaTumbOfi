@@ -12,7 +12,7 @@ const { rows, showAllHref = '/contratacion', apiBase } = Astro.props
 const upcomingApiUrl = apiBase ? `${apiBase.replace(/\/+$/, '')}/api/tours/upcoming` : undefined
 ---
 
-<div class="tour-table-wrap" data-tour-upcoming-api={upcomingApiUrl}>
+<div class="tour-table-wrap" data-tour-upcoming-api={upcomingApiUrl} style="min-height: 320px;">
   <table class="tour-table">
     <caption class="sr-only">Próximas fechas</caption>
     <thead>
