@@ -22,4 +22,9 @@ export function mountHeroVideo(doc: Document): void {
     },
     { once: true },
   )
+  // Autoplay: the element has no `autoplay` attr, and `preload="none"` means
+  // some browsers won't fire `loadeddata` until a decode is requested. Calling
+  // play() here forces the load + starts playback (muted = allowed unattended).
+  const p = video.play()
+  if (p && typeof p.catch === 'function') p.catch(() => {})
 }
