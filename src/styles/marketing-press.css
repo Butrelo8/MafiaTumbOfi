@@ -1,27 +1,32 @@
 /* Press / marketing landing — dark theme. Use with body.marketing-body (MarketingLayout). */
 
 :root {
-  /* Veracruz Noir — token values from DESIGN.md */
-  --bg: oklch(8% 0 0);
-  --bg-raised: oklch(12% 0.004 90);
+  /* Gótico Tumbado — token values from DESIGN.md */
+  --bg: oklch(7% 0 0);
+  --bg-raised: oklch(11% 0.006 60);
   --bg-sunk: oklch(5% 0 0);
-  --text: oklch(94% 0.01 90);
-  --text-muted: oklch(65% 0.01 90);
-  --text-faint: oklch(45% 0.01 90);
-  --gold: oklch(76% 0.16 82);
-  --gold-mid: oklch(64% 0.13 78);
-  --gold-shadow: oklch(48% 0.09 75);
+  --text: oklch(95% 0.008 85);
+  --text-muted: oklch(82% 0.008 85);
+  --text-faint: oklch(58% 0.01 85);
+  --gold-peak: oklch(88% 0.14 88);
+  --gold: oklch(78% 0.15 85);
+  --gold-mid: oklch(66% 0.13 80);
+  --gold-shadow: oklch(50% 0.10 78);
   --gold-dim: oklch(38% 0.07 75);
-  --gold-gradient: linear-gradient(135deg, var(--gold-shadow), var(--gold), var(--gold-mid));
+  --gold-gradient: linear-gradient(135deg, var(--gold-shadow), oklch(82% 0.15 86), var(--gold-mid));
+  --gold-text-gradient: linear-gradient(168deg, var(--gold-shadow) 0%, var(--gold-peak) 38%, oklch(72% 0.15 82) 62%, oklch(48% 0.09 76) 100%);
+  --red: oklch(62% 0.22 30);
+  --red-link: oklch(72% 0.19 32);
+  --red-glow: oklch(52% 0.20 28);
   --burgundy-glow: oklch(38% 0.14 15);
   --burgundy-hot: oklch(52% 0.18 18);
   /* Links + focus only — not primary CTAs (use --gold-gradient / gold tokens) */
   --accent: oklch(68% 0.14 200);
-  --border: oklch(20% 0.005 90);
-  --focus-ring: oklch(76% 0.16 82 / 0.65);
+  --border: oklch(19% 0.006 85);
+  --focus-ring: oklch(78% 0.15 85 / 0.7);
 
-  --ff-display: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
-  --ff-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --ff-display: 'Grenze Gotisch', Georgia, serif;
+  --ff-body: 'Archivo', system-ui, -apple-system, sans-serif;
   --ff-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
 
   --fs-eyebrow: 0.75rem;
@@ -51,6 +56,20 @@
   --muted: var(--text-muted);
   --color-brand: var(--gold);
   --color-border: var(--border);
+}
+
+.gold-text {
+  color: var(--gold);
+  background-image: var(--gold-text-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@supports not ((background-clip: text) or (-webkit-background-clip: text)) {
+  .gold-text {
+    -webkit-text-fill-color: currentColor;
+  }
 }
 
 *,
