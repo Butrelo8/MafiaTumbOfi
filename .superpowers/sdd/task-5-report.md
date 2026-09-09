@@ -32,11 +32,10 @@ bun run build
 Result with Spotify credentials absent: pass. Astro built 1 page and completed successfully. The catalog module retains six committed snapshot releases when credentials or Spotify data are unavailable.
 
 ```sh
-SPOTIFY_CLIENT_SECRET=task5-scan-only-secret
-grep -rn "$SPOTIFY_CLIENT_SECRET" dist/ || echo clean
+export SPOTIFY_CLIENT_SECRET='task5-scan-only-secret'; grep -rn -- "$SPOTIFY_CLIENT_SECRET" dist/ || echo clean
 ```
 
-Result: `clean`. Returned catalog data contains mapped public album/video fields only; credentials are not returned.
+Result: `clean` (secret value not printed). Returned catalog data contains mapped public album/video fields only; credentials are not returned.
 
 ## Implementation notes
 
