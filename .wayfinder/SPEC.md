@@ -491,3 +491,21 @@ asset to ship. Not worth a `<source>` fork.
 < 1 MB initial load · LCP < 2.5s · TBT < 200ms · **performance ≥ 90, throttled mobile**.
 Enforcement: honour system, verified once before the DNS cutover in §5. No CI perf gate — a
 one-page static site does not change often enough for a per-commit check to earn its maintenance.
+
+### Mobile-throttled baseline (2026-09-09)
+Built with `bun run build`; served with `bun run preview -- --host 127.0.0.1 --port 4321`; measured
+`http://127.0.0.1:4321/` using Lighthouse 13.1.0 with
+`--form-factor=mobile --throttling-method=simulate --screenEmulation.mobile=true`
+(150 ms RTT, 1,638.4 Kbps throughput, 4× CPU slowdown).
+
+| Metric | Target | Observed | Result |
+| --- | --- | --- | --- |
+| Initial load (total transfer) | < 1 MB | 9,279 KiB (9,502,187 bytes) | Miss — 8,255 KiB over 1 MiB |
+| LCP | < 2.5 s | 8.909 s | Miss — 6.409 s over |
+| TBT | < 200 ms | 150 ms | Pass |
+| Performance | ≥ 90 | 73 | Miss — 17 points short |
+| Accessibility | ≥ 96 | 96 | Pass |
+
+Generated `dist/video/hero.mp4` is 10,036,145 bytes (largest output asset); it remains unchanged per
+the deferred hero-video decision above. This baseline is not DNS-cutover ready because initial-load,
+LCP, and performance targets miss.
