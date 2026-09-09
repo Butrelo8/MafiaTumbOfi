@@ -13,9 +13,13 @@ const limiter = createRateLimiter(WINDOW_MS, MAX_REQUESTS)
  * Use only on the booking route; not applied globally.
  */
 export async function rateLimitBooking(c: Context, next: Next) {
-  const { allowed } = limiter.check(getClientId(c))
+  const { allowed, resetAt } = limiter.check(getClientId(c))
 
   if (!allowed) {
+    const now = Date.now()
+    const retryAfter = Math.ceil(Math.max(0, resetAt - now) / 1000)
+    c.header('Retry-After', retryAfter.toString())
+
     return errorResponse(
       c,
       429,

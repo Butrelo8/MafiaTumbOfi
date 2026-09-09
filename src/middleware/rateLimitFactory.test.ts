@@ -8,11 +8,13 @@ describe('createRateLimiter', () => {
       const r1 = limiter.check('a')
       expect(r1.allowed).toBe(true)
       expect(r1.remaining).toBe(2)
+      expect(r1.resetAt).toBeGreaterThan(Date.now())
       expect(limiter.check('a').allowed).toBe(true)
       expect(limiter.check('a').allowed).toBe(true)
       const r4 = limiter.check('a')
       expect(r4.allowed).toBe(false)
       expect(r4.remaining).toBe(0)
+      expect(r4.resetAt).toBe(r1.resetAt)
     } finally {
       limiter.destroy()
     }

@@ -4,7 +4,7 @@
  */
 
 export interface RateLimitStore {
-  check(clientId: string): { allowed: boolean; remaining: number }
+  check(clientId: string): { allowed: boolean; remaining: number; resetAt: number }
   /** Clears state and the cleanup timer (for tests / shutdown). */
   destroy(): void
 }
@@ -44,7 +44,7 @@ export function createRateLimiter(windowMs: number, max: number): RateLimitStore
 
       const allowed = state.count <= max
       const remaining = Math.max(0, max - state.count)
-      return { allowed, remaining }
+      return { allowed, remaining, resetAt: state.resetAt }
     },
     destroy() {
       clearInterval(interval)
