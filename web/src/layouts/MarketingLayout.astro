@@ -55,7 +55,6 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
       robots={robots}
     />
     <link rel="preconnect" href="https://plausible.io" />
-    <link rel="preload" as="image" href="/video/hero-poster.webp" />
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'MusicGroup',
@@ -95,10 +94,7 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
     <!-- ─── HEADER ──────────────────────────────────────────── -->
     <header class="site-header" id="site-header">
       <a href="/" class="header-logo" aria-label="Mafia Tumbada — Inicio">
-        <picture>
-          <source srcset="/icon/mafiatumbada.webp" type="image/webp" />
-          <img src="/icon/mafiatumbada.png" alt="Mafia Tumbada" class="header-logo-img" width="200" height="60" />
-        </picture>
+        <img src="/icon/mafiatumbada.webp" alt="Mafia Tumbada" class="header-logo-img" width="200" height="60" />
       </a>
 
       <div class="header-right">

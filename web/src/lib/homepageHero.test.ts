@@ -26,7 +26,6 @@ describe('marketing homepage hero', () => {
     expect(src).toContain('aria-hidden="true"')
     expect(src).toContain('playsinline')
     expect(src).toContain('muted')
-    expect(src).toContain('poster="/video/hero-poster.webp"')
     expect(src).toContain('preload="none"')
   })
 
