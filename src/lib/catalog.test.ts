@@ -1,0 +1,100 @@
+import { describe, expect, test } from 'bun:test'
+import { loadCatalog } from './catalog'
+
+const spotifyOptions = {
+  spotifyClientId: 'test-client',
+  spotifyClientSecret: 'test-secret',
+}
+
+const response = (body: unknown) => new Response(JSON.stringify(body))
+
+describe('loadCatalog', () => {
+  test('uses snapshot releases when Spotify rejects', async () => {
+    const catalog = await loadCatalog({
+      ...spotifyOptions,
+      fetch: async () => Promise.reject(new Error('Spotify unavailable')),
+    })
+
+    expect(catalog.releases).toHaveLength(6)
+    expect(catalog.releases[0].cover).toBe('/music/lv.webp')
+  })
+
+  test('uses Spotify releases when YouTube rejects', async () => {
+    let calls = 0
+    const catalog = await loadCatalog({
+      ...spotifyOptions,
+      fetch: async () => {
+        calls += 1
+        if (calls === 1) return response({ access_token: 'token' })
+        if (calls === 2) return response({ items: [album] })
+        throw new Error('YouTube unavailable')
+      },
+    })
+
+    expect(catalog.releases).toEqual([mappedAlbum])
+    expect(catalog.videos).toEqual([])
+  })
+
+  test('uses snapshot releases for malformed Spotify JSON', async () => {
+    const catalog = await loadCatalog({
+      ...spotifyOptions,
+      fetch: async (url) =>
+        String(url).includes('/api/token')
+          ? response({ access_token: 'token' })
+          : new Response('{', { headers: { 'content-type': 'application/json' } }),
+    })
+
+    expect(catalog.releases).toHaveLength(6)
+  })
+
+  test('maps a Spotify album to ShelfItem', async () => {
+    let calls = 0
+    const catalog = await loadCatalog({
+      ...spotifyOptions,
+      fetch: async () => {
+        calls += 1
+        if (calls === 1) return response({ access_token: 'token' })
+        if (calls === 2) return response({ items: [album] })
+        return response({})
+      },
+    })
+
+    expect(catalog.releases).toEqual([mappedAlbum])
+  })
+
+  test('maps an RSS entry to VideoItem', async () => {
+    const catalog = await loadCatalog({
+      fetch: async () =>
+        new Response(
+          '<feed><entry><title>Live Session</title><yt:videoId>abc123</yt:videoId></entry></feed>',
+        ),
+    })
+
+    expect(catalog.videos).toEqual([
+      {
+        title: 'Live Session',
+        href: 'https://www.youtube.com/watch?v=abc123',
+        thumbnail: 'https://i.ytimg.com/vi/abc123/hqdefault.jpg',
+      },
+    ])
+    expect(catalog.releases).toHaveLength(6)
+  })
+})
+
+const album = {
+  name: 'Nueva Vida',
+  release_date: '2025-03-21',
+  external_urls: { spotify: 'https://open.spotify.com/album/album-id' },
+  images: [
+    { url: 'https://images.example/medium.jpg', width: 300 },
+    { url: 'https://images.example/large.jpg', width: 640 },
+  ],
+}
+
+const mappedAlbum = {
+  title: 'Nueva Vida',
+  subtitle: '2025',
+  href: 'https://open.spotify.com/album/album-id',
+  label: 'Spotify',
+  cover: 'https://images.example/large.jpg',
+}

@@ -1,0 +1,47 @@
+{
+  "releases": [
+    {
+      "title": "L.V.",
+      "subtitle": "Corrido tumbado",
+      "href": "https://open.spotify.com/intl-es/album/070MvKHW6m7CV17k0EeYjz?go=1&sp_cid=0d6d738c-4142-4435-ae8f-f760b4483f00&utm_source=spotify_web_player&utm_medium=mobile&sp_cid=0d6d738c-4142-4435-ae8f-f760b4483f00&fallback=getapp",
+      "label": "Spotify",
+      "cover": "/music/lv.webp"
+    },
+    {
+      "title": "L.A. BUBU",
+      "subtitle": "Single",
+      "href": "https://open.spotify.com/intl-es/track/5djRHmBwycYgJbqtpF8FPN",
+      "label": "Spotify",
+      "cover": "/music/la-bubu.webp"
+    },
+    {
+      "title": "No Te He Olvidado",
+      "subtitle": "Regional",
+      "href": "https://music.apple.com/es/song/no-te-he-olvidado/1794933904",
+      "label": "Apple Music",
+      "cover": "/music/no-te-he-olvidado.webp"
+    },
+    {
+      "title": "Tal Vez",
+      "subtitle": "Corrido tumbado",
+      "href": "https://open.spotify.com/intl-es/track/54nPL89TjXqZ2UYRO1PvBD?si=e276a7b6475d470c",
+      "label": "Spotify",
+      "cover": "/music/tal-vez.webp"
+    },
+    {
+      "title": "Corazón",
+      "subtitle": "Regional",
+      "href": "https://music.apple.com/es/album/coraz%C3%B3n-single/1779090777",
+      "label": "Apple Music",
+      "cover": "/music/corazon.webp"
+    },
+    {
+      "title": "Besos",
+      "subtitle": "Single",
+      "href": "https://youtu.be/kAdwJ-0F8mU?si=H2Y-8VBsuOdIdtQo",
+      "label": "YouTube",
+      "cover": "/music/besos.webp"
+    }
+  ],
+  "videos": []
+}

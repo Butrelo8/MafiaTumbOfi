@@ -1,0 +1,87 @@
+import type { ShelfItem } from '../components/ArtworkShelf.astro'
+import snapshot from '../data/catalog.json'
+
+export interface VideoItem {
+  title: string
+  href: string
+  thumbnail: string
+}
+
+export interface Catalog {
+  releases: ShelfItem[]
+  videos: VideoItem[]
+}
+
+type LoadCatalogOptions = {
+  fetch?: typeof fetch
+  spotifyClientId?: string
+  spotifyClientSecret?: string
+}
+
+const spotifyAlbumsUrl =
+  'https://api.spotify.com/v1/artists/3pc90hxACiSUahZmmfYjcI/albums?include_groups=single,album&market=MX'
+const youtubeFeedUrl = 'https://www.youtube.com/feeds/videos.xml?playlist_id=UUSZnXDUTBZvPYcU-AGZULYA'
+
+export async function loadCatalog(options: LoadCatalogOptions = {}): Promise<Catalog> {
+  const fetcher = options.fetch ?? fetch
+  const releases = await loadSpotify(fetcher, options).catch(() => snapshot.releases)
+  const videos = await loadYouTube(fetcher).catch(() => snapshot.videos)
+
+  return { releases: releases.length ? releases : snapshot.releases, videos }
+}
+
+async function loadSpotify(fetcher: typeof fetch, options: LoadCatalogOptions): Promise<ShelfItem[]> {
+  const clientId = options.spotifyClientId ?? import.meta.env.SPOTIFY_CLIENT_ID
+  const clientSecret = options.spotifyClientSecret ?? import.meta.env.SPOTIFY_CLIENT_SECRET
+  if (!clientId || !clientSecret) throw new Error('Spotify credentials missing')
+
+  const tokenResponse = await fetcher('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: 'grant_type=client_credentials',
+    signal: AbortSignal.timeout(10_000),
+  })
+  if (!tokenResponse.ok) throw new Error('Spotify token failed')
+  const token = (await tokenResponse.json()).access_token
+  if (typeof token !== 'string' || !token) throw new Error('Spotify token missing')
+
+  const albumsResponse = await fetcher(spotifyAlbumsUrl, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(10_000),
+  })
+  if (!albumsResponse.ok) throw new Error('Spotify albums failed')
+  const data = await albumsResponse.json()
+  if (!Array.isArray(data?.items)) throw new Error('Spotify albums malformed')
+
+  return data.items.map(mapAlbum).filter((item): item is ShelfItem => item !== null)
+}
+
+function mapAlbum(album: unknown): ShelfItem | null {
+  if (!album || typeof album !== 'object') return null
+  const value = album as Record<string, unknown>
+  const images = Array.isArray(value.images) ? value.images : []
+  const cover = images
+    .filter((image): image is Record<string, unknown> => !!image && typeof image === 'object')
+    .sort((a, b) => Number(b.width) - Number(a.width))
+    .find((image) => typeof image.url === 'string')?.url
+  const href = (value.external_urls as Record<string, unknown> | undefined)?.spotify
+  const releaseDate = value.release_date
+  if (typeof value.name !== 'string' || typeof href !== 'string' || typeof cover !== 'string') return null
+
+  return { title: value.name, subtitle: typeof releaseDate === 'string' ? releaseDate.slice(0, 4) : '', href, label: 'Spotify', cover }
+}
+
+async function loadYouTube(fetcher: typeof fetch): Promise<VideoItem[]> {
+  const response = await fetcher(youtubeFeedUrl, { signal: AbortSignal.timeout(10_000) })
+  if (!response.ok) throw new Error('YouTube feed failed')
+  return [...(await response.text()).matchAll(/<entry>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<yt:videoId>([\w-]+)<\/yt:videoId>[\s\S]*?<\/entry>/g)].map(
+    ([, title, id]) => ({
+      title: title.replace(/^<!\[CDATA\[|\]\]>$/g, '').trim(),
+      href: `https://www.youtube.com/watch?v=${id}`,
+      thumbnail: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+    }),
+  )
+}
