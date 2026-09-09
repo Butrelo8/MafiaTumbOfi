@@ -193,6 +193,8 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
     <script>
       const hamburgerBtn = document.getElementById('hamburger-btn');
       const menu = document.getElementById('mobile-menu');
+      const menuCloseBtn = document.getElementById('menu-close-btn');
+      const focusableSelector = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
       function openMenu() {
         menu?.classList.add('is-open');
@@ -201,15 +203,18 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
         hamburgerBtn?.setAttribute('aria-expanded', 'true');
         hamburgerBtn?.setAttribute('aria-label', 'Cerrar menú');
         document.body.style.overflow = 'hidden';
+        menuCloseBtn?.focus();
       }
 
       function closeMenu() {
+        const wasOpen = menu?.classList.contains('is-open');
         menu?.classList.remove('is-open');
         menu?.setAttribute('aria-hidden', 'true');
         hamburgerBtn?.classList.remove('is-open');
         hamburgerBtn?.setAttribute('aria-expanded', 'false');
         hamburgerBtn?.setAttribute('aria-label', 'Abrir menú');
         document.body.style.overflow = '';
+        if (wasOpen) hamburgerBtn?.focus();
       }
 
       const header = document.getElementById('site-header');
@@ -237,7 +242,6 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
         else openMenu();
       });
 
-      const menuCloseBtn = document.getElementById('menu-close-btn');
       menuCloseBtn?.addEventListener('click', () => {
         closeMenu();
       });
@@ -249,9 +253,29 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
         link.addEventListener('click', closeMenu);
       });
 
-      // Close on Escape
+      // Keep keyboard focus inside the open modal; Escape closes it.
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeMenu();
+        if (!menu?.classList.contains('is-open')) return;
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeMenu();
+          return;
+        }
+        if (e.key !== 'Tab') return;
+
+        const focusable = [...menu.querySelectorAll<HTMLElement>(focusableSelector)];
+        const first = focusable[0];
+        const last = focusable.at(-1);
+        if (!first || !last) return;
+
+        const focusIsOutside = !menu.contains(document.activeElement);
+        if (e.shiftKey && (document.activeElement === first || focusIsOutside)) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && (document.activeElement === last || focusIsOutside)) {
+          e.preventDefault();
+          first.focus();
+        }
       });
 
     </script>

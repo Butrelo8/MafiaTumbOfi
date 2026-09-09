@@ -21,6 +21,7 @@ type LoadCatalogOptions = {
 const spotifyAlbumsUrl =
   'https://api.spotify.com/v1/artists/3pc90hxACiSUahZmmfYjcI/albums?include_groups=single,album&market=MX'
 const youtubeFeedUrl = 'https://www.youtube.com/feeds/videos.xml?playlist_id=UUSZnXDUTBZvPYcU-AGZULYA'
+const xmlEntities = { amp: '&', apos: "'", gt: '>', lt: '<', quot: '"' } as const
 
 export async function loadCatalog(options: LoadCatalogOptions = {}): Promise<Catalog> {
   const fetcher = options.fetch ?? fetch
@@ -74,6 +75,17 @@ function mapAlbum(album: unknown): ShelfItem | null {
   return { title: value.name, subtitle: typeof releaseDate === 'string' ? releaseDate.slice(0, 4) : '', href, label: 'Spotify', cover }
 }
 
+function decodeXmlTitle(title: string): string {
+  const text = title.trim()
+  if (text.startsWith('<![CDATA[') && text.endsWith(']]>')) return text.slice(9, -3).trim()
+
+  return text.replace(/&(?:#(\d+)|#x([\da-f]+)|(amp|apos|gt|lt|quot));/gi, (entity, decimal, hexadecimal, named) => {
+    if (named) return xmlEntities[named.toLowerCase() as keyof typeof xmlEntities]
+    const codePoint = Number.parseInt(decimal ?? hexadecimal, decimal ? 10 : 16)
+    return codePoint <= 0x10ffff ? String.fromCodePoint(codePoint) : entity
+  })
+}
+
 async function loadYouTube(fetcher: typeof fetch): Promise<VideoItem[]> {
   const response = await fetcher(youtubeFeedUrl, { signal: AbortSignal.timeout(10_000) })
   if (!response.ok) throw new Error('YouTube feed failed')
@@ -83,7 +95,7 @@ async function loadYouTube(fetcher: typeof fetch): Promise<VideoItem[]> {
     const id = entry.match(/<yt:videoId>([\w-]+)<\/yt:videoId>/)?.[1]
     return title && id
       ? [{
-          title: title.replace(/^<!\[CDATA\[|\]\]>$/g, '').trim(),
+          title: decodeXmlTitle(title),
           href: `https://www.youtube.com/watch?v=${id}`,
           thumbnail: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
         }]

@@ -93,6 +93,20 @@ describe('loadCatalog', () => {
     ])
     expect(catalog.releases).toHaveLength(6)
   })
+
+  test('decodes XML entities in RSS titles without altering CDATA', async () => {
+    const catalog = await loadCatalog({
+      fetch: async () =>
+        new Response(
+          `<feed>
+            <entry><title>Rock &amp; Roll &#39;Live&#39;</title><yt:videoId>encoded</yt:videoId></entry>
+            <entry><title><![CDATA[Raw &amp; Title]]></title><yt:videoId>cdata</yt:videoId></entry>
+          </feed>`,
+        ),
+    })
+
+    expect(catalog.videos.map(({ title }) => title)).toEqual(["Rock & Roll 'Live'", 'Raw &amp; Title'])
+  })
 })
 
 const album = {
