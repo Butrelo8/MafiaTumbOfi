@@ -77,11 +77,16 @@ function mapAlbum(album: unknown): ShelfItem | null {
 async function loadYouTube(fetcher: typeof fetch): Promise<VideoItem[]> {
   const response = await fetcher(youtubeFeedUrl, { signal: AbortSignal.timeout(10_000) })
   if (!response.ok) throw new Error('YouTube feed failed')
-  return [...(await response.text()).matchAll(/<entry>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<yt:videoId>([\w-]+)<\/yt:videoId>[\s\S]*?<\/entry>/g)].map(
-    ([, title, id]) => ({
-      title: title.replace(/^<!\[CDATA\[|\]\]>$/g, '').trim(),
-      href: `https://www.youtube.com/watch?v=${id}`,
-      thumbnail: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
-    }),
-  )
+  const entries = (await response.text()).matchAll(/<entry(?:\s[^>]*)?>([\s\S]*?)<\/entry>/g)
+  return [...entries].flatMap(([, entry]) => {
+    const title = entry.match(/<title(?:\s[^>]*)?>([\s\S]*?)<\/title>/)?.[1]
+    const id = entry.match(/<yt:videoId>([\w-]+)<\/yt:videoId>/)?.[1]
+    return title && id
+      ? [{
+          title: title.replace(/^<!\[CDATA\[|\]\]>$/g, '').trim(),
+          href: `https://www.youtube.com/watch?v=${id}`,
+          thumbnail: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+        }]
+      : []
+  })
 }

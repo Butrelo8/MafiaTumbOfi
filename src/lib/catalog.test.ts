@@ -62,11 +62,20 @@ describe('loadCatalog', () => {
     expect(catalog.releases).toEqual([mappedAlbum])
   })
 
-  test('maps an RSS entry to VideoItem', async () => {
+  test('pairs each YouTube video ID with its title in actual RSS field order', async () => {
     const catalog = await loadCatalog({
       fetch: async () =>
         new Response(
-          '<feed><entry><title>Live Session</title><yt:videoId>abc123</yt:videoId></entry></feed>',
+          `<feed>
+            <entry>
+              <yt:videoId>abc123</yt:videoId>
+              <title>Live Session</title>
+            </entry>
+            <entry>
+              <yt:videoId>def456</yt:videoId>
+              <title><![CDATA[Second Session]]></title>
+            </entry>
+          </feed>`,
         ),
     })
 
@@ -75,6 +84,11 @@ describe('loadCatalog', () => {
         title: 'Live Session',
         href: 'https://www.youtube.com/watch?v=abc123',
         thumbnail: 'https://i.ytimg.com/vi/abc123/hqdefault.jpg',
+      },
+      {
+        title: 'Second Session',
+        href: 'https://www.youtube.com/watch?v=def456',
+        thumbnail: 'https://i.ytimg.com/vi/def456/hqdefault.jpg',
       },
     ])
     expect(catalog.releases).toHaveLength(6)
