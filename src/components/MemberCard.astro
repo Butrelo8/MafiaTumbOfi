@@ -22,11 +22,11 @@ const { name, role, image, featured = false, instagram = "#", youtube = "#" } = 
 
 <style>
 .member-card {
-  background: var(--surface, #111111);
-  border: 1px solid var(--border, #262420);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
   padding: 2rem 1.8rem;
   text-align: center;
-  transition: all 0.3s ease;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -34,10 +34,7 @@ const { name, role, image, featured = false, instagram = "#", youtube = "#" } = 
 }
 
 .member-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  border-color: var(--gold, #c49a2a);
-  box-shadow: 0 10px 30px rgba(196, 154, 42, 0.15);
-  background: var(--surface2, #191919);
+  transform: translateY(-2px);
 }
 
 .member-image {
@@ -53,7 +50,6 @@ const { name, role, image, featured = false, instagram = "#", youtube = "#" } = 
 
 .member-card:hover .member-image {
   filter: grayscale(0%);
-  border-color: var(--gold, #c49a2a);
 }
 
 .member-image img {
@@ -67,11 +63,11 @@ const { name, role, image, featured = false, instagram = "#", youtube = "#" } = 
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--gold, #c49a2a);
+  color: var(--text-muted);
 }
 
 .member-name {
-  font-family: var(--ff-display, 'Cormorant Garamond', serif);
+  font-family: var(--ff-body);
   font-size: 1.5rem;
   font-weight: 600;
   line-height: 1.2;
@@ -82,7 +78,7 @@ const { name, role, image, featured = false, instagram = "#", youtube = "#" } = 
   display: flex;
   justify-content: center;
   gap: 1.2rem;
-  border-top: 1px solid rgba(196, 154, 42, 0.1);
+  border-top: 1px solid var(--border);
   padding-top: 1rem;
 }
 
@@ -90,11 +86,15 @@ const { name, role, image, featured = false, instagram = "#", youtube = "#" } = 
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.1em;
-  color: var(--gold, #c49a2a);
+  color: var(--accent);
   text-decoration: none;
   opacity: 0.6;
   transition: opacity 0.2s, transform 0.2s;
-  padding: 0.2rem 0.5rem;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .member-socials a:hover {
@@ -102,8 +102,9 @@ const { name, role, image, featured = false, instagram = "#", youtube = "#" } = 
   transform: translateY(-2px);
 }
 
-.member-card:hover .member-socials {
-  border-top-color: rgba(196, 154, 42, 0.3);
+.member-socials a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
 }
 
 /* Vocal principal destacado en grids con auto-fit */

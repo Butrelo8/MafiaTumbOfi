@@ -51,3 +51,28 @@ Unrelated modified `.superpowers/sdd/task-1-report.md` and unrelated untracked f
 ## Commit
 
 Commit: `feat(web): rebuild homepage as seven static sections`
+
+## Review fixes
+
+- Deleted the remaining `public/members/luis-c 1.jpg` asset; no `public/members/luis-c*` files remain.
+- Replaced in-place mutation of `catalog.releases` with a mapped `releases` array before passing it to `ArtworkShelf`.
+- Updated `MemberCard.astro` at source: member names use `--ff-body`; roles use muted body color; IG links and focus use `--accent`; social/card borders use neutral `--border`; IG touch targets are at least 44 × 44 px; hover motion is limited to `translateY(-2px)` with no scale, gold border, or shadow.
+- Left member-card markup, copy, section structure, `SignatureCTA.astro`, and dependencies unchanged.
+
+## Review fix validation
+
+```sh
+bun run build
+```
+
+Passed: Astro generated one static route, `/index.html` (1 page), with the existing stale `caniuse-lite` warning only.
+
+```sh
+bun test
+```
+
+Passed: 20 tests, 0 failures, 26 assertions across 3 files.
+
+Generated output and source checks confirmed the required section order through the footer, three rendered member cards, release cards and linked YouTube thumbnails, no iframe/embed/object, no form/login/admin/booking route or `showPressAssets`, no remaining `luis-c*` asset, no catalog release mutation, required spacing/landmarks, and a clean `git diff --check`.
+
+Review fix commit: `fix: align member cards with design tokens`

@@ -14,10 +14,11 @@ const title = 'Mafia Tumbada — Oficial'
 const description = 'Sitio oficial de Mafia Tumbada. Música, videos, integrantes y contacto para contrataciones desde Xalapa, Veracruz.'
 const canonicalUrl = homeCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)
 const catalog = await loadCatalog()
-catalog.releases.forEach((release) => {
-  release.subtitle = /^\d{4}$/.test(release.subtitle ?? '') ? release.subtitle : undefined
-  release.label = 'Escuchar en Spotify'
-})
+const releases = catalog.releases.map((release) => ({
+  ...release,
+  subtitle: /^\d{4}$/.test(release.subtitle ?? '') ? release.subtitle : undefined,
+  label: 'Escuchar en Spotify',
+}))
 ---
 
 <MarketingLayout title={title} description={description} canonicalUrl={canonicalUrl} hasHero={true}>
@@ -38,7 +39,7 @@ catalog.releases.forEach((release) => {
   <section class="section music-section" id="musica" aria-labelledby="musica-heading"><div class="container">
     <Eyebrow text="Escucha" />
     <h2 id="musica-heading" class="section-heading">Música</h2>
-    <ArtworkShelf items={catalog.releases} />
+    <ArtworkShelf items={releases} />
     <a class="music-link" href={bandSocialUrls.appleMusic} target="_blank" rel="noopener noreferrer">Escúchanos en Apple Music</a>
     <h3 class="videos-heading">Videos</h3>
     <ul class="video-row">{catalog.videos.map((video) => <li><a href={video.href} target="_blank" rel="noopener noreferrer"><img src={video.thumbnail} alt="" width="480" height="360" loading="lazy" decoding="async" /><span>{video.title}</span></a></li>)}</ul>
