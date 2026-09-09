@@ -9,4 +9,5 @@ export const bandSocialUrls = {
   instagram: 'https://www.instagram.com/mafia_tumbada_oficial/',
   facebook: 'https://www.facebook.com/share/1Awj8bXU4T/?mibextid=wwXIfr',
   appleMusic: 'https://music.apple.com/us/artist/mafia-tumbada/1777597386',
+  whatsapp: 'https://wa.me/5212288351464?text=Hola%20Mafia%20Tumbada%2C%20quiero%20informaci%C3%B3n%20para%20contratarlos.%20Mi%20evento%20es%20el%20%5Bfecha%5D%20en%20%5Bciudad%5D.',
 } as const

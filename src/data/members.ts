@@ -23,20 +23,4 @@ export const members = [
     instagram:
       'https://www.instagram.com/diegocerecer/',
   },
-  {
-    name: 'Luis C.',
-    role: 'Tololoche & Bajo',
-    image: '/members/luis-c.jpg',
-    featured: false,
-    instagram:
-      'https://www.instagram.com/the_keytar/',
-  },
-  {
-    name: 'Diego Mora',
-    role: 'Trombón',
-    image: '/members/dimora.jpg',
-    featured: false,
-    instagram:
-      'https://www.instagram.com/di_moratb/',
-  },
 ]

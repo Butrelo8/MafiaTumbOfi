@@ -28,11 +28,9 @@ const { title, description, canonicalUrl, robots } = Astro.props
 
 const navItems = [
   { href: '/', label: 'Inicio' },
-  { href: '/#redes', label: 'Redes' },
   { href: '/#musica', label: 'Música' },
   { href: '/#grupo', label: 'Integrantes' },
-  { href: '/#paquetes', label: 'Paquetes' },
-  { href: '/contratacion', label: 'Contrataciones' },
+  { href: '/#contratacion', label: 'Contrataciones' },
 ]
 
 const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN)
@@ -179,7 +177,7 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
             <a href={bandSocialUrls.youtube} target="_blank" rel="noopener noreferrer">YouTube</a>
           </nav>
 
-          <a href="/contratacion" class="menu-cta">
+          <a href="/#contratacion" class="menu-cta">
             <span class="menu-cta-eyebrow">Contrataciones</span>
             <span class="menu-cta-label">Contrátanos<em>.</em></span>
           </a>
@@ -256,18 +254,6 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
         if (e.key === 'Escape') closeMenu();
       });
 
-      document.getElementById('hero-cta-contratacion')?.addEventListener('click', () => {
-        window.plausible?.('CTA Click', { props: { target: 'contratacion' } });
-      });
-
-      document.body.addEventListener('click', (e) => {
-        const t = e.target;
-        if (!(t instanceof Element)) return;
-        const a = t.closest('a.tour-ticket-btn');
-        if (!a) return;
-        const venue = (a.getAttribute('data-analytics-venue') || 'unknown').trim().slice(0, 120);
-        window.plausible?.('Ticket CTA', { props: { venue } });
-      });
     </script>
   </body>
 </html>
