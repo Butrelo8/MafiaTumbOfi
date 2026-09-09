@@ -40,6 +40,8 @@ Thumbs.db
 logs/
 *.log
 npm-debug.log*
+report*.html
+report*.json
 
 # Testing
 coverage/
@@ -54,3 +56,4 @@ herovid/
 .cursor/
 .gstack/
 .superpowers/
+.gstack/
