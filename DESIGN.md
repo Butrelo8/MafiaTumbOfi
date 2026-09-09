@@ -131,32 +131,28 @@ background: linear-gradient(135deg, var(--gold-shadow), var(--gold), var(--gold-
 - 12-col grid desktop, 4-col tablet, flow mobile
 - `gap: clamp(1rem, 2vw, 2rem)`
 - **Asymmetric hero:** full-bleed background video with scrims + film grain; copy left-aligned in container, layered above video. No centered stock-hero
-- **Bento grid:** Repertorio, Integrantes, Discografía use 1-large-plus-2-small breakup
-- **Tour table:** 4 columns desktop (date / city / venue / CTA), stacked mobile. Date column mono + `tabular-nums`
+- **Integrantes grid:** `auto-fit` / `minmax(200px, 1fr)`, equal cards
 - **Artwork shelf:** horizontal scroll-snap, 4 visible desktop, full-bleed covers; optional per-item `cover` URL (lazy `<img>`, 80×80) or initials fallback
 - **BTS strip:** 3-photo horizontal film reel with edge bleed
-- **Press-kit spread (`/contratacion`):** full-bleed cover + 2-col body (bio left, form right)
 
 ## Components
 
-Each lives in `web/src/components/` and must respect the tokens above.
+Each lives in `src/components/` and must respect the tokens above.
 
-1. `**<Hero>`** — full-bleed video background; copy + eyebrow + meta chips left (layered on top)
-2. `**<TourTable>`** — 4-col tabular, mono dates, per-row ticket CTA, blood-red `**SOLD OUT`** tag (English label on purpose: ticketing/promo convention; body copy stays Spanish-first)
-3. `**<ArtworkShelf>`** — horizontal scroll-snap, hover reveals title + stream links
-4. `**<Marquee>`** — single-use per page, CSS `@keyframes` translate, pausable on hover
-5. `**<FilmStrip>`** — 3-photo BTS row, bleed to page edges
-6. `**<PressKitSpread>`** — 2-col editorial for `/contratacion`, feels InDesign
-7. `**<Eyebrow>`** — ALL CAPS Inter, gold, tracked `0.18em`
-8. `**<SignatureCTA>**` — mono-italic "Contrátanos." placeholder; upgrade to handwritten SVG later
+1. `**<ArtworkShelf>`** — horizontal scroll-snap, cover art or initials fallback, stream link per item
+2. `**<Marquee>`** — single-use per page, CSS `@keyframes` translate, pausable on hover
+3. `**<FilmStrip>`** — 3-photo BTS row, bleed to page edges
+4. `**<MemberCard>`** — circular grayscale portrait, role eyebrow, name, IG link; color on hover/focus
+5. `**<Eyebrow>`** — ALL CAPS Inter, gold, tracked `0.18em`
+6. `**<Seo>`** — meta, canonical, and structured data
+
+The hero is inline in `src/pages/index.astro`, not a component.
 
 ## Decoration
 
 - **Film grain:** SVG noise overlay, 6% opacity, photo sections only
 - **Gold hairline dividers:** `1px`, 40% opacity, section breaks only
 - **Marquee strip:** `CORRIDOS TUMBADOS · XALAPA · DESDE 2021 ·` repeating, 1 per page max
-- **Ticket-stub clip:** `clip-path` motif on tour cards, 1–2 uses
-- **Paper-grain background:** `/contratacion` and `/prensa` only
 - **No drop shadows on UI.** Drop shadows only on photos (atmospheric, blurred, low-opacity)
 
 ## Motion
@@ -181,29 +177,23 @@ Each lives in `web/src/components/` and must respect the tokens above.
 
 ## Information architecture
 
-### Homepage (fan-first)
+The site is a single static page. `/contratacion` and `/prensa` were removed
+in the static rebuild; booking now lives in the `#contratacion` section and
+converts through WhatsApp instead of a form.
 
-1. Hero (video + asymmetric logo + eyebrow + meta chips)
+### Homepage (fans lead, promoters land on `#contratacion`)
+
+1. Hero (video + asymmetric logo + eyebrow + meta chips + WhatsApp CTA)
 2. Marquee strip
-3. Próximas fechas (`<TourTable>`, next 5 shows + "Ver todas" link)
-4. Artwork shelf (Repertorio top streams + Discografía)
-5. BTS film strip (3 recent photos)
-6. Integrantes (bento grid)
-7. Redes sociales (large icons + latest-post previews)
-8. Trust strip (testimonials, venues played)
-9. Footer (press link, booking deep-link, socials, legal)
+3. Música — artwork shelf, Apple Music link, video row (`#musica`)
+4. BTS film strip (3 photos)
+5. Bio — "El sonido de Xalapa", sidebar tags + body
+6. El grupo — integrantes grid (`#grupo`)
+7. Contratación — copy, agenda urgency, WhatsApp CTA, phone (`#contratacion`)
+8. Footer (socials, legal)
 
-### `/contratacion` (promoter-first)
-
-1. Full-bleed cover + band name + "Press Kit" eyebrow
-2. 2-col spread — bio left, form right
-3. Tech rider bullets + downloadable PDF
-4. Photo reel
-5. Contact footer
-
-### `/prensa` (press kit standalone)
-
-- Photo downloads, logo bundle, tech rider PDF, short + long bio, high-res album art
+No tour table, socials section, or trust strip: there is no dates feed, and
+the marquee plus footer already carry the socials.
 
 ## Don't
 
@@ -223,8 +213,8 @@ Each lives in `web/src/components/` and must respect the tokens above.
 
 Before any design-adjacent PR ships:
 
-1. `cd web && bun dev` — visual check at 320 / 768 / 1280 / 1920
-2. Lighthouse on `/` and `/contratacion` — LCP < 2.5s, CLS < 0.1, TBT < 200ms
+1. `bun dev` — visual check at 320 / 768 / 1280 / 1920
+2. Lighthouse on `/` — LCP < 2.5s, CLS < 0.1, TBT < 200ms
 3. Playwright + axe-core — zero serious violations
 4. Keyboard tab-through — every CTA reachable, focus visible
 5. `prefers-reduced-motion` toggle — no autoplay, no marquee, no scroll-trigger
@@ -233,6 +223,10 @@ Before any design-adjacent PR ships:
 
 ## History
 
+- 2026-09-09 — Reconciled with the static single-page rebuild: IA rewritten to
+  the eight sections that ship, `/contratacion` and `/prensa` removed,
+  `<TourTable>`, `<PressKitSpread>` and `<SignatureCTA>` dropped from the
+  component list, bento member grid replaced by an `auto-fit` grid.
 - 2026-04-26 — `/contratacion` bio section restructured: wall-of-text split into lede (Cormorant italic, `--gold-shadow` left hairline), body paragraph, and styled `<ul>` with em-dash gold markers. Confirms token roles: `--accent` (turquoise) = links/focus only; gold gradient = CTAs/labels; `--gold-shadow` = decorative hairlines.
 - 2026-04-22 — Palette elevated to premium: `--bg` deepened to `oklch(8%)`, `--bg-sunk` to `oklch(5%)`. Gold expanded to 4-stop metallic gradient range (`--gold`, `--gold-mid`, `--gold-shadow`, `--gold-dim`). `--accent-hot` replaced by `--burgundy-glow` (glow-only) + `--burgundy-hot` (marquee/SOLD OUT). Turquoise demoted from CTA primary to link/focus only.
 - 2026-04-21 — Semantic `--color-success` / `--color-error`; tour sold-out tag copy locked to English `SOLD OUT` (see `<TourTable>`).
