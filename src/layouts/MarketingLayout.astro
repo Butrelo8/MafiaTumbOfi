@@ -197,13 +197,20 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
       const focusableSelector = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
       function openMenu() {
+        if (menu) {
+          const focusCloseButton = (event: TransitionEvent) => {
+            if (event.target !== menu || event.propertyName !== 'opacity') return;
+            menu.removeEventListener('transitionend', focusCloseButton);
+            if (menu.classList.contains('is-open')) menuCloseBtn?.focus();
+          };
+          menu.addEventListener('transitionend', focusCloseButton);
+        }
         menu?.classList.add('is-open');
         menu?.setAttribute('aria-hidden', 'false');
         hamburgerBtn?.classList.add('is-open');
         hamburgerBtn?.setAttribute('aria-expanded', 'true');
         hamburgerBtn?.setAttribute('aria-label', 'Cerrar menú');
         document.body.style.overflow = 'hidden';
-        menuCloseBtn?.focus();
       }
 
       function closeMenu() {

@@ -644,6 +644,9 @@ body.marketing-body img {
 
 /* ── Mobile tightening (≤640px) ────────────────────────── */
 @media (max-width: 640px) {
+  .header-socials {
+    display: none;
+  }
   .menu-grid {
     padding-top: 4.5rem;
   }
