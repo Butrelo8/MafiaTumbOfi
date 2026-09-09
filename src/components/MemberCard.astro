@@ -1,13 +1,13 @@
 ---
 // src/components/MemberCard.astro
-const { name, role, image, featured = false, instagram = "#", youtube = "#" } = Astro.props;
+const { name, role, image, instagram = "#" } = Astro.props;
 ---
 
-<div class={`member-card ${featured ? "featured" : ""}`} data-reveal>
+<div class="member-card" data-reveal>
   <div class="member-image">
     <picture>
       <source srcset={image.replace('.jpg', '.webp')} type="image/webp" />
-      <img src={image} alt={name} loading="lazy" width="180" height="180" decoding="async" />
+      <img src={image} alt="" loading="lazy" width="180" height="180" decoding="async" />
     </picture>
   </div>
 
@@ -16,7 +16,6 @@ const { name, role, image, featured = false, instagram = "#", youtube = "#" } = 
 
   <div class="member-socials">
     <a href={instagram} target="_blank" rel="noopener noreferrer">IG</a>
-    <!-- <a href={youtube} target="_blank" rel="noopener noreferrer">YT</a> -->
   </div>
 </div>
 
@@ -44,11 +43,12 @@ const { name, role, image, featured = false, instagram = "#", youtube = "#" } = 
   border-radius: 50%;
   overflow: hidden;
   filter: grayscale(100%);
-  transition: 0.3s;
+  transition: filter 0.3s;
   border: 2px solid transparent;
 }
 
-.member-card:hover .member-image {
+.member-card:hover .member-image,
+.member-card:focus-within .member-image {
   filter: grayscale(0%);
 }
 
@@ -105,10 +105,5 @@ const { name, role, image, featured = false, instagram = "#", youtube = "#" } = 
 .member-socials a:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 4px;
-}
-
-/* Vocal principal destacado en grids con auto-fit */
-.featured {
-  grid-column: span 1; /* Puedes usar span 2 si el layout es más ancho */
 }
 </style>

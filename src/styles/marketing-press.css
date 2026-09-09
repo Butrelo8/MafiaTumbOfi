@@ -1732,10 +1732,6 @@ body.marketing-body img {
   margin: 0.5rem 0 1.75rem;
 }
 
-.signature-cta-wrap {
-  margin-top: 1.25rem;
-}
-
 /* Eyebrow (component) */
 .eyebrow {
   font-family: var(--ff-mono);
@@ -2040,30 +2036,6 @@ body.marketing-body img {
   box-shadow:
     0 20px 50px oklch(5% 0 0 / 0.7),
     0 0 30px color-mix(in oklch, var(--burgundy-glow) 65%, transparent);
-}
-
-/* Signature CTA */
-.signature-cta {
-  display: inline-block;
-  font-family: var(--ff-display);
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-  font-weight: 600;
-  font-style: italic;
-  color: var(--gold);
-  text-decoration: none;
-  letter-spacing: 0.02em;
-  transition: color 0.2s, transform 0.2s;
-}
-
-.signature-cta:hover {
-  color: var(--gold-mid);
-  transform: translateX(2px);
-}
-
-.signature-cta:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 4px;
-  border-radius: 2px;
 }
 .footer-github-link {
   color: inherit;
