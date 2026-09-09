@@ -1866,13 +1866,6 @@ body.marketing-body img {
   outline-offset: 2px;
 }
 
-.tour-tag-soldout {
-  font-family: var(--ff-mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.14em;
-  color: var(--burgundy-hot);
-}
-
 .tour-table-foot {
   margin: 1rem 0 0;
   text-align: right;
