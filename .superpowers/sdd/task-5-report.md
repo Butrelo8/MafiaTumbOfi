@@ -26,16 +26,15 @@ Green result: 5 pass, 0 fail, 8 assertions. Tests inject `fetch`; no test makes 
 ## Build, fallback, and secret evidence
 
 ```sh
+export SPOTIFY_CLIENT_ID=task5-scan-only-id
+export SPOTIFY_CLIENT_SECRET=task5-scan-only-secret
 bun run build
+grep -rn "$SPOTIFY_CLIENT_SECRET" dist/ || echo clean
 ```
 
-Result with Spotify credentials absent: pass. Astro built 1 page and completed successfully. The catalog module retains six committed snapshot releases when credentials or Spotify data are unavailable.
+Result: pass. Astro built 1 page and completed successfully. The catalog module retains six committed snapshot releases when credentials or Spotify data are unavailable.
 
-```sh
-export SPOTIFY_CLIENT_SECRET='task5-scan-only-secret'; grep -rn -- "$SPOTIFY_CLIENT_SECRET" dist/ || echo clean
-```
-
-Result: `clean` (secret value not printed). Returned catalog data contains mapped public album/video fields only; credentials are not returned.
+The scan result was `clean`. Scan output was captured while checking, and no secret value was printed. Returned catalog data contains mapped public album/video fields only; credentials are not returned.
 
 ## Implementation notes
 
@@ -43,3 +42,7 @@ Result: `clean` (secret value not printed). Returned catalog data contains mappe
 - YouTube playlist RSS request uses `AbortSignal.timeout(10_000)`.
 - Each source has an independent fallback: Spotify uses snapshot releases; YouTube uses snapshot videos.
 - No dependency, page rewrite, image caching, or runtime worker added.
+
+## Concerns
+
+- Build emitted an existing Browserslist warning that `caniuse-lite` data is 6 months old; unrelated to Task 5.
