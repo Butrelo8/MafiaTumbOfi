@@ -30,6 +30,7 @@
   --ff-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
 
   --fs-eyebrow: 0.75rem;
+  --fs-monogram: clamp(2rem, 1.6rem + 1.4vw, 2.5rem);
   --fs-body: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
   --fs-lede: clamp(1.25rem, 1rem + 0.8vw, 1.5rem);
   --fs-h3: clamp(1.5rem, 1.2rem + 1vw, 2rem);
@@ -156,35 +157,29 @@ body.marketing-body img {
   -webkit-backdrop-filter: blur(12px);
 }
 
-.header-logo {
+.header-mark {
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  font-family: var(--ff-display);
+  font-size: var(--fs-monogram);
+  font-weight: 700;
+  gap: 0.1em;
+  line-height: 1;
+  min-height: 44px;
   text-decoration: none;
 }
 
-/* Veracruz Noir logo glow — keeps natural PNG (mix-blend screen); no brightness(0) colorize */
-.header-logo-img {
-  height: 60px;
-  width: auto;
-  max-width: 200px;
-  object-fit: contain;
-  display: block;
-  mix-blend-mode: screen;
-  transition: height 0.3s ease, filter 0.3s ease;
-  filter:
-    drop-shadow(0 0 6px rgba(196, 154, 42, 0.85))
-    drop-shadow(0 0 18px rgba(196, 154, 42, 0.35))
-    drop-shadow(0 0 32px rgba(114, 47, 55, 0.45))
-    drop-shadow(0 3px 8px rgba(0, 0, 0, 0.9));
-  animation: logo-shimmer-header 4s ease-in-out infinite;
+.header-mark-bolt {
+  width: 0.34em;
+  height: 0.62em;
+  color: var(--red);
+  filter: drop-shadow(0 0 10px var(--red-glow));
 }
 
-@media (min-width: 640px) {
-  .header-logo-img {
-    height: 80px;
-    max-width: 260px;
-  }
+.header-mark:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
 }
 
 .hero-logo-img {
@@ -200,24 +195,6 @@ body.marketing-body img {
     drop-shadow(0 0 60px rgba(114, 47, 55, 0.55))
     drop-shadow(0 4px 12px rgba(0, 0, 0, 0.95));
   animation: logo-shimmer-hero 4s ease-in-out infinite;
-}
-
-@keyframes logo-shimmer-header {
-  0%,
-  100% {
-    filter:
-      drop-shadow(0 0 6px rgba(196, 154, 42, 0.85))
-      drop-shadow(0 0 18px rgba(196, 154, 42, 0.35))
-      drop-shadow(0 0 32px rgba(114, 47, 55, 0.45))
-      drop-shadow(0 3px 8px rgba(0, 0, 0, 0.9));
-  }
-  50% {
-    filter:
-      drop-shadow(0 0 9px rgba(220, 175, 60, 1))
-      drop-shadow(0 0 26px rgba(220, 175, 60, 0.55))
-      drop-shadow(0 0 44px rgba(140, 30, 45, 0.55))
-      drop-shadow(0 3px 8px rgba(0, 0, 0, 0.9));
-  }
 }
 
 @keyframes logo-shimmer-hero {
@@ -239,7 +216,6 @@ body.marketing-body img {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .header-logo-img,
   .hero-logo-img {
     animation: none;
   }
