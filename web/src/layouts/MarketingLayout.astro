@@ -4,7 +4,6 @@ import '../styles/marketing-press.css'
 import Seo from '../components/Seo.astro'
 import { bandSocialUrls } from '../data/socials'
 import { normalizePlausibleDataDomain } from '../lib/plausibleClient'
-import { showPressAssetsSection } from '../lib/showPressAssets'
 import '@fontsource/cormorant-garamond/latin-300.css'
 import '@fontsource/cormorant-garamond/latin-300-italic.css'
 import '@fontsource/cormorant-garamond/latin-600.css'
@@ -27,14 +26,11 @@ interface Props {
 
 const { title, description, canonicalUrl, robots } = Astro.props
 
-const { userId } = Astro.locals.auth?.() ?? {}
-
 const navItems = [
   { href: '/', label: 'Inicio' },
   { href: '/#redes', label: 'Redes' },
   { href: '/#musica', label: 'Música' },
   { href: '/#grupo', label: 'Integrantes' },
-  ...(showPressAssetsSection ? [{ href: '/#press', label: 'Press kit' }] : []),
   { href: '/#paquetes', label: 'Paquetes' },
   { href: '/contratacion', label: 'Contrataciones' },
 ]
@@ -167,14 +163,6 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
                 </a>
               </li>
             ))}
-            {userId ? (
-              <li class="menu-item" style={`--i:${navItems.length}`}>
-                <a href="/admin" class="menu-link">
-                  <span class="menu-num">{String(navItems.length + 1).padStart(2, '0')}</span>
-                  <span class="menu-label">Admin</span>
-                </a>
-              </li>
-            ) : null}
           </ol>
         </nav>
 
@@ -196,11 +184,6 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
             <span class="menu-cta-label">Contrátanos<em>.</em></span>
           </a>
 
-          <div class="menu-auth">
-            {userId ? (
-              <a href="/admin" class="menu-cta">Admin</a>
-            ) : null}
-          </div>
         </aside>
       </div>
     </div>
