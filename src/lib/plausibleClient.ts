@@ -1,6 +1,6 @@
 /**
  * Browser-only Plausible custom events. No-op when script is absent or `plausible` is not loaded.
- * See `PUBLIC_PLAUSIBLE_DOMAIN` in `web/.env.example`.
+ * See `PUBLIC_PLAUSIBLE_DOMAIN` in `.env.example`.
  */
 
 export type PlausibleEventOptions = {
