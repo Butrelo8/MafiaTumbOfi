@@ -16,7 +16,15 @@ unrelated tracked and untracked worktree files.
 
 Run date: 2026-09-09.
 
-Command:
+Chrome launch command used before Lighthouse:
+
+```text
+/usr/bin/chromium-browser --headless=new --no-sandbox --disable-dev-shm-usage --remote-debugging-port=9222 --user-data-dir=/tmp/mto-task-9-chrome-profile about:blank > /tmp/mto-task-9-chrome.log 2>&1 & CHROME_PID=$!
+```
+
+Stopped after Lighthouse with `kill "$CHROME_PID"`.
+
+Lighthouse command:
 
 ```text
 bunx lighthouse@13.1.0 http://127.0.0.1:4321/ --port=9222 --only-categories=performance,accessibility --form-factor=mobile --throttling-method=simulate --screenEmulation.mobile=true --output=json --output-path=/tmp/mto-task-9-lighthouse.json --quiet
