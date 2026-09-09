@@ -89,7 +89,6 @@ See `.env.example` (root) and `web/.env.example`. Critical:
 
 ## Code style
 
-- See .cursor/rules/ for detailed conventions
 - TypeScript strict mode always
 - Hono routes follow REST naming
 - Drizzle schema is source of truth for types

@@ -480,6 +480,11 @@ describe('POST /api/booking', () => {
       body,
     })
     expect(res.status).toBe(429)
+    expect(res.headers.get('Retry-After')).toBeDefined()
+    const retryAfter = Number.parseInt(res.headers.get('Retry-After') || '0', 10)
+    expect(retryAfter).toBeGreaterThan(0)
+    expect(retryAfter).toBeLessThanOrEqual(60)
+
     const data = await res.json()
     expect(data.error?.code).toBe('RATE_LIMITED')
   })
