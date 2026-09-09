@@ -41,7 +41,7 @@ Why this direction and not generic dark-luxury: Mafia Tumbada is from Xalapa, Ve
 
   /* Burgundy — cinematic glow ONLY, never flat fill */
   --burgundy-glow: oklch(38% 0.14 15);    /* deep burgundy — box-shadow / glow source */
-  --burgundy-hot: oklch(52% 0.18 18);     /* marquee strip, SOLD OUT tag only */
+  --burgundy-hot: oklch(52% 0.18 18);     /* marquee strip only */
 
   /* Turquoise — secondary accent, links + focus ONLY */
   --accent: oklch(68% 0.14 200);          /* veracruz turquoise — links, focus, NOT buttons */
@@ -49,8 +49,6 @@ Why this direction and not generic dark-luxury: Mafia Tumbada is from Xalapa, Ve
   /* Semantic */
   --border: oklch(20% 0.005 90);
   --focus-ring: oklch(76% 0.16 82 / 0.65); /* gold-highlight @ 65% */
-  --color-success: oklch(62% 0.16 145);   /* inline form confirmation */
-  --color-error: oklch(52% 0.18 18);      /* form errors — same hue as --burgundy-hot */
 }
 ```
 
@@ -63,9 +61,8 @@ background: linear-gradient(135deg, var(--gold-shadow), var(--gold), var(--gold-
 **Color rules:**
 
 - Gold: metallic gradient (`--gold-shadow → --gold → --gold-mid`) on primary CTA backgrounds, buttons, logo treatment. Flat `--gold` only for eyebrow labels. `--gold-dim` for hairline dividers. NEVER body text.
-- Burgundy: `--burgundy-glow` ONLY as `box-shadow` / `filter: drop-shadow()` for cinematic atmosphere on hero, cards, photo overlays. `--burgundy-hot` for marquee strip and "SOLD OUT" tag ONLY. Never as flat fill, background, or text color.
+- Burgundy: `--burgundy-glow` ONLY as `box-shadow` / `filter: drop-shadow()` for cinematic atmosphere on hero, cards, photo overlays. `--burgundy-hot` for the marquee strip ONLY. Never as flat fill, background, or text color.
 - Turquoise (`--accent`): text link hover, `::after` underline reveals, focus outlines ONLY. NOT used on button backgrounds or CTAs.
-- `--color-success` / `--color-error`: booking form inline status only (not body copy)
 - All text tokens must hold WCAG AA against `--bg`
 
 ### Typography
