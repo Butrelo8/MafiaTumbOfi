@@ -38,7 +38,7 @@ const releases = catalog.releases.map((release) => ({
 
   <section class="section music-section" id="musica" aria-labelledby="musica-heading"><div class="container">
     <Eyebrow text="Escucha" />
-    <h2 id="musica-heading" class="section-heading">Música</h2>
+    <h2 id="musica-heading" class="section-heading gold-text">Música</h2>
     <ArtworkShelf items={releases} />
     <a class="music-link" href={bandSocialUrls.appleMusic} target="_blank" rel="noopener noreferrer">Escúchanos en Apple Music</a>
     <h3 class="videos-heading">Videos</h3>
@@ -60,17 +60,17 @@ const releases = catalog.releases.map((release) => ({
   </div></section>
 
   <section class="section group-section" id="grupo" aria-labelledby="grupo-heading"><div class="container">
-    <Eyebrow text="La banda" /><h2 id="grupo-heading" class="section-heading">El grupo</h2>
+    <Eyebrow text="La banda" /><h2 id="grupo-heading" class="section-heading gold-text">El grupo</h2>
     <div class="members-grid">{members.map((member) => <MemberCard {...member} />)}</div>
   </div></section>
 
   <section class="section booking-section" id="contratacion" aria-labelledby="contratacion-heading"><div class="container booking-grid">
-    <div><Eyebrow text="Contratar al grupo" /><h2 id="contratacion-heading" class="section-heading">¿Tienes una <em>fecha disponible?</em></h2></div>
+    <div><Eyebrow text="Contratar al grupo" /><h2 id="contratacion-heading" class="section-heading gold-text">¿Tienes una <em>fecha disponible?</em></h2></div>
     <div class="booking-copy">
       <p>El grupo está disponible para presentaciones, festivales, eventos privados y giras regionales. Cuentan con equipo propio y experiencia para adaptarse a diferentes formatos de producción.</p>
       <p class="booking-urgency">Agenda limitada — los fines de semana suelen reservarse con tres o cuatro semanas de anticipación.</p>
       <a href={bandSocialUrls.whatsapp} target="_blank" rel="noopener noreferrer" class="btn-primary" data-plausible-event="whatsapp_contratacion">Escríbenos por WhatsApp</a>
-      <p>O llámanos: <a href="tel:+522288351464">+52 228 835 1464</a></p>
+      <p>O llámanos: <a href="tel:+522283538827">+52 228 353 8827</a></p>
     </div>
   </div></section>
 

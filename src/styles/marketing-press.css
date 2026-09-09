@@ -543,7 +543,7 @@ body.marketing-body img {
 
 .menu-tagline {
   font-family: var(--ff-display);
-  font-weight: 300;
+  font-weight: 600;
   font-size: clamp(1.25rem, 2.4vw, 1.75rem);
   line-height: 1.15;
   color: var(--text-muted);
@@ -995,7 +995,7 @@ body.marketing-body img {
 
 .bio-sidebar h2 em {
   font-style: italic;
-  font-weight: 300;
+  font-weight: 600;
   color: var(--gold);
 }
 
@@ -1229,7 +1229,7 @@ body.marketing-body img {
 
 .booking-headline em {
   font-style: italic;
-  font-weight: 300;
+  font-weight: 600;
   color: var(--gold);
 }
 
@@ -1332,7 +1332,8 @@ body.marketing-body img {
 }
 
 .footer-brand {
-  font-family: var(--ff-display);
+  /* Archivo keeps this compact footer label legible below 24px. */
+  font-family: var(--ff-body);
   font-size: 1.1rem;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -1458,7 +1459,8 @@ body.marketing-body img {
 }
 
 .repertoire-name {
-  font-family: var(--ff-display);
+  /* Archivo keeps this compact label legible below 24px. */
+  font-family: var(--ff-body);
   font-size: 1.25rem;
   font-weight: 600;
   line-height: 1.2;
@@ -1876,7 +1878,8 @@ body.marketing-body img {
 }
 
 .artwork-shelf-initial {
-  font-family: var(--ff-display);
+  /* Archivo keeps this compact fallback mark legible below 24px. */
+  font-family: var(--ff-body);
   font-size: 1.35rem;
   font-weight: 600;
   color: var(--gold);
@@ -1891,7 +1894,8 @@ body.marketing-body img {
 }
 
 .artwork-shelf-title {
-  font-family: var(--ff-display);
+  /* Archivo keeps release titles legible below 24px. */
+  font-family: var(--ff-body);
   font-size: 1.05rem;
   font-weight: 600;
   line-height: 1.2;
