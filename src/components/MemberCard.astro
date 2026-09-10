@@ -4,12 +4,12 @@ const { name, role, image, instagram = "#" } = Astro.props;
 ---
 
 <div class="member-card" data-reveal>
-  <div class="member-image">
+  <button type="button" class="member-image" data-zoom-src={image} data-zoom-alt={name} aria-label={`Ampliar foto de ${name}`}>
     <picture>
       <source srcset={image.replace('.jpg', '.webp')} type="image/webp" />
-      <img src={image} alt="" loading="lazy" width="180" height="180" decoding="async" />
+      <img src={image} alt="" loading="lazy" width="1440" height="1081" decoding="async" />
     </picture>
-  </div>
+  </button>
 
   <span class="member-role">{role}</span>
   <p class="member-name">{name}</p>
@@ -23,7 +23,7 @@ const { name, role, image, instagram = "#" } = Astro.props;
 .member-card {
   background: var(--bg-raised);
   border: 1px solid var(--border);
-  padding: 2rem 1.8rem;
+  padding: 1rem 1rem 1.6rem;
   text-align: center;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
@@ -37,14 +37,22 @@ const { name, role, image, instagram = "#" } = Astro.props;
 }
 
 .member-image {
-  width: 90px;
-  height: 90px;
+  display: block;
+  padding: 0;
+  background: none;
+  cursor: zoom-in;
+  width: 100%;
+  aspect-ratio: 4 / 3;
   margin: 0 auto 1rem;
-  border-radius: 50%;
   overflow: hidden;
   filter: grayscale(100%);
   transition: filter 0.3s;
   border: 2px solid transparent;
+}
+
+.member-image:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
 }
 
 .member-card:hover .member-image,

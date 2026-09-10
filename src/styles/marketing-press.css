@@ -21,7 +21,7 @@
   --border: oklch(19% 0.006 85);
   --focus-ring: oklch(78% 0.15 85 / 0.7);
 
-  --ff-display: 'Grenze Gotisch', Georgia, serif;
+  --ff-display: 'Pirata One', Georgia, serif;
   --ff-body: 'Archivo', system-ui, -apple-system, sans-serif;
   --ff-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
 
@@ -117,8 +117,16 @@ body.marketing-body::after {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background: url('/marketing-grunge-texture.webp') center / 320px 320px repeat;
-  opacity: 0.18;
+  /* Single 1600x1000 feTurbulence sheet, scaled to cover — no tiling, so there is
+     no repeat to spot. Flicked-spray look: each pass multiplies its dot noise by a
+     shared low-frequency mask BEFORE thresholding (feComposite arithmetic k1=1),
+     so dots cluster into bursts over empty black instead of spreading evenly.
+     Thresholding uses a steep feFuncA linear ramp, never discrete — discrete's top
+     bucket needs alpha > 0.875, which fractalNoise never reaches, so it renders
+     nothing. Density is very sensitive to intercept: ~1.0 covers empty-to-solid.
+     Replaces a 1MB webp. */
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='1000'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='11'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  1 0 0 0 -0.42'/><feComponentTransfer><feFuncA type='gamma' exponent='2' amplitude='2.8'/></feComponentTransfer></filter><filter id='s1'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' seed='5' result='dots'/><feTurbulence type='fractalNoise' baseFrequency='0.0035' numOctaves='3' seed='21' result='mask'/><feComposite in='dots' in2='mask' operator='arithmetic' k1='1' k2='0' k3='0' k4='0'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  1 0 0 0 0'/><feComponentTransfer><feFuncA type='linear' slope='60' intercept='-22.2'/></feComponentTransfer></filter><filter id='s2'><feTurbulence type='fractalNoise' baseFrequency='0.3' numOctaves='2' seed='13' result='dots'/><feTurbulence type='fractalNoise' baseFrequency='0.0035' numOctaves='3' seed='21' result='mask'/><feComposite in='dots' in2='mask' operator='arithmetic' k1='1' k2='0' k3='0' k4='0'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  1 0 0 0 0'/><feComponentTransfer><feFuncA type='linear' slope='60' intercept='-21.6'/></feComponentTransfer><feGaussianBlur stdDeviation='0.3'/></filter><filter id='s3'><feTurbulence type='turbulence' baseFrequency='0.06' numOctaves='3' seed='31' result='dots'/><feTurbulence type='fractalNoise' baseFrequency='0.0035' numOctaves='3' seed='47' result='mask'/><feComposite in='dots' in2='mask' operator='arithmetic' k1='1' k2='0' k3='0' k4='0'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  1 0 0 0 0'/><feComponentTransfer><feFuncA type='linear' slope='45' intercept='-14.2'/></feComponentTransfer><feGaussianBlur stdDeviation='0.7'/></filter><rect width='100%25' height='100%25' filter='url(%23g)' opacity='0.55'/><rect width='100%25' height='100%25' filter='url(%23s3)' opacity='0.5'/><rect width='100%25' height='100%25' filter='url(%23s1)' opacity='0.85'/><rect width='100%25' height='100%25' filter='url(%23s2)' opacity='0.7'/></svg>") center / cover no-repeat;
+  opacity: 0.22;
   mix-blend-mode: screen;
 }
 
@@ -159,7 +167,7 @@ body.marketing-body img {
   flex-shrink: 0;
   font-family: var(--ff-display);
   font-size: var(--fs-monogram);
-  font-weight: 700;
+  font-weight: 400;
   gap: 0.1em;
   line-height: 1;
   min-height: 44px;
@@ -451,7 +459,7 @@ body.marketing-body img {
   position: relative;
   display: inline-block;
   font-family: var(--ff-display);
-  font-weight: 600;
+  font-weight: 400;
   font-size: clamp(2.25rem, 7vw, 4.75rem);
   line-height: var(--lh-tight, 0.95);
   letter-spacing: var(--tracking-display, -0.02em);
@@ -515,7 +523,7 @@ body.marketing-body img {
 
 .menu-tagline {
   font-family: var(--ff-display);
-  font-weight: 600;
+  font-weight: 400;
   font-size: clamp(1.25rem, 2.4vw, 1.75rem);
   line-height: 1.15;
   color: var(--text-muted);
@@ -583,7 +591,7 @@ body.marketing-body img {
 }
 .menu-cta-label {
   font-family: var(--ff-display);
-  font-weight: 600;
+  font-weight: 400;
   font-style: italic;
   font-size: clamp(1.75rem, 3.5vw, 2.5rem);
   line-height: 1;
@@ -692,7 +700,7 @@ body.marketing-body img {
 .section-heading {
   font-family: var(--ff-display);
   font-size: clamp(1.8rem, 4vw, 3rem);
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1.1;
 }
 
@@ -930,7 +938,7 @@ body.marketing-body img {
 .stat-number {
   font-family: var(--ff-display);
   font-size: 2.8rem;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1;
   color: var(--gold);
   display: block;
@@ -961,7 +969,7 @@ body.marketing-body img {
 .bio-sidebar h2 {
   font-family: var(--ff-display);
   font-size: clamp(2.8rem, 7vw, 5rem);
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1.05;
 }
 
@@ -1033,7 +1041,7 @@ body.marketing-body img {
 .single-number {
   font-family: var(--ff-display);
   font-size: 4rem;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1;
   color: var(--border);
   letter-spacing: -0.02em;
@@ -1047,7 +1055,7 @@ body.marketing-body img {
 .single-title {
   font-family: var(--ff-display);
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.2;
 }
 
@@ -1195,7 +1203,7 @@ body.marketing-body img {
 .booking-headline {
   font-family: var(--ff-display);
   font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1.1;
 }
 
@@ -1349,7 +1357,7 @@ body.marketing-body img {
 .member-name {
   font-family: var(--ff-display);
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.2;
 }
 
@@ -1615,7 +1623,7 @@ body.marketing-body img {
 .package-name {
   font-family: var(--ff-display);
   font-size: 1.75rem;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.15;
 }
 
@@ -1807,18 +1815,12 @@ body.marketing-body img {
 }
 
 .artwork-shelf-track {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 1rem;
-  overflow-x: auto;
   padding: 0.25rem 0 0.75rem;
-  scroll-snap-type: x mandatory;
   list-style: none;
   margin: 0;
-}
-
-.artwork-shelf-item {
-  flex: 0 0 min(220px, 78vw);
-  scroll-snap-align: start;
 }
 
 .artwork-shelf-card {
@@ -1905,18 +1907,26 @@ body.marketing-body img {
 }
 
 .film-strip-inner {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
   justify-content: center;
-  flex-wrap: wrap;
   max-width: var(--container, 72rem);
   margin-inline: auto;
   padding-inline: 1.25rem;
 }
 
 .film-strip-frame {
-  flex: 1 1 180px;
-  max-width: 280px;
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: zoom-in;
+}
+
+.film-strip-frame:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
 }
 
 .film-strip-img {
@@ -1948,4 +1958,51 @@ body.marketing-body img {
 .footer-github-link:hover,
 .footer-github-link:focus-visible {
   color: var(--red-link);
+}
+
+/* Photo lightbox — native <dialog> */
+.zoom-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  max-width: min(92vw, 1200px);
+  max-height: 92vh;
+  padding: 0;
+  border: 1px solid var(--gold-dim);
+  background: var(--bg-sunk);
+  color: var(--text);
+  overflow: visible;
+}
+
+.zoom-dialog::backdrop {
+  background: oklch(4% 0 0 / 0.88);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.zoom-dialog img {
+  display: block;
+  max-width: min(92vw, 1200px);
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+}
+
+.zoom-dialog-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--text);
+  background: oklch(4% 0 0 / 0.6);
+  border: none;
+  cursor: pointer;
+}
+
+.zoom-dialog-close:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -4px;
 }

@@ -10,7 +10,7 @@ const frames = [
   <div class="film-strip-inner">
     {
       frames.map((f) => (
-        <div class="film-strip-frame">
+        <button type="button" class="film-strip-frame" data-zoom-src={f.src} data-zoom-alt={f.alt} aria-label={`Ampliar ${f.alt}`}>
           <img
             src={f.src}
             alt={f.alt}
@@ -20,7 +20,7 @@ const frames = [
             width="560"
             height="420"
           />
-        </div>
+        </button>
       ))
     }
   </div>

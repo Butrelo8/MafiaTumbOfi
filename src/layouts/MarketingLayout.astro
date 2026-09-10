@@ -6,9 +6,7 @@ import { bandSocialUrls } from '../data/socials'
 import { normalizePlausibleDataDomain } from '../lib/plausibleClient'
 import '@fontsource/jetbrains-mono/latin-400.css'
 import '@fontsource/jetbrains-mono/latin-500.css'
-import '@fontsource/grenze-gotisch/latin-400.css'
-import '@fontsource/grenze-gotisch/latin-600.css'
-import '@fontsource/grenze-gotisch/latin-700.css'
+import '@fontsource/pirata-one/latin-400.css'
 import '@fontsource/archivo/latin-400.css'
 import '@fontsource/archivo/latin-500.css'
 import '@fontsource/archivo/latin-600.css'
@@ -192,6 +190,32 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
     <main class="marketing-main">
       <slot />
     </main>
+
+    <dialog id="zoom-dialog" class="zoom-dialog" aria-label="Foto ampliada">
+      <img id="zoom-dialog-img" src="" alt="" />
+      <button type="button" id="zoom-dialog-close" class="zoom-dialog-close" aria-label="Cerrar">&times;</button>
+    </dialog>
+
+    <script>
+      const zoomDialog = document.getElementById('zoom-dialog') as HTMLDialogElement
+      const zoomImg = document.getElementById('zoom-dialog-img') as HTMLImageElement
+
+      document.addEventListener('click', (e) => {
+        const trigger = (e.target as HTMLElement).closest<HTMLElement>('[data-zoom-src]')
+        if (trigger) {
+          zoomImg.src = trigger.dataset.zoomSrc!
+          zoomImg.alt = trigger.dataset.zoomAlt ?? ''
+          zoomDialog.showModal()
+          return
+        }
+        // backdrop or close button
+        if (zoomDialog.open && (e.target === zoomDialog || (e.target as HTMLElement).id === 'zoom-dialog-close')) {
+          zoomDialog.close()
+        }
+      })
+
+      zoomDialog.addEventListener('close', () => { zoomImg.removeAttribute('src') })
+    </script>
 
     <script>
       const hamburgerBtn = document.getElementById('hamburger-btn');
