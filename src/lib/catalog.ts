@@ -25,8 +25,17 @@ const xmlEntities = { amp: '&', apos: "'", gt: '>', lt: '<', quot: '"' } as cons
 
 export async function loadCatalog(options: LoadCatalogOptions = {}): Promise<Catalog> {
   const fetcher = options.fetch ?? fetch
-  const releases = await loadSpotify(fetcher, options).catch(() => snapshot.releases)
-  const videos = await loadYouTube(fetcher).catch(() => snapshot.videos)
+  // Falling back is correct -- a dead upstream must not break the build -- but it
+  // has to say so. A silent catch here hid missing Spotify credentials for weeks:
+  // the site kept building green off the snapshot with nobody the wiser.
+  const releases = await loadSpotify(fetcher, options).catch((error) => {
+    console.warn(`[catalog] Spotify fetch failed, using snapshot: ${error instanceof Error ? error.message : error}`)
+    return snapshot.releases
+  })
+  const videos = await loadYouTube(fetcher).catch((error) => {
+    console.warn(`[catalog] YouTube fetch failed, using snapshot: ${error instanceof Error ? error.message : error}`)
+    return snapshot.videos
+  })
 
   return { releases: releases.length ? releases : snapshot.releases, videos }
 }
@@ -45,7 +54,7 @@ async function loadSpotify(fetcher: typeof fetch, options: LoadCatalogOptions): 
     body: 'grant_type=client_credentials',
     signal: AbortSignal.timeout(10_000),
   })
-  if (!tokenResponse.ok) throw new Error('Spotify token failed')
+  if (!tokenResponse.ok) throw new Error(`Spotify token failed: HTTP ${tokenResponse.status}`)
   const token = (await tokenResponse.json()).access_token
   if (typeof token !== 'string' || !token) throw new Error('Spotify token missing')
 
@@ -53,7 +62,7 @@ async function loadSpotify(fetcher: typeof fetch, options: LoadCatalogOptions): 
     headers: { Authorization: `Bearer ${token}` },
     signal: AbortSignal.timeout(10_000),
   })
-  if (!albumsResponse.ok) throw new Error('Spotify albums failed')
+  if (!albumsResponse.ok) throw new Error(`Spotify albums failed: HTTP ${albumsResponse.status}`)
   const data = await albumsResponse.json()
   if (!Array.isArray(data?.items)) throw new Error('Spotify albums malformed')
 
