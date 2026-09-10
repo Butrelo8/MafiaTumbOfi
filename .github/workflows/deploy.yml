@@ -1,0 +1,50 @@
+name: Build and deploy
+
+# Nightly so the Spotify/YouTube catalog refreshes without anyone running a
+# build by hand, plus on push so main always matches production.
+# Public repo => GitHub-hosted runner minutes are free and unlimited, and a
+# Cloudflare deploy has no per-day cap, so the cadence costs nothing.
+on:
+  schedule:
+    - cron: '0 8 * * *' # 08:00 UTC / 02:00 Xalapa
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A nightly run and a push must never deploy over each other.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Build
+        env:
+          # Absent secrets are not fatal: loadCatalog() falls back to the
+          # committed catalog.json snapshot, so the build still produces a
+          # correct site with slightly stale releases.
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          PUBLIC_SITE_URL: https://mafiatumbada.com
+          PUBLIC_ALLOW_INDEXING: 'true'
+          PUBLIC_PLAUSIBLE_DOMAIN: mafiatumbada.com
+        run: bun run build
+
+      - run: bun test
+
+      - name: Deploy to Cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: bunx wrangler deploy
