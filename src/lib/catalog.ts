@@ -69,7 +69,10 @@ async function loadSpotify(fetcher: typeof fetch, options: LoadCatalogOptions): 
     headers: { Authorization: `Bearer ${token}` },
     signal: AbortSignal.timeout(10_000),
   })
-  if (!albumsResponse.ok) throw new Error(`Spotify albums failed: HTTP ${albumsResponse.status}`)
+  if (!albumsResponse.ok) {
+    const detail = await albumsResponse.text().catch(() => '')
+    throw new Error(`Spotify albums failed: HTTP ${albumsResponse.status} ${detail.slice(0, 200)}`)
+  }
   const data = await albumsResponse.json()
   if (!Array.isArray(data?.items)) throw new Error('Spotify albums malformed')
 

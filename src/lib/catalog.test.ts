@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { loadCatalog } from './catalog'
+import snapshot from '../data/catalog.json'
 
 const spotifyOptions = {
   spotifyClientId: 'test-client',
@@ -32,7 +33,7 @@ describe('loadCatalog', () => {
     })
 
     expect(catalog.releases).toEqual([mappedAlbum])
-    expect(catalog.videos).toEqual([])
+    expect(catalog.videos).toEqual(snapshot.videos)
   })
 
   test('uses snapshot releases for malformed Spotify JSON', async () => {
