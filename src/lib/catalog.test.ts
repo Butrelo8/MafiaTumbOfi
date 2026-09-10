@@ -16,8 +16,8 @@ describe('loadCatalog', () => {
       fetch: async () => Promise.reject(new Error('Spotify unavailable')),
     })
 
-    expect(catalog.releases).toHaveLength(6)
-    expect(catalog.releases[0].cover).toBe('/music/lv.webp')
+    expect(catalog.releases).toHaveLength(snapshot.releases.length)
+    expect(catalog.releases[0].cover).toBe(snapshot.releases[0].cover)
   })
 
   test('uses Spotify releases when YouTube rejects', async () => {
@@ -45,7 +45,7 @@ describe('loadCatalog', () => {
           : new Response('{', { headers: { 'content-type': 'application/json' } }),
     })
 
-    expect(catalog.releases).toHaveLength(6)
+    expect(catalog.releases).toHaveLength(snapshot.releases.length)
   })
 
   test('maps a Spotify album to ShelfItem', async () => {
@@ -92,7 +92,7 @@ describe('loadCatalog', () => {
         thumbnail: 'https://i.ytimg.com/vi/def456/hqdefault.jpg',
       },
     ])
-    expect(catalog.releases).toHaveLength(6)
+    expect(catalog.releases).toHaveLength(snapshot.releases.length)
   })
 
   test('decodes XML entities in RSS titles without altering CDATA', async () => {

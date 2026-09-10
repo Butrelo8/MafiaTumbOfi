@@ -1,11 +1,32 @@
 {
   "releases": [
     {
+      "title": "PUTIFRESA",
+      "subtitle": "Single",
+      "label": "Spotify",
+      "href": "https://open.spotify.com/album/1w8U5GJbRsYoGl52QlBDdQ",
+      "cover": "/music/putifresa.webp"
+    },
+    {
       "title": "L.V.",
       "subtitle": "Corrido tumbado",
       "href": "https://open.spotify.com/intl-es/album/070MvKHW6m7CV17k0EeYjz?go=1&sp_cid=0d6d738c-4142-4435-ae8f-f760b4483f00&utm_source=spotify_web_player&utm_medium=mobile&sp_cid=0d6d738c-4142-4435-ae8f-f760b4483f00&fallback=getapp",
       "label": "Spotify",
       "cover": "/music/lv.webp"
+    },
+    {
+      "title": "Besos",
+      "subtitle": "Single",
+      "href": "https://youtu.be/kAdwJ-0F8mU?si=H2Y-8VBsuOdIdtQo",
+      "label": "YouTube",
+      "cover": "/music/besos.webp"
+    },
+    {
+      "title": "Tal Vez",
+      "subtitle": "Corrido tumbado",
+      "href": "https://open.spotify.com/intl-es/track/54nPL89TjXqZ2UYRO1PvBD?si=e276a7b6475d470c",
+      "label": "Spotify",
+      "cover": "/music/tal-vez.webp"
     },
     {
       "title": "L.A. BUBU",
@@ -22,11 +43,18 @@
       "cover": "/music/no-te-he-olvidado.webp"
     },
     {
-      "title": "Tal Vez",
-      "subtitle": "Corrido tumbado",
-      "href": "https://open.spotify.com/intl-es/track/54nPL89TjXqZ2UYRO1PvBD?si=e276a7b6475d470c",
+      "title": "SD",
+      "subtitle": "Single",
       "label": "Spotify",
-      "cover": "/music/tal-vez.webp"
+      "href": "https://open.spotify.com/album/6PDeUBPHPutSjOU7mJCMZC",
+      "cover": "/music/sd.webp"
+    },
+    {
+      "title": "Mírame",
+      "subtitle": "Single",
+      "label": "Spotify",
+      "href": "https://open.spotify.com/album/4ha0Wnd1upezqhIsVmWkQ6",
+      "cover": "/music/mirame.webp"
     },
     {
       "title": "Corazón",
@@ -34,13 +62,6 @@
       "href": "https://music.apple.com/es/album/coraz%C3%B3n-single/1779090777",
       "label": "Apple Music",
       "cover": "/music/corazon.webp"
-    },
-    {
-      "title": "Besos",
-      "subtitle": "Single",
-      "href": "https://youtu.be/kAdwJ-0F8mU?si=H2Y-8VBsuOdIdtQo",
-      "label": "YouTube",
-      "cover": "/music/besos.webp"
     }
   ],
   "videos": [

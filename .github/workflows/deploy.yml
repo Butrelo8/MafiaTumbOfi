@@ -1,12 +1,14 @@
 name: Build and deploy
 
-# Nightly so the Spotify/YouTube catalog refreshes without anyone running a
-# build by hand, plus on push so main always matches production.
-# Public repo => GitHub-hosted runner minutes are free and unlimited, and a
-# Cloudflare deploy has no per-day cap, so the cadence costs nothing.
+# Deploy on push so main always matches production, plus manual runs.
+#
+# There is deliberately no schedule. A nightly rebuild only helps if an
+# upstream can supply something new, and neither can: Spotify returns 403
+# ("Active premium subscription required for the owner of the app") and the
+# YouTube RSS feed 404s on both URL forms. Until one of those is fixed the
+# catalog comes from src/data/catalog.json, so a nightly run would rebuild a
+# byte-identical site and report success, which is worse than not running.
 on:
-  schedule:
-    - cron: '0 8 * * *' # 08:00 UTC / 02:00 Xalapa
   push:
     branches: [main]
   workflow_dispatch:
