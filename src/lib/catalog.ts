@@ -20,7 +20,14 @@ type LoadCatalogOptions = {
 
 const spotifyAlbumsUrl =
   'https://api.spotify.com/v1/artists/3pc90hxACiSUahZmmfYjcI/albums?include_groups=single,album&market=MX'
-const youtubeFeedUrl = 'https://www.youtube.com/feeds/videos.xml?playlist_id=UUSZnXDUTBZvPYcU-AGZULYA'
+const youtubeChannelId = 'UCSZnXDUTBZvPYcU-AGZULYA'
+// Two accepted forms of the same feed. The uploads-playlist form (UC -> UU) is
+// the one that was here; the channel_id form is tried as a fallback because
+// YouTube does not serve RSS for every auto-generated uploads playlist.
+const youtubeFeedUrls = [
+  `https://www.youtube.com/feeds/videos.xml?playlist_id=UU${youtubeChannelId.slice(2)}`,
+  `https://www.youtube.com/feeds/videos.xml?channel_id=${youtubeChannelId}`,
+]
 const xmlEntities = { amp: '&', apos: "'", gt: '>', lt: '<', quot: '"' } as const
 
 export async function loadCatalog(options: LoadCatalogOptions = {}): Promise<Catalog> {
@@ -96,9 +103,18 @@ function decodeXmlTitle(title: string): string {
 }
 
 async function loadYouTube(fetcher: typeof fetch): Promise<VideoItem[]> {
-  const response = await fetcher(youtubeFeedUrl, { signal: AbortSignal.timeout(10_000) })
-  if (!response.ok) throw new Error('YouTube feed failed')
-  const entries = (await response.text()).matchAll(/<entry(?:\s[^>]*)?>([\s\S]*?)<\/entry>/g)
+  let xml: string | null = null
+  const failures: string[] = []
+  for (const url of youtubeFeedUrls) {
+    const response = await fetcher(url, { signal: AbortSignal.timeout(10_000) })
+    if (response.ok) {
+      xml = await response.text()
+      break
+    }
+    failures.push(`HTTP ${response.status} on ${new URL(url).search}`)
+  }
+  if (xml === null) throw new Error(`YouTube feed failed: ${failures.join('; ')}`)
+  const entries = xml.matchAll(/<entry(?:\s[^>]*)?>([\s\S]*?)<\/entry>/g)
   return [...entries].flatMap(([, entry]) => {
     const title = entry.match(/<title(?:\s[^>]*)?>([\s\S]*?)<\/title>/)?.[1]
     const id = entry.match(/<yt:videoId>([\w-]+)<\/yt:videoId>/)?.[1]
