@@ -1890,13 +1890,61 @@ body.marketing-body img {
   color: var(--muted);
 }
 
-.artwork-shelf-cta {
+/* Outlined pill that fills on hover, adapted from uiverse.io/reshades/dull-snake-38
+   (MIT, (c) 2026 reshades). Palette, radius and timing are ours; the platform mark
+   replaces the original arrow. It is a <span>, not a <button>: the whole card is
+   already an <a>, and nesting interactive elements is invalid. */
+.shelf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  padding: 0.45em 0.85em;
+  background-color: transparent;
+  color: var(--gold);
+  border: 2px solid var(--gold-dim);
+  border-radius: 11px;
   font-family: var(--ff-mono);
   font-size: 0.62rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--gold-mid);
-  margin-top: 0.35rem;
+  white-space: nowrap;
+  transition:
+    background-color 300ms ease,
+    border-color 300ms ease,
+    color 300ms ease;
+}
+
+.shelf-btn svg {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+  transition: transform 300ms ease;
+}
+
+.artwork-shelf-card:hover .shelf-btn,
+.artwork-shelf-card:focus-visible .shelf-btn {
+  background-color: var(--gold);
+  border-color: var(--gold);
+  color: oklch(9% 0 0);
+}
+
+.artwork-shelf-card:hover .shelf-btn svg,
+.artwork-shelf-card:focus-visible .shelf-btn svg {
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shelf-btn,
+  .shelf-btn svg {
+    transition: none;
+  }
+
+  .artwork-shelf-card:hover .shelf-btn svg,
+  .artwork-shelf-card:focus-visible .shelf-btn svg {
+    transform: none;
+  }
 }
 
 /* Film strip */

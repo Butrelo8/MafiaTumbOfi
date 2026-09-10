@@ -17,7 +17,6 @@ const catalog = await loadCatalog()
 const releases = catalog.releases.map((release) => ({
   ...release,
   subtitle: /^\d{4}$/.test(release.subtitle ?? '') ? release.subtitle : undefined,
-  label: `Escuchar en ${release.label}`,
 }))
 ---
 
