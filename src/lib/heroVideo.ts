@@ -1,5 +1,8 @@
 export function shouldLoadHeroVideo(win: Window): boolean {
   if (win.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
+  // ponytail: phones skip it entirely — a 10 MB looping decode is enough memory
+  // pressure that mobile WebKit kills and reloads the tab every few seconds.
+  if (win.matchMedia('(max-width: 900px)').matches) return false
   const conn = (win.navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection
   if (conn?.saveData === true) return false
   if (conn?.effectiveType && ['slow-2g', '2g'].includes(conn.effectiveType)) return false
