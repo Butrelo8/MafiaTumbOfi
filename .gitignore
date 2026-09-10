@@ -67,3 +67,6 @@ playwright-report/
 # Lighthouse audits
 *.report.html
 *.report.json
+
+# Wrangler local state
+.wrangler/
