@@ -1312,16 +1312,30 @@ body.marketing-body img {
 }
 
 .footer-brand {
-  /* Archivo keeps this compact footer label legible below 24px. */
-  font-family: var(--ff-body);
-  font-size: 1.1rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  /* Display face at the mockup's 30px. The old Archivo note was about legibility
+     below 24px; at this size the blackletter holds. Weight stays 400 because
+     Pirata One ships a single weight. */
+  font-family: var(--ff-display);
+  font-size: 1.875rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: var(--tracking-display);
+}
+
+.footer-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.125rem;
+  font-size: 0.875rem;
 }
 
 .footer-copy {
-  font-size: 0.75rem;
-  color: var(--muted);
+  font-family: var(--ff-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 0;
 }
 
 .members-grid {
