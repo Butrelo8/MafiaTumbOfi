@@ -57,3 +57,13 @@ herovid/
 .gstack/
 .superpowers/
 .gstack/
+# Astro generated types
+.astro/
+
+# Playwright
+test-results/
+playwright-report/
+
+# Lighthouse audits
+*.report.html
+*.report.json
