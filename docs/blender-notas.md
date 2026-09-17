@@ -285,14 +285,20 @@ criterio de distancia.
 
 ## Entorno
 
-### En portatil (MacBook)
+### Atajos de navegacion: hay que guardarlos
 
-No hay numpad ni botones laterales, y la tecla `` ` `` es incomoda en teclado
-ES de Mac. `blender/keymap.py` deja la maquina igual que la de casa: emula
-raton de 3 botones (`Alt` + clic izquierdo orbita) y numpad, y asigna
-`Ctrl+Shift+W` a walk y `Ctrl+Shift+F` a fly. Se ejecuta una vez por maquina
-(editor de texto de Blender o `blender --python blender/keymap.py`) y guarda
-las preferencias.
+`blender/keymap.py` asigna walk y fly al boton 4/5 del raton y a
+`Ctrl+Shift+W` / `Ctrl+Shift+F`, y en macOS activa la emulacion de raton de 3
+botones y de numpad (el MacBook no tiene ninguno de los dos). Se ejecuta una
+vez por maquina, desde el editor de texto de Blender o con
+`blender --python blender/keymap.py`.
+
+Un `keymap_items.new()` suelto **se pierde al cerrar Blender**: el script
+termina en `bpy.ops.wm.save_userpref()` justo por eso. Si un atajo "no agarra"
+despues de reiniciar, es que se asigno sin guardar.
+
+Blender ya trae `Shift + \`` (`view3d.navigate`), pero esa tecla es incomoda en
+teclado ES de Mac.
 
 ### Rutas WSL ↔ Windows
 
