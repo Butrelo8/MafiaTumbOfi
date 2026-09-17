@@ -206,27 +206,8 @@ def _hornacinas(col):
                   (x + dx, RETABLO_Y - 0.22, HORNACINA_Z + dz), (ancho, 0.12, alto))
 
 
-def _props(col, mesa_z):
-    """Lo que hace que el altar parezca usado y no un render de catálogo."""
-    # Cenicero con dos cigarros, cerca del micro (estación de la reliquia).
-    _cilindro(col, "PROP_cenicero", (-0.45, ALTAR_Y - 0.1, mesa_z + 0.015),
-              0.085, 0.03, 24)
-    _cilindro(col, "PROP_cenicero_hueco", (-0.45, ALTAR_Y - 0.1, mesa_z + 0.032),
-              0.062, 0.012, 24)
-    for i, (dx, dy, giro) in enumerate(((0.06, 0.02, 0.9), (-0.05, -0.04, -0.4))):
-        cigarro = _cilindro(col, "PROP_cigarro_%d" % i,
-                            (-0.45 + dx, ALTAR_Y - 0.1 + dy, mesa_z + 0.042),
-                            0.0055, 0.09, 12)
-        cigarro.rotation_euler = (1.45, 0, giro)
-        brasa = _cilindro(col, "PROP_brasa_%d" % i,
-                          (-0.45 + dx + 0.042 * math.sin(giro),
-                           ALTAR_Y - 0.1 + dy + 0.042 * math.cos(giro),
-                           mesa_z + 0.042), 0.0056, 0.008, 12)
-        brasa.rotation_euler = (1.45, 0, giro)
-
-    # Botella cuadrada de hombros marcados: se reconoce por la silueta, sin
-    # logo ni etiqueta, que a este tamaño no se leerían.
-    bx, by = 1.66, ALTAR_Y + 0.30
+def _botella_greybox(col, bx, by, mesa_z):
+    """Botella de primitivas, para cuando el asset no está."""
     cuerpo_bot = _caja(col, "PROP_botella", (bx, by, mesa_z + 0.095),
                        (0.086, 0.086, 0.19))
     bisel = cuerpo_bot.modifiers.new("bisel", "BEVEL")
@@ -251,6 +232,34 @@ def _props(col, mesa_z):
     # Tequila dentro: sin líquido, el vidrio se lee como un bloque vacío.
     _caja(col, "PROP_botella_liquido", (bx, by, mesa_z + 0.072),
           (0.074, 0.074, 0.14))
+
+
+def _props(col, mesa_z):
+    """Lo que hace que el altar parezca usado y no un render de catálogo."""
+    # Cenicero con dos cigarros, cerca del micro (estación de la reliquia).
+    _cilindro(col, "PROP_cenicero", (-0.45, ALTAR_Y - 0.1, mesa_z + 0.015),
+              0.085, 0.03, 24)
+    _cilindro(col, "PROP_cenicero_hueco", (-0.45, ALTAR_Y - 0.1, mesa_z + 0.032),
+              0.062, 0.012, 24)
+    for i, (dx, dy, giro) in enumerate(((0.06, 0.02, 0.9), (-0.05, -0.04, -0.4))):
+        cigarro = _cilindro(col, "PROP_cigarro_%d" % i,
+                            (-0.45 + dx, ALTAR_Y - 0.1 + dy, mesa_z + 0.042),
+                            0.0055, 0.09, 12)
+        cigarro.rotation_euler = (1.45, 0, giro)
+        brasa = _cilindro(col, "PROP_brasa_%d" % i,
+                          (-0.45 + dx + 0.042 * math.sin(giro),
+                           ALTAR_Y - 0.1 + dy + 0.042 * math.cos(giro),
+                           mesa_z + 0.042), 0.0056, 0.008, 12)
+        brasa.rotation_euler = (1.45, 0, giro)
+
+    # Botella cuadrada de hombros marcados: se reconoce por la silueta, sin
+    # logo ni etiqueta, que a este tamaño no se leerían.
+    bx, by = 1.66, ALTAR_Y + 0.30
+    assets_bot = _cargar_assets()
+    if assets_bot is not None and assets_bot.disponible(assets_bot.BOTELLA):
+        assets_bot.botella(col, (bx, by, mesa_z), alto=0.26, giro=0.5)
+    else:
+        _botella_greybox(col, bx, by, mesa_z)
 
     # Billetes: sueltos y desordenados, como propina de una noche. Ordenados en
     # abanico se leían como "el dinero es el tema", que no es la idea.
@@ -362,10 +371,11 @@ def _props(col, mesa_z):
     _caja(col, "PROP_lentes_patilla", (1.50, ALTAR_Y + 0.5, mesa_z + 0.014),
           (0.11, 0.008, 0.01)).rotation_euler = (0, 0, 0.9)
 
-    # Botella alta de cerámica al fondo de la mesa.
-    _cilindro(col, "PROP_ceramica", (-1.75, ALTAR_Y + 0.3, mesa_z + 0.16),
+    # Botella alta de cerámica al fondo de la mesa. La X viene de moverla en el
+    # visor: 9 cm hacia el centro, para que no se salga del canto de la mesa.
+    _cilindro(col, "PROP_ceramica", (-1.662, ALTAR_Y + 0.3, mesa_z + 0.16),
               0.05, 0.32, 20)
-    _cilindro(col, "PROP_ceramica_cuello", (-1.75, ALTAR_Y + 0.3, mesa_z + 0.36),
+    _cilindro(col, "PROP_ceramica_cuello", (-1.662, ALTAR_Y + 0.3, mesa_z + 0.36),
               0.018, 0.09, 12)
 
     # Cera escurrida al pie de las veladoras.

@@ -38,6 +38,8 @@ TOLOLOCHE = "tololoche.blend"
 TOLOLOCHE_POLIGONOS = 22000
 CANDELABRO = "candelabro.blend"      # nueve brazos, generado por el equipo
 CANDELABRO_POLIGONOS = 14000
+BOTELLA = "botella.blend"            # tequila cuadrado con tapón de bola
+BOTELLA_POLIGONOS = 9000
 
 GORRA = "gorra.glb"
 GORRA_POLIGONOS = 18000     # techo tras decimar; el original trae ~92k
@@ -312,6 +314,16 @@ def _plantar(pieza, ubicacion, alto, giro=0.0, inclinacion=0.0, nombre_ancla=Non
     ancla.location = ubicacion
     bpy.context.view_layer.update()
     return pieza
+
+
+def botella(col, ubicacion, alto=0.26, giro=0.0):
+    """Botella de tequila sobre la mesa. Malla única: el líquido, el tapón y el
+    lazo son parte de la misma pieza, así que todo va con el mismo vidrio."""
+    pieza = _malla_unica(BOTELLA, "PROP_botella", col, BOTELLA_POLIGONOS)
+    if pieza is None:
+        return None
+    return _plantar(pieza, ubicacion, alto, giro=giro,
+                    nombre_ancla="PROP_botella_ancla")
 
 
 def candelabro(col, nombre, ubicacion, alto=1.35, giro=0.0):

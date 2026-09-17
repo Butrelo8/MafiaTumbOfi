@@ -30,6 +30,12 @@ retirada no deja nada pendiente.
 Generado por el propio equipo (`candelabro.blend`), sin derechos de terceros.
 Malla única, decimada a 14.000 polígonos.
 
+### Botella de tequila
+
+Generada por el propio equipo (`botella.blend`), sin derechos de terceros.
+Malla única sin materiales ni UV, decimada a 9.000 polígonos: es sólo la
+silueta —cuerpo cuadrado, tapón de bola, lazo— sin logo, etiqueta ni texto.
+
 ### Gorra
 
 Generada por el propio equipo (`gorra.glb`), sin derechos de terceros. Se
