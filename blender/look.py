@@ -189,7 +189,7 @@ ASIGNACION = (
     ("PROP_botella", "vidrio"),
     ("PROP_billete", "papel"),
     ("PROP_cera", "cera"),
-    ("PROP_escapulario_cordon", "hueso"),
+    ("PROP_escapulario_cordon", "fieltro"),
     ("PROP_escapulario", "fieltro"),
     ("PROP_rosario_nicho", "madera"),
     ("PROP_rosario_cruz", "madera"),

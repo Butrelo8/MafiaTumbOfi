@@ -462,16 +462,30 @@ def _devocion(col, mesa_z):
     # Escapulario sobre el marco del nicho central.
     x_centro = HORNACINA_X[1]
     borde = HORNACINA_Z + HORNACINA_ALTO / 2 + 0.03
-    for signo, nombre in ((-1, "frente"), (1, "espalda")):
-        placa = _caja(col, "PROP_escapulario_%s" % nombre,
-                      (x_centro + 0.30, RETABLO_Y - 0.31,
-                       borde - 0.30 - (0 if signo < 0 else 0.07)),
-                      (0.095, 0.007, 0.125))
-        placa.rotation_euler = (0.08 * signo, 0, 0.05)
+    # La placa frontal es un plano con grosor, no un cubo: un cubo mapea la
+    # estampa por cara y sale recortada. El alto sigue la proporción real de
+    # la imagen (480x790) para que la figura no se deforme.
+    ancho_placa = 0.095
+    alto_placa = ancho_placa * 790 / 480
+    bpy.ops.mesh.primitive_plane_add(
+        size=1.0, location=(x_centro + 0.30, RETABLO_Y - 0.315, borde - 0.30))
+    frente = bpy.context.object
+    frente.name = "PROP_escapulario_frente"
+    frente.rotation_euler = (math.radians(90), 0, 0.05)
+    frente.scale = (ancho_placa, alto_placa, 1.0)
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    grosor = frente.modifiers.new("grosor", "SOLIDIFY")
+    grosor.thickness = 0.006
+    _reubicar(col, frente)
+
+    espalda = _caja(col, "PROP_escapulario_espalda",
+                    (x_centro + 0.30, RETABLO_Y - 0.30, borde - 0.37),
+                    (ancho_placa, 0.007, alto_placa))
+    espalda.rotation_euler = (0.08, 0, 0.05)
     for lado in (-1, 1):
         cordon = _cilindro(col, "PROP_escapulario_cordon_%d" % lado,
-                           (x_centro + 0.30 + lado * 0.042, RETABLO_Y - 0.31,
-                            borde - 0.10), 0.005, 0.34, 8)
+                           (x_centro + 0.30 + lado * 0.062, RETABLO_Y - 0.305,
+                            borde - 0.07), 0.005, 0.30, 8)
         cordon.rotation_euler = (0, lado * 0.06, 0)
 
     # Rosario de madera colgando del marco del nicho izquierdo.
