@@ -51,6 +51,23 @@ Malla única, decimada a 10.000 polígonos.
 Generada por el propio equipo (`cadena.blend`), sin derechos de terceros.
 Malla única enrollada con broche, decimada de 260.000 a 20.000 polígonos.
 
+### Cigarros de papel
+
+Generados por el propio equipo (`prerolls.blend`), sin derechos de terceros.
+Malla única, decimada a 12.000 polígonos.
+
+### Cigarros sueltos — ⚠️ LICENCIA SIN VERIFICAR
+
+`cigarros.blend` (`Cigarette_01_GEO` y `Cigarette_02_GEO`) **no** lo generó el
+equipo: viene con materiales y texturas PBR de un autor sin identificar. Del
+archivo sólo entran las dos mallas, sin material ni textura, pero **la
+geometría sigue siendo de su autor**.
+
+Mismo caso que `guitarra.blend`: antes de publicar hay que averiguar de dónde
+salió y bajo qué licencia. Si resulta CC-BY, hay que acreditar en el sitio. Si
+no aparece la licencia, se sustituye por geometría propia — son dos cilindros,
+cuesta menos rehacerlos que arriesgarse.
+
 ### Gorra
 
 Generada por el propio equipo (`gorra.glb`), sin derechos de terceros. Se

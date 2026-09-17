@@ -688,6 +688,16 @@ def _devocion(col, mesa_z):
     dije = _rayo(col, "PROP_dije_rayo", dije_pos, alto=0.075, grosor=0.008)
     dije.rotation_euler = (1.57, 0.35, 0)
 
+    # Vicios de la mesa: un cigarro apoyado en el borde del cenicero y su
+    # colilla al lado. Vienen a escala real, no se reescalan.
+    assets_vicio = _cargar_assets()
+    if assets_vicio is not None and assets_vicio.disponible(assets_vicio.CIGARROS):
+        assets_vicio.cigarro_suelto(col, "PROP_cigarro_borde",
+                                    (-0.34, 6.86, mesa_z + 0.075), giro=0.9)
+        assets_vicio.cigarro_suelto(col, "PROP_cigarro_colilla",
+                                    (-0.62, 6.66, mesa_z), giro=-0.5,
+                                    colilla=True)
+
     # Cinturón piteado con hebilla: identidad del género sin marca de nadie.
     correa = _caja(col, "PROP_cinturon", (1.15, ALTAR_Y - 0.44, mesa_z + 0.008),
                    (0.62, 0.075, 0.012))
@@ -800,6 +810,12 @@ def _mobiliario(col):
                   0.16, 0.04, 16)
         _cilindro(col, "VELADORA_pie_%d" % signo, (x, ALTAR_Y - 1.9, 1.28),
                   0.06, 0.28, 16)
+
+    # Montón de cigarros de papel sobre el escalón alto, a la vista de la
+    # cámara cuando sube hacia el altar. La mesa ya no tiene un hueco libre.
+    if assets_cand is not None and assets_cand.disponible(assets_cand.PRERROLLOS):
+        assets_cand.prerrollos(col, (-0.5, ALTAR_Y - 1.5, 0.36), ancho=0.14,
+                               giro=0.3)
 
 
 def _cargar_assets():

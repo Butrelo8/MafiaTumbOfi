@@ -46,6 +46,16 @@ LENTES = "lentes.blend"              # montura dorada sin aro, patillas abiertas
 LENTES_POLIGONOS = 10000
 CADENA = "cadena.blend"              # cubana enrollada, con broche
 CADENA_POLIGONOS = 20000
+PRERROLLOS = "prerolls.blend"        # cinco cigarros de papel, en montón
+PRERROLLOS_POLIGONOS = 12000
+
+# Cigarros sueltos de terceros: llegan ya a escala real y con sus texturas.
+# Licencia SIN VERIFICAR, ver public/scene/CREDITOS.md. Se importan sólo las
+# dos mallas y se les quita el material, así que de momento sólo entra la
+# geometría.
+CIGARROS = "cigarros.blend"
+CIGARRO_ENTERO = "Cigarette_01_GEO"
+CIGARRO_COLILLA = "Cigarette_02_GEO"
 
 GORRA = "gorra.glb"
 GORRA_POLIGONOS = 18000     # techo tras decimar; el original trae ~92k
@@ -268,11 +278,15 @@ def guitarra(col, ubicacion, largo=0.98, giro=0.0, inclinacion=0.0,
     return madera, metal
 
 
-def _malla_unica(archivo, nombre, col, techo):
-    """Trae el único objeto de un .blend generado, lo limpia y lo decima."""
+def _malla_unica(archivo, nombre, col, techo, cual=None):
+    """Trae una malla de un .blend generado, la limpia y la decima.
+
+    `cual` elige por nombre cuando el archivo trae más de una; sin él se unen
+    todas, que es lo que hace falta en los assets de una sola pieza.
+    """
     ruta = os.path.join(CARPETA, archivo)
     with bpy.data.libraries.load(ruta, link=False) as (origen, destino):
-        destino.objects = list(origen.objects)
+        destino.objects = [cual] if cual else list(origen.objects)
     traidos = [o for o in destino.objects if o is not None and o.type == "MESH"]
     if not traidos:
         return None
@@ -320,6 +334,35 @@ def _plantar(pieza, ubicacion, alto, giro=0.0, inclinacion=0.0, nombre_ancla=Non
     ancla.location = ubicacion
     bpy.context.view_layer.update()
     return pieza
+
+
+def prerrollos(col, ubicacion, ancho=0.14, giro=0.0):
+    """Montón de cigarros de papel. Se escala por el ancho, como los lentes."""
+    pieza = _malla_unica(PRERROLLOS, "PROP_prerrollos", col, PRERROLLOS_POLIGONOS)
+    if pieza is None:
+        return None
+    minimos, maximos = _caja_mundo([pieza])
+    ancho_actual = maximos[0] - minimos[0]
+    alto_actual = maximos[2] - minimos[2]
+    alto = alto_actual * (ancho / ancho_actual) if ancho_actual else alto_actual
+    return _plantar(pieza, ubicacion, alto, giro=giro,
+                    nombre_ancla="PROP_prerrollos_ancla")
+
+
+def cigarro_suelto(col, nombre, ubicacion, giro=0.0, colilla=False):
+    """Un cigarro (o una colilla aplastada) apoyado donde se le diga.
+
+    El asset viene a escala real, así que no se reescala: sólo se apoya por su
+    base y se gira. Se le quita el material del autor; el look de la escena le
+    pone el suyo por el prefijo del nombre.
+    """
+    pieza = _malla_unica(CIGARROS, nombre, col, 2000,
+                         cual=CIGARRO_COLILLA if colilla else CIGARRO_ENTERO)
+    if pieza is None:
+        return None
+    minimos, maximos = _caja_mundo([pieza])
+    return _plantar(pieza, ubicacion, maximos[2] - minimos[2], giro=giro,
+                    nombre_ancla=nombre + "_ancla")
 
 
 def cadena(col, ubicacion, ancho=0.20, giro=0.0):

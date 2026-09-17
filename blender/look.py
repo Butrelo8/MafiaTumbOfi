@@ -186,6 +186,7 @@ ASIGNACION = (
     ("PROP_cenicero_hueco", "ceniza"),
     ("PROP_cenicero", "vidrio"),
     ("PROP_brasa", "brasa"),
+    ("PROP_prerrollos", "papel"),
     ("PROP_cigarro", "papel"),
     ("PROP_botella", "vidrio"),
     ("PROP_billete", "papel"),
