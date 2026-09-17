@@ -109,6 +109,26 @@ export function frameEnAnclas(scrollY: number, anclas: Ancla[]): number {
  *
  * Si faltan secciones o vienen desordenadas se usan las que haya; si no hay
  * ninguna, quien llama se queda con el reparto plano de siempre.
+ *
+ * ## Para navegar por clicks
+ *
+ * Las cinco estaciones están marcadas con `[data-estacion]` y con un `id`
+ * estable: `#inicio`, `#musica`, `#grupo`, `#contratacion`, `#cierre`. Un botón
+ * que quiera saltar a una estación tiene que **centrar** el elemento:
+ *
+ *     document.querySelector('[data-estacion="2"]')
+ *       .scrollIntoView({ block: 'center' })
+ *
+ * Y no puede usar un enlace `#hash`: el hash deja el borde superior de la
+ * sección arriba, no su centro, y la estación vive en el centro. Medido el
+ * 2026-09-17 a 390x844: `#musica` cae en el frame 5 y `#grupo` en el 38,
+ * cuando sus estaciones son la 20 y la 40. Sólo coinciden cuando la sección
+ * mide exactamente una ventana, como pasa hoy con contratación.
+ *
+ * El menú de cabecera son enlaces `#hash` a propósito: lleva al principio de
+ * la sección, que es donde está el titular. Centrar `#musica` dejaría el
+ * titular 2500 px por encima del viewport. Son dos navegaciones distintas y no
+ * hay que fundirlas: la de contenido va al titular, la de estaciones al frame.
  */
 export function anclasDelDocumento(
   formato: FormatoEscena,
