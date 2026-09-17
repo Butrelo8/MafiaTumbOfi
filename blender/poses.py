@@ -26,8 +26,9 @@ TOLERANCIA = 1e-4
 def _pose(ob):
     caja = [ob.matrix_world @ Vector(c) for c in ob.bound_box]
     centro = sum(caja, Vector()) / 8.0
-    euler = (ob.rotation_euler if ob.rotation_mode == "XYZ"
-             else ob.rotation_quaternion.to_euler("XYZ"))
+    # Del mundo, no local: si el objeto cuelga de un ancla, su `rotation_euler`
+    # no incluye el giro del padre y dos poses distintas se leen iguales.
+    euler = ob.matrix_world.to_euler("XYZ")
     return {"centro": [round(v, 5) for v in centro],
             "euler": [round(v, 5) for v in euler],
             "escala": [round(v, 5) for v in ob.scale]}

@@ -298,7 +298,7 @@ def _props(col, mesa_z):
 
     # Botella cuadrada de hombros marcados: se reconoce por la silueta, sin
     # logo ni etiqueta, que a este tamaño no se leerían.
-    bx, by = 1.66, ALTAR_Y + 0.30
+    bx, by = 1.2205, ALTAR_Y + 0.30
     assets_bot = _cargar_assets()
     if assets_bot is not None and assets_bot.disponible(assets_bot.BOTELLA):
         assets_bot.botella(col, (bx, by, mesa_z), alto=0.26, giro=0.5)
@@ -342,7 +342,7 @@ def _props(col, mesa_z):
     # Vaso y cerillos, cerca del cenicero.
     _cilindro(col, "PROP_vaso", (-0.18, ALTAR_Y + 0.22, mesa_z + 0.05),
               0.036, 0.1, 20)
-    _caja(col, "PROP_cerillos", (-0.62, ALTAR_Y + 0.26, mesa_z + 0.012),
+    _caja(col, "PROP_cerillos", (-0.535, ALTAR_Y + 0.26, mesa_z + 0.012),
           (0.055, 0.035, 0.024))
 
     # Tapete bajo los discos: unifica la toma cenital y separa el negro del
@@ -512,7 +512,7 @@ def _rayo(col, nombre, centro, alto=0.06, grosor=0.012):
 # mismo problema legal que copiarla.
 MARCA = "SANTO VICIO"
 MARCA_MONOGRAMA = "SV"
-GORRA_POS = (0.62, -0.42, -0.9)       # x, desplazamiento en y, giro
+GORRA_POS = (-1.4038, -0.3088, 0.4088)   # x, desplazamiento en y, giro
 
 
 def _texto(col, nombre, cuerpo, centro, alto, extrusion=0.002, negrita=True):
@@ -699,8 +699,8 @@ def _devocion(col, mesa_z):
         # Aquí y no en el escalón: medido proyectando a cámara, en el escalón
         # salían a 8 px en los planos generales y fuera de cuadro en el resto.
         # Junto al micro ocupan 118 px en el plano de la reliquia.
-        assets_vicio.prerrollos(col, (-1.35, ALTAR_Y - 0.25, mesa_z), ancho=0.11,
-                                giro=0.3)
+        assets_vicio.prerrollos(col, (0.5371, ALTAR_Y - 0.4426, mesa_z),
+                                ancho=0.11, giro=0.3)
     if assets_vicio is not None and assets_vicio.disponible(assets_vicio.CIGARROS):
         assets_vicio.cigarro_suelto(col, "PROP_cigarro_borde",
                                     (-0.34, 6.86, mesa_z + 0.075), giro=0.9)
