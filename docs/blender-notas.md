@@ -400,3 +400,12 @@ Si ese botón ya tenía algo asignado, conviene desactivar la asignación anteri
 (`item.active = False`) en vez de borrarla: queda reversible desde
 `Preferences > Keymap`. El cambio vive en la sesión hasta que se guarde con
 `bpy.ops.wm.save_userpref()`.
+
+### En portatil (MacBook)
+
+No hay numpad ni botones laterales, y la tecla `` ` `` es incomoda en teclado
+ES de Mac. `blender/keymap.py` deja la maquina igual que la de casa: emula
+raton de 3 botones (`Alt` + clic izquierdo orbita) y numpad, y asigna
+`Ctrl+Shift+W` a walk y `Ctrl+Shift+F` a fly. Se ejecuta una vez por maquina
+(editor de texto de Blender o `blender --python blender/keymap.py`) y guarda
+las preferencias.
