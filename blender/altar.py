@@ -69,9 +69,9 @@ TOLOLOCHE_POSE = (
     (-1.2155, -0.0489, -0.0395),      # euler en radianes
     0.9748,                           # escala (alto final 1.85 m)
 )
-REQUINTO_POS = (1.2357, 6.0578, 0.3265)   # recargado contra el frente del altar
+REQUINTO_POS = (1.2357, 6.0578, 0.3026)   # recargado contra el frente del altar
 REQUINTO_GIRO = -0.0136
-REQUINTO_INCLINACION = -0.1239
+REQUINTO_INCLINACION = -0.1792
 
 COLECCION = "SANTUARIO"
 
