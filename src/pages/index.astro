@@ -24,7 +24,7 @@ const releases = catalog.releases.map((release) => ({
 <MarketingLayout title={title} description={description} canonicalUrl={canonicalUrl} hasHero={true}>
   <AltarScene />
 
-  <section class="hero hero--asymmetric" aria-labelledby="hero-heading">
+  <section class="hero hero--asymmetric" aria-labelledby="hero-heading" data-estacion="0">
     <video class="hero-video" muted playsinline loop aria-hidden="true" preload="none"><source data-src="/video/hero.mp4" type="video/mp4" /></video>
     <div class="hero-grain" aria-hidden="true"></div>
     <div class="container hero-grid"><div class="hero-copy hero-content">
@@ -38,7 +38,7 @@ const releases = catalog.releases.map((release) => ({
 
   <Marquee />
 
-  <section class="section music-section" id="musica" aria-labelledby="musica-heading"><div class="container">
+  <section class="section music-section" id="musica" aria-labelledby="musica-heading" data-estacion="1"><div class="container">
     <Eyebrow text="Escucha" />
     <h2 id="musica-heading" class="section-heading gold-text">Música</h2>
     <ArtworkShelf items={releases} />
@@ -49,7 +49,7 @@ const releases = catalog.releases.map((release) => ({
 
   <FilmStrip />
 
-  <section class="section bio-section" aria-labelledby="bio-heading"><div class="container bio-grid">
+  <section class="section bio-section" aria-labelledby="bio-heading" data-estacion="2"><div class="container bio-grid">
     <div class="bio-sidebar" data-reveal>
       <Eyebrow text="Quiénes somos" />
       <h2 id="bio-heading">El sonido de <em>Xalapa</em></h2>
@@ -61,12 +61,12 @@ const releases = catalog.releases.map((release) => ({
     </div>
   </div></section>
 
-  <section class="section group-section" id="grupo" aria-labelledby="grupo-heading"><div class="container">
+  <section class="section group-section" id="grupo" aria-labelledby="grupo-heading" data-estacion="3"><div class="container">
     <Eyebrow text="La banda" /><h2 id="grupo-heading" class="section-heading gold-text">El grupo</h2>
     <div class="members-grid">{members.map((member) => <MemberCard {...member} />)}</div>
   </div></section>
 
-  <section class="section booking-section" id="contratacion" aria-labelledby="contratacion-heading"><div class="container booking-grid">
+  <section class="section booking-section" id="contratacion" aria-labelledby="contratacion-heading" data-estacion="4"><div class="container booking-grid">
     <div><Eyebrow text="Contratar al grupo" /><h2 id="contratacion-heading" class="section-heading gold-text">¿Tienes una <em>fecha disponible?</em></h2></div>
     <div class="booking-copy">
       <p>El grupo está disponible para presentaciones, festivales, eventos privados y giras regionales. Cuentan con equipo propio y experiencia para adaptarse a diferentes formatos de producción.</p>

@@ -58,6 +58,77 @@ export function formatoParaPantalla(escena: Escena, ancho: number, alto: number)
   return Object.keys(escena.formatos)[0] ?? ''
 }
 
+/** Un ancla: en este scroll, este frame. Ordenadas por scroll. */
+export type Ancla = { scroll: number; frame: number }
+
+/**
+ * Frame de cada estación dentro de la secuencia completa.
+ *
+ * La estación N es el primer frame del tramo N, y la última es el último
+ * frame del último tramo: al llegar abajo la cámara ha terminado el recorrido.
+ */
+export function framesDeEstacion(formato: FormatoEscena): number[] {
+  const frames: number[] = []
+  let acumulado = 0
+  for (const tramo of formato.tramos) {
+    frames.push(acumulado)
+    acumulado += tramo.frames
+  }
+  frames.push(Math.max(acumulado - 1, 0))
+  return frames
+}
+
+/**
+ * Interpola el frame entre anclas.
+ *
+ * Entre dos anclas el avance es lineal, así que el tramo se reproduce mientras
+ * se scrollea de una sección a la siguiente y la cámara llega a la estación
+ * justo cuando la sección queda centrada. Fuera del rango se queda en el ancla
+ * del extremo en vez de extrapolar.
+ */
+export function frameEnAnclas(scrollY: number, anclas: Ancla[]): number {
+  if (anclas.length === 0) return 0
+  if (scrollY <= anclas[0].scroll) return anclas[0].frame
+  const ultima = anclas[anclas.length - 1]
+  if (scrollY >= ultima.scroll) return ultima.frame
+
+  for (let i = 1; i < anclas.length; i += 1) {
+    const previa = anclas[i - 1]
+    const actual = anclas[i]
+    if (scrollY > actual.scroll) continue
+    const tramo = actual.scroll - previa.scroll
+    if (tramo <= 0) return actual.frame
+    const avance = (scrollY - previa.scroll) / tramo
+    return Math.round(previa.frame + avance * (actual.frame - previa.frame))
+  }
+  return ultima.frame
+}
+
+/**
+ * Anclas leídas del documento: cada `[data-estacion]` centrada en la ventana.
+ *
+ * Si faltan secciones o vienen desordenadas se usan las que haya; si no hay
+ * ninguna, quien llama se queda con el reparto plano de siempre.
+ */
+export function anclasDelDocumento(
+  formato: FormatoEscena,
+  ventana: Window,
+): Ancla[] {
+  const frames = framesDeEstacion(formato)
+  const recorrido = ventana.document.documentElement.scrollHeight - ventana.innerHeight
+  const anclas: Ancla[] = []
+  for (const elemento of ventana.document.querySelectorAll<HTMLElement>('[data-estacion]')) {
+    const indice = Number(elemento.dataset.estacion)
+    if (!Number.isInteger(indice) || indice < 0 || indice >= frames.length) continue
+    const caja = elemento.getBoundingClientRect()
+    const centro = caja.top + ventana.scrollY + caja.height / 2
+    const scroll = Math.min(Math.max(centro - ventana.innerHeight / 2, 0), Math.max(recorrido, 0))
+    anclas.push({ scroll, frame: frames[indice] })
+  }
+  anclas.sort((a, b) => a.scroll - b.scroll)
+  return anclas
+}
+
 type Opciones = {
   canvas: HTMLCanvasElement
   escena: Escena
@@ -106,13 +177,28 @@ export function mountScrollScene({ canvas, escena, ventana = window }: Opciones)
     canvas.dataset.frame = String(indice)
   }
 
+  // Las anclas dependen del alto de las secciones, que cambia con la ventana y
+  // con las fuentes: se releen en cada scroll, que es una lectura de layout ya
+  // dentro del rAF.
+  const indiceDeScroll = () => {
+    if (sinMovimiento) {
+      const recorrido = ventana.document.documentElement.scrollHeight - ventana.innerHeight
+      return frameEnScroll(ventana.scrollY, recorrido, rutas.length)
+    }
+    const anclas = anclasDelDocumento(formato, ventana)
+    if (anclas.length < 2) {
+      const recorrido = ventana.document.documentElement.scrollHeight - ventana.innerHeight
+      return frameEnScroll(ventana.scrollY, recorrido, rutas.length)
+    }
+    return frameEnAnclas(ventana.scrollY, anclas)
+  }
+
   const alScroll = () => {
     if (animando) return
     animando = true
     ventana.requestAnimationFrame(() => {
       animando = false
-      const recorrido = ventana.document.documentElement.scrollHeight - ventana.innerHeight
-      const indice = frameEnScroll(ventana.scrollY, recorrido, rutas.length)
+      const indice = indiceDeScroll()
       if (indice === pedido) return
       pedido = indice
       const carga = cargar(indice)

@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'bun:test'
-import { formatoParaPantalla, frameEnScroll, rutasDeFrames } from './scrollScene'
+import {
+  frameEnAnclas,
+  framesDeEstacion,
+  formatoParaPantalla,
+  frameEnScroll,
+  rutasDeFrames,
+} from './scrollScene'
 import escena from '../data/scene.json'
 
 const formato = escena.formatos.mobile
@@ -38,5 +44,43 @@ describe('formatoParaPantalla', () => {
   test('vertical pide mobile y horizontal pide desktop', () => {
     expect(formatoParaPantalla(escena, 390, 844)).toBe('mobile')
     expect(formatoParaPantalla(escena, 1440, 900)).toBe('desktop')
+  })
+})
+
+describe('framesDeEstacion', () => {
+  test('cada estación es el primer frame de su tramo, y la última el final', () => {
+    expect(framesDeEstacion(formato)).toEqual([0, 20, 40, 60, 79])
+  })
+})
+
+describe('frameEnAnclas', () => {
+  const anclas = [
+    { scroll: 0, frame: 0 },
+    { scroll: 1000, frame: 20 },
+    { scroll: 2000, frame: 40 },
+  ]
+
+  test('en el ancla cae el frame exacto de la estación', () => {
+    expect(frameEnAnclas(0, anclas)).toBe(0)
+    expect(frameEnAnclas(1000, anclas)).toBe(20)
+    expect(frameEnAnclas(2000, anclas)).toBe(40)
+  })
+
+  test('entre dos anclas interpola', () => {
+    expect(frameEnAnclas(500, anclas)).toBe(10)
+    expect(frameEnAnclas(1500, anclas)).toBe(30)
+  })
+
+  test('fuera del rango se queda en el extremo, no extrapola', () => {
+    expect(frameEnAnclas(-800, anclas)).toBe(0)
+    expect(frameEnAnclas(99999, anclas)).toBe(40)
+  })
+
+  test('dos anclas en el mismo scroll no dividen por cero: gana la primera', () => {
+    expect(frameEnAnclas(1000, [{ scroll: 1000, frame: 5 }, { scroll: 1000, frame: 9 }])).toBe(5)
+  })
+
+  test('sin anclas devuelve el primer frame', () => {
+    expect(frameEnAnclas(300, [])).toBe(0)
   })
 })

@@ -78,6 +78,14 @@ const primeraEscritorio = escritorio?.estaciones[0]
     box-shadow: none;
   }
 
+  /* Cada sección de estación ocupa al menos una ventana: así el tramo entre
+     dos estaciones tiene un recorrido de scroll parecido y la cámara no
+     atraviesa veinte frames en 600 px en unas secciones y en 1700 en otras.
+     Sólo crece las cortas; la de música ya es más alta que esto. */
+  :global([data-estacion]) {
+    min-height: 100svh;
+  }
+
   /* El contenido va encima de la escena: el fondo del body es opaco, así que
      la escena no puede ir a z-index negativo. */
   :global(.marketing-main),
