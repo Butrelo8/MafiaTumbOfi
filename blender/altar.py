@@ -249,13 +249,34 @@ def _props(col, mesa_z):
                                   azar.uniform(-0.05, 0.05),
                                   azar.uniform(0, 3.14))
 
-    # Sombrero apoyado sobre la mesa, detrás del micro: identidad inmediata.
-    copa = _cilindro(col, "PROP_sombrero_copa", (-1.32, ALTAR_Y + 0.3, mesa_z + 0.1),
-                     0.115, 0.2, 24)
-    copa.rotation_euler = (0.18, 0, 0)
-    ala = _cilindro(col, "PROP_sombrero_ala", (-1.32, ALTAR_Y + 0.3, mesa_z + 0.02),
-                    0.26, 0.022, 32)
-    ala.rotation_euler = (0.18, 0, 0)
+    # Gorra sobre la mesa. El sombrero se descartó: no es lo que usan. El
+    # parche lleva el rayo del monograma, no el logo de nadie más.
+    # Se construye con el frente en -Y y luego se gira todo el conjunto, para
+    # que visera y parche salgan de la cara delantera y no del centro.
+    gx, gy, giro = -1.30, ALTAR_Y + 0.26, -0.35
+    frente_x = math.sin(giro)
+    frente_y = -math.cos(giro)
+
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=0.10, segments=40, ring_count=20,
+        location=(gx, gy, mesa_z + 0.028))
+    copa = bpy.context.object
+    copa.name = "PROP_gorra_mesa_copa"
+    bpy.ops.object.shade_smooth()
+    copa.scale = (1.0, 1.05, 0.74)
+    copa.rotation_euler = (0, 0, giro)
+    _reubicar(col, copa)
+
+    visera = _cilindro(col, "PROP_gorra_mesa_visera",
+                       (gx + frente_x * 0.085, gy + frente_y * 0.085,
+                        mesa_z + 0.022), 0.098, 0.011, 24)
+    visera.scale = (1.0, 0.52, 1.0)
+    visera.rotation_euler = (0.16, 0, giro)
+
+    parche = _caja(col, "PROP_gorra_mesa_parche",
+                   (gx + frente_x * 0.092, gy + frente_y * 0.092, mesa_z + 0.072),
+                   (0.058, 0.006, 0.046))
+    parche.rotation_euler = (0.12, 0, giro)
 
     # Requinto recostado contra el altar, visible en los planos generales.
     cuerpo = _cilindro(col, "PROP_requinto_cuerpo", (1.9, ALTAR_Y - 0.85, 0.42),
@@ -420,6 +441,17 @@ def _rayo(col, nombre, centro, alto=0.06, grosor=0.012):
     engrosar = ob.modifiers.new("grosor", "SOLIDIFY")
     engrosar.thickness = grosor
     return ob
+
+
+def _parche_gorra(col, mesa_z):
+    """El rayo bordado en el parche frontal de la gorra."""
+    gx, gy, giro = -1.30, ALTAR_Y + 0.26, -0.35
+    frente_x = math.sin(giro)
+    frente_y = -math.cos(giro)
+    dije = _rayo(col, "PROP_gorra_rayo",
+                 (gx + frente_x * 0.098, gy + frente_y * 0.098, mesa_z + 0.073),
+                 alto=0.036, grosor=0.004)
+    dije.rotation_euler = (0.12, 0, giro)
 
 
 def _devocion(col, mesa_z):
@@ -608,6 +640,7 @@ def _reliquias(col):
 
     _props(col, mesa_z)
     _devocion(col, mesa_z)
+    _parche_gorra(col, mesa_z)
     _mobiliario(col)
     _exvotos(col)
     _gorra(col)

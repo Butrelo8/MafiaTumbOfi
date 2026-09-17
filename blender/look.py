@@ -226,7 +226,9 @@ ASIGNACION = (
     ("EXVOTO_", "laton"),
     ("CONFETI_", "oro"),
     ("COLILLA_", "papel"),
-    ("PROP_sombrero", "fieltro"),
+    ("PROP_gorra_rayo", "plata"),
+    ("PROP_gorra_mesa_parche", "fieltro"),
+    ("PROP_gorra_mesa", "fieltro"),
     ("PROP_requinto", "madera"),
     ("PROP_rosario", "oro"),
     ("PROP_vaso", "vidrio"),
@@ -241,6 +243,29 @@ FOTOS = (
     r"E:\Cursor Projects\MTO\public\band\band-2.jpg",
     r"E:\Cursor Projects\MTO\public\band\band-3.jpg",
 )
+
+
+# La estampa del escapulario. Si el archivo no existe, la placa queda en tela
+# lisa y no se rompe nada.
+ESTAMPA = r"E:\Cursor Projects\MTO\public\scene\escapulario.jpg"
+
+
+def _material_estampa():
+    import os
+    if not os.path.exists(ESTAMPA):
+        return None
+    mat = bpy.data.materials.get("MTO_estampa") or bpy.data.materials.new("MTO_estampa")
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes.get("Principled BSDF")
+    _fijar(bsdf, "Roughness", 0.72)
+    try:
+        imagen = bpy.data.images.load(ESTAMPA, check_existing=True)
+    except RuntimeError:
+        return None
+    textura = mat.node_tree.nodes.new("ShaderNodeTexImage")
+    textura.image = imagen
+    mat.node_tree.links.new(textura.outputs["Color"], bsdf.inputs["Base Color"])
+    return mat
 
 
 def _materiales_foto():
@@ -494,6 +519,13 @@ def aplicar():
     _ensuciar(mats["oro"], escala=22.0, minimo=0.22, maximo=0.52)
     _ensuciar(mats["cromo"], escala=30.0, minimo=0.06, maximo=0.20)
     aplicados = _asignar(mats)
+    estampa = _material_estampa()
+    if estampa is not None:
+        frente = bpy.data.objects.get("PROP_escapulario_frente")
+        if frente is not None:
+            frente.data.materials.clear()
+            frente.data.materials.append(estampa)
+
     for indice, mat in enumerate(fotos):
         ob = bpy.data.objects.get("PROP_polaroid_img_%d" % indice)
         if ob is not None and mat is not None:
