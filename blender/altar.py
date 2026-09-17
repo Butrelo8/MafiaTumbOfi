@@ -409,8 +409,8 @@ def _props(col, mesa_z):
     # Lentes sobre la mesa, del lado de los discos.
     assets_len = _cargar_assets()
     if assets_len is not None and assets_len.disponible(assets_len.LENTES):
-        assets_len.lentes(col, (1.45, ALTAR_Y + 0.45, mesa_z), ancho=0.14,
-                          giro=0.9)
+        assets_len.lentes(col, (0.97208, ALTAR_Y + 0.36958, mesa_z), ancho=0.14,
+                          giro=0.2406)
     else:
         _lentes_greybox(col, mesa_z)
 
@@ -421,11 +421,11 @@ def _props(col, mesa_z):
     _cilindro(col, "PROP_ceramica_cuello", (-1.662, ALTAR_Y + 0.3, mesa_z + 0.36),
               0.018, 0.09, 12)
 
-    # Cera escurrida al pie de las veladoras. Las cuatro primeras gotas se
-    # repartieron a mano en el visor; la quinta sigue donde la puso el bucle.
+    # Cera escurrida al pie de las veladoras. Las cinco gotas se repartieron
+    # a mano en el visor; ninguna sigue donde la puso el bucle.
     CERA = (((-0.95, -0.2933), 1.8421), ((-0.5666, -0.4363), 0.0),
             ((0.2824, -0.0715), 0.0), ((0.3721, -0.3079), 0.0),
-            ((0.73, -0.36), 0.0))
+            ((0.64721, -0.17206), 0.0))
     for i, ((x, dy), giro) in enumerate(CERA):
         gota = _cilindro(col, "PROP_cera_%d" % i,
                          (x, ALTAR_Y + dy, mesa_z + 0.004), 0.048, 0.008, 16)
@@ -844,7 +844,8 @@ def _reliquias(col):
                                 (0.46, ALTAR_Y - 0.30, mesa_z), alto=0.23, giro=-0.4)
         # (x, y respecto del altar), colocadas a mano en el visor: las dos
         # primeras se adelantaron hacia la cámara, las otras dos siguen en fila.
-        posiciones = ((-0.92, -0.2188), (0.622, -0.1099), (1.16, -0.32), (1.44, -0.32))
+        posiciones = ((-0.92, -0.2188), (0.622, -0.1099), (1.16, -0.32),
+                      (1.36096, -0.32))
     else:
         posiciones = tuple((-1.05 + i * (1.6 / (VELADORAS - 1)), -0.32)
                            for i in range(VELADORAS))
@@ -856,7 +857,8 @@ def _reliquias(col):
     # los mira en picado, no de frente.
     _cilindro(col, "PROXY_vinilo", (1.05, ALTAR_Y + 0.05, mesa_z + 0.012),
               0.175, 0.024, 32)
-    disco = _cilindro(col, "VINILO_ladeado", (1.58, ALTAR_Y - 0.22, mesa_z + 0.012),
+    disco = _cilindro(col, "VINILO_ladeado",
+                      (1.62938, ALTAR_Y - 0.26732, mesa_z + 0.012),
                       0.175, 0.022, 32)
     disco.rotation_euler = (0, 0, 0.4)
     pila = _cilindro(col, "VINILO_pila", (0.62, ALTAR_Y + 0.3, mesa_z + 0.05),
@@ -866,7 +868,7 @@ def _reliquias(col):
     # Etiquetas: sin ellas los discos son manchas negras sin lectura.
     for nombre, (x, y, z) in (
         ("ETIQUETA_principal", (1.05, ALTAR_Y + 0.05, mesa_z + 0.025)),
-        ("ETIQUETA_ladeado", (1.58, ALTAR_Y - 0.22, mesa_z + 0.024)),
+        ("ETIQUETA_ladeado", (1.62938, ALTAR_Y - 0.26732, mesa_z + 0.024)),
         ("ETIQUETA_pila", (0.62, ALTAR_Y + 0.3, mesa_z + 0.101)),
     ):
         _cilindro(col, nombre, (x, y, z), 0.058, 0.002, 24)

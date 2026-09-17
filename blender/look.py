@@ -299,6 +299,81 @@ def _materiales_foto():
     return hechos
 
 
+# Los tres nichos llevan a los tres de la banda, las mismas fotos que la web
+# sirve en /members. (x, y) es el punto de la foto que queda centrado en el
+# nicho: las tomas son apaisadas y el hueco es vertical, así que sin ese
+# encuadre el recorte deja fuera la cara.
+RETRATOS = (
+    ("i", r"E:\Cursor Projects\MTO\public\members\hector-baez.jpg", 0.66, 0.42),
+    ("c", r"E:\Cursor Projects\MTO\public\members\alexandro-montal.jpg", 0.53, 0.32),
+    ("d", r"E:\Cursor Projects\MTO\public\members\diego-cerecer.jpg", 0.60, 0.30),
+)
+NICHO_RELACION = 0.72 / 1.15          # ancho/alto del hueco, de altar.py
+RETRATO_EMISION = 1.8
+
+
+def _materiales_retrato():
+    """Recorte 'cover': la foto llena el nicho sin deformarse.
+
+    El cubo de Blender mapea cada cara al cuadrado UV completo, así que una
+    foto apaisada en un hueco vertical saldría estirada. El nodo Mapping
+    reduce la ventana en U a la fracción que cabe y la desplaza al punto de
+    interés, que es justo lo que hace `object-fit: cover` en la web.
+    """
+    hechos = {}
+    for sufijo, ruta, centro_x, centro_y in RETRATOS:
+        nombre = "MTO_retrato_" + sufijo
+        mat = bpy.data.materials.get(nombre) or bpy.data.materials.new(nombre)
+        mat.use_nodes = True
+        arbol = mat.node_tree
+        bsdf = arbol.nodes.get("Principled BSDF")
+        _fijar(bsdf, "Roughness", 0.58)
+        _fijar(bsdf, "Metallic", 0.0)
+        try:
+            imagen = bpy.data.images.load(ruta, check_existing=True)
+        except RuntimeError:
+            continue
+        ancho, alto = imagen.size
+        relacion = (ancho / alto) if alto else 1.0
+        ventana_u = min(1.0, NICHO_RELACION / relacion)
+        ventana_v = min(1.0, relacion / NICHO_RELACION)
+
+        # La ventana nunca puede salirse de la foto: en el eje que no se
+        # recorta vale 1.0 y el desplazamiento tiene que ser 0, o se vería
+        # el borde estirado por EXTEND.
+        def encuadre(centro, ventana):
+            return min(max(centro - ventana / 2.0, 0.0), 1.0 - ventana)
+
+        # Generated, no UV: el cubo de Blender reparte sus seis caras en
+        # trozos del cuadrado UV, así que texturizar por UV sale con un zoom
+        # que no se puede compensar. Generated va 0..1 sobre la caja del
+        # nicho; la cara frontal es el plano XZ.
+        coord = arbol.nodes.new("ShaderNodeTexCoord")
+        separar = arbol.nodes.new("ShaderNodeSeparateXYZ")
+        juntar = arbol.nodes.new("ShaderNodeCombineXYZ")
+        arbol.links.new(coord.outputs["Generated"], separar.inputs["Vector"])
+        arbol.links.new(separar.outputs["X"], juntar.inputs["X"])
+        arbol.links.new(separar.outputs["Z"], juntar.inputs["Y"])
+        mapa = arbol.nodes.new("ShaderNodeMapping")
+        mapa.inputs["Location"].default_value = (
+            encuadre(centro_x, ventana_u),
+            encuadre(1.0 - centro_y, ventana_v), 0.0)
+        mapa.inputs["Scale"].default_value = (ventana_u, ventana_v, 1.0)
+        textura = arbol.nodes.new("ShaderNodeTexImage")
+        textura.image = imagen
+        textura.extension = "EXTEND"
+        arbol.links.new(juntar.outputs["Vector"], mapa.inputs["Vector"])
+        arbol.links.new(mapa.outputs["Vector"], textura.inputs["Vector"])
+        arbol.links.new(textura.outputs["Color"], bsdf.inputs["Base Color"])
+        # Las tomas son de directo, negras sobre negro: al fondo del nicho y en
+        # penumbra no se leen. Una emisión baja de la propia foto las levanta
+        # sin delatar que es un plano con textura.
+        arbol.links.new(textura.outputs["Color"], bsdf.inputs["Emission Color"])
+        _fijar(bsdf, "Emission Strength", RETRATO_EMISION)
+        hechos[sufijo] = mat
+    return hechos
+
+
 def _tallar(mat, escala=14.0, fuerza=0.35):
     """Relieve procedural: la piedra lisa delata el render de inmediato."""
     arbol = mat.node_tree
@@ -559,6 +634,12 @@ def aplicar():
         if frente is not None:
             frente.data.materials.clear()
             frente.data.materials.append(estampa)
+
+    for sufijo, mat in _materiales_retrato().items():
+        nicho = bpy.data.objects.get("PROXY_hornacina_" + sufijo)
+        if nicho is not None:
+            nicho.data.materials.clear()
+            nicho.data.materials.append(mat)
 
     for indice, mat in enumerate(fotos):
         ob = bpy.data.objects.get("PROP_polaroid_img_%d" % indice)
