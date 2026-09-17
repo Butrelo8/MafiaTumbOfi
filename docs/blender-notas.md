@@ -344,3 +344,36 @@ conviene medir el hueco real: si el prop ocupa 1,52 m y el espacio libre es
 1,49, ninguna posición lo va a resolver. En ese caso se cambia la escena —
 quitar una banca y dejar que el instrumento ocupe el claro — en vez de seguir
 empujando el objeto de sitio en sitio.
+
+## `rotation_euler` no hace nada en modo quaternion
+
+Los assets generados (`.glb`, y los `.blend` de generadores) llegan con
+`rotation_mode = "QUATERNION"`. Asignar `ob.rotation_euler` entonces **no rota
+nada y no avisa**: el objeto se queda como estaba y la depuración se va por el
+camino equivocado, porque `ob.rotation_euler` sí devuelve los valores que
+acabas de escribir mientras `matrix_world` sigue sin rotación.
+
+```python
+ob.rotation_mode = "XYZ"      # primero esto
+ob.rotation_euler = (x, y, z)
+```
+
+Para detectarlo: comparar `ob.rotation_euler` con la rotación que sale de
+`ob.matrix_world.decompose()`. Si la primera tiene valores y la segunda es
+cero, es esto.
+
+## Congelar en el script una pose hecha a mano
+
+Colocar props a ojo en el visor funciona mucho mejor que calcular coordenadas,
+pero el script reconstruye la escena desde cero y borra cualquier ajuste
+manual. El flujo que funciona: el usuario coloca, se lee la transformación y se
+escribe en el script como constante.
+
+Dos avisos al hacerlo:
+
+- **Anclar por el centro de la caja envolvente, no por `location`.** El origen
+  de una malla reimportada no tiene por qué caer donde cayó en la sesión en que
+  se colocó a mano; el centro de la caja sí es comparable.
+- **Verificar con la caja, no con el ojo.** Se guarda la caja que tenía la pose
+  original y, tras reconstruir, se comprueba que coincide dentro de una
+  tolerancia. Así se sabe que la pose quedó realmente congelada.

@@ -61,6 +61,18 @@ RECORRIDO = (
     (-0.85, 6.30, 1.15),
 )
 
+# Colocación de los instrumentos, tomada moviéndolos en el visor y leyendo su
+# transformación: a mano se decide mejor dónde queda bien, pero el valor tiene
+# que vivir aquí o se pierde en la siguiente reconstrucción.
+TOLOLOCHE_POSE = (
+    (-1.4365, 4.9190, 0.4095),        # centro de su caja, no su origen
+    (-1.2155, -0.0489, -0.0395),      # euler en radianes
+    0.9748,                           # escala (alto final 1.85 m)
+)
+REQUINTO_POS = (1.2357, 6.0578, 0.3265)   # recargado contra el frente del altar
+REQUINTO_GIRO = -0.0136
+REQUINTO_INCLINACION = -0.1239
+
 COLECCION = "SANTUARIO"
 
 
@@ -263,8 +275,9 @@ def _props(col, mesa_z):
     # Requinto recostado contra el altar, visible en los planos generales.
     assets_guitarra = _cargar_assets()
     if assets_guitarra is not None and assets_guitarra.disponible(assets_guitarra.GUITARRA):
-        assets_guitarra.guitarra(col, (1.62, ALTAR_Y - 3.05, 0.02),
-                                 largo=0.98, giro=-0.62, inclinacion=0.20)
+        # Colocación tomada del visor: recargada contra el frente del altar.
+        assets_guitarra.guitarra(col, REQUINTO_POS, largo=0.98,
+                                 giro=REQUINTO_GIRO, inclinacion=REQUINTO_INCLINACION)
     else:
         cuerpo = _cilindro(col, "PROP_requinto_cuerpo", (1.9, ALTAR_Y - 0.85, 0.42),
                            0.17, 0.09, 24)
@@ -372,7 +385,8 @@ def _tololoche(col):
     """
     assets_tololoche = _cargar_assets()
     if assets_tololoche is not None and assets_tololoche.disponible(assets_tololoche.TOLOLOCHE):
-        assets_tololoche.tololoche(col, (-2.05, 3.05, 0.02), alto=1.85, giro=0.55)
+        # Pose tomada del visor: recargado contra el escalón izquierdo.
+        assets_tololoche.tololoche(col, pose=TOLOLOCHE_POSE)
         return
     if assets_tololoche is not None and assets_tololoche.disponible(assets_tololoche.GUITARRA):
         assets_tololoche.guitarra(col, (-2.05, 3.05, 0.02), largo=1.85,

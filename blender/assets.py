@@ -218,6 +218,7 @@ def gorra(col, ubicacion, ancho=0.27, giro=0.0, inclinacion=0.0):
     ancho_actual = maximos[0] - minimos[0]
     factor = ancho / ancho_actual if ancho_actual else 1.0
     ancla.scale = (factor, factor, factor)
+    ancla.rotation_mode = "XYZ"
     ancla.rotation_euler = (inclinacion, 0.0, giro)
     ancla.location = ubicacion
     bpy.context.view_layer.update()
@@ -253,6 +254,7 @@ def guitarra(col, ubicacion, largo=0.98, giro=0.0, inclinacion=0.0,
     largo_actual = maximos[2] - minimos[2]
     factor = largo / largo_actual if largo_actual else 1.0
     ancla.scale = (factor, factor, factor)
+    ancla.rotation_mode = "XYZ"
     ancla.rotation_euler = (inclinacion, 0.0, giro)
     ancla.location = ubicacion
     bpy.context.view_layer.update()
@@ -306,6 +308,7 @@ def _plantar(pieza, ubicacion, alto, giro=0.0, inclinacion=0.0, nombre_ancla=Non
     alto_actual = maximos[2] - minimos[2]
     factor = alto / alto_actual if alto_actual else 1.0
     ancla.scale = (factor, factor, factor)
+    ancla.rotation_mode = "XYZ"
     ancla.rotation_euler = (inclinacion, 0.0, giro)
     ancla.location = ubicacion
     bpy.context.view_layer.update()
@@ -321,9 +324,37 @@ def trio_velas(col, nombre, ubicacion, alto=0.26, giro=0.0):
     return _plantar(pieza, ubicacion, alto, giro=giro)
 
 
-def tololoche(col, ubicacion, alto=1.85, giro=0.0, inclinacion=0.0):
+def tololoche(col, ubicacion=None, alto=1.85, giro=0.0, inclinacion=0.0,
+              pose=None):
+    """Tololoche. Con `pose` se fija la colocación exacta.
+
+    `pose` es (traslación, euler en radianes, escala) tal como quedó tras
+    colocarlo a mano en Blender. Se usa cuando la posición se decidió moviendo
+    el objeto en el visor: los parámetros de ubicación/giro/inclinación no
+    pueden describir una pose arbitraria, y traducirla a mano se presta a
+    errores. La escala va referida a la geometría de este asset concreto; si el
+    .blend cambia, hay que volver a tomarla.
+    """
     pieza = _malla_unica(TOLOLOCHE, "PROP_tololoche_cuerpo", col, TOLOLOCHE_POLIGONOS)
     if pieza is None:
         return None
+    if pose is not None:
+        centro_objetivo, euler, escala = pose
+        # Los assets generados llegan en modo quaternion: asignar
+        # `rotation_euler` sin cambiar el modo no hace nada, y no avisa.
+        pieza.rotation_mode = "XYZ"
+        pieza.rotation_euler = euler
+        pieza.scale = (escala, escala, escala)
+        bpy.context.view_layer.update()
+        # La pose se ancla por el centro de la caja, no por `location`: el
+        # origen de la malla importada no tiene por qué caer donde cayó en la
+        # sesión en que se colocó a mano, y entonces la misma rotación acaba en
+        # otro sitio.
+        minimos, maximos = _caja_mundo([pieza])
+        centro_actual = [(minimos[i] + maximos[i]) / 2 for i in range(3)]
+        for eje in range(3):
+            pieza.location[eje] += centro_objetivo[eje] - centro_actual[eje]
+        bpy.context.view_layer.update()
+        return pieza
     return _plantar(pieza, ubicacion, alto, giro=giro, inclinacion=inclinacion,
                     nombre_ancla="PROP_tololoche_ancla")
