@@ -41,8 +41,9 @@ sin ellos porque cada uno tiene su fallback.
 
 **Lo siguiente es la fase 3**, que ya es producción y no diseño:
 
-1. Calibrar CRF convirtiendo un still final a AVIF y midiendo el peso real
-   (tarea heredada de la fase 0; sin esto no se sabe cuántos frames caben).
+1. ~~Calibrar CRF~~ **hecho 2026-09-17**: CRF 38 para los tramos (14.7 KB por
+   frame, 1.18 MB los 80), CRF 30 para el frame 0. Tabla y método en
+   `docs/blender-notas.md` → "CRF calibrado contra AVIF real".
 2. Renderizar 4 tramos × 20 frames con motion blur, en los dos formatos.
 3. Renderizar los 5 loops de estación a 24 fps con llama, humo de cigarro,
    polvo en los haces y parpadeo del neón; cerrarlos en bucle con `ffmpeg xfade`.

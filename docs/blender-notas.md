@@ -231,6 +231,32 @@ Los valores que acabaron funcionando (veladora 140 W, neón 2400 W, cenital
 Salieron de renderizar, medir la luminancia con ffmpeg y repetir. Además hubo
 que recalibrarlos al pasar a Cycles, porque la GI suma luz rebotada.
 
+### CRF calibrado contra AVIF real (2026-09-17)
+
+Medido, no estimado: dos frames a 900×1600 (`f001` estación nave, `f011` en
+mitad del tramo) codificados con
+`ffmpeg -c:v libaom-av1 -still-picture 1 -cpu-used 6`:
+
+| CRF | frame nave | frame tramo | 80 frames |
+|---|---|---|---|
+| 30 | 18.6 KB | 22.3 KB | 1.78 MB |
+| 34 | 15.3 KB | 18.4 KB | 1.47 MB |
+| **38** | **12.6 KB** | **14.7 KB** | **1.18 MB** |
+| 42 | 10.6 KB | 12.2 KB | 0.98 MB |
+| 46 | 9.0 KB | 10.0 KB | 0.80 MB |
+
+**CRF 38 para los frames de tramo.** Es el primero que cabe en la línea de
+1.2 MB del presupuesto. El SSIM no sirve para elegir aquí (0.99 → 0.98 en todo
+el rango: la escena es casi negra y el índice apenas se mueve); se decidió
+mirando recortes con el brillo subido, que es donde aparece el banding. A 38 el
+grano del muro y los degradados de las velas aguantan; a 46 se posterizan.
+
+El frame 0 (LCP) puede ir a CRF 30: 18.6 KB contra los 45 KB que le da el
+presupuesto.
+
+El set de escritorio es 1600×900 = los mismos 1.44 Mpx, así que los pesos valen
+igual para los dos formatos.
+
 ### Coste real medido
 
 | Motor | Ajustes | Por frame a 640×360 |
