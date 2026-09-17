@@ -74,6 +74,10 @@ def _limpiar():
         for datablock in list(bloque):
             if datablock.users == 0:
                 bloque.remove(datablock)
+    # Los append de assets dejan datablocks huérfanos que se acumulan entre
+    # reconstrucciones; sin purgarlos, el .blend crece en cada build.
+    bpy.ops.outliner.orphans_purge(do_local_ids=True, do_linked_ids=True,
+                                   do_recursive=True)
     existente = bpy.data.collections.get(COLECCION)
     if existente:
         bpy.data.collections.remove(existente)
@@ -257,12 +261,17 @@ def _props(col, mesa_z):
         _gorra_mesa(col, mesa_z)
 
     # Requinto recostado contra el altar, visible en los planos generales.
-    cuerpo = _cilindro(col, "PROP_requinto_cuerpo", (1.9, ALTAR_Y - 0.85, 0.42),
-                       0.17, 0.09, 24)
-    cuerpo.rotation_euler = (1.25, 0, -0.25)
-    mastil = _caja(col, "PROP_requinto_mastil", (2.06, ALTAR_Y - 1.32, 0.95),
-                   (0.07, 0.05, 0.78))
-    mastil.rotation_euler = (0.32, 0, -0.25)
+    assets_guitarra = _cargar_assets()
+    if assets_guitarra is not None and assets_guitarra.disponible(assets_guitarra.GUITARRA):
+        assets_guitarra.guitarra(col, (1.42, ALTAR_Y - 1.95, 0.02),
+                                 largo=0.98, giro=-0.55, inclinacion=0.26)
+    else:
+        cuerpo = _cilindro(col, "PROP_requinto_cuerpo", (1.9, ALTAR_Y - 0.85, 0.42),
+                           0.17, 0.09, 24)
+        cuerpo.rotation_euler = (1.25, 0, -0.25)
+        mastil = _caja(col, "PROP_requinto_mastil", (2.06, ALTAR_Y - 1.32, 0.95),
+                       (0.07, 0.05, 0.78))
+        mastil.rotation_euler = (0.32, 0, -0.25)
 
     # Rosario colgando del borde de la mesa, del lado de los vinilos.
     for i in range(14):
@@ -363,7 +372,18 @@ def _props(col, mesa_z):
 
 
 def _tololoche(col):
-    """Silueta de tololoche contra una columna: el bajo del género, en penumbra."""
+    """Tololoche contra una columna, el bajo del género.
+
+    Es el mismo asset de la guitarra escalado a 1.85 m: a ocho metros y en
+    penumbra, la silueta de un contrabajo y la de una guitarra grande no se
+    distinguen. Si aparece un tololoche de verdad, se cambia esta llamada.
+    """
+    assets_tololoche = _cargar_assets()
+    if assets_tololoche is not None and assets_tololoche.disponible(assets_tololoche.GUITARRA):
+        assets_tololoche.guitarra(col, (-2.30, 1.30, 0.02), largo=1.85,
+                                  giro=0.55, inclinacion=0.16,
+                                  nombre="PROP_tololoche")
+        return
     cuerpo = _cilindro(col, "PROP_tololoche_cuerpo", (-2.35, 1.4, 0.72), 0.34, 0.22, 24)
     cuerpo.rotation_euler = (1.35, 0, 0.18)
     cuerpo.scale = (1.0, 1.35, 1.0)

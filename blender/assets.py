@@ -22,6 +22,15 @@ MICRO_ARANA = ("Cylinder.019", "Cylinder.014", "Cylinder.012",
 
 # Gorra snapback con relieves góticos, generada por el propio equipo. Viene sin
 # materiales ni UV: sólo geometría, que es justo lo que interesa.
+# Guitarra clásica. El .blend trae la escena entera del autor: soporte, foco,
+# entorno y una calcomanía con el material `hohner`, que es una marca real y se
+# queda fuera. Sólo se traen las piezas del instrumento.
+GUITARRA = "guitarra.blend"
+GUITARRA_MADERA = ("Deck", "Deck inside", "Vulture", "Nut",
+                   "Fastening", "Fastening two")
+GUITARRA_METAL = ("frets", "1", "2", "3", "4", "5", "6",
+                  "Screw 1", "Screw 2", "Screw 3", "Screw 4")
+
 GORRA = "gorra.glb"
 GORRA_POLIGONOS = 18000     # techo tras decimar; el original trae ~92k
 
@@ -40,6 +49,34 @@ def _traer(nombre_blend, piezas):
         bpy.context.scene.collection.objects.link(ob)
     bpy.context.view_layer.update()
     return traidos
+
+
+def _sin_subdivision(ob):
+    """Quita los modificadores de subdivisión que traen los assets.
+
+    Un Subsurf a nivel 4 convierte 2.000 caras en 55.000 al renderizar, y
+    entonces decimar la malla base no sirve de nada: el coste vuelve a
+    aparecer en cada frame.
+    """
+    for modificador in list(ob.modifiers):
+        if modificador.type in {"SUBSURF", "MULTIRES", "EDGE_SPLIT"}:
+            ob.modifiers.remove(modificador)
+    if ob.type == "MESH":
+        for poligono in ob.data.polygons:
+            poligono.use_smooth = True
+    return ob
+
+
+def _decimar(ob, techo):
+    """Baja la malla a un techo de polígonos. Un instrumento en penumbra al
+    fondo no gana nada con 300.000 caras y encarece cada frame."""
+    if ob.type != "MESH" or len(ob.data.polygons) <= techo:
+        return ob
+    modificador = ob.modifiers.new("decimar", "DECIMATE")
+    modificador.ratio = techo / len(ob.data.polygons)
+    bpy.context.view_layer.objects.active = ob
+    bpy.ops.object.modifier_apply(modifier=modificador.name)
+    return ob
 
 
 def _unir(objetos, nombre, col):
@@ -63,6 +100,7 @@ def _unir(objetos, nombre, col):
     unido = bpy.context.view_layer.objects.active
     unido.name = nombre
     unido.data.materials.clear()
+    _sin_subdivision(unido)
     for otra in list(unido.users_collection):
         otra.objects.unlink(unido)
     col.objects.link(unido)
@@ -148,6 +186,7 @@ def gorra(col, ubicacion, ancho=0.27, giro=0.0, inclinacion=0.0):
 
     pieza.name = "PROP_gorra"
     pieza.data.materials.clear()
+    _sin_subdivision(pieza)
     if len(pieza.data.polygons) > GORRA_POLIGONOS:
         decimar = pieza.modifiers.new("decimar", "DECIMATE")
         decimar.ratio = GORRA_POLIGONOS / len(pieza.data.polygons)
@@ -177,3 +216,38 @@ def gorra(col, ubicacion, ancho=0.27, giro=0.0, inclinacion=0.0):
     ancla.location = ubicacion
     bpy.context.view_layer.update()
     return pieza
+
+
+def guitarra(col, ubicacion, largo=0.98, giro=0.0, inclinacion=0.0,
+             nombre="PROP_requinto"):
+    """Trae la guitarra y la recuesta contra el altar.
+
+    Devuelve (madera, metal) para poder darles materiales distintos. El eje
+    largo del asset es Z, así que ya viene casi de pie.
+    """
+    madera = _unir(_traer(GUITARRA, GUITARRA_MADERA), nombre + "_cuerpo", col)
+    metal = _unir(_traer(GUITARRA, GUITARRA_METAL), nombre + "_metal", col)
+    _decimar(madera, 14000)
+    _decimar(metal, 6000)
+    piezas = (madera, metal)
+
+    minimos, maximos = _caja_mundo(piezas)
+    ancla = bpy.data.objects.new(nombre + "_ancla", None)
+    col.objects.link(ancla)
+    ancla.location = ((minimos[0] + maximos[0]) / 2,
+                      (minimos[1] + maximos[1]) / 2,
+                      minimos[2])
+    bpy.context.view_layer.update()
+    for ob in piezas:
+        matriz = ob.matrix_world.copy()
+        ob.parent = ancla
+        ob.matrix_parent_inverse = ancla.matrix_world.inverted()
+        ob.matrix_world = matriz
+
+    largo_actual = maximos[2] - minimos[2]
+    factor = largo / largo_actual if largo_actual else 1.0
+    ancla.scale = (factor, factor, factor)
+    ancla.rotation_euler = (inclinacion, 0.0, giro)
+    ancla.location = ubicacion
+    bpy.context.view_layer.update()
+    return madera, metal

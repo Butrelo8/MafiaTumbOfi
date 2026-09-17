@@ -36,3 +36,19 @@ importa decimada de ~92.000 a 18.000 polígonos.
 cláusula "you can not use it for commercial purposes under any circumstance".
 El sitio de una banda que busca contrataciones es uso comercial, así que no se
 usa.
+
+### Guitarra clásica
+
+`guitarra.blend`, descargada de Blend Swap. Del archivo original se usan sólo
+las 17 piezas del instrumento; quedan fuera el soporte, el foco, el entorno del
+autor y el objeto `Sticker`, que lleva un material llamado `hohner` — una marca
+real que no tiene por qué aparecer en la escena.
+
+El mismo asset se reutiliza escalado a 1,85 m como tololoche apoyado en una
+columna: a esa distancia y en penumbra, la silueta de un contrabajo y la de una
+guitarra grande no se distinguen.
+
+**Pendiente:** confirmar autor y licencia exacta de este blend. Se descargó sin
+su archivo de licencia, así que antes de publicar hay que verificarlo en Blend
+Swap y anotarlo aquí; si resultara ser CC-BY, el crédito debe aparecer también
+en el sitio.
