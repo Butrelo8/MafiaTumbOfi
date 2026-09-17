@@ -318,3 +318,21 @@ tensión. Queda a decisión de la banda: si la piden, se modela.
 **Marcas comerciales en general:** la botella se reconoce por silueta —cuerpo
 cuadrado, hombros, cuello corto, tapón de madera— sin logo ni etiqueta. A ese
 tamaño no se leerían, y la silueta hace el trabajo sin reproducir una marca.
+
+### Marca ficticia SANTO VICIO — 2026-09-17
+
+La gorra y la hebilla llevan una marca inventada, **SANTO VICIO**, con
+monograma `SV` en serif extruido. Usa el lenguaje visual del lujo —monograma
+entrelazado, oro, placa biselada— **sin parecerse a ninguna marca real**:
+imitar de cerca a Chrome Hearts, Amiri o Louis Vuitton sería el mismo problema
+legal que copiar su logo, y esto va en el sitio oficial de la banda. Si alguna
+vez la banda tiene su propia marca de ropa, se cambian dos constantes
+(`MARCA` y `MARCA_MONOGRAMA` en `blender/altar.py`) y se re-renderiza.
+
+La gorra costó tres iteraciones y las tres fallaron por lo mismo, que conviene
+recordar: **al recortar con booleanos, la pieza y el cortador tienen que estar
+en la misma orientación antes del corte**. La visera salía envolviendo como ala
+de sombrero porque se giraba la caja de recorte pero no la esfera, y después se
+volvía a girar la geometría ya cortada, duplicando el giro. Se arregla girando
+la esfera y aplicando la rotación antes del booleano, e inclinándola después
+alrededor del eje transversal real.

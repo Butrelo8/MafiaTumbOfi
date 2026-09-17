@@ -249,34 +249,7 @@ def _props(col, mesa_z):
                                   azar.uniform(-0.05, 0.05),
                                   azar.uniform(0, 3.14))
 
-    # Gorra sobre la mesa. El sombrero se descartó: no es lo que usan. El
-    # parche lleva el rayo del monograma, no el logo de nadie más.
-    # Se construye con el frente en -Y y luego se gira todo el conjunto, para
-    # que visera y parche salgan de la cara delantera y no del centro.
-    gx, gy, giro = -1.30, ALTAR_Y + 0.26, -0.35
-    frente_x = math.sin(giro)
-    frente_y = -math.cos(giro)
-
-    bpy.ops.mesh.primitive_uv_sphere_add(
-        radius=0.10, segments=40, ring_count=20,
-        location=(gx, gy, mesa_z + 0.028))
-    copa = bpy.context.object
-    copa.name = "PROP_gorra_mesa_copa"
-    bpy.ops.object.shade_smooth()
-    copa.scale = (1.0, 1.05, 0.74)
-    copa.rotation_euler = (0, 0, giro)
-    _reubicar(col, copa)
-
-    visera = _cilindro(col, "PROP_gorra_mesa_visera",
-                       (gx + frente_x * 0.085, gy + frente_y * 0.085,
-                        mesa_z + 0.022), 0.098, 0.011, 24)
-    visera.scale = (1.0, 0.52, 1.0)
-    visera.rotation_euler = (0.16, 0, giro)
-
-    parche = _caja(col, "PROP_gorra_mesa_parche",
-                   (gx + frente_x * 0.092, gy + frente_y * 0.092, mesa_z + 0.072),
-                   (0.058, 0.006, 0.046))
-    parche.rotation_euler = (0.12, 0, giro)
+    _gorra_mesa(col, mesa_z)
 
     # Requinto recostado contra el altar, visible en los planos generales.
     cuerpo = _cilindro(col, "PROP_requinto_cuerpo", (1.9, ALTAR_Y - 0.85, 0.42),
@@ -443,15 +416,130 @@ def _rayo(col, nombre, centro, alto=0.06, grosor=0.012):
     return ob
 
 
+# Marca ficticia de la gorra. Lenguaje de casa de lujo —monograma entrelazado,
+# serif, oro— sin parecerse a ninguna marca real: imitar una de cerca sería el
+# mismo problema legal que copiarla.
+MARCA = "SANTO VICIO"
+MARCA_MONOGRAMA = "SV"
+GORRA_POS = (-1.30, 7.26, -0.35)      # x, y, giro; y se corrige con ALTAR_Y
+
+
+def _texto(col, nombre, cuerpo, centro, alto, extrusion=0.002, negrita=True):
+    """Texto extruido como malla. Sirve para el monograma de la marca."""
+    bpy.ops.object.text_add(location=centro)
+    ob = bpy.context.object
+    ob.name = nombre
+    ob.data.body = cuerpo
+    ob.data.size = alto
+    ob.data.extrude = extrusion
+    ob.data.align_x = "CENTER"
+    ob.data.align_y = "CENTER"
+    for ruta in (r"C:\Windows\Fonts\georgiab.ttf" if negrita else r"C:\Windows\Fonts\georgia.ttf",
+                 r"C:\Windows\Fonts\timesbd.ttf", r"C:\Windows\Fonts\times.ttf"):
+        try:
+            ob.data.font = bpy.data.fonts.load(ruta, check_existing=True)
+            break
+        except RuntimeError:
+            continue
+    bpy.ops.object.convert(target="MESH")
+    ob = bpy.context.object
+    ob.name = nombre
+    _reubicar(col, ob)
+    return ob
+
+
+def _gorra_mesa(col, mesa_z):
+    """Gorra de seis gajos con visera curva y parche de marca.
+
+    La primera versión era una cúpula con un disco debajo; ésta se construye
+    con la copa cortada en gajos por costuras, visera con curvatura real
+    (intersección de una esfera achatada) y botón superior.
+    """
+    gx, gy, giro = GORRA_POS[0], ALTAR_Y + 0.26, GORRA_POS[2]
+    frente_x, frente_y = math.sin(giro), -math.cos(giro)
+    radio = 0.10
+
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=radio, segments=48, ring_count=24, location=(gx, gy, mesa_z + 0.026))
+    copa = bpy.context.object
+    copa.name = "PROP_gorra_copa"
+    copa.scale = (1.0, 1.02, 0.82)
+    copa.rotation_euler = (0, 0, giro)
+    bpy.ops.object.shade_smooth()
+    _reubicar(col, copa)
+
+    # Costuras de los seis gajos: tres aros verticales girados entre sí.
+    for i in range(3):
+        bpy.ops.mesh.primitive_torus_add(
+            major_radius=radio * 0.995, minor_radius=0.0016,
+            major_segments=48, minor_segments=6,
+            location=(gx, gy, mesa_z + 0.026))
+        costura = bpy.context.object
+        costura.name = "PROP_gorra_costura_%d" % i
+        costura.rotation_euler = (math.radians(90), 0, giro + i * math.radians(60))
+        costura.scale = (1.0, 0.82, 1.0)
+        bpy.ops.object.shade_smooth()
+        _reubicar(col, costura)
+
+    # Botón superior.
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=0.008, segments=16, ring_count=8,
+        location=(gx, gy, mesa_z + 0.026 + radio * 0.82))
+    boton = bpy.context.object
+    boton.name = "PROP_gorra_boton"
+    bpy.ops.object.shade_smooth()
+    _reubicar(col, boton)
+
+    # Visera: esfera achatada recortada, para que tenga curvatura real en vez
+    # de ser un disco plano.
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=0.15, segments=40, ring_count=20,
+        location=(gx, gy, mesa_z + 0.028))
+    visera = bpy.context.object
+    visera.name = "PROP_gorra_visera"
+    visera.scale = (0.80, 1.20, 0.075)
+    # Se gira la esfera ANTES de cortar: si sólo se gira la caja de recorte,
+    # la intersección sale desviada y la visera envuelve por los lados.
+    visera.rotation_euler = (0, 0, giro)
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+    bpy.ops.object.shade_smooth()
+    _reubicar(col, visera)
+
+    recorte = _caja(col, "CORTE_visera",
+                    (gx + frente_x * 0.115, gy + frente_y * 0.115, mesa_z + 0.028),
+                    (0.20, 0.155, 0.08))
+    recorte.rotation_euler = (0, 0, giro)
+    corte = visera.modifiers.new("corte", "BOOLEAN")
+    corte.operation = "INTERSECT"
+    corte.object = recorte
+    bpy.context.view_layer.objects.active = visera
+    bpy.ops.object.modifier_apply(modifier=corte.name)
+    bpy.data.objects.remove(recorte, do_unlink=True)
+    # La geometría ya salió orientada del booleano; volver a girarla en Z la
+    # desviaba. Sólo se inclina alrededor del eje transversal de la gorra.
+    visera.rotation_euler = (0.22 * math.cos(giro), 0.22 * math.sin(giro), 0)
+
+    # Parche frontal con el monograma de la marca.
+    parche = _caja(col, "PROP_gorra_parche",
+                   (gx + frente_x * 0.094, gy + frente_y * 0.094, mesa_z + 0.072),
+                   (0.056, 0.006, 0.042))
+    parche.rotation_euler = (0.1, 0, giro)
+
+
 def _parche_gorra(col, mesa_z):
-    """El rayo bordado en el parche frontal de la gorra."""
-    gx, gy, giro = -1.30, ALTAR_Y + 0.26, -0.35
-    frente_x = math.sin(giro)
-    frente_y = -math.cos(giro)
-    dije = _rayo(col, "PROP_gorra_rayo",
-                 (gx + frente_x * 0.098, gy + frente_y * 0.098, mesa_z + 0.073),
-                 alto=0.036, grosor=0.004)
-    dije.rotation_euler = (0.12, 0, giro)
+    """Monograma de la marca ficticia bordado en el parche."""
+    gx, gy, giro = GORRA_POS[0], ALTAR_Y + 0.26, GORRA_POS[2]
+    frente_x, frente_y = math.sin(giro), -math.cos(giro)
+
+    mono = _texto(col, "PROP_gorra_monograma", MARCA_MONOGRAMA,
+                  (gx + frente_x * 0.101, gy + frente_y * 0.101, mesa_z + 0.078),
+                  alto=0.028, extrusion=0.002)
+    mono.rotation_euler = (math.radians(90) + 0.1, 0, giro)
+
+    nombre = _texto(col, "PROP_gorra_marca", MARCA,
+                    (gx + frente_x * 0.101, gy + frente_y * 0.101, mesa_z + 0.060),
+                    alto=0.0068, extrusion=0.001)
+    nombre.rotation_euler = (math.radians(90) + 0.1, 0, giro)
 
 
 def _devocion(col, mesa_z):
@@ -527,20 +615,25 @@ def _devocion(col, mesa_z):
                              mesa_z + 0.0145), (0.012, 0.004, 0.002))
             puntada.rotation_euler = (0, 0, -0.12)
 
-    hebilla = _caja(col, "PROP_hebilla", (0.78, ALTAR_Y - 0.40, mesa_z + 0.012),
-                    (0.115, 0.085, 0.014))
+    hebilla = _caja(col, "PROP_hebilla", (0.78, ALTAR_Y - 0.40, mesa_z + 0.014),
+                    (0.125, 0.092, 0.012))
     hebilla.rotation_euler = (0, 0, -0.12)
-    _caja(col, "PROP_hebilla_hueco", (0.78, ALTAR_Y - 0.40, mesa_z + 0.016),
-          (0.075, 0.05, 0.016)).rotation_euler = (0, 0, -0.12)
+    bisel_hebilla = hebilla.modifiers.new("bisel", "BEVEL")
+    bisel_hebilla.width = 0.006
+    bisel_hebilla.segments = 3
+    mono_hebilla = _texto(col, "PROP_hebilla_monograma", MARCA_MONOGRAMA,
+                          (0.78, ALTAR_Y - 0.40, mesa_z + 0.021), alto=0.052,
+                          extrusion=0.003)
+    mono_hebilla.rotation_euler = (0, 0, -0.12)
 
 
 def _gorra(col):
     """Colgada de la esquina de un nicho: rompe la solemnidad del oro."""
-    copa = _cilindro(col, "PROP_gorra_copa",
+    copa = _cilindro(col, "PROP_gorranicho_copa",
                      (HORNACINA_X[2] + 0.42, RETABLO_Y - 0.34, HORNACINA_Z - 0.32),
                      0.105, 0.11, 20)
     copa.rotation_euler = (0.55, 0, 0.2)
-    visera = _cilindro(col, "PROP_gorra_visera",
+    visera = _cilindro(col, "PROP_gorranicho_visera",
                        (HORNACINA_X[2] + 0.48, RETABLO_Y - 0.46, HORNACINA_Z - 0.40),
                        0.115, 0.016, 20)
     visera.rotation_euler = (0.95, 0, 0.2)
