@@ -324,3 +324,23 @@ píxeles en el render final no aportan nada.
 **Licencias.** Revisar siempre el archivo de licencia que acompaña al asset, no
 sólo la etiqueta de la web: en Blend Swap un blend puede ser CC-0 y estar además
 marcado como *Fan Art*, lo que prohíbe todo uso comercial.
+
+## Comprobar intersecciones con datos, no a ojo
+
+Colocar props a ojo y mirar el render es lento y engañoso: un instrumento puede
+parecer apoyado y estar atravesando un escalón. Sale mucho más barato comparar
+cajas envolventes en coordenadas de mundo antes de renderizar:
+
+```python
+def solapan(a, b, holgura=0.01):
+    (a_min, a_max), (b_min, b_max) = a, b
+    return all(a_min[i] < b_max[i] - holgura and b_min[i] < a_max[i] - holgura
+               for i in range(3))
+```
+
+Con eso, cada intento devuelve la lista exacta de objetos que se están tocando
+en vez de una impresión. Y cuando la lista no se vacía tras varios intentos,
+conviene medir el hueco real: si el prop ocupa 1,52 m y el espacio libre es
+1,49, ninguna posición lo va a resolver. En ese caso se cambia la escena —
+quitar una banca y dejar que el instrumento ocupe el claro — en vez de seguir
+empujando el objeto de sitio en sitio.

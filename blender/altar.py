@@ -263,8 +263,8 @@ def _props(col, mesa_z):
     # Requinto recostado contra el altar, visible en los planos generales.
     assets_guitarra = _cargar_assets()
     if assets_guitarra is not None and assets_guitarra.disponible(assets_guitarra.GUITARRA):
-        assets_guitarra.guitarra(col, (1.42, ALTAR_Y - 1.95, 0.02),
-                                 largo=0.98, giro=-0.55, inclinacion=0.26)
+        assets_guitarra.guitarra(col, (1.62, ALTAR_Y - 3.05, 0.02),
+                                 largo=0.98, giro=-0.62, inclinacion=0.20)
     else:
         cuerpo = _cilindro(col, "PROP_requinto_cuerpo", (1.9, ALTAR_Y - 0.85, 0.42),
                            0.17, 0.09, 24)
@@ -272,14 +272,6 @@ def _props(col, mesa_z):
         mastil = _caja(col, "PROP_requinto_mastil", (2.06, ALTAR_Y - 1.32, 0.95),
                        (0.07, 0.05, 0.78))
         mastil.rotation_euler = (0.32, 0, -0.25)
-
-    # Rosario colgando del borde de la mesa, del lado de los vinilos.
-    for i in range(14):
-        angulo = i / 14.0 * 2 * math.pi
-        _cilindro(col, "PROP_rosario_%d" % i,
-                  (1.35 + 0.075 * math.cos(angulo), ALTAR_Y - 0.34,
-                   mesa_z + 0.012 + 0.075 * math.sin(angulo)),
-                  0.009, 0.01, 8)
 
     # Vaso y cerillos, cerca del cenicero.
     _cilindro(col, "PROP_vaso", (-0.18, ALTAR_Y + 0.22, mesa_z + 0.05),
@@ -380,8 +372,8 @@ def _tololoche(col):
     """
     assets_tololoche = _cargar_assets()
     if assets_tololoche is not None and assets_tololoche.disponible(assets_tololoche.GUITARRA):
-        assets_tololoche.guitarra(col, (-2.30, 1.30, 0.02), largo=1.85,
-                                  giro=0.55, inclinacion=0.16,
+        assets_tololoche.guitarra(col, (-2.05, 3.05, 0.02), largo=1.85,
+                                  giro=0.30, inclinacion=0.0,
                                   nombre="PROP_tololoche")
         return
     cuerpo = _cilindro(col, "PROP_tololoche_cuerpo", (-2.35, 1.4, 0.72), 0.34, 0.22, 24)
@@ -616,12 +608,23 @@ def _devocion(col, mesa_z):
 
     # Cadena cubana con el dije del rayo, sobre la mesa.
     inicio_x, inicio_y = 0.02, ALTAR_Y + 0.34
-    for i in range(22):
-        eslabon = _cilindro(col, "PROP_cubana_%d" % i,
-                            (inicio_x + 0.028 * i - 0.30,
-                             inicio_y + 0.05 * math.sin(i * 0.55),
-                             mesa_z + 0.012), 0.016, 0.011, 10)
-        eslabon.rotation_euler = (1.57, 0, azar.uniform(-0.2, 0.2) + i * 0.15)
+    paso = 0.019                      # menor que el diámetro: los eslabones se solapan
+    for i in range(26):
+        avance = inicio_x + paso * i - 0.26
+        lateral = inicio_y + 0.05 * math.sin(i * 0.42)
+        bpy.ops.mesh.primitive_torus_add(
+            major_radius=0.0145, minor_radius=0.0042,
+            major_segments=14, minor_segments=6,
+            location=(avance, lateral, mesa_z + 0.008))
+        eslabon = bpy.context.object
+        eslabon.name = "PROP_cubana_%d" % i
+        # alternar el plano de cada eslabón es lo que hace que se lea como cadena
+        eslabon.rotation_euler = (math.radians(90) if i % 2 else 0.0,
+                                  0.0,
+                                  math.atan2(0.05 * 0.42 * math.cos(i * 0.42), paso))
+        eslabon.scale = (1.0, 1.35, 1.0)
+        bpy.ops.object.shade_smooth()
+        _reubicar(col, eslabon)
     dije = _rayo(col, "PROP_dije_rayo",
                  (inicio_x + 0.028 * 22 - 0.30, inicio_y + 0.02, mesa_z + 0.014),
                  alto=0.075, grosor=0.008)
@@ -699,6 +702,11 @@ def _mobiliario(col):
     """Bancas y candelabros: dan escala a la nave y pueblan los planos generales."""
     for lado, signo in (("izq", -1), ("der", 1)):
         for i in range(5):
+            # La última banca izquierda no se pone: ese claro lo ocupa el
+            # tololoche, y forzarlo en el hueco entre banca y escalón lo dejaba
+            # siempre atravesando una de las dos.
+            if (lado, i) == ("izq", 4):
+                continue
             y = -5.5 + i * 2.1
             x = signo * 1.95
             _caja(col, "BANCA_%s_%d" % (lado, i), (x, y, 0.45), (1.5, 0.42, 0.1))
