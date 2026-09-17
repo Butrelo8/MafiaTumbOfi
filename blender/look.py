@@ -179,7 +179,6 @@ ASIGNACION = (
     ("PROXY_vinilo", "vinilo"),
     ("PROXY_micro", "cromo"),
     ("MICRO_rejilla", "cromo"),
-    ("MICRO_arana", "plastico"),
     ("PROXY_cadena", "oro"),
     ("PROXY_placa", "oro"),
     ("ETIQUETA_", "oro"),

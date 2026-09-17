@@ -7,18 +7,18 @@ modo que lo versionado sigue siendo el código que los coloca, no el asset.
 Licencias en `blender/assets/*-LICENSE.txt` y en `public/scene/CREDITOS.md`.
 """
 
+import bmesh
 import bpy
 import os
 
 CARPETA = r"E:\Cursor Projects\MTO\blender\assets"
 
-# Micrófono de condensador con araña. "Low Poly Microphone" de mgordon, CC-0.
-# El .blend trae dos copias y su peana de render; sólo interesan estas piezas,
-# que son las del micro centrado en el origen.
-MICROFONO = "microfono.blend"
-MICRO_CAPSULA = ("Cylinder.020", "Cylinder.018", "Cylinder.015")
-MICRO_ARANA = ("Cylinder.019", "Cylinder.014", "Cylinder.012",
-               "BezierCircle", "BezierCircle.003")
+# Micrófono de cinta sobre pie de mesa, generado por el equipo. Malla única,
+# sin materiales ni UV. Llega de pie sobre un disco de escenario de 1.9 m que
+# no sirve aquí y que hay que cortar: ver `microfono()`.
+MICROFONO = "microfono-spot.blend"
+MICRO_POLIGONOS = 12000
+MICRO_CORTE_Z = 0.27          # altura relativa por debajo de la cual todo es disco
 
 # Gorra snapback con relieves góticos, generada por el propio equipo. Viene sin
 # materiales ni UV: sólo geometría, que es justo lo que interesa.
@@ -133,39 +133,36 @@ def _caja_mundo(objetos):
 
 
 def microfono(col, ubicacion, alto=0.26, giro=0.0):
-    """Trae el micrófono y lo deja de pie sobre la mesa, a escala real.
+    """Trae el micrófono, le quita el disco de escenario y lo planta en la mesa.
 
-    Las piezas cuelgan de un empty que hace de ancla: escalar cada objeto por
-    separado no encoge el conjunto, porque cada uno se escala respecto de su
-    propio origen y la distancia entre ellos no cambia.
+    El asset viene en una sola malla soldada: el disco no se puede separar por
+    partes sueltas, así que se corta por geometría. Todo lo que queda por
+    debajo de `MICRO_CORTE_Z` (relativo a la base) es disco; la peana del pie
+    empieza justo encima. El fondo queda abierto, que no se ve: se apoya en la
+    mesa.
 
-    La cápsula se llama `PROXY_micro` porque es el objeto al que apunta el foco
-    de la estación de la reliquia: renombrarlo obligaría a tocar el rig.
+    La pieza se llama `PROXY_micro` porque es el objeto al que apunta el foco
+    de la estación de la reliquia: renombrarla obligaría a tocar el rig.
     """
-    capsula = _unir(_traer(MICROFONO, MICRO_CAPSULA), "PROXY_micro", col)
-    arana = _unir(_traer(MICROFONO, MICRO_ARANA), "MICRO_arana", col)
-    piezas = (capsula, arana)
+    pieza = _malla_unica(MICROFONO, "PROXY_micro", col, MICRO_POLIGONOS)
+    if pieza is None:
+        return None
 
-    minimos, maximos = _caja_mundo(piezas)
-    ancla = bpy.data.objects.new("MICRO_ancla", None)
-    col.objects.link(ancla)
-    ancla.location = ((minimos[0] + maximos[0]) / 2,
-                      (minimos[1] + maximos[1]) / 2,
-                      minimos[2])
+    malla = pieza.data
+    base = min(v.co.z for v in malla.vertices)
+    bm = bmesh.new()
+    bm.from_mesh(malla)
+    bmesh.ops.delete(
+        bm,
+        geom=[v for v in bm.verts if (v.co.z - base) < MICRO_CORTE_Z],
+        context="VERTS",
+    )
+    bm.to_mesh(malla)
+    bm.free()
+    malla.update()
     bpy.context.view_layer.update()
-    for ob in piezas:
-        matriz = ob.matrix_world.copy()
-        ob.parent = ancla
-        ob.matrix_parent_inverse = ancla.matrix_world.inverted()
-        ob.matrix_world = matriz
 
-    alto_actual = maximos[2] - minimos[2]
-    factor = alto / alto_actual if alto_actual else 1.0
-    ancla.scale = (factor, factor, factor)
-    ancla.rotation_euler.z = giro
-    ancla.location = ubicacion
-    bpy.context.view_layer.update()
-    return capsula, arana
+    return _plantar(pieza, ubicacion, alto, giro=giro, nombre_ancla="MICRO_ancla")
 
 
 def gorra(col, ubicacion, ancho=0.27, giro=0.0, inclinacion=0.0):

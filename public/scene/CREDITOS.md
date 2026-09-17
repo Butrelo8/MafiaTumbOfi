@@ -15,15 +15,15 @@ Se usa como estampa del escapulario que cuelga del nicho central en la escena
 
 ## Modelos 3D de la escena
 
-### Micrófono de condensador
+### Micrófono de cinta
 
-"Low Poly Microphone" de **mgordon**, descargado de Blend Swap (blend 40491).
-**CC-0 (dominio público)**: sin requisitos, ni siquiera de atribución. Se cita
-aquí por higiene, no por obligación.
+Generado por el propio equipo (`microfono-spot.blend`), sin derechos de
+terceros. Malla única sin materiales ni UV; se importa decimada a 12.000
+polígonos y se le corta el disco de escenario con el que viene.
 
-Del archivo original se usan sólo las ocho piezas del micrófono centrado en el
-origen; el `.blend` trae además una copia duplicada, una peana de render y dos
-textos del autor ("Speak loud" y su firma), que se descartan.
+Sustituye al "Low Poly Microphone" de **mgordon** (Blend Swap 40491, CC-0) que
+usó la escena hasta el 2026-09-17. Aquel no imponía condiciones, así que su
+retirada no deja nada pendiente.
 
 ### Gorra
 
