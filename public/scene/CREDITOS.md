@@ -52,3 +52,16 @@ guitarra grande no se distinguen.
 su archivo de licencia, así que antes de publicar hay que verificarlo en Blend
 Swap y anotarlo aquí; si resultara ser CC-BY, el crédito debe aparecer también
 en el sitio.
+
+### Velas y tololoche
+
+`velas.blend` (trío de velas) y `tololoche.blend` (contrabajo), generados por el
+propio equipo, sin derechos de terceros. Vienen como malla única, sin materiales
+ni UV; se decimán y se les aplican los materiales del proyecto.
+
+El trío de velas no se puede separar en velas sueltas —es una sola malla—, así
+que se usa como grupo donde la cámara se acerca, y en las posiciones lejanas se
+mantienen los cilindros, que a esa distancia rinden igual y cuestan mucho menos.
+
+El tololoche sustituye el apaño anterior, que era la guitarra clásica escalada a
+1,85 m.

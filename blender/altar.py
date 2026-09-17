@@ -371,6 +371,9 @@ def _tololoche(col):
     distinguen. Si aparece un tololoche de verdad, se cambia esta llamada.
     """
     assets_tololoche = _cargar_assets()
+    if assets_tololoche is not None and assets_tololoche.disponible(assets_tololoche.TOLOLOCHE):
+        assets_tololoche.tololoche(col, (-2.05, 3.05, 0.02), alto=1.85, giro=0.55)
+        return
     if assets_tololoche is not None and assets_tololoche.disponible(assets_tololoche.GUITARRA):
         assets_tololoche.guitarra(col, (-2.05, 3.05, 0.02), largo=1.85,
                                   giro=0.30, inclinacion=0.0,
@@ -752,8 +755,20 @@ def _cargar_assets():
 def _reliquias(col):
     mesa_z = ALTAR_ALTO + 0.08
 
-    for i in range(VELADORAS):
-        x = -1.05 + i * (1.6 / (VELADORAS - 1))
+    assets_velas = _cargar_assets()
+    hay_trio = (assets_velas is not None
+                and assets_velas.disponible(assets_velas.VELAS))
+    if hay_trio:
+        # Donde la cámara se acerca, velas de verdad; en el resto, cilindros,
+        # que a esa distancia rinden igual y cuestan mucho menos.
+        assets_velas.trio_velas(col, "TRIO_velas_izq",
+                                (-0.62, ALTAR_Y - 0.42, mesa_z), alto=0.20, giro=0.25)
+        assets_velas.trio_velas(col, "TRIO_velas_der",
+                                (0.46, ALTAR_Y - 0.30, mesa_z), alto=0.23, giro=-0.4)
+        posiciones = (-0.92, 0.88, 1.16, 1.44)
+    else:
+        posiciones = tuple(-1.05 + i * (1.6 / (VELADORAS - 1)) for i in range(VELADORAS))
+    for i, x in enumerate(posiciones):
         _cilindro(col, "VELADORA_%d" % i,
                   (x, ALTAR_Y - 0.32, mesa_z + 0.11), 0.055, 0.22, 16)
 

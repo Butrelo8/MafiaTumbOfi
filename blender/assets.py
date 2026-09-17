@@ -31,6 +31,12 @@ GUITARRA_MADERA = ("Deck", "Deck inside", "Vulture", "Nut",
 GUITARRA_METAL = ("frets", "1", "2", "3", "4", "5", "6",
                   "Screw 1", "Screw 2", "Screw 3", "Screw 4")
 
+# Generados por el equipo, sin materiales ni UV: sólo geometría.
+VELAS = "velas.blend"          # trío de velas, malla única e indivisible
+VELAS_POLIGONOS = 9000
+TOLOLOCHE = "tololoche.blend"
+TOLOLOCHE_POLIGONOS = 22000
+
 GORRA = "gorra.glb"
 GORRA_POLIGONOS = 18000     # techo tras decimar; el original trae ~92k
 
@@ -251,3 +257,73 @@ def guitarra(col, ubicacion, largo=0.98, giro=0.0, inclinacion=0.0,
     ancla.location = ubicacion
     bpy.context.view_layer.update()
     return madera, metal
+
+
+def _malla_unica(archivo, nombre, col, techo):
+    """Trae el único objeto de un .blend generado, lo limpia y lo decima."""
+    ruta = os.path.join(CARPETA, archivo)
+    with bpy.data.libraries.load(ruta, link=False) as (origen, destino):
+        destino.objects = list(origen.objects)
+    traidos = [o for o in destino.objects if o is not None and o.type == "MESH"]
+    if not traidos:
+        return None
+    for ob in traidos:
+        bpy.context.scene.collection.objects.link(ob)
+    pieza = traidos[0]
+    if len(traidos) > 1:
+        bpy.ops.object.select_all(action="DESELECT")
+        for ob in traidos:
+            ob.select_set(True)
+        bpy.context.view_layer.objects.active = pieza
+        bpy.ops.object.join()
+        pieza = bpy.context.view_layer.objects.active
+    pieza.name = nombre
+    pieza.data.materials.clear()
+    _sin_subdivision(pieza)
+    _decimar(pieza, techo)
+    for otra in list(pieza.users_collection):
+        otra.objects.unlink(pieza)
+    col.objects.link(pieza)
+    return pieza
+
+
+def _plantar(pieza, ubicacion, alto, giro=0.0, inclinacion=0.0, nombre_ancla=None):
+    """Escala por altura y apoya por la base, vía un empty que hace de ancla."""
+    minimos, maximos = _caja_mundo([pieza])
+    ancla = bpy.data.objects.new(nombre_ancla or (pieza.name + "_ancla"), None)
+    for coleccion in pieza.users_collection:
+        coleccion.objects.link(ancla)
+        break
+    ancla.location = ((minimos[0] + maximos[0]) / 2,
+                      (minimos[1] + maximos[1]) / 2,
+                      minimos[2])
+    bpy.context.view_layer.update()
+    matriz = pieza.matrix_world.copy()
+    pieza.parent = ancla
+    pieza.matrix_parent_inverse = ancla.matrix_world.inverted()
+    pieza.matrix_world = matriz
+
+    alto_actual = maximos[2] - minimos[2]
+    factor = alto / alto_actual if alto_actual else 1.0
+    ancla.scale = (factor, factor, factor)
+    ancla.rotation_euler = (inclinacion, 0.0, giro)
+    ancla.location = ubicacion
+    bpy.context.view_layer.update()
+    return pieza
+
+
+def trio_velas(col, nombre, ubicacion, alto=0.26, giro=0.0):
+    """Trío de velas. La malla es única: no se pueden separar en velas sueltas,
+    así que se usa como grupo."""
+    pieza = _malla_unica(VELAS, nombre, col, VELAS_POLIGONOS)
+    if pieza is None:
+        return None
+    return _plantar(pieza, ubicacion, alto, giro=giro)
+
+
+def tololoche(col, ubicacion, alto=1.85, giro=0.0, inclinacion=0.0):
+    pieza = _malla_unica(TOLOLOCHE, "PROP_tololoche_cuerpo", col, TOLOLOCHE_POLIGONOS)
+    if pieza is None:
+        return None
+    return _plantar(pieza, ubicacion, alto, giro=giro, inclinacion=inclinacion,
+                    nombre_ancla="PROP_tololoche_ancla")

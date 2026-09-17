@@ -36,7 +36,7 @@ MUESTRAS = 128
 
 # Potencias calibradas midiendo la luminancia del render, no estimadas.
 # Están ajustadas a Cycles, que suma luz rebotada; en EEVEE se ven más bajas.
-VELA_W = 140.0                      # potencia por veladora
+VELA_W = 92.0                      # potencia por veladora
 NEON_W = 1400.0
 CENITAL_W = 350.0
 CONTRALUZ_W = 260.0                 # rim light frío; sin él, negro sobre negro
@@ -207,6 +207,7 @@ ASIGNACION = (
     ("PROP_botella_cinta", "corcho"),
     ("PROP_botella_lazo", "corcho"),
     ("PROP_botella", "vidrio"),
+    ("TRIO_velas_", "cera"),
     ("PROP_marcador", "plastico"),
     ("PROP_anillo", "plata"),
     ("PROP_pua", "hueso"),
@@ -350,6 +351,30 @@ def _asignar(mats):
                 aplicados[ob.name] = clave
                 break
     return aplicados
+
+
+def _luces_trio(col, mats):
+    """Cada trío de velas lleva tres puntos de luz repartidos a lo ancho.
+
+    Las velas del asset son una malla única, así que no hay un objeto por llama
+    del que colgar la luz: se reparten sobre su caja.
+    """
+    for ob in [o for o in bpy.data.objects if o.name.startswith("TRIO_velas_")]:
+        centro = ob.matrix_world.translation
+        ancho = ob.dimensions.x
+        alto = ob.dimensions.z
+        for indice, fraccion in enumerate((-0.32, 0.0, 0.32)):
+            bpy.ops.object.light_add(
+                type="POINT",
+                location=(centro.x + ancho * fraccion, centro.y, centro.z + alto * 0.52))
+            luz = bpy.context.object
+            luz.name = "LUZ_%s_%d" % (ob.name, indice)
+            luz.data.energy = VELA_W * 0.34
+            luz.data.color = VELA_COLOR
+            luz.data.shadow_soft_size = 0.02
+            for otra in list(luz.users_collection):
+                otra.objects.unlink(luz)
+            col.objects.link(luz)
 
 
 def _velas(col, mats):
@@ -541,6 +566,7 @@ def aplicar():
             ob.data.materials.append(mat)
     _luces(col)
     _velas(col, mats)
+    _luces_trio(col, mats)
     _mundo_y_niebla()
     _render()
     motor(MOTOR, MUESTRAS)
