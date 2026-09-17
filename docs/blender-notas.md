@@ -462,3 +462,74 @@ Si ese botón ya tenía algo asignado, conviene desactivar la asignación anteri
 (`item.active = False`) en vez de borrarla: queda reversible desde
 `Preferences > Keymap`. El cambio vive en la sesión hasta que se guarde con
 `bpy.ops.wm.save_userpref()`.
+
+## Dónde cae el sujeto en cada estación, medido
+
+Esta tabla no existía y por eso el encuadre de hornacinas se descubrió mirando
+capturas en vez de leyendo un número. Sale de proyectar las esquinas de la caja
+envolvente de cada sujeto con `world_to_camera_view`, sin renderizar nada:
+
+```python
+from bpy_extras.object_utils import world_to_camera_view
+p = world_to_camera_view(escena, cam, ob.matrix_world @ Vector(esquina))
+# p.x, p.y en 0..1 sobre el cuadro; p.z <= 0 significa detrás de la cámara
+```
+
+Coordenadas normalizadas del cuadro renderizado. `u` de izquierda a derecha,
+`v` de abajo a arriba. Medido el 2026-09-17.
+
+| Estación | Frame Blender | Frame web | Sujeto | Escritorio `u` | Escritorio `v` | Móvil `u` | Móvil `v` |
+|---|---|---|---|---|---|---|---|
+| nave | 1 | 0 | Cruz + retablo | 0.413–0.587 | 0.450–0.790 | 0.345–0.655 | 0.472–0.663 |
+| sonido | 21 | 20 | Vinilos y mesa | 0.163–1.001 | 0.064–0.833 | −0.098–1.391 | 0.255–0.687 |
+| hornacinas | 41 | 40 | Los tres marcos | **0.034–0.994** | 0.164–0.815 | **−0.328–1.379** | 0.311–0.677 |
+| reliquia | 61 | 60 | Micro de bala | 0.363–0.629 | 0.250–0.902 | 0.257–0.729 | 0.360–0.726 |
+| retirada | 81 | 79 | Placa M⚡T | 0.405–0.609 | 0.323–0.914 | 0.330–0.694 | 0.401–0.733 |
+
+**El cuadro renderizado no es el cuadro que se ve.** El canvas va con
+`object-fit: cover`, así que el navegador recorta el eje que sobra. En una
+ventana de 1425×900 contra un frame de 1600×900 el recorte es del **10.9 %:
+88 px por lado**, y sólo se ve de `u` 0.055 a 0.945. Cualquier cosa fuera de ese
+rango se pierde en esa ventana, y en una más estrecha se pierde más.
+
+La cuenta, para no repetirla a ojo:
+
+```
+escala   = max(ancho_ventana / ancho_frame, alto_ventana / alto_frame)
+visible_u = [ (1 - ancho_ventana / (ancho_frame * escala)) / 2 , 1 - eso ]
+```
+
+Consecuencias que hay que respetar al mover la cámara o al maquetar:
+
+- **Hornacinas se sale.** Los marcos llegan a 0.994 y el navegador corta en
+  0.945: los dos de fuera se ven cortados. Bajar la lente de 34 a 28 mm los
+  deja en 0.117–0.907, con aire. En móvil los marcos laterales quedan fuera de
+  cuadro y hace falta 16 mm para meterlos, lo que los deja diminutos: decisión
+  del usuario del 2026-09-17, **móvil se queda con el nicho central solo**.
+- **En sonido y hornacinas no hay zona libre**: el sujeto ocupa el ancho
+  completo y el texto va forzosamente encima. La legibilidad la sostiene el
+  velo de 0.62, no el hueco.
+- **En nave, reliquia y retirada el sujeto vive en la franja central** (entre
+  0.36 y 0.63 en escritorio). Ahí sí hay columna libre a los dos lados, y es
+  donde debe caer el texto.
+
+## Loops de estación: dónde van
+
+Los loops son los frames de estación, no otros: **1, 21, 41, 61 y 81** en
+Blender, que `framesDeEstacion()` traduce a **0, 20, 40, 60 y 79** en la web.
+Un loop entra cuando el scroll se detiene en una estación y tiene que empalmar
+consigo mismo, cerrado con `ffmpeg xfade`.
+
+Qué hay en cada estación que merezca animarse, según la spec:
+
+| Estación | Qué se mueve |
+|---|---|
+| nave | Parpadeo de la cruz de neón; velas del altar al fondo |
+| sonido | Llama de las veladoras de la mesa; humo del cigarro del cenicero |
+| hornacinas | Velas de la repisa; polvo en los haces de los focos |
+| reliquia | Llama muy cerca; polvo; reflejo moviéndose en el cromo |
+| retirada | Velas apagándose; parpadeo del neón |
+
+**Hoy la escena no tiene nada de eso animado.** Las llamas son mallas quietas y
+el neón es un material emisivo constante: los cinco loops son trabajo de
+animación en Blender, no de encode. Es lo único que queda abierto de la fase 3.
