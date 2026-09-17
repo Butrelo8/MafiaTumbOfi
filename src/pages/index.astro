@@ -1,5 +1,6 @@
 ---
 import MarketingLayout from '../layouts/MarketingLayout.astro'
+import AltarScene from '../components/AltarScene.astro'
 import ArtworkShelf from '../components/ArtworkShelf.astro'
 import Eyebrow from '../components/Eyebrow.astro'
 import FilmStrip from '../components/FilmStrip.astro'
@@ -21,6 +22,8 @@ const releases = catalog.releases.map((release) => ({
 ---
 
 <MarketingLayout title={title} description={description} canonicalUrl={canonicalUrl} hasHero={true}>
+  <AltarScene />
+
   <section class="hero hero--asymmetric" aria-labelledby="hero-heading">
     <video class="hero-video" muted playsinline loop aria-hidden="true" preload="none"><source data-src="/video/hero.mp4" type="video/mp4" /></video>
     <div class="hero-grain" aria-hidden="true"></div>

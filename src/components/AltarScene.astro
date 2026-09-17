@@ -1,0 +1,114 @@
+---
+/**
+ * Fondo del santuario: el canvas que el scroll recorre.
+ *
+ * Debajo va el frame de la primera estación como <img>: es el LCP y a la vez
+ * el fallback si el navegador no decodifica AVIF o si falla el script.
+ */
+import escena from '../data/scene.json'
+
+const movil = escena.formatos.mobile
+const escritorio = escena.formatos.desktop
+const primeraMovil = movil?.estaciones[0]
+const primeraEscritorio = escritorio?.estaciones[0]
+---
+
+{primeraMovil && (
+  <div class="altar-escena" aria-hidden="true">
+    <picture>
+      <source media="(min-aspect-ratio: 1/1)" srcset={primeraEscritorio?.imagen} />
+      <img
+        class="altar-escena__lcp"
+        src={primeraMovil.imagen}
+        alt=""
+        width={movil.ancho}
+        height={movil.alto}
+        fetchpriority="high"
+        decoding="async"
+      />
+    </picture>
+    <canvas class="altar-escena__canvas" data-altar-canvas></canvas>
+    <div class="altar-escena__velo"></div>
+  </div>
+)}
+
+<style>
+  .altar-escena {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: #000;
+  }
+
+  .altar-escena__lcp,
+  .altar-escena__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Velo: la escena está iluminada y el texto va encima. El 0.62 está medido,
+     no elegido a ojo: es el alfa mínimo con el que el percentil 95 de la
+     estación más brillante (la reliquia, cromo del micro) sigue dando 4.5:1
+     contra --text. Bajarlo rompe AA; ver docs/blender-notas.md. */
+  .altar-escena__velo {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.62);
+  }
+
+  /* El vídeo del hero es un fondo decorativo y tapaba la escena entera. Se
+     apaga, no se borra: el marcado sigue ahí. */
+  :global(.hero-video) {
+    display: none;
+  }
+
+  /* Los velos del hero existían para que el texto se leyera sobre ese vídeo.
+     Con la escena detrás sobran: el ::before lo tapaba de negro y el ::after
+     metía un halo rojo que se leía como una banda. La legibilidad ya la da el
+     velo medido de arriba. */
+  :global(.hero::before) {
+    background-image: none;
+  }
+
+  :global(.hero::after) {
+    box-shadow: none;
+  }
+
+  /* El contenido va encima de la escena: el fondo del body es opaco, así que
+     la escena no puede ir a z-index negativo. */
+  :global(.marketing-main),
+  :global(.site-header),
+  :global(.site-footer),
+  :global(.mobile-menu) {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* El canvas tapa al <img> en cuanto pinta su primer frame. */
+  .altar-escena__canvas {
+    opacity: 0;
+    transition: opacity 240ms ease;
+  }
+
+  .altar-escena__canvas[data-frame] {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .altar-escena__canvas {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import escena from '../data/scene.json'
+  import { mountScrollScene } from '../lib/scrollScene'
+
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-altar-canvas]')
+  if (canvas) mountScrollScene({ canvas, escena })
+</script>
