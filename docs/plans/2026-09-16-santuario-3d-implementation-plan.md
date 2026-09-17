@@ -93,6 +93,7 @@ frames no toca TypeScript.
 | 4.4 | Detección de scroll detenido (~150 ms) + crossfade al loop | La escena respira al pararse |
 | 4.5 | Elección de set por `matchMedia` | Móvil no descarga el set de escritorio |
 | 4.6 | Reposicionar el contenido de `index.astro` sobre las estaciones | Nada de contenido añadido ni perdido |
+| 4.7 | Capa de primer plano por encima del texto en las estaciones, oculta durante el scrub | Una columna pasa frente al título; el texto sigue legible debajo |
 
 **Puerta 4:** se ve y se siente como el storyboard, en móvil y escritorio.
 
@@ -242,3 +243,20 @@ cualquier prueba A/B tiene que limpiarlos explícitamente.
 - Imperfecciones: polvo, huellas en el oro, rugosidad variable.
 - Stills finales en los dos aspect ratios (tarea 2.6) y calibración de CRF y
   frames por tramo contra un AVIF real (tarea 2.7, heredada de la fase 0).
+
+### Cierre de la fase 2 — 2026-09-17
+
+Props ampliados a petición: bancas a ambos lados de la nave y candelabros de pie
+(dan escala a los planos generales), sombrero y requinto recostado (identidad de
+la banda), rosario, vaso y cerillos para los planos cercanos, además del
+cenicero con cigarros encendidos, la botella, los billetes y la cera de la
+primera tanda. La escena pasa de 80 a 148 objetos y el render sigue en 9,5 s
+para las cinco estaciones a 800×450.
+
+**Capa de primer plano con alfa**, decidida al revisar el workflow de
+blender-skills. De ese workflow no aplica ni ProRes 4444 (códec de edición que
+ningún navegador reproduce; nuestro máster son PNG de 16 bits) ni el fondo
+transparente como salida principal (nuestra escena es un interior completo, no
+un producto recortado) ni la salida a `~/Desktop`. Sí aplica el alfa para una
+capa que va **delante** del texto, y 24 fps para los loops de estación; los
+tramos no tienen fps porque su velocidad la pone el scroll.

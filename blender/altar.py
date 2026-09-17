@@ -221,12 +221,68 @@ def _props(col, mesa_z):
                         (x, y, mesa_z + 0.003 + i * 0.002), (0.15, 0.068, 0.002))
         billete.rotation_euler = (0, 0, giro)
 
+    # Sombrero apoyado sobre la mesa, detrás del micro: identidad inmediata.
+    copa = _cilindro(col, "PROP_sombrero_copa", (-1.32, ALTAR_Y + 0.3, mesa_z + 0.1),
+                     0.115, 0.2, 24)
+    copa.rotation_euler = (0.18, 0, 0)
+    ala = _cilindro(col, "PROP_sombrero_ala", (-1.32, ALTAR_Y + 0.3, mesa_z + 0.02),
+                    0.26, 0.022, 32)
+    ala.rotation_euler = (0.18, 0, 0)
+
+    # Requinto recostado contra el altar, visible en los planos generales.
+    cuerpo = _cilindro(col, "PROP_requinto_cuerpo", (1.9, ALTAR_Y - 0.85, 0.42),
+                       0.17, 0.09, 24)
+    cuerpo.rotation_euler = (1.25, 0, -0.25)
+    mastil = _caja(col, "PROP_requinto_mastil", (2.06, ALTAR_Y - 1.32, 0.95),
+                   (0.07, 0.05, 0.78))
+    mastil.rotation_euler = (0.32, 0, -0.25)
+
+    # Rosario colgando del borde de la mesa, del lado de los vinilos.
+    for i in range(14):
+        angulo = i / 14.0 * 2 * math.pi
+        _cilindro(col, "PROP_rosario_%d" % i,
+                  (1.35 + 0.075 * math.cos(angulo), ALTAR_Y - 0.34,
+                   mesa_z + 0.012 + 0.075 * math.sin(angulo)),
+                  0.009, 0.01, 8)
+
+    # Vaso y cerillos, cerca del cenicero.
+    _cilindro(col, "PROP_vaso", (-0.18, ALTAR_Y + 0.22, mesa_z + 0.05),
+              0.036, 0.1, 20)
+    _caja(col, "PROP_cerillos", (-0.62, ALTAR_Y + 0.26, mesa_z + 0.012),
+          (0.055, 0.035, 0.024))
+
     # Cera escurrida al pie de las veladoras.
     for i in range(5):
         x = -0.95 + i * 0.42
         gota = _cilindro(col, "PROP_cera_%d" % i,
                          (x, ALTAR_Y - 0.36, mesa_z + 0.004), 0.048, 0.008, 16)
         gota.scale = (1.0, 0.65, 1.0)
+
+
+def _mobiliario(col):
+    """Bancas y candelabros: dan escala a la nave y pueblan los planos generales."""
+    for lado, signo in (("izq", -1), ("der", 1)):
+        for i in range(5):
+            y = -5.5 + i * 2.1
+            x = signo * 1.95
+            _caja(col, "BANCA_%s_%d" % (lado, i), (x, y, 0.45), (1.5, 0.42, 0.1))
+            _caja(col, "BANCA_respaldo_%s_%d" % (lado, i),
+                  (x, y - signo * 0.0 - 0.2, 0.72), (1.5, 0.08, 0.45))
+            for dx in (-0.6, 0.6):
+                _caja(col, "BANCA_pata_%s_%d_%d" % (lado, i, int(dx * 10)),
+                      (x + dx, y, 0.22), (0.1, 0.34, 0.45))
+
+    # Candelabros de pie flanqueando los escalones del altar.
+    for signo in (-1, 1):
+        x = signo * 1.9
+        _cilindro(col, "CANDELABRO_pie_%d" % signo, (x, ALTAR_Y - 1.9, 0.55),
+                  0.07, 1.1, 12)
+        _cilindro(col, "CANDELABRO_base_%d" % signo, (x, ALTAR_Y - 1.9, 0.04),
+                  0.24, 0.08, 16)
+        _cilindro(col, "CANDELABRO_plato_%d" % signo, (x, ALTAR_Y - 1.9, 1.12),
+                  0.16, 0.04, 16)
+        _cilindro(col, "VELADORA_pie_%d" % signo, (x, ALTAR_Y - 1.9, 1.28),
+                  0.06, 0.28, 16)
 
 
 def _reliquias(col):
@@ -279,6 +335,7 @@ def _reliquias(col):
           (0, ALTAR_Y - ALTAR_FONDO / 2 - 0.04, 0.58), (1.5, 0.06, 0.62))
 
     _props(col, mesa_z)
+    _mobiliario(col)
 
 
 def _rig(col):
@@ -416,4 +473,77 @@ def render_stills(out_dir, ancho=480, alto=270):
         escena.render.filepath = os.path.join(out_dir, "%d-%s.png" % (indice, nombre))
         bpy.ops.render.render(write_still=True)
         escritos.append(escena.render.filepath)
+    return escritos
+
+
+# Sólo estos pueden ser primer plano. La arquitectura queda fuera: su origen
+# está en el centro de una malla enorme, así que la distancia al origen no dice
+# nada sobre si tapa o no a la cámara.
+PREFIJOS_FRENTE = (
+    "COLUMNA_", "BANCA_", "CANDELABRO_", "PROP_", "VELADORA_", "LLAMA_",
+    "VINILO_", "ETIQUETA_", "MICRO_", "PROXY_micro", "PROXY_cadena",
+)
+
+
+def render_capa_frontal(out_dir, ancho=800, alto=450, margen=0.78):
+    """Capa con alfa de lo que queda DELANTE del sujeto enfocado.
+
+    Se compone por encima del texto HTML, así la tipografía queda dentro de la
+    escena en vez de flotar sobre ella: una columna pasa frente al título.
+    Sólo se renderiza en las estaciones; durante los tramos se oculta.
+
+    `margen` define el umbral: es primer plano lo que esté más cerca que la
+    distancia cámara->objeto enfocado multiplicada por este factor.
+    """
+    import os
+    escena = bpy.context.scene
+    camara = escena.camera
+    escena.render.resolution_x = ancho
+    escena.render.resolution_y = alto
+    escena.render.image_settings.file_format = "PNG"
+    escena.render.image_settings.color_mode = "RGBA"
+    escena.render.film_transparent = True
+    os.makedirs(out_dir, exist_ok=True)
+
+    # La niebla del mundo llenaría el alfa entero: se desconecta mientras dura.
+    mundo = escena.world
+    enlaces_volumen = []
+    if mundo and mundo.use_nodes:
+        salida_mundo = mundo.node_tree.nodes.get("World Output")
+        if salida_mundo:
+            for enlace in list(mundo.node_tree.links):
+                if enlace.to_socket == salida_mundo.inputs["Volume"]:
+                    enlaces_volumen.append((enlace.from_socket, enlace.to_socket))
+                    mundo.node_tree.links.remove(enlace)
+
+    mallas = [o for o in bpy.data.objects if o.type == "MESH"]
+    ocultos_previos = {o.name: o.hide_render for o in mallas}
+    escritos = []
+    try:
+        for indice, (nombre, frame, _o, _a, foco_obj, *_r) in enumerate(ESTACIONES):
+            escena.frame_set(frame)
+            bpy.context.view_layer.update()
+            grafo = bpy.context.evaluated_depsgraph_get()
+            origen = camara.evaluated_get(grafo).matrix_world.translation
+            sujeto = bpy.data.objects[foco_obj].matrix_world.translation
+            umbral = (sujeto - origen).length * margen
+
+            frontales = 0
+            for ob in mallas:
+                candidato = ob.name.startswith(PREFIJOS_FRENTE)
+                distancia = (ob.matrix_world.translation - origen).length
+                ob.hide_render = not (candidato and distancia < umbral)
+                frontales += not ob.hide_render
+
+            escena.render.filepath = os.path.join(
+                out_dir, "%d-%s-frente.png" % (indice, nombre))
+            bpy.ops.render.render(write_still=True)
+            escritos.append((nombre, frontales, round(umbral, 2)))
+    finally:
+        for ob in mallas:
+            ob.hide_render = ocultos_previos.get(ob.name, False)
+        for desde, hacia in enlaces_volumen:
+            mundo.node_tree.links.new(desde, hacia)
+        escena.render.film_transparent = False
+        escena.render.image_settings.color_mode = "RGB"
     return escritos

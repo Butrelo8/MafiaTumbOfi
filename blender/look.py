@@ -113,7 +113,15 @@ def _materiales():
     _fijar(brasa.node_tree.nodes["Principled BSDF"], "Emission Color",
            (1.0, 0.28, 0.06, 1.0))
     _fijar(brasa.node_tree.nodes["Principled BSDF"], "Emission Strength", 4.0)
+    madera = _material(
+        "MTO_madera", base_color=(0.055, 0.032, 0.020, 1.0), roughness=0.62)
+    fieltro = _material(
+        "MTO_fieltro", base_color=(0.030, 0.026, 0.024, 1.0), roughness=0.95)
+    hierro = _material(
+        "MTO_hierro", base_color=(0.16, 0.15, 0.15, 1.0), metallic=1.0,
+        roughness=0.55)
     return {
+        "madera": madera, "fieltro": fieltro, "hierro": hierro,
         "vidrio": vidrio, "ceniza": ceniza, "papel": papel, "brasa": brasa,
         "piedra": piedra, "piedra_oscura": piedra_oscura, "oro": oro,
         "oro_viejo": oro_viejo, "neon": neon, "cera": cera, "llama": llama,
@@ -147,6 +155,13 @@ ASIGNACION = (
     ("PROP_botella", "vidrio"),
     ("PROP_billete", "papel"),
     ("PROP_cera", "cera"),
+    ("PROP_sombrero", "fieltro"),
+    ("PROP_requinto", "madera"),
+    ("PROP_rosario", "oro"),
+    ("PROP_vaso", "vidrio"),
+    ("PROP_cerillos", "papel"),
+    ("BANCA_", "madera"),
+    ("CANDELABRO_", "hierro"),
 )
 
 

@@ -63,9 +63,32 @@ cruzando el haz de luz, el brillo del oro desplazándose. El último frame del
 tramo es idéntico al frame 0 del loop, así que el empalme es invisible. Al
 reanudar el scroll, el video se pausa y el canvas retoma.
 
+## Capa de primer plano
+
+Cada estación tiene además una imagen con alfa de lo que queda **delante** del
+sujeto enfocado: columnas, bancas, el borde de la mesa, las velas del macro. Se
+compone por encima del texto HTML, de modo que la tipografía queda dentro de la
+escena en vez de flotar sobre ella — una columna pasa frente al título, una vela
+desenfocada cruza por delante del párrafo.
+
+Sólo existe en las cinco estaciones, nunca en los tramos: por frame duplicaría
+el peso del proyecto, y en movimiento no se aprecia. Durante el scrub se oculta
+y reaparece con el loop al detenerse.
+
+Qué cuenta como primer plano lo decide el render: es todo objeto candidato
+(columnas, bancas, candelabros, props, veladonas, vinilos, el micro) que esté
+más cerca de la cámara que el objeto enfocado, con un margen de 0.78. La
+arquitectura queda excluida por nombre, porque el origen de una malla enorme no
+dice nada sobre si tapa a la cámara. La niebla del mundo se desconecta mientras
+se renderiza, o llenaría el alfa entero.
+
+El texto que quede bajo esta capa necesita comprobación de contraste propia
+(check 5).
+
 ## Presupuesto de peso
 
-**Objetivo 2 MB por visitante móvil. Techo duro 3 MB.** El margen entre ambos se
+**Objetivo 2 MB por visitante móvil. Techo duro 3 MB**, ampliado desde
+el objetivo inicial para dar sitio a la capa de primer plano. El margen entre ambos se
 gasta en más frames de tramo — nunca en subir resolución.
 
 | Recurso | Cálculo | Peso |
@@ -73,7 +96,8 @@ gasta en más frames de tramo — nunca en subir resolución.
 | Frame 0 estático (LCP) | AVIF 900×1600 | ~45 KB |
 | 4 tramos × 20 frames | AVIF; la escena casi negra comprime muy bien | ~1.2 MB |
 | 5 loops idle | WebM/AV1, 2.5 s, 900×1600 | ~550 KB |
-| Total objetivo | | **~1.8 MB** |
+| 5 capas de primer plano | AVIF con alfa, sólo estaciones | ~200 KB |
+| Total objetivo | | **~2.0 MB** |
 
 Escritorio descarga su propio set 16:9 a 1600×900. Cada visitante baja un solo
 set. La carga es progresiva: el hero pinta con el frame 0 y los tramos
