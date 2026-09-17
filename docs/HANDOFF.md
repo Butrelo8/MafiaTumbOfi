@@ -1,6 +1,7 @@
 # Handoff — Santuario M⚡T
 
-> Escrito 2026-09-17, 02:30 CST. Rama `dev`, 18 commits por delante de `main`.
+> Escrito 2026-09-17, 02:30 CST; actualizado 02:55. Rama `dev`, 20 commits por
+> delante de `main`.
 > Formato según la skill `matt-handoff` de mpaf, guardado en el repo (y no en
 > el temporal del sistema, como sugiere la skill) para que sobreviva entre
 > sesiones.
@@ -30,8 +31,13 @@ qué**, no sólo qué.
 ## Estado
 
 **Fases 0, 1 y 2 cerradas** — entorno verificado, encuadres aprobados, look
-terminado con props y assets externos. La escena son 380 objetos, unas 85.000
+terminado con props y assets externos. La escena son unos 400 objetos, 85.000
 caras en render, y los cinco encuadres en los dos formatos salen en 28 s.
+
+Assets externos integrados (ver `public/scene/CREDITOS.md`): micrófono de
+condensador, gorra, guitarra clásica que hace de requinto, trío de velas y
+tololoche. Los `.blend` y `.glb` no se versionan; la escena se construye igual
+sin ellos porque cada uno tiene su fallback.
 
 **Lo siguiente es la fase 3**, que ya es producción y no diseño:
 
@@ -74,6 +80,18 @@ Después, fase 4 (capa web) y fase 5 (accesibilidad y verificación).
 - **Los retratos de las hornacinas** son huecos negros hasta que la capa web
   ponga encima las fotos reales con su enlace a Instagram.
 
+## Colocar props: el flujo que funciona
+
+El usuario coloca a ojo en el visor de Blender —para esto es mucho mejor que
+calcular coordenadas—, dice qué objeto tocó, y **se lee su transformación y se
+escribe en el script como constante**. Lo que no pase al script se pierde en la
+siguiente reconstrucción, porque `build()` borra la escena entera.
+
+Las poses de los instrumentos (`TOLOLOCHE_POSE`, `REQUINTO_POS` en
+`blender/altar.py`) salieron así. Detalles en `docs/blender-notas.md`: anclar
+por el centro de la caja envolvente y no por `location`, y verificar comparando
+cajas después de reconstruir.
+
 ## Trampas que ya costaron tiempo
 
 Están todas en `docs/blender-notas.md`, pero estas tres se repiten:
@@ -88,6 +106,9 @@ Están todas en `docs/blender-notas.md`, pero estas tres se repiten:
 3. **Al importar assets**: escalar cada pieza por separado no encoge el grupo,
    `ob.scale =` sobrescribe en vez de multiplicar, el origen no está en la base,
    y un Subsurf heredado convierte 2.000 caras en 55.000 al renderizar.
+4. **`rotation_euler` no rota nada en modo quaternion**, que es como llegan los
+   assets generados, y Blender no avisa: al leerlo devuelve lo que escribiste
+   mientras `matrix_world` sigue sin rotación.
 
 ## Cómo hablar con el usuario
 

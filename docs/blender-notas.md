@@ -377,3 +377,26 @@ Dos avisos al hacerlo:
 - **Verificar con la caja, no con el ojo.** Se guarda la caja que tenía la pose
   original y, tras reconstruir, se comprueba que coincide dentro de una
   tolerancia. Así se sabe que la pose quedó realmente congelada.
+
+## Navegar la escena en primera persona
+
+Para revisar encuadres es mucho más rápido moverse por la nave que orbitar.
+Blender lo trae de serie: **Walk Navigation** (`View > Navigation > Walk
+Navigation`, por defecto `Shift + \``).
+
+Dentro de ese modo: `W A S D` para moverse, `Q` baja, `E` sube, `Shift` acelera,
+`Alt` va despacio, la rueda cambia la velocidad base, clic izquierdo confirma y
+`Esc` cancela y vuelve a donde estabas.
+
+Se puede lanzar desde un botón lateral del ratón:
+
+```python
+teclas = bpy.context.window_manager.keyconfigs.user.keymaps["3D View"]
+teclas.keymap_items.new("view3d.walk", "BUTTON4MOUSE", "PRESS")
+teclas.keymap_items.new("view3d.fly", "BUTTON5MOUSE", "PRESS")
+```
+
+Si ese botón ya tenía algo asignado, conviene desactivar la asignación anterior
+(`item.active = False`) en vez de borrarla: queda reversible desde
+`Preferences > Keymap`. El cambio vive en la sesión hasta que se guarde con
+`bpy.ops.wm.save_userpref()`.
