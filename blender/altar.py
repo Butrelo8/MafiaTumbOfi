@@ -733,9 +733,24 @@ def _mobiliario(col):
                 _caja(col, "BANCA_pata_%s_%d_%d" % (lado, i, int(dx * 10)),
                       (x + dx, y, 0.22), (0.1, 0.34, 0.45))
 
-    # Candelabros de pie flanqueando los escalones del altar.
+    # Candelabros de pie flanqueando los escalones del altar. Si el asset no
+    # está, se cae a los cilindros de siempre.
+    assets_cand = _cargar_assets()
+    hay_candelabro = (assets_cand is not None
+                      and assets_cand.disponible(assets_cand.CANDELABRO))
     for signo in (-1, 1):
         x = signo * 1.9
+        if hay_candelabro:
+            # Los brazos abren hacia el centro de la nave: el asset los saca en
+            # su eje X, así que el de la izquierda va girado media vuelta.
+            # Sobre el escalón alto y pegados a los lados: es la única
+            # colocación que no toca nada. Comprobado con cajas envolventes;
+            # más al centro choca con el tololoche.
+            assets_cand.candelabro(col, "CANDELABRO_%d" % signo,
+                                   (signo * 2.3, ALTAR_Y - 1.4, 0.36),
+                                   alto=0.95,
+                                   giro=0.0 if signo < 0 else math.pi)
+            continue
         _cilindro(col, "CANDELABRO_pie_%d" % signo, (x, ALTAR_Y - 1.9, 0.55),
                   0.07, 1.1, 12)
         _cilindro(col, "CANDELABRO_base_%d" % signo, (x, ALTAR_Y - 1.9, 0.04),

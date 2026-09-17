@@ -36,6 +36,8 @@ VELAS = "velas.blend"          # trío de velas, malla única e indivisible
 VELAS_POLIGONOS = 9000
 TOLOLOCHE = "tololoche.blend"
 TOLOLOCHE_POLIGONOS = 22000
+CANDELABRO = "candelabro.blend"      # nueve brazos, generado por el equipo
+CANDELABRO_POLIGONOS = 14000
 
 GORRA = "gorra.glb"
 GORRA_POLIGONOS = 18000     # techo tras decimar; el original trae ~92k
@@ -310,6 +312,16 @@ def _plantar(pieza, ubicacion, alto, giro=0.0, inclinacion=0.0, nombre_ancla=Non
     ancla.location = ubicacion
     bpy.context.view_layer.update()
     return pieza
+
+
+def candelabro(col, nombre, ubicacion, alto=1.35, giro=0.0):
+    """Candelabro de nueve brazos, de pie. Los brazos salen en el eje X del
+    asset, así que `giro` decide hacia dónde abren."""
+    pieza = _malla_unica(CANDELABRO, nombre, col, CANDELABRO_POLIGONOS)
+    if pieza is None:
+        return None
+    return _plantar(pieza, ubicacion, alto, giro=giro,
+                    nombre_ancla=nombre + "_ancla")
 
 
 def trio_velas(col, nombre, ubicacion, alto=0.26, giro=0.0):

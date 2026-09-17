@@ -25,6 +25,11 @@ Sustituye al "Low Poly Microphone" de **mgordon** (Blend Swap 40491, CC-0) que
 usó la escena hasta el 2026-09-17. Aquel no imponía condiciones, así que su
 retirada no deja nada pendiente.
 
+### Candelabro de nueve brazos
+
+Generado por el propio equipo (`candelabro.blend`), sin derechos de terceros.
+Malla única, decimada a 14.000 polígonos.
+
 ### Gorra
 
 Generada por el propio equipo (`gorra.glb`), sin derechos de terceros. Se
