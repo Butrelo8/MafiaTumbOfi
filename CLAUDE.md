@@ -30,9 +30,12 @@ npx wrangler deploy
 ## Design rules
 
 Read [`DESIGN.md`](./DESIGN.md) before changing the page. Preserve the
-Veracruz Noir direction: black-on-black surfaces, Cormorant Garamond for
-headlines only, Inter for body/UI, JetBrains Mono for tabular data, turquoise
-for links and focus, and gold for signature labels and CTAs.
+Gótico Tumbado direction: black-on-black surfaces, Grenze Gotisch for display
+type only, Archivo for body/UI, JetBrains Mono for tabular data, red neon for
+links, rules and glow, and gold for display type, the MTO monogram and CTAs.
+
+Cormorant Garamond, Inter and the coastal turquoise belong to the retired
+Veracruz Noir direction — do not reintroduce them.
 
 Keep the asymmetric editorial layout, responsive spacing, WCAG AA contrast,
 visible focus states, Spanish-first labels, 44px touch targets, and
