@@ -43,7 +43,12 @@ def volcar(ruta):
 
 
 def comparar(ruta):
-    """Devuelve lo que difiere entre el volcado y la escena actual."""
+    """Devuelve lo que difiere entre el volcado y la escena actual.
+
+    Sirve en los dos sentidos: volcar el visor y reconstruir, o volcar recién
+    reconstruido y dejar que alguien mueva cosas. El segundo es más barato,
+    porque no hace falta reconstruir para comparar.
+    """
     bpy.context.view_layer.update()
     with open(ruta, encoding="utf-8") as f:
         antes = json.load(f)
@@ -54,10 +59,11 @@ def comparar(ruta):
         actual = ahora.get(nombre)
         if actual is None:
             continue
-        deltas = {campo: [round(a - b, 5) for a, b in zip(pose[campo], actual[campo])]
+        # actual - referencia: positivo = se movió hacia ahí.
+        deltas = {campo: [round(b - a, 5) for a, b in zip(pose[campo], actual[campo])]
                   for campo in ("centro", "euler", "escala")}
         if any(abs(v) > TOLERANCIA for d in deltas.values() for v in d):
-            movidos.append({"nombre": nombre, "visor": pose, "script": actual,
+            movidos.append({"nombre": nombre, "referencia": pose, "actual": actual,
                             "delta": deltas})
     return {"movidos": movidos,
             "solo_en_volcado": sorted(set(antes) - set(ahora)),

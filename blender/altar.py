@@ -377,12 +377,12 @@ def _props(col, mesa_z):
     caja_trato = _caja(col, "PROP_caja_trato", (-0.72, ALTAR_Y + 0.18, mesa_z + 0.04),
                        (0.17, 0.115, 0.075))
     caja_trato.rotation_euler = (0, 0, -0.35)
-    tapa = _caja(col, "PROP_caja_tapa", (-0.79, ALTAR_Y + 0.28, mesa_z + 0.12),
+    tapa = _caja(col, "PROP_caja_tapa", (-0.7049, ALTAR_Y + 0.2178, mesa_z + 0.1303),
                  (0.17, 0.11, 0.012))
     tapa.rotation_euler = (-1.15, 0, -0.35)
     _caja(col, "PROP_caja_forro", (-0.72, ALTAR_Y + 0.18, mesa_z + 0.079),
           (0.15, 0.095, 0.004)).rotation_euler = (0, 0, -0.35)
-    marcador = _cilindro(col, "PROP_marcador", (-0.63, ALTAR_Y + 0.06, mesa_z + 0.012),
+    marcador = _cilindro(col, "PROP_marcador", (-0.63, ALTAR_Y + 0.0071, mesa_z + 0.012),
                          0.011, 0.14, 12)
     marcador.rotation_euler = (1.57, 0, 0.62)
     tapa_m = _cilindro(col, "PROP_marcador_tapa", (-0.71, ALTAR_Y - 0.01, mesa_z + 0.012),
@@ -421,12 +421,16 @@ def _props(col, mesa_z):
     _cilindro(col, "PROP_ceramica_cuello", (-1.662, ALTAR_Y + 0.3, mesa_z + 0.36),
               0.018, 0.09, 12)
 
-    # Cera escurrida al pie de las veladoras.
-    for i in range(5):
-        x = -0.95 + i * 0.42
+    # Cera escurrida al pie de las veladoras. Las cuatro primeras gotas se
+    # repartieron a mano en el visor; la quinta sigue donde la puso el bucle.
+    CERA = (((-0.95, -0.2933), 1.8421), ((-0.5666, -0.4363), 0.0),
+            ((0.2824, -0.0715), 0.0), ((0.3721, -0.3079), 0.0),
+            ((0.73, -0.36), 0.0))
+    for i, ((x, dy), giro) in enumerate(CERA):
         gota = _cilindro(col, "PROP_cera_%d" % i,
-                         (x, ALTAR_Y - 0.36, mesa_z + 0.004), 0.048, 0.008, 16)
+                         (x, ALTAR_Y + dy, mesa_z + 0.004), 0.048, 0.008, 16)
         gota.scale = (1.0, 0.65, 1.0)
+        gota.rotation_euler = (0, 0, giro)
 
 
 def _tololoche(col):
@@ -688,9 +692,15 @@ def _devocion(col, mesa_z):
     dije = _rayo(col, "PROP_dije_rayo", dije_pos, alto=0.075, grosor=0.008)
     dije.rotation_euler = (1.57, 0.35, 0)
 
-    # Vicios de la mesa: un cigarro apoyado en el borde del cenicero y su
-    # colilla al lado. Vienen a escala real, no se reescalan.
+    # Vicios de la mesa: montón de cigarros de papel junto al micrófono, un
+    # cigarro apoyado en el borde del cenicero y su colilla al lado.
     assets_vicio = _cargar_assets()
+    if assets_vicio is not None and assets_vicio.disponible(assets_vicio.PRERROLLOS):
+        # Aquí y no en el escalón: medido proyectando a cámara, en el escalón
+        # salían a 8 px en los planos generales y fuera de cuadro en el resto.
+        # Junto al micro ocupan 118 px en el plano de la reliquia.
+        assets_vicio.prerrollos(col, (-1.35, ALTAR_Y - 0.25, mesa_z), ancho=0.11,
+                                giro=0.3)
     if assets_vicio is not None and assets_vicio.disponible(assets_vicio.CIGARROS):
         assets_vicio.cigarro_suelto(col, "PROP_cigarro_borde",
                                     (-0.34, 6.86, mesa_z + 0.075), giro=0.9)
@@ -798,12 +808,6 @@ def _mobiliario(col):
         _cilindro(col, "VELADORA_pie_%d" % signo, (x, ALTAR_Y - 1.9, 1.28),
                   0.06, 0.28, 16)
 
-    # Montón de cigarros de papel sobre el escalón alto, a la vista de la
-    # cámara cuando sube hacia el altar. La mesa ya no tiene un hueco libre.
-    if assets_cand is not None and assets_cand.disponible(assets_cand.PRERROLLOS):
-        assets_cand.prerrollos(col, (-0.5, ALTAR_Y - 1.5, 0.36), ancho=0.14,
-                               giro=0.3)
-
 
 def _cargar_assets():
     """blender/assets.py, cargado a mano: este script se ejecuta con exec() y
@@ -838,12 +842,15 @@ def _reliquias(col):
                                 (-0.62, ALTAR_Y - 0.42, mesa_z), alto=0.20, giro=0.25)
         assets_velas.trio_velas(col, "TRIO_velas_der",
                                 (0.46, ALTAR_Y - 0.30, mesa_z), alto=0.23, giro=-0.4)
-        posiciones = (-0.92, 0.88, 1.16, 1.44)
+        # (x, y respecto del altar), colocadas a mano en el visor: las dos
+        # primeras se adelantaron hacia la cámara, las otras dos siguen en fila.
+        posiciones = ((-0.92, -0.2188), (0.622, -0.1099), (1.16, -0.32), (1.44, -0.32))
     else:
-        posiciones = tuple(-1.05 + i * (1.6 / (VELADORAS - 1)) for i in range(VELADORAS))
-    for i, x in enumerate(posiciones):
+        posiciones = tuple((-1.05 + i * (1.6 / (VELADORAS - 1)), -0.32)
+                           for i in range(VELADORAS))
+    for i, (x, dy) in enumerate(posiciones):
         _cilindro(col, "VELADORA_%d" % i,
-                  (x, ALTAR_Y - 0.32, mesa_z + 0.11), 0.055, 0.22, 16)
+                  (x, ALTAR_Y + dy, mesa_z + 0.11), 0.055, 0.22, 16)
 
     # Vinilos acostados sobre la mesa del altar: la estación del sonido
     # los mira en picado, no de frente.
