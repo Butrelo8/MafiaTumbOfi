@@ -40,6 +40,8 @@ CANDELABRO = "candelabro.blend"      # nueve brazos, generado por el equipo
 CANDELABRO_POLIGONOS = 14000
 BOTELLA = "botella.blend"            # tequila cuadrado con tapón de bola
 BOTELLA_POLIGONOS = 9000
+CENICERO = "cenicero.blend"          # cuenco desbordado de colillas
+CENICERO_POLIGONOS = 16000
 
 GORRA = "gorra.glb"
 GORRA_POLIGONOS = 18000     # techo tras decimar; el original trae ~92k
@@ -314,6 +316,17 @@ def _plantar(pieza, ubicacion, alto, giro=0.0, inclinacion=0.0, nombre_ancla=Non
     ancla.location = ubicacion
     bpy.context.view_layer.update()
     return pieza
+
+
+def cenicero(col, ubicacion, alto=0.10, giro=0.0):
+    """Cenicero desbordado de colillas. Cuenco y colillas son la misma malla,
+    así que comparten material: se le da el de ceniza, porque unas colillas de
+    vidrio cantan más que un cenicero mate."""
+    pieza = _malla_unica(CENICERO, "PROP_cenicero_lleno", col, CENICERO_POLIGONOS)
+    if pieza is None:
+        return None
+    return _plantar(pieza, ubicacion, alto, giro=giro,
+                    nombre_ancla="PROP_cenicero_ancla")
 
 
 def botella(col, ubicacion, alto=0.26, giro=0.0):

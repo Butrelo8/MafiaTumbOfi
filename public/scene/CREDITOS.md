@@ -36,6 +36,11 @@ Generada por el propio equipo (`botella.blend`), sin derechos de terceros.
 Malla única sin materiales ni UV, decimada a 9.000 polígonos: es sólo la
 silueta —cuerpo cuadrado, tapón de bola, lazo— sin logo, etiqueta ni texto.
 
+### Cenicero desbordado
+
+Generado por el propio equipo (`cenicero.blend`), sin derechos de terceros.
+Cuenco y colillas son una sola malla, decimada de 438.000 a 16.000 polígonos.
+
 ### Gorra
 
 Generada por el propio equipo (`gorra.glb`), sin derechos de terceros. Se

@@ -366,6 +366,27 @@ píxeles en el render final no aportan nada.
 sólo la etiqueta de la web: en Blend Swap un blend puede ser CC-0 y estar además
 marcado como *Fan Art*, lo que prohíbe todo uso comercial.
 
+## Saber qué se movió a mano, sin preguntarlo
+
+`blender/poses.py` compara la escena del visor con la que produce el script.
+Hay un orden obligatorio, porque `build()` borra la escena y con ella lo que se
+haya colocado a mano:
+
+```python
+p = {}
+exec(open(r"E:\Cursor Projects\MTO\blender\poses.py").read(), p)
+p["volcar"](r"E:\Cursor Projects\MTO\tmp\poses-visor.json")   # 1. ANTES de nada
+# 2. build() + aplicar()
+p["comparar"](r"E:\Cursor Projects\MTO\tmp\poses-visor.json")  # 3. lista de movidos
+```
+
+Devuelve, por objeto, la pose del visor, la del script y el delta. Mide por el
+centro de la caja envolvente y no por `location`, por lo mismo que se explica
+en la sección de congelar poses.
+
+Si se reconstruye antes de volcar, lo movido ya no existe y no hay nada que
+comparar.
+
 ## Comprobar intersecciones con datos, no a ojo
 
 Colocar props a ojo y mirar el render es lento y engañoso: un instrumento puede

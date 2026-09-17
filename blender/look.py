@@ -182,6 +182,7 @@ ASIGNACION = (
     ("PROXY_cadena", "oro"),
     ("PROXY_placa", "oro"),
     ("ETIQUETA_", "oro"),
+    ("PROP_cenicero_lleno", "ceniza"),
     ("PROP_cenicero_hueco", "ceniza"),
     ("PROP_cenicero", "vidrio"),
     ("PROP_brasa", "brasa"),

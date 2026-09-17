@@ -206,6 +206,24 @@ def _hornacinas(col):
                   (x + dx, RETABLO_Y - 0.22, HORNACINA_Z + dz), (ancho, 0.12, alto))
 
 
+def _cenicero_greybox(col, mesa_z):
+    """Cenicero de primitivas con dos cigarros, para cuando el asset no está."""
+    _cilindro(col, "PROP_cenicero", (-0.45, ALTAR_Y - 0.1, mesa_z + 0.015),
+              0.085, 0.03, 24)
+    _cilindro(col, "PROP_cenicero_hueco", (-0.45, ALTAR_Y - 0.1, mesa_z + 0.032),
+              0.062, 0.012, 24)
+    for i, (dx, dy, giro) in enumerate(((0.06, 0.02, 0.9), (-0.05, -0.04, -0.4))):
+        cigarro = _cilindro(col, "PROP_cigarro_%d" % i,
+                            (-0.45 + dx, ALTAR_Y - 0.1 + dy, mesa_z + 0.042),
+                            0.0055, 0.09, 12)
+        cigarro.rotation_euler = (1.45, 0, giro)
+        brasa = _cilindro(col, "PROP_brasa_%d" % i,
+                          (-0.45 + dx + 0.042 * math.sin(giro),
+                           ALTAR_Y - 0.1 + dy + 0.042 * math.cos(giro),
+                           mesa_z + 0.042), 0.0056, 0.008, 12)
+        brasa.rotation_euler = (1.45, 0, giro)
+
+
 def _botella_greybox(col, bx, by, mesa_z):
     """Botella de primitivas, para cuando el asset no está."""
     cuerpo_bot = _caja(col, "PROP_botella", (bx, by, mesa_z + 0.095),
@@ -236,21 +254,14 @@ def _botella_greybox(col, bx, by, mesa_z):
 
 def _props(col, mesa_z):
     """Lo que hace que el altar parezca usado y no un render de catálogo."""
-    # Cenicero con dos cigarros, cerca del micro (estación de la reliquia).
-    _cilindro(col, "PROP_cenicero", (-0.45, ALTAR_Y - 0.1, mesa_z + 0.015),
-              0.085, 0.03, 24)
-    _cilindro(col, "PROP_cenicero_hueco", (-0.45, ALTAR_Y - 0.1, mesa_z + 0.032),
-              0.062, 0.012, 24)
-    for i, (dx, dy, giro) in enumerate(((0.06, 0.02, 0.9), (-0.05, -0.04, -0.4))):
-        cigarro = _cilindro(col, "PROP_cigarro_%d" % i,
-                            (-0.45 + dx, ALTAR_Y - 0.1 + dy, mesa_z + 0.042),
-                            0.0055, 0.09, 12)
-        cigarro.rotation_euler = (1.45, 0, giro)
-        brasa = _cilindro(col, "PROP_brasa_%d" % i,
-                          (-0.45 + dx + 0.042 * math.sin(giro),
-                           ALTAR_Y - 0.1 + dy + 0.042 * math.cos(giro),
-                           mesa_z + 0.042), 0.0056, 0.008, 12)
-        brasa.rotation_euler = (1.45, 0, giro)
+    # Cenicero cerca del micro (estación de la reliquia). El asset ya viene
+    # desbordado de colillas, así que con él no se ponen cigarros sueltos.
+    assets_cen = _cargar_assets()
+    if assets_cen is not None and assets_cen.disponible(assets_cen.CENICERO):
+        assets_cen.cenicero(col, (-0.45, ALTAR_Y - 0.1, mesa_z), alto=0.10,
+                            giro=0.7)
+    else:
+        _cenicero_greybox(col, mesa_z)
 
     # Botella cuadrada de hombros marcados: se reconoce por la silueta, sin
     # logo ni etiqueta, que a este tamaño no se leerían.
