@@ -105,8 +105,8 @@ def _materiales():
         "MTO_cromo", base_color=(0.78, 0.78, 0.80, 1.0), metallic=1.0,
         roughness=0.12)
     vidrio = _material(
-        "MTO_vidrio", base_color=(0.25, 0.10, 0.03, 1.0), roughness=0.08,
-        transmission_weight=0.92, ior=1.46)
+        "MTO_vidrio", base_color=(0.86, 0.88, 0.86, 1.0), roughness=0.05,
+        transmission_weight=0.97, ior=1.45)
     ceniza = _material(
         "MTO_ceniza", base_color=(0.16, 0.15, 0.14, 1.0), roughness=0.95)
     papel = _material(
@@ -142,7 +142,16 @@ def _materiales():
     _fijar(bombilla.node_tree.nodes["Principled BSDF"], "Emission Color",
            (1.0, 0.64, 0.30, 1.0))
     _fijar(bombilla.node_tree.nodes["Principled BSDF"], "Emission Strength", 3.2)
+    alfombra = _material(
+        "MTO_alfombra", base_color=(0.085, 0.012, 0.010, 1.0), roughness=0.95)
+    _fijar(alfombra.node_tree.nodes["Principled BSDF"], "Sheen Weight", 0.4)
+    tequila = _material(
+        "MTO_tequila", base_color=(0.72, 0.62, 0.42, 1.0), roughness=0.02,
+        transmission_weight=0.96, ior=1.36)
+    corcho = _material(
+        "MTO_corcho", base_color=(0.045, 0.032, 0.026, 1.0), roughness=0.72)
     return {
+        "alfombra": alfombra, "tequila": tequila, "corcho": corcho,
         "plata": plata, "plastico": plastico, "ceramica": ceramica,
         "bombilla": bombilla,
         "terciopelo": terciopelo, "laton": laton, "hueso": hueso,
@@ -180,6 +189,13 @@ ASIGNACION = (
     ("PROP_botella", "vidrio"),
     ("PROP_billete", "papel"),
     ("PROP_cera", "cera"),
+    ("ALFOMBRA_franja", "oro"),
+    ("ALFOMBRA_", "alfombra"),
+    ("PROP_botella_liquido", "tequila"),
+    ("PROP_botella_tapon", "corcho"),
+    ("PROP_botella_cinta", "corcho"),
+    ("PROP_botella_lazo", "corcho"),
+    ("PROP_botella", "vidrio"),
     ("PROP_marcador", "plastico"),
     ("PROP_anillo", "plata"),
     ("PROP_pua", "hueso"),
@@ -462,6 +478,7 @@ def aplicar():
     _ensuciar(mats["piedra"], escala=6.0, minimo=0.70, maximo=0.98)
     _tallar(mats["piedra"], escala=14.0, fuerza=0.4)
     _tallar(mats["oro"], escala=45.0, fuerza=0.12)
+    _ensuciar(mats["alfombra"], escala=90.0, minimo=0.88, maximo=1.0)
     mats["foto"] = mats["hueso"]  # sustituido abajo por las fotos reales
     fotos = _materiales_foto()
     _ensuciar(mats["oro"], escala=22.0, minimo=0.22, maximo=0.52)

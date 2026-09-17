@@ -208,11 +208,33 @@ def _props(col, mesa_z):
                            mesa_z + 0.042), 0.0056, 0.008, 12)
         brasa.rotation_euler = (1.45, 0, giro)
 
-    # Botella, al borde de la mesa.
-    _cilindro(col, "PROP_botella", (-1.55, ALTAR_Y - 0.05, mesa_z + 0.13),
-              0.045, 0.26, 20)
-    _cilindro(col, "PROP_botella_cuello", (-1.55, ALTAR_Y - 0.05, mesa_z + 0.30),
-              0.016, 0.09, 12)
+    # Botella cuadrada de hombros marcados: se reconoce por la silueta, sin
+    # logo ni etiqueta, que a este tamaño no se leerían.
+    bx, by = 1.66, ALTAR_Y + 0.30
+    cuerpo_bot = _caja(col, "PROP_botella", (bx, by, mesa_z + 0.095),
+                       (0.086, 0.086, 0.19))
+    bisel = cuerpo_bot.modifiers.new("bisel", "BEVEL")
+    bisel.width = 0.012
+    bisel.segments = 3
+    hombro = _caja(col, "PROP_botella_hombro", (bx, by, mesa_z + 0.205),
+                   (0.062, 0.062, 0.04))
+    bisel_h = hombro.modifiers.new("bisel", "BEVEL")
+    bisel_h.width = 0.016
+    bisel_h.segments = 3
+    _cilindro(col, "PROP_botella_cuello", (bx, by, mesa_z + 0.245), 0.019, 0.05, 16)
+    _cilindro(col, "PROP_botella_cinta", (bx, by, mesa_z + 0.262), 0.022, 0.022, 16)
+    tapon = _cilindro(col, "PROP_botella_tapon", (bx, by, mesa_z + 0.292),
+                      0.028, 0.042, 20)
+    tapon.scale = (1.0, 1.0, 0.85)
+    bisel_t = tapon.modifiers.new("bisel", "BEVEL")
+    bisel_t.width = 0.014
+    bisel_t.segments = 4
+    lazo = _caja(col, "PROP_botella_lazo", (bx + 0.05, by - 0.02, mesa_z + 0.245),
+                 (0.07, 0.004, 0.028))
+    lazo.rotation_euler = (0, 0.35, 0.4)
+    # Tequila dentro: sin líquido, el vidrio se lee como un bloque vacío.
+    _caja(col, "PROP_botella_liquido", (bx, by, mesa_z + 0.072),
+          (0.074, 0.074, 0.14))
 
     # Billetes: sueltos y desordenados, como propina de una noche. Ordenados en
     # abanico se leían como "el dinero es el tema", que no es la idea.
@@ -393,6 +415,15 @@ def _gorra(col):
     visera.scale = (1.0, 0.75, 1.0)
 
 
+def _alfombra(col):
+    """Alfombra del pasillo central, como en cualquier parroquia: guía la vista
+    al altar y rompe la losa lisa."""
+    _caja(col, "ALFOMBRA_pasillo", (0, -1.4, 0.006), (1.7, 13.6, 0.012))
+    for signo in (-1, 1):
+        _caja(col, "ALFOMBRA_franja_%d" % signo,
+              (signo * 0.76, -1.4, 0.0125), (0.09, 13.6, 0.013))
+
+
 def _desechos(col):
     """Confeti y colillas en el piso. El suelo limpio delataba el render."""
     azar = random.Random(31)
@@ -401,14 +432,16 @@ def _desechos(col):
         # el desenfoque los convierte en destellos dorados
         x = azar.gauss(0, 1.15)
         y = azar.uniform(-8.5, 5.5)
-        pieza = _caja(col, "CONFETI_%d" % i, (x, y, 0.003),
+        # sobre la alfombra, no debajo
+        z = 0.016 if abs(x) < 0.85 and -8.2 < y < 5.4 else 0.003
+        pieza = _caja(col, "CONFETI_%d" % i, (x, y, z),
                       (azar.uniform(0.015, 0.03), azar.uniform(0.012, 0.025), 0.0008))
         pieza.rotation_euler = (azar.uniform(-0.3, 0.3), azar.uniform(-0.3, 0.3),
                                 azar.uniform(0, 3.14))
     for i in range(14):
-        colilla = _cilindro(col, "COLILLA_%d" % i,
-                            (azar.gauss(0, 1.3), azar.uniform(-8.0, 5.0), 0.008),
-                            0.0055, 0.042, 8)
+        cx, cy = azar.gauss(0, 1.3), azar.uniform(-8.0, 5.0)
+        cz = 0.021 if abs(cx) < 0.85 and -8.2 < cy < 5.4 else 0.008
+        colilla = _cilindro(col, "COLILLA_%d" % i, (cx, cy, cz), 0.0055, 0.042, 8)
         colilla.rotation_euler = (1.57, 0, azar.uniform(0, 3.14))
 
 
@@ -493,6 +526,7 @@ def _reliquias(col):
     _gorra(col)
     _tololoche(col)
     _guirnalda(col)
+    _alfombra(col)
     _desechos(col)
 
 
