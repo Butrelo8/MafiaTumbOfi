@@ -10,6 +10,7 @@ Ejecutar dentro de Blender:
 
 import bpy
 import math
+import random
 from mathutils import Vector
 
 # ---------------------------------------------------------------- parámetros
@@ -213,13 +214,18 @@ def _props(col, mesa_z):
     _cilindro(col, "PROP_botella_cuello", (-1.55, ALTAR_Y - 0.05, mesa_z + 0.30),
               0.016, 0.09, 12)
 
-    # Billetes doblados, del lado de los vinilos: entran en la cenital.
-    for i, (x, y, giro) in enumerate(((1.62, ALTAR_Y + 0.28, 0.5),
-                                      (1.70, ALTAR_Y + 0.22, 0.2),
-                                      (1.55, ALTAR_Y + 0.18, 0.9))):
+    # Billetes: sueltos y desordenados, como propina de una noche. Ordenados en
+    # abanico se leían como "el dinero es el tema", que no es la idea.
+    azar = random.Random(7)
+    for i in range(4):
         billete = _caja(col, "PROP_billete_%d" % i,
-                        (x, y, mesa_z + 0.003 + i * 0.002), (0.15, 0.068, 0.002))
-        billete.rotation_euler = (0, 0, giro)
+                        (1.58 + azar.uniform(-0.16, 0.16),
+                         ALTAR_Y + 0.24 + azar.uniform(-0.12, 0.12),
+                         mesa_z + 0.003 + i * 0.0015),
+                        (0.15, 0.068, 0.0015))
+        billete.rotation_euler = (azar.uniform(-0.05, 0.05),
+                                  azar.uniform(-0.05, 0.05),
+                                  azar.uniform(0, 3.14))
 
     # Sombrero apoyado sobre la mesa, detrás del micro: identidad inmediata.
     copa = _cilindro(col, "PROP_sombrero_copa", (-1.32, ALTAR_Y + 0.3, mesa_z + 0.1),
@@ -251,12 +257,159 @@ def _props(col, mesa_z):
     _caja(col, "PROP_cerillos", (-0.62, ALTAR_Y + 0.26, mesa_z + 0.012),
           (0.055, 0.035, 0.024))
 
+    # Tapete bajo los discos: unifica la toma cenital y separa el negro del
+    # vinilo del de la piedra.
+    tapete = _caja(col, "PROP_tapete", (1.15, ALTAR_Y + 0.02, mesa_z + 0.001),
+                   (0.92, 0.58, 0.004))
+    tapete.rotation_euler = (0, 0, 0.12)
+
+    # Polaroids de la banda entre los discos: dicen quién toca sin una palabra.
+    azar_foto = random.Random(11)
+    for i in range(3):
+        foto = _caja(col, "PROP_polaroid_%d" % i,
+                     (0.72 + i * 0.1 + azar_foto.uniform(-0.05, 0.05),
+                      ALTAR_Y - 0.28 + azar_foto.uniform(-0.06, 0.06),
+                      mesa_z + 0.004 + i * 0.002),
+                     (0.13, 0.108, 0.002))
+        foto.rotation_euler = (0, 0, azar_foto.uniform(-0.35, 0.35))
+        _caja(col, "PROP_polaroid_img_%d" % i,
+              (foto.location.x, foto.location.y + 0.008,
+               foto.location.z + 0.0015), (0.108, 0.082, 0.001)).rotation_euler = (
+                  0, 0, foto.rotation_euler.z)
+
+    # Frasco tallado de agua bendita.
+    _cilindro(col, "PROP_frasco", (0.30, ALTAR_Y - 0.02, mesa_z + 0.085),
+              0.042, 0.17, 16)
+    _cilindro(col, "PROP_frasco_tapon", (0.30, ALTAR_Y - 0.02, mesa_z + 0.185),
+              0.022, 0.035, 12)
+
+    # Estuche de micrófono abierto y marcador grueso: la estación de
+    # contratación dice "aquí se firma", con objetos de su mundo y no de
+    # una película de época.
+    caja_trato = _caja(col, "PROP_caja_trato", (-0.72, ALTAR_Y + 0.18, mesa_z + 0.04),
+                       (0.17, 0.115, 0.075))
+    caja_trato.rotation_euler = (0, 0, -0.35)
+    tapa = _caja(col, "PROP_caja_tapa", (-0.79, ALTAR_Y + 0.28, mesa_z + 0.12),
+                 (0.17, 0.11, 0.012))
+    tapa.rotation_euler = (-1.15, 0, -0.35)
+    _caja(col, "PROP_caja_forro", (-0.72, ALTAR_Y + 0.18, mesa_z + 0.079),
+          (0.15, 0.095, 0.004)).rotation_euler = (0, 0, -0.35)
+    marcador = _cilindro(col, "PROP_marcador", (-0.63, ALTAR_Y + 0.06, mesa_z + 0.012),
+                         0.011, 0.14, 12)
+    marcador.rotation_euler = (1.57, 0, 0.62)
+    tapa_m = _cilindro(col, "PROP_marcador_tapa", (-0.71, ALTAR_Y - 0.01, mesa_z + 0.012),
+                       0.0125, 0.045, 12)
+    tapa_m.rotation_euler = (1.57, 0, 0.62)
+
+    # Anillos caídos junto al micrófono.
+    azar_anillo = random.Random(13)
+    for i in range(3):
+        anillo = _cilindro(col, "PROP_anillo_%d" % i,
+                           (-1.08 + azar_anillo.uniform(-0.09, 0.09),
+                            ALTAR_Y - 0.18 + azar_anillo.uniform(-0.07, 0.07),
+                            mesa_z + 0.006), 0.0115, 0.012, 14)
+        anillo.rotation_euler = (1.57, 0, azar_anillo.uniform(0, 3.14))
+
+    # Púas dispersas.
+    for i in range(5):
+        pua = _caja(col, "PROP_pua_%d" % i,
+                    (0.15 + azar_anillo.uniform(-0.5, 0.5),
+                     ALTAR_Y + azar_anillo.uniform(-0.3, 0.3), mesa_z + 0.003),
+                    (0.028, 0.03, 0.002))
+        pua.rotation_euler = (0, 0, azar_anillo.uniform(0, 3.14))
+
+    # Lentes oscuros sobre la mesa, del lado de los discos.
+    for signo in (-1, 1):
+        cristal = _caja(col, "PROP_lentes_cristal_%d" % signo,
+                        (1.42 + signo * 0.032, ALTAR_Y + 0.42, mesa_z + 0.012),
+                        (0.055, 0.032, 0.018))
+        cristal.rotation_euler = (0.15, 0, 0.3)
+    _caja(col, "PROP_lentes_patilla", (1.50, ALTAR_Y + 0.5, mesa_z + 0.014),
+          (0.11, 0.008, 0.01)).rotation_euler = (0, 0, 0.9)
+
+    # Botella alta de cerámica al fondo de la mesa.
+    _cilindro(col, "PROP_ceramica", (-1.75, ALTAR_Y + 0.3, mesa_z + 0.16),
+              0.05, 0.32, 20)
+    _cilindro(col, "PROP_ceramica_cuello", (-1.75, ALTAR_Y + 0.3, mesa_z + 0.36),
+              0.018, 0.09, 12)
+
     # Cera escurrida al pie de las veladoras.
     for i in range(5):
         x = -0.95 + i * 0.42
         gota = _cilindro(col, "PROP_cera_%d" % i,
                          (x, ALTAR_Y - 0.36, mesa_z + 0.004), 0.048, 0.008, 16)
         gota.scale = (1.0, 0.65, 1.0)
+
+
+def _tololoche(col):
+    """Silueta de tololoche contra una columna: el bajo del género, en penumbra."""
+    cuerpo = _cilindro(col, "PROP_tololoche_cuerpo", (-2.35, 1.4, 0.72), 0.34, 0.22, 24)
+    cuerpo.rotation_euler = (1.35, 0, 0.18)
+    cuerpo.scale = (1.0, 1.35, 1.0)
+    mastil = _caja(col, "PROP_tololoche_mastil", (-2.52, 0.62, 1.62), (0.09, 0.07, 1.1))
+    mastil.rotation_euler = (0.28, 0, 0.18)
+    clavijero = _caja(col, "PROP_tololoche_clavijero", (-2.60, 0.28, 2.18),
+                      (0.11, 0.09, 0.26))
+    clavijero.rotation_euler = (0.28, 0, 0.18)
+
+
+def _guirnalda(col):
+    """Focos colgados al fondo: bokeh cálido que rompe la solemnidad."""
+    azar = random.Random(41)
+    for i in range(11):
+        x = -2.3 + i * 0.46
+        caida = 0.35 * math.sin(i / 10.0 * math.pi)
+        _cilindro(col, "FOCO_%d" % i, (x, RETABLO_Y - 1.5, 6.4 - caida),
+                  0.035, 0.07, 10)
+
+
+def _exvotos(col):
+    """Milagritos de latón al pie de los nichos: devoción, no decorado."""
+    azar = random.Random(23)
+    repisa_z = HORNACINA_Z - HORNACINA_ALTO / 2 - 0.05
+    for x in HORNACINA_X:
+        _caja(col, "EXVOTO_repisa_%d" % int(x * 100),
+              (x, RETABLO_Y - 0.28, repisa_z), (HORNACINA_ANCHO + 0.2, 0.16, 0.04))
+        for i in range(4):
+            pieza = _caja(col, "EXVOTO_%d_%d" % (int(x * 100), i),
+                          (x - 0.28 + i * 0.19 + azar.uniform(-0.02, 0.02),
+                           RETABLO_Y - 0.31,
+                           repisa_z + 0.045),
+                          (0.045, 0.012, 0.055))
+            pieza.rotation_euler = (azar.uniform(-0.12, 0.12), 0,
+                                    azar.uniform(-0.25, 0.25))
+
+
+def _gorra(col):
+    """Colgada de la esquina de un nicho: rompe la solemnidad del oro."""
+    copa = _cilindro(col, "PROP_gorra_copa",
+                     (HORNACINA_X[2] + 0.42, RETABLO_Y - 0.34, HORNACINA_Z - 0.32),
+                     0.105, 0.11, 20)
+    copa.rotation_euler = (0.55, 0, 0.2)
+    visera = _cilindro(col, "PROP_gorra_visera",
+                       (HORNACINA_X[2] + 0.48, RETABLO_Y - 0.46, HORNACINA_Z - 0.40),
+                       0.115, 0.016, 20)
+    visera.rotation_euler = (0.95, 0, 0.2)
+    visera.scale = (1.0, 0.75, 1.0)
+
+
+def _desechos(col):
+    """Confeti y colillas en el piso. El suelo limpio delataba el render."""
+    azar = random.Random(31)
+    for i in range(70):
+        # concentrados en el pasillo central y hacia la cámara, que es donde
+        # el desenfoque los convierte en destellos dorados
+        x = azar.gauss(0, 1.15)
+        y = azar.uniform(-8.5, 5.5)
+        pieza = _caja(col, "CONFETI_%d" % i, (x, y, 0.003),
+                      (azar.uniform(0.015, 0.03), azar.uniform(0.012, 0.025), 0.0008))
+        pieza.rotation_euler = (azar.uniform(-0.3, 0.3), azar.uniform(-0.3, 0.3),
+                                azar.uniform(0, 3.14))
+    for i in range(14):
+        colilla = _cilindro(col, "COLILLA_%d" % i,
+                            (azar.gauss(0, 1.3), azar.uniform(-8.0, 5.0), 0.008),
+                            0.0055, 0.042, 8)
+        colilla.rotation_euler = (1.57, 0, azar.uniform(0, 3.14))
 
 
 def _mobiliario(col):
@@ -336,6 +489,11 @@ def _reliquias(col):
 
     _props(col, mesa_z)
     _mobiliario(col)
+    _exvotos(col)
+    _gorra(col)
+    _tololoche(col)
+    _guirnalda(col)
+    _desechos(col)
 
 
 def _rig(col):

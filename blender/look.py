@@ -39,6 +39,7 @@ MUESTRAS = 128
 VELA_W = 140.0                      # potencia por veladora
 NEON_W = 1400.0
 CENITAL_W = 350.0
+CONTRALUZ_W = 260.0                 # rim light frío; sin él, negro sobre negro
 NIEBLA = 0.012                      # densidad; Cycles resuelve dispersion multiple y lava la escena con mas
 
 
@@ -90,6 +91,7 @@ def _materiales():
     neon = _material("MTO_neon", base_color=color("red"), roughness=0.4)
     _fijar(neon.node_tree.nodes["Principled BSDF"], "Emission Color", color("red"))
     _fijar(neon.node_tree.nodes["Principled BSDF"], "Emission Strength", 2.6)
+    _tallar(neon, escala=60.0, fuerza=0.06)
     cera = _material(
         "MTO_cera", base_color=(0.85, 0.80, 0.70, 1.0), roughness=0.55,
         subsurface_weight=0.35, ior=1.45)
@@ -108,7 +110,7 @@ def _materiales():
     ceniza = _material(
         "MTO_ceniza", base_color=(0.16, 0.15, 0.14, 1.0), roughness=0.95)
     papel = _material(
-        "MTO_papel", base_color=(0.14, 0.16, 0.12, 1.0), roughness=0.82)
+        "MTO_papel", base_color=(0.055, 0.070, 0.045, 1.0), roughness=0.86)
     brasa = _material("MTO_brasa", base_color=(0.9, 0.25, 0.05, 1.0), roughness=0.9)
     _fijar(brasa.node_tree.nodes["Principled BSDF"], "Emission Color",
            (1.0, 0.28, 0.06, 1.0))
@@ -120,7 +122,30 @@ def _materiales():
     hierro = _material(
         "MTO_hierro", base_color=(0.16, 0.15, 0.15, 1.0), metallic=1.0,
         roughness=0.55)
+    terciopelo = _material(
+        "MTO_terciopelo", base_color=(0.020, 0.010, 0.008, 1.0), roughness=0.98)
+    _fijar(terciopelo.node_tree.nodes["Principled BSDF"], "Sheen Weight", 0.6)
+    laton = _material(
+        "MTO_laton", base_color=(0.62, 0.45, 0.18, 1.0), metallic=1.0,
+        roughness=0.52)
+    hueso = _material(
+        "MTO_hueso", base_color=(0.62, 0.58, 0.50, 1.0), roughness=0.55)
+    plata = _material(
+        "MTO_plata", base_color=(0.42, 0.43, 0.45, 1.0), metallic=1.0,
+        roughness=0.42)
+    plastico = _material(
+        "MTO_plastico", base_color=(0.015, 0.015, 0.017, 1.0), roughness=0.35)
+    ceramica = _material(
+        "MTO_ceramica", base_color=(0.030, 0.026, 0.024, 1.0), roughness=0.25)
+    bombilla = _material("MTO_bombilla", base_color=(1.0, 0.72, 0.38, 1.0),
+                         roughness=0.3)
+    _fijar(bombilla.node_tree.nodes["Principled BSDF"], "Emission Color",
+           (1.0, 0.64, 0.30, 1.0))
+    _fijar(bombilla.node_tree.nodes["Principled BSDF"], "Emission Strength", 3.2)
     return {
+        "plata": plata, "plastico": plastico, "ceramica": ceramica,
+        "bombilla": bombilla,
+        "terciopelo": terciopelo, "laton": laton, "hueso": hueso,
         "madera": madera, "fieltro": fieltro, "hierro": hierro,
         "vidrio": vidrio, "ceniza": ceniza, "papel": papel, "brasa": brasa,
         "piedra": piedra, "piedra_oscura": piedra_oscura, "oro": oro,
@@ -155,6 +180,26 @@ ASIGNACION = (
     ("PROP_botella", "vidrio"),
     ("PROP_billete", "papel"),
     ("PROP_cera", "cera"),
+    ("PROP_marcador", "plastico"),
+    ("PROP_anillo", "plata"),
+    ("PROP_pua", "hueso"),
+    ("PROP_lentes", "plastico"),
+    ("PROP_ceramica", "ceramica"),
+    ("PROP_gorra", "fieltro"),
+    ("PROP_tololoche", "madera"),
+    ("FOCO_", "bombilla"),
+    ("PROP_polaroid_img", "foto"),
+    ("PROP_polaroid", "hueso"),
+    ("PROP_tapete", "terciopelo"),
+    ("PROP_frasco", "vidrio"),
+    ("PROP_caja_forro", "terciopelo"),
+    ("PROP_caja", "madera"),
+    ("PROP_pluma_punta", "oro"),
+    ("PROP_pluma", "hueso"),
+    ("EXVOTO_repisa", "piedra"),
+    ("EXVOTO_", "laton"),
+    ("CONFETI_", "oro"),
+    ("COLILLA_", "papel"),
     ("PROP_sombrero", "fieltro"),
     ("PROP_requinto", "madera"),
     ("PROP_rosario", "oro"),
@@ -163,6 +208,58 @@ ASIGNACION = (
     ("BANCA_", "madera"),
     ("CANDELABRO_", "hierro"),
 )
+
+
+FOTOS = (
+    r"E:\Cursor Projects\MTO\public\band\band-1.jpg",
+    r"E:\Cursor Projects\MTO\public\band\band-2.jpg",
+    r"E:\Cursor Projects\MTO\public\band\band-3.jpg",
+)
+
+
+def _materiales_foto():
+    """Las polaroids llevan fotos reales de la banda, no siluetas inventadas."""
+    hechos = []
+    for indice, ruta in enumerate(FOTOS):
+        nombre = "MTO_foto_%d" % indice
+        mat = bpy.data.materials.get(nombre) or bpy.data.materials.new(nombre)
+        mat.use_nodes = True
+        bsdf = mat.node_tree.nodes.get("Principled BSDF")
+        _fijar(bsdf, "Roughness", 0.32)
+        try:
+            imagen = bpy.data.images.load(ruta, check_existing=True)
+        except RuntimeError:
+            hechos.append(None)
+            continue
+        textura = mat.node_tree.nodes.new("ShaderNodeTexImage")
+        textura.image = imagen
+        mat.node_tree.links.new(textura.outputs["Color"], bsdf.inputs["Base Color"])
+        hechos.append(mat)
+    return hechos
+
+
+def _tallar(mat, escala=14.0, fuerza=0.35):
+    """Relieve procedural: la piedra lisa delata el render de inmediato."""
+    arbol = mat.node_tree
+    bsdf = arbol.nodes.get("Principled BSDF")
+    if bsdf is None or bsdf.inputs["Normal"].is_linked:
+        return mat
+    ruido = arbol.nodes.new("ShaderNodeTexNoise")
+    ruido.inputs["Scale"].default_value = escala
+    ruido.inputs["Detail"].default_value = 8.0
+    ruido.inputs["Roughness"].default_value = 0.62
+    celdas = arbol.nodes.new("ShaderNodeTexVoronoi")
+    celdas.inputs["Scale"].default_value = escala * 0.35
+    mezcla = arbol.nodes.new("ShaderNodeMix")
+    mezcla.data_type = "FLOAT"
+    mezcla.inputs["Factor"].default_value = 0.45
+    arbol.links.new(ruido.outputs["Fac"], mezcla.inputs[2])
+    arbol.links.new(celdas.outputs["Distance"], mezcla.inputs[3])
+    relieve = arbol.nodes.new("ShaderNodeBump")
+    relieve.inputs["Strength"].default_value = fuerza
+    arbol.links.new(mezcla.outputs[0], relieve.inputs["Height"])
+    arbol.links.new(relieve.outputs["Normal"], bsdf.inputs["Normal"])
+    return mat
 
 
 def _ensuciar(mat, escala=9.0, minimo=0.25, maximo=0.75):
@@ -239,6 +336,26 @@ def _luces(col):
         for otra in list(neon.users_collection):
             otra.objects.unlink(neon)
         col.objects.link(neon)
+
+    # Contraluz frío lateral: sin él, el vinilo, el micro y el tololoche son
+    # siluetas negras sobre fondo negro. Es luz de cámara, no color de marca:
+    # define bordes sin teñir la escena.
+    # La posición del altar se lee de la escena: las constantes viven en
+    # altar.py y duplicarlas aquí sería garantizar que se desincronicen.
+    altar = bpy.data.objects.get("ALTAR_bloque")
+    altar_y = altar.matrix_world.translation.y if altar else 7.0
+    for signo in (-1, 1):
+        bpy.ops.object.light_add(
+            type="AREA", location=(signo * 2.6, altar_y - 1.2, 2.6))
+        rim = bpy.context.object
+        rim.name = "LUZ_contraluz_%d" % signo
+        rim.data.energy = CONTRALUZ_W
+        rim.data.color = (0.38, 0.55, 0.85)
+        rim.data.size = 2.4
+        rim.rotation_euler = (math.radians(75), 0, math.radians(-95 * signo))
+        for otra in list(rim.users_collection):
+            otra.objects.unlink(rim)
+        col.objects.link(rim)
 
     # Cenital fría: separa la arquitectura del negro sin iluminar el suelo.
     bpy.ops.object.light_add(type="AREA", location=(0, 2.0, 8.6))
@@ -343,9 +460,18 @@ def aplicar():
     col = bpy.data.collections.get("SANTUARIO")
     mats = _materiales()
     _ensuciar(mats["piedra"], escala=6.0, minimo=0.70, maximo=0.98)
+    _tallar(mats["piedra"], escala=14.0, fuerza=0.4)
+    _tallar(mats["oro"], escala=45.0, fuerza=0.12)
+    mats["foto"] = mats["hueso"]  # sustituido abajo por las fotos reales
+    fotos = _materiales_foto()
     _ensuciar(mats["oro"], escala=22.0, minimo=0.22, maximo=0.52)
     _ensuciar(mats["cromo"], escala=30.0, minimo=0.06, maximo=0.20)
     aplicados = _asignar(mats)
+    for indice, mat in enumerate(fotos):
+        ob = bpy.data.objects.get("PROP_polaroid_img_%d" % indice)
+        if ob is not None and mat is not None:
+            ob.data.materials.clear()
+            ob.data.materials.append(mat)
     _luces(col)
     _velas(col, mats)
     _mundo_y_niebla()

@@ -260,3 +260,37 @@ transparente como salida principal (nuestra escena es un interior completo, no
 un producto recortado) ni la salida a `~/Desktop`. Sí aplica el alfa para una
 capa que va **delante** del texto, y 24 fps para los loops de estación; los
 tramos no tienen fps porque su velocidad la pone el scroll.
+
+### Ronda de dirección de arte externa — 2026-09-17
+
+Se consultó a Gemini con las hojas de contactos. Dos rondas; lo aceptado ya está
+modelado. Queda constancia de qué se descartó y por qué, para no reabrirlo.
+
+**Aceptado e implementado.** Caja/estuche de micrófono con marcador grueso en la
+estación de contratación (convierte "aquí hay un micrófono" en "aquí se firma");
+polaroids entre los discos, **con las fotos reales de `public/band/`** en vez de
+siluetas inventadas; exvotos de latón en la repisa de los nichos; tapete bajo
+los vinilos; frasco tallado; piedra con relieve procedural; confeti y colillas
+en el piso; billetes desordenados y oscurecidos; tololoche apoyado en columna;
+gorra colgada de un nicho; lentes, púas, anillos de plata y botella de cerámica;
+guirnalda de focos al fondo; y ruido en el halo del neón.
+
+**El mejor consejo de las dos rondas: contraluz frío.** Dos áreas laterales en
+azul frío a baja potencia. Sin ellas, el vinilo, el micro y el tololoche son
+siluetas negras sobre fondo negro. Es luz de cámara, no color de marca: define
+bordes sin teñir la escena ni contradecir `DESIGN.md`.
+
+**Descartado.** Placas numeradas en las bancas: a 28 mm y diez metros no se leen,
+son polígonos invisibles. Vidrio roto en el suelo: se pisa con el confeti y las
+colillas sin añadir nada. Pluma de tintero: pertenece a otra película, la
+sustituye el marcador.
+
+**Advertencia sobre la segunda ronda.** Gemini afirmó haber analizado los videos
+de la banda y describió detalles concretos (gorra de parches del cantante, una
+marca de tequila mencionada en una canción, vapes en el set). No hay forma de
+confirmar que los viera, y en la primera ronda ya criticó objetos que no
+aparecían en las imágenes enviadas —dijo que el requinto estaba en la toma
+cenital cuando no sale ahí—, señal de que describía una imagen propia. Las ideas
+se adoptaron porque funcionan como dirección de arte, **no** como identidad
+documentada de la banda. Antes de darlas por buenas, que alguien que conozca su
+material las verifique.
