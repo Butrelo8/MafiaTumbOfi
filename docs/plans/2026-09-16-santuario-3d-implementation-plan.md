@@ -294,3 +294,27 @@ cenital cuando no sale ahí—, señal de que describía una imagen propia. Las 
 se adoptaron porque funcionan como dirección de arte, **no** como identidad
 documentada de la banda. Antes de darlas por buenas, que alguien que conozca su
 material las verifique.
+
+### Devoción y objetos personales — 2026-09-17
+
+Última tanda del look: escapulario colgando del marco del nicho central, rosario
+de madera dentro del nicho izquierdo, cadena cubana sobre la mesa con **un dije
+del rayo del propio monograma M⚡T** (malla propia, no un símbolo prestado),
+cinturón piteado con hebilla de oro, alfombra granate con franjas doradas en el
+pasillo, y botella cuadrada de hombros marcados.
+
+**Marcas de ropa de lujo: descartadas.** Los monogramas y cuadros de las casas
+de lujo son marcas registradas y replicarlos en el sitio oficial de la banda
+sería infracción, aunque el render sea propio. El cinturón piteado da más
+identidad de género y no es marca de nadie.
+
+**Arma: no se modela.** No es pudor, es negocio. Varios estados de México han
+restringido presentaciones de corridos con apología, y esta página la abren
+promotores decidiendo si contratan; un arma mueve la lectura de "banda con
+identidad" a "narcocorrido" justo donde hay que cerrar fechas, y complica
+cualquier pauta en redes. El micro de bala y la cruz de neón ya cargan esa
+tensión. Queda a decisión de la banda: si la piden, se modela.
+
+**Marcas comerciales en general:** la botella se reconoce por silueta —cuerpo
+cuadrado, hombros, cuello corto, tapón de madera— sin logo ni etiqueta. A ese
+tamaño no se leerían, y la silueta hace el trabajo sin reproducir una marca.

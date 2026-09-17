@@ -402,6 +402,92 @@ def _exvotos(col):
                                     azar.uniform(-0.25, 0.25))
 
 
+def _rayo(col, nombre, centro, alto=0.06, grosor=0.012):
+    """El rayo del monograma M⚡T, como dije. Malla propia: es la identidad de
+    la banda, no un símbolo prestado."""
+    escala = alto / 2.0
+    perfil = [
+        (0.26, 1.0), (-0.42, 0.06), (-0.02, 0.06), (-0.26, -1.0),
+        (0.42, -0.04), (0.04, -0.04),
+    ]
+    vertices = [(x * escala, 0.0, y * escala) for x, y in perfil]
+    malla = bpy.data.meshes.new(nombre)
+    malla.from_pydata(vertices, [], [list(range(len(vertices)))])
+    malla.update()
+    ob = bpy.data.objects.new(nombre, malla)
+    col.objects.link(ob)
+    ob.location = centro
+    engrosar = ob.modifiers.new("grosor", "SOLIDIFY")
+    engrosar.thickness = grosor
+    return ob
+
+
+def _devocion(col, mesa_z):
+    """Escapulario y rosario colgando de los nichos, cadena con el rayo en la
+    mesa. Lo que cuelga de un altar real no es decoración: es promesa."""
+    azar = random.Random(53)
+
+    # Escapulario sobre el marco del nicho central.
+    x_centro = HORNACINA_X[1]
+    borde = HORNACINA_Z + HORNACINA_ALTO / 2 + 0.03
+    for signo, nombre in ((-1, "frente"), (1, "espalda")):
+        placa = _caja(col, "PROP_escapulario_%s" % nombre,
+                      (x_centro + 0.30, RETABLO_Y - 0.31,
+                       borde - 0.30 - (0 if signo < 0 else 0.07)),
+                      (0.095, 0.007, 0.125))
+        placa.rotation_euler = (0.08 * signo, 0, 0.05)
+    for lado in (-1, 1):
+        cordon = _cilindro(col, "PROP_escapulario_cordon_%d" % lado,
+                           (x_centro + 0.30 + lado * 0.042, RETABLO_Y - 0.31,
+                            borde - 0.10), 0.005, 0.34, 8)
+        cordon.rotation_euler = (0, lado * 0.06, 0)
+
+    # Rosario de madera colgando del marco del nicho izquierdo.
+    x_izq = HORNACINA_X[0] - HORNACINA_ANCHO / 2 + 0.06
+    for i in range(18):
+        angulo = i / 18.0 * math.pi * 2
+        _cilindro(col, "PROP_rosario_nicho_%d" % i,
+                  (x_izq + 0.075 * math.cos(angulo), RETABLO_Y - 0.31,
+                   HORNACINA_Z + 0.22 + 0.15 * math.sin(angulo)),
+                  0.011, 0.012, 8)
+    _caja(col, "PROP_rosario_cruz_v",
+          (x_izq, RETABLO_Y - 0.31, HORNACINA_Z - 0.01), (0.016, 0.01, 0.075))
+    _caja(col, "PROP_rosario_cruz_h",
+          (x_izq, RETABLO_Y - 0.31, HORNACINA_Z + 0.018), (0.052, 0.01, 0.016))
+
+    # Cadena cubana con el dije del rayo, sobre la mesa.
+    inicio_x, inicio_y = 0.02, ALTAR_Y + 0.34
+    for i in range(22):
+        eslabon = _cilindro(col, "PROP_cubana_%d" % i,
+                            (inicio_x + 0.028 * i - 0.30,
+                             inicio_y + 0.05 * math.sin(i * 0.55),
+                             mesa_z + 0.012), 0.016, 0.011, 10)
+        eslabon.rotation_euler = (1.57, 0, azar.uniform(-0.2, 0.2) + i * 0.15)
+    dije = _rayo(col, "PROP_dije_rayo",
+                 (inicio_x + 0.028 * 22 - 0.30, inicio_y + 0.02, mesa_z + 0.014),
+                 alto=0.075, grosor=0.008)
+    dije.rotation_euler = (1.57, 0.35, 0)
+
+    # Cinturón piteado con hebilla: identidad del género sin marca de nadie.
+    correa = _caja(col, "PROP_cinturon", (1.15, ALTAR_Y - 0.44, mesa_z + 0.008),
+                   (0.62, 0.075, 0.012))
+    correa.rotation_euler = (0, 0, -0.12)
+    for i in range(22):
+        avance = -0.28 + i * 0.026
+        for borde_y in (-0.028, 0.028):
+            puntada = _caja(col, "PROP_pitiado_%d_%d" % (i, int(borde_y * 1000)),
+                            (1.15 + avance * math.cos(-0.12),
+                             ALTAR_Y - 0.44 + borde_y + avance * math.sin(-0.12),
+                             mesa_z + 0.0145), (0.012, 0.004, 0.002))
+            puntada.rotation_euler = (0, 0, -0.12)
+
+    hebilla = _caja(col, "PROP_hebilla", (0.78, ALTAR_Y - 0.40, mesa_z + 0.012),
+                    (0.115, 0.085, 0.014))
+    hebilla.rotation_euler = (0, 0, -0.12)
+    _caja(col, "PROP_hebilla_hueco", (0.78, ALTAR_Y - 0.40, mesa_z + 0.016),
+          (0.075, 0.05, 0.016)).rotation_euler = (0, 0, -0.12)
+
+
 def _gorra(col):
     """Colgada de la esquina de un nicho: rompe la solemnidad del oro."""
     copa = _cilindro(col, "PROP_gorra_copa",
@@ -521,6 +607,7 @@ def _reliquias(col):
           (0, ALTAR_Y - ALTAR_FONDO / 2 - 0.04, 0.58), (1.5, 0.06, 0.62))
 
     _props(col, mesa_z)
+    _devocion(col, mesa_z)
     _mobiliario(col)
     _exvotos(col)
     _gorra(col)
