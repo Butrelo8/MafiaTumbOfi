@@ -39,16 +39,20 @@ condensador, gorra, guitarra clásica que hace de requinto, trío de velas y
 tololoche. Los `.blend` y `.glb` no se versionan; la escena se construye igual
 sin ellos porque cada uno tiene su fallback.
 
-**Lo siguiente es la fase 3**, que ya es producción y no diseño:
+**Fase 3 a medias.** Frames y encode cerrados; quedan los loops de estación,
+que son el punto 3 y arrastran la parte de WebM del punto 4:
 
 1. ~~Calibrar CRF~~ **hecho 2026-09-17**: CRF 38 para los tramos (14.7 KB por
    frame, 1.18 MB los 80), CRF 30 para el frame 0. Tabla y método en
    `docs/blender-notas.md` → "CRF calibrado contra AVIF real".
-2. Renderizar 4 tramos × 20 frames con motion blur, en los dos formatos.
+2. ~~Renderizar 4 tramos × 20 frames~~ **hecho 2026-09-17**: 170 PNG de 16 bits
+   en `tmp/frames/` (933 MB, no se versionan), obturador 0.25 y 10 s por frame.
 3. Renderizar los 5 loops de estación a 24 fps con llama, humo de cigarro,
    polvo en los haces y parpadeo del neón; cerrarlos en bucle con `ffmpeg xfade`.
-4. `scripts/build-scene.sh` → AVIF + WebM + `src/data/scene.json`.
-5. `scripts/check-budget.sh` → falla por encima de 3 MB en móvil.
+4. ~~`scripts/build-scene.sh`~~ **hecho** para los AVIF y `src/data/scene.json`;
+   le falta la parte de WebM, que depende del punto 3.
+5. ~~`scripts/check-budget.sh`~~ **hecho**: mide el peor formato, no la suma,
+   porque cada visitante baja uno solo. Ahora mismo 0.85 MB de 3 MB.
 
 Después, fase 4 (capa web) y fase 5 (accesibilidad y verificación).
 

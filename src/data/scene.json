@@ -1,0 +1,128 @@
+{
+  "formatos": {
+    "mobile": {
+      "ancho": 900,
+      "alto": 1600,
+      "estaciones": [
+        {
+          "nombre": "nave",
+          "imagen": "/scene/mobile/estacion-0.avif",
+          "bytes": 16512
+        },
+        {
+          "nombre": "sonido",
+          "imagen": "/scene/mobile/estacion-1.avif",
+          "bytes": 24808
+        },
+        {
+          "nombre": "hornacinas",
+          "imagen": "/scene/mobile/estacion-2.avif",
+          "bytes": 18867
+        },
+        {
+          "nombre": "reliquia",
+          "imagen": "/scene/mobile/estacion-3.avif",
+          "bytes": 15409
+        },
+        {
+          "nombre": "retirada",
+          "imagen": "/scene/mobile/estacion-4.avif",
+          "bytes": 19813
+        }
+      ],
+      "tramos": [
+        {
+          "desde": "nave",
+          "hasta": "sonido",
+          "frames": 20,
+          "patron": "/scene/mobile/tramo-0/%03d.avif",
+          "bytes": 219596
+        },
+        {
+          "desde": "sonido",
+          "hasta": "hornacinas",
+          "frames": 20,
+          "patron": "/scene/mobile/tramo-1/%03d.avif",
+          "bytes": 214139
+        },
+        {
+          "desde": "hornacinas",
+          "hasta": "reliquia",
+          "frames": 20,
+          "patron": "/scene/mobile/tramo-2/%03d.avif",
+          "bytes": 164798
+        },
+        {
+          "desde": "reliquia",
+          "hasta": "retirada",
+          "frames": 20,
+          "patron": "/scene/mobile/tramo-3/%03d.avif",
+          "bytes": 199523
+        }
+      ],
+      "bytes": 893465
+    },
+    "desktop": {
+      "ancho": 1600,
+      "alto": 900,
+      "estaciones": [
+        {
+          "nombre": "nave",
+          "imagen": "/scene/desktop/estacion-0.avif",
+          "bytes": 14462
+        },
+        {
+          "nombre": "sonido",
+          "imagen": "/scene/desktop/estacion-1.avif",
+          "bytes": 28753
+        },
+        {
+          "nombre": "hornacinas",
+          "imagen": "/scene/desktop/estacion-2.avif",
+          "bytes": 16985
+        },
+        {
+          "nombre": "reliquia",
+          "imagen": "/scene/desktop/estacion-3.avif",
+          "bytes": 18196
+        },
+        {
+          "nombre": "retirada",
+          "imagen": "/scene/desktop/estacion-4.avif",
+          "bytes": 18252
+        }
+      ],
+      "tramos": [
+        {
+          "desde": "nave",
+          "hasta": "sonido",
+          "frames": 20,
+          "patron": "/scene/desktop/tramo-0/%03d.avif",
+          "bytes": 223946
+        },
+        {
+          "desde": "sonido",
+          "hasta": "hornacinas",
+          "frames": 20,
+          "patron": "/scene/desktop/tramo-1/%03d.avif",
+          "bytes": 186554
+        },
+        {
+          "desde": "hornacinas",
+          "hasta": "reliquia",
+          "frames": 20,
+          "patron": "/scene/desktop/tramo-2/%03d.avif",
+          "bytes": 159928
+        },
+        {
+          "desde": "reliquia",
+          "hasta": "retirada",
+          "frames": 20,
+          "patron": "/scene/desktop/tramo-3/%03d.avif",
+          "bytes": 221298
+        }
+      ],
+      "bytes": 888374
+    }
+  }
+}
