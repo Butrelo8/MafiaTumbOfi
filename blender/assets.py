@@ -57,6 +57,13 @@ CIGARROS = "cigarros.blend"
 CIGARRO_ENTERO = "Cigarette_01_GEO"
 CIGARRO_COLILLA = "Cigarette_02_GEO"
 
+# Púa de celuloide. El .blend trae además el estudio del autor: un suelo de
+# 21 m, dos paneles de luz y una cámara. Sólo entra `Plane`, que es la púa.
+# Licencia SIN VERIFICAR, ver public/scene/CREDITOS.md.
+PUA = "pick.blend"
+PUA_PIEZA = "Plane"
+PUA_POLIGONOS = 400
+
 GORRA = "gorra.glb"
 GORRA_POLIGONOS = 18000     # techo tras decimar; el original trae ~92k
 
@@ -395,6 +402,23 @@ def lentes(col, ubicacion, ancho=0.14, giro=0.0):
     alto = alto_actual * (ancho / ancho_actual) if ancho_actual else alto_actual
     return _plantar(pieza, ubicacion, alto, giro=giro,
                     nombre_ancla="PROP_lentes_ancla")
+
+
+def pua(col, nombre, ubicacion, ancho=0.028, giro=0.0):
+    """Púa tumbada sobre la mesa.
+
+    Como los lentes, se escala por el ancho: tumbada, su alto es el grosor del
+    celuloide y ajustar por ahí la dejaría del tamaño de un disco.
+    """
+    pieza = _malla_unica(PUA, nombre, col, PUA_POLIGONOS, cual=PUA_PIEZA)
+    if pieza is None:
+        return None
+    minimos, maximos = _caja_mundo([pieza])
+    ancho_actual = maximos[0] - minimos[0]
+    alto_actual = maximos[2] - minimos[2]
+    alto = alto_actual * (ancho / ancho_actual) if ancho_actual else alto_actual
+    return _plantar(pieza, ubicacion, alto, giro=giro,
+                    nombre_ancla=nombre + "_ancla")
 
 
 def cenicero(col, ubicacion, alto=0.10, giro=0.0):

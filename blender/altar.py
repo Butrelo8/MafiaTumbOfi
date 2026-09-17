@@ -151,7 +151,7 @@ PUA_CIRCULOS = ((0.20, 0.30), (-0.44, 0.06))
 
 
 def _pua(col, nombre, centro, ancho=0.028, alto=0.031, grosor=0.0009):
-    """Púa de verdad. Era una cajita, y en el picado del sonido se notaba."""
+    """Púa de primitivas, para cuando el asset no está."""
     puntos = []
     for centro_y, radio in PUA_CIRCULOS:
         for i in range(48):
@@ -448,12 +448,18 @@ def _props(col, mesa_z):
                             mesa_z + 0.006), 0.0115, 0.012, 14)
         anillo.rotation_euler = (1.57, 0, azar_anillo.uniform(0, 3.14))
 
-    # Púas dispersas.
+    # Púas dispersas. El asset es de terceros; sin él se cae al greybox, que
+    # es la misma silueta hecha a mano.
+    assets_pua = _cargar_assets()
+    hay_asset = assets_pua is not None and assets_pua.disponible(assets_pua.PUA)
     for i in range(5):
-        pua = _pua(col, "PROP_pua_%d" % i,
-                   (0.15 + azar_anillo.uniform(-0.5, 0.5),
-                    ALTAR_Y + azar_anillo.uniform(-0.3, 0.3), mesa_z + 0.003))
-        pua.rotation_euler = (0, 0, azar_anillo.uniform(0, 3.14))
+        sitio = (0.15 + azar_anillo.uniform(-0.5, 0.5),
+                 ALTAR_Y + azar_anillo.uniform(-0.3, 0.3), mesa_z + 0.003)
+        giro = azar_anillo.uniform(0, 3.14)
+        if hay_asset:
+            assets_pua.pua(col, "PROP_pua_%d" % i, sitio, ancho=0.028, giro=giro)
+        else:
+            _pua(col, "PROP_pua_%d" % i, sitio).rotation_euler = (0, 0, giro)
 
     # Lentes sobre la mesa, del lado de los discos.
     assets_len = _cargar_assets()

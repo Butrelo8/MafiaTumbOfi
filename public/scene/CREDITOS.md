@@ -108,3 +108,15 @@ mantienen los cilindros, que a esa distancia rinden igual y cuestan mucho menos.
 
 El tololoche sustituye el apaño anterior, que era la guitarra clásica escalada a
 1,85 m.
+
+### Púa
+
+`pick.blend`, aportado por el usuario el 2026-09-17. Del archivo se usa sólo la
+malla `Plane`, que es la púa; quedan fuera el suelo de 21 m, los dos paneles de
+luz y la cámara del estudio del autor. Se le quita el material y el Subsurf, y
+entra sin texturas: sólo geometría.
+
+**Pendiente:** confirmar origen, autor y licencia. El blend llegó sin archivo de
+licencia y su fecha interna es de 2013, así que no es del equipo. Antes de
+publicar hay que verificarlo; si resultara ser CC-BY, el crédito debe aparecer
+también en el sitio.
