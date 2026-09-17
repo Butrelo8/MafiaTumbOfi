@@ -23,6 +23,9 @@ npx wrangler deploy
 - `public/` — static media, favicon, robots, and redirects
 - `wrangler.jsonc` — Cloudflare Workers Static Assets configuration
 - `DESIGN.md` — visual-system source of truth
+- `blender/` — scene and look scripts for the scroll-driven 3D santuario
+- `docs/blender-notas.md` — **read before touching `blender/`**: Blender 5.2
+  quirks, measurement method and decisions already taken
 
 ## Design rules
 
