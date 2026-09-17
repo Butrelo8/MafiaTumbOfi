@@ -9,6 +9,7 @@ Ejecutar dentro de Blender:
 """
 
 import bpy
+import math
 from mathutils import Vector
 
 # ---------------------------------------------------------------- parámetros
@@ -45,7 +46,7 @@ ESTACIONES = (
     ("sonido",     21, 0.825, "PROXY_vinilo",  "PROXY_vinilo",      70.0, 1.95, 3.2),
     ("hornacinas", 41, 0.885, "AIM_retablo",   "PROXY_hornacina_c", 34.0, 0.10, 3.5),
     ("reliquia",   61, 0.970, "PROXY_micro",   "PROXY_micro",       65.0, 0.15, 2.8),
-    ("retirada",   81, 0.325, "PROXY_placa",   "PROXY_placa",       26.0, 1.30, 5.6),
+    ("retirada",   81, 0.325, "AIM_altar",     "PROXY_placa",       26.0, 1.05, 5.6),
 )
 
 # Puntos del recorrido de cámara: (x, y, z)
@@ -149,20 +150,83 @@ def _arquitectura(col):
           (0, ALTAR_Y, ALTAR_ALTO + 0.04),
           (ALTAR_ANCHO + 0.25, ALTAR_FONDO + 0.2, 0.08))
 
-    # Hornacinas: en greybox son marcos salientes. El boolean real entra en fase 2.
-    for x, sufijo in zip(HORNACINA_X, ("i", "c", "d")):
-        _caja(col, "HORNACINA_marco_" + sufijo,
-              (x, RETABLO_Y - 0.25, HORNACINA_Z),
-              (HORNACINA_ANCHO + 0.14, 0.1, HORNACINA_ALTO + 0.14))
-        _caja(col, "PROXY_hornacina_" + sufijo,
-              (x, RETABLO_Y - 0.32, HORNACINA_Z),
-              (HORNACINA_ANCHO, 0.05, HORNACINA_ALTO))
+    _hornacinas(col)
 
     # Cruz de neón
     _caja(col, "CRUZ_vertical",
           (0, RETABLO_Y - 0.3, CRUZ_Z), (0.12, 0.08, 1.6))
     _caja(col, "CRUZ_horizontal",
           (0, RETABLO_Y - 0.3, CRUZ_Z + 0.35), (0.9, 0.08, 0.12))
+
+
+def _hornacinas(col):
+    """Huecos reales restados del retablo, con su marco de oro alrededor."""
+    muro = bpy.data.objects["RETABLO_muro"]
+    for x, sufijo in zip(HORNACINA_X, ("i", "c", "d")):
+        hueco = _caja(col, "CORTE_" + sufijo,
+                      (x, RETABLO_Y - 0.12, HORNACINA_Z),
+                      (HORNACINA_ANCHO, 0.42, HORNACINA_ALTO))
+        modificador = muro.modifiers.new("corte_" + sufijo, "BOOLEAN")
+        modificador.operation = "DIFFERENCE"
+        modificador.object = hueco
+        bpy.context.view_layer.objects.active = muro
+        bpy.ops.object.modifier_apply(modifier=modificador.name)
+        bpy.data.objects.remove(hueco, do_unlink=True)
+
+        # Fondo del nicho: el retrato irá encima, en HTML.
+        _caja(col, "PROXY_hornacina_" + sufijo,
+              (x, RETABLO_Y + 0.08, HORNACINA_Z),
+              (HORNACINA_ANCHO, 0.04, HORNACINA_ALTO))
+        # Marco de oro rodeando el hueco, cuatro listones.
+        grosor = 0.07
+        for dx, dz, ancho, alto in (
+            (0, (HORNACINA_ALTO + grosor) / 2, HORNACINA_ANCHO + grosor * 2, grosor),
+            (0, -(HORNACINA_ALTO + grosor) / 2, HORNACINA_ANCHO + grosor * 2, grosor),
+            ((HORNACINA_ANCHO + grosor) / 2, 0, grosor, HORNACINA_ALTO + grosor * 2),
+            (-(HORNACINA_ANCHO + grosor) / 2, 0, grosor, HORNACINA_ALTO + grosor * 2),
+        ):
+            _caja(col, "HORNACINA_marco_%s_%d_%d" % (sufijo, int(dx * 100), int(dz * 100)),
+                  (x + dx, RETABLO_Y - 0.22, HORNACINA_Z + dz), (ancho, 0.12, alto))
+
+
+def _props(col, mesa_z):
+    """Lo que hace que el altar parezca usado y no un render de catálogo."""
+    # Cenicero con dos cigarros, cerca del micro (estación de la reliquia).
+    _cilindro(col, "PROP_cenicero", (-0.45, ALTAR_Y - 0.1, mesa_z + 0.015),
+              0.085, 0.03, 24)
+    _cilindro(col, "PROP_cenicero_hueco", (-0.45, ALTAR_Y - 0.1, mesa_z + 0.032),
+              0.062, 0.012, 24)
+    for i, (dx, dy, giro) in enumerate(((0.06, 0.02, 0.9), (-0.05, -0.04, -0.4))):
+        cigarro = _cilindro(col, "PROP_cigarro_%d" % i,
+                            (-0.45 + dx, ALTAR_Y - 0.1 + dy, mesa_z + 0.042),
+                            0.0055, 0.09, 12)
+        cigarro.rotation_euler = (1.45, 0, giro)
+        brasa = _cilindro(col, "PROP_brasa_%d" % i,
+                          (-0.45 + dx + 0.042 * math.sin(giro),
+                           ALTAR_Y - 0.1 + dy + 0.042 * math.cos(giro),
+                           mesa_z + 0.042), 0.0056, 0.008, 12)
+        brasa.rotation_euler = (1.45, 0, giro)
+
+    # Botella, al borde de la mesa.
+    _cilindro(col, "PROP_botella", (-1.55, ALTAR_Y - 0.05, mesa_z + 0.13),
+              0.045, 0.26, 20)
+    _cilindro(col, "PROP_botella_cuello", (-1.55, ALTAR_Y - 0.05, mesa_z + 0.30),
+              0.016, 0.09, 12)
+
+    # Billetes doblados, del lado de los vinilos: entran en la cenital.
+    for i, (x, y, giro) in enumerate(((1.62, ALTAR_Y + 0.28, 0.5),
+                                      (1.70, ALTAR_Y + 0.22, 0.2),
+                                      (1.55, ALTAR_Y + 0.18, 0.9))):
+        billete = _caja(col, "PROP_billete_%d" % i,
+                        (x, y, mesa_z + 0.003 + i * 0.002), (0.15, 0.068, 0.002))
+        billete.rotation_euler = (0, 0, giro)
+
+    # Cera escurrida al pie de las veladoras.
+    for i in range(5):
+        x = -0.95 + i * 0.42
+        gota = _cilindro(col, "PROP_cera_%d" % i,
+                         (x, ALTAR_Y - 0.36, mesa_z + 0.004), 0.048, 0.008, 16)
+        gota.scale = (1.0, 0.65, 1.0)
 
 
 def _reliquias(col):
@@ -183,6 +247,14 @@ def _reliquias(col):
     pila = _cilindro(col, "VINILO_pila", (0.62, ALTAR_Y + 0.3, mesa_z + 0.05),
                      0.168, 0.09, 32)
     pila.rotation_euler = (0.03, 0.02, 0)
+
+    # Etiquetas: sin ellas los discos son manchas negras sin lectura.
+    for nombre, (x, y, z) in (
+        ("ETIQUETA_principal", (1.05, ALTAR_Y + 0.05, mesa_z + 0.025)),
+        ("ETIQUETA_ladeado", (1.58, ALTAR_Y - 0.22, mesa_z + 0.024)),
+        ("ETIQUETA_pila", (0.62, ALTAR_Y + 0.3, mesa_z + 0.101)),
+    ):
+        _cilindro(col, nombre, (x, y, z), 0.058, 0.002, 24)
 
     micro = _cilindro(col, "PROXY_micro",
                       (-0.95, ALTAR_Y + 0.08, mesa_z + 0.09), 0.048, 0.18, 20)
@@ -205,6 +277,8 @@ def _reliquias(col):
 
     _caja(col, "PROXY_placa",
           (0, ALTAR_Y - ALTAR_FONDO / 2 - 0.04, 0.58), (1.5, 0.06, 0.62))
+
+    _props(col, mesa_z)
 
 
 def _rig(col):

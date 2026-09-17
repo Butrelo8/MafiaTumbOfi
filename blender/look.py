@@ -23,7 +23,7 @@ TOKENS = {
     "red":         (0.62, 0.220, 30.0),
     "red_glow":    (0.52, 0.200, 28.0),
     # Albedos de render, no colores de pantalla.
-    "piedra":      (0.50, 0.008, 60.0),
+    "piedra":      (0.42, 0.008, 60.0),
     "piedra_honda": (0.24, 0.006, 60.0),
 }
 
@@ -100,9 +100,21 @@ def _materiales():
     vinilo = _material(
         "MTO_vinilo", base_color=(0.012, 0.012, 0.014, 1.0), roughness=0.22)
     cromo = _material(
-        "MTO_cromo", base_color=(0.55, 0.55, 0.57, 1.0), metallic=1.0,
-        roughness=0.28)
+        "MTO_cromo", base_color=(0.78, 0.78, 0.80, 1.0), metallic=1.0,
+        roughness=0.12)
+    vidrio = _material(
+        "MTO_vidrio", base_color=(0.25, 0.10, 0.03, 1.0), roughness=0.08,
+        transmission_weight=0.92, ior=1.46)
+    ceniza = _material(
+        "MTO_ceniza", base_color=(0.16, 0.15, 0.14, 1.0), roughness=0.95)
+    papel = _material(
+        "MTO_papel", base_color=(0.14, 0.16, 0.12, 1.0), roughness=0.82)
+    brasa = _material("MTO_brasa", base_color=(0.9, 0.25, 0.05, 1.0), roughness=0.9)
+    _fijar(brasa.node_tree.nodes["Principled BSDF"], "Emission Color",
+           (1.0, 0.28, 0.06, 1.0))
+    _fijar(brasa.node_tree.nodes["Principled BSDF"], "Emission Strength", 4.0)
     return {
+        "vidrio": vidrio, "ceniza": ceniza, "papel": papel, "brasa": brasa,
         "piedra": piedra, "piedra_oscura": piedra_oscura, "oro": oro,
         "oro_viejo": oro_viejo, "neon": neon, "cera": cera, "llama": llama,
         "vinilo": vinilo, "cromo": cromo,
@@ -127,7 +139,32 @@ ASIGNACION = (
     ("MICRO_rejilla", "cromo"),
     ("PROXY_cadena", "oro"),
     ("PROXY_placa", "oro"),
+    ("ETIQUETA_", "oro"),
+    ("PROP_cenicero_hueco", "ceniza"),
+    ("PROP_cenicero", "vidrio"),
+    ("PROP_brasa", "brasa"),
+    ("PROP_cigarro", "papel"),
+    ("PROP_botella", "vidrio"),
+    ("PROP_billete", "papel"),
+    ("PROP_cera", "cera"),
 )
+
+
+def _ensuciar(mat, escala=9.0, minimo=0.25, maximo=0.75):
+    """Rugosidad variable con ruido: ninguna superficie real es uniforme."""
+    arbol = mat.node_tree
+    bsdf = arbol.nodes.get("Principled BSDF")
+    if bsdf is None or bsdf.inputs["Roughness"].is_linked:
+        return mat
+    ruido = arbol.nodes.new("ShaderNodeTexNoise")
+    ruido.inputs["Scale"].default_value = escala
+    ruido.inputs["Detail"].default_value = 6.0
+    rango = arbol.nodes.new("ShaderNodeMapRange")
+    rango.inputs["To Min"].default_value = minimo
+    rango.inputs["To Max"].default_value = maximo
+    arbol.links.new(ruido.outputs["Fac"], rango.inputs["Value"])
+    arbol.links.new(rango.outputs["Result"], bsdf.inputs["Roughness"])
+    return mat
 
 
 def _asignar(mats):
@@ -290,6 +327,9 @@ def _compositor():
 def aplicar():
     col = bpy.data.collections.get("SANTUARIO")
     mats = _materiales()
+    _ensuciar(mats["piedra"], escala=6.0, minimo=0.70, maximo=0.98)
+    _ensuciar(mats["oro"], escala=22.0, minimo=0.22, maximo=0.52)
+    _ensuciar(mats["cromo"], escala=30.0, minimo=0.06, maximo=0.20)
     aplicados = _asignar(mats)
     _luces(col)
     _velas(col, mats)
