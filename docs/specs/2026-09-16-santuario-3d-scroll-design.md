@@ -150,7 +150,10 @@ entorno es negro. Cycles lo resuelve con rebotes reales, y el oro es media
 identidad de la banda. Cuesta 1.2–1.5 s por frame a 640×360, lo que proyecta
 unos 5 s a 1600×900: los dos juegos completos de frames caben en menos de una
 hora. EEVEE queda como motor de vista previa rápida.
-Motion blur con obturador 0.5. Glare en el compositor para el neón
+Motion blur con obturador **0.25** (era 0.5; corregido el 2026-09-17 tras
+renderizar el tramo 0 completo: a 0.5, a media carrera entre estaciones el
+retablo y la guitarra quedaban ilegibles. A 0.25 el arrastre sigue ahí y la
+escena se lee. Cuesta 0.5 KB más por frame en AVIF, que cabe de sobra). Glare en el compositor para el neón
 (EEVEE Next ya no expone panel de bloom). Dos pasadas sobre el mismo `.blend`,
 cambiando solo el sensor de cámara: 1600×900 escritorio, 900×1600 móvil.
 
