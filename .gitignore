@@ -77,3 +77,7 @@ tmp/
 blender/*.blend
 blender/*.blend1
 blender/render-out/
+
+# Assets 3D externos pesados (los .blend de terceros)
+blender/assets/*.blend
+blender/assets/*.glb

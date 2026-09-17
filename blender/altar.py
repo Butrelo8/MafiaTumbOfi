@@ -46,7 +46,7 @@ ESTACIONES = (
     ("nave",       1,  0.000, "AIM_altar",     "AIM_altar",         28.0, 0.00, 4.0),
     ("sonido",     21, 0.825, "PROXY_vinilo",  "PROXY_vinilo",      70.0, 1.95, 3.2),
     ("hornacinas", 41, 0.885, "AIM_retablo",   "PROXY_hornacina_c", 34.0, 0.10, 3.5),
-    ("reliquia",   61, 0.970, "PROXY_micro",   "PROXY_micro",       65.0, 0.15, 2.8),
+    ("reliquia",   61, 0.962, "PROXY_micro",   "PROXY_micro",       58.0, 0.30, 3.2),
     ("retirada",   81, 0.325, "AIM_altar",     "PROXY_placa",       26.0, 1.05, 5.6),
 )
 
@@ -249,7 +249,12 @@ def _props(col, mesa_z):
                                   azar.uniform(-0.05, 0.05),
                                   azar.uniform(0, 3.14))
 
-    _gorra_mesa(col, mesa_z)
+    assets_gorra = _cargar_assets()
+    if assets_gorra is not None and assets_gorra.disponible(assets_gorra.GORRA):
+        assets_gorra.gorra(col, (GORRA_POS[0], ALTAR_Y + GORRA_POS[1], mesa_z),
+                           ancho=0.155, giro=GORRA_POS[2], inclinacion=0.05)
+    else:
+        _gorra_mesa(col, mesa_z)
 
     # Requinto recostado contra el altar, visible en los planos generales.
     cuerpo = _cilindro(col, "PROP_requinto_cuerpo", (1.9, ALTAR_Y - 0.85, 0.42),
@@ -421,7 +426,7 @@ def _rayo(col, nombre, centro, alto=0.06, grosor=0.012):
 # mismo problema legal que copiarla.
 MARCA = "SANTO VICIO"
 MARCA_MONOGRAMA = "SV"
-GORRA_POS = (-1.30, 7.26, -0.35)      # x, y, giro; y se corrige con ALTAR_Y
+GORRA_POS = (0.62, -0.42, -0.9)       # x, desplazamiento en y, giro
 
 
 def _texto(col, nombre, cuerpo, centro, alto, extrusion=0.002, negrita=True):
@@ -455,7 +460,7 @@ def _gorra_mesa(col, mesa_z):
     con la copa cortada en gajos por costuras, visera con curvatura real
     (intersección de una esfera achatada) y botón superior.
     """
-    gx, gy, giro = GORRA_POS[0], ALTAR_Y + 0.26, GORRA_POS[2]
+    gx, gy, giro = GORRA_POS[0], ALTAR_Y + GORRA_POS[1], GORRA_POS[2]
     frente_x, frente_y = math.sin(giro), -math.cos(giro)
     radio = 0.10
 
@@ -528,7 +533,7 @@ def _gorra_mesa(col, mesa_z):
 
 def _parche_gorra(col, mesa_z):
     """Monograma de la marca ficticia bordado en el parche."""
-    gx, gy, giro = GORRA_POS[0], ALTAR_Y + 0.26, GORRA_POS[2]
+    gx, gy, giro = GORRA_POS[0], ALTAR_Y + GORRA_POS[1], GORRA_POS[2]
     frente_x, frente_y = math.sin(giro), -math.cos(giro)
 
     mono = _texto(col, "PROP_gorra_monograma", MARCA_MONOGRAMA,
@@ -696,6 +701,26 @@ def _mobiliario(col):
                   0.06, 0.28, 16)
 
 
+def _cargar_assets():
+    """blender/assets.py, cargado a mano: este script se ejecuta con exec() y
+    no hay paquete del que importar."""
+    import os
+    ruta = os.path.join(os.path.dirname(__file__) if "__file__" in dir() else "",
+                        "assets.py")
+    if not os.path.exists(ruta):
+        ruta = r"E:\Cursor Projects\MTO\blender\assets.py"
+    if not os.path.exists(ruta):
+        return None
+    espacio = {}
+    exec(open(ruta).read(), espacio)
+    class Modulo:
+        pass
+    modulo = Modulo()
+    for clave, valor in espacio.items():
+        setattr(modulo, clave, valor)
+    return modulo
+
+
 def _reliquias(col):
     mesa_z = ALTAR_ALTO + 0.08
 
@@ -723,15 +748,22 @@ def _reliquias(col):
     ):
         _cilindro(col, nombre, (x, y, z), 0.058, 0.002, 24)
 
-    micro = _cilindro(col, "PROXY_micro",
-                      (-0.95, ALTAR_Y + 0.08, mesa_z + 0.09), 0.048, 0.18, 20)
-    micro.rotation_euler = (0.42, 0, 0.3)
-    bpy.ops.mesh.primitive_uv_sphere_add(
-        radius=0.062, segments=16, ring_count=10,
-        location=(-0.95, ALTAR_Y + 0.02, mesa_z + 0.2))
-    rejilla = bpy.context.object
-    rejilla.name = "MICRO_rejilla"
-    _reubicar(col, rejilla)
+    # El micrófono es un asset externo (CC-0). Si no está, se cae al proxy de
+    # siempre: la escena tiene que poder construirse sin los .blend de terceros,
+    # que no se versionan.
+    assets = _cargar_assets()
+    if assets is not None and assets.disponible(assets.MICROFONO):
+        assets.microfono(col, (-1.28, ALTAR_Y + 0.02, mesa_z), alto=0.26, giro=0.6)
+    else:
+        micro = _cilindro(col, "PROXY_micro",
+                          (-0.95, ALTAR_Y + 0.08, mesa_z + 0.09), 0.048, 0.18, 20)
+        micro.rotation_euler = (0.42, 0, 0.3)
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=0.062, segments=16, ring_count=10,
+            location=(-0.95, ALTAR_Y + 0.02, mesa_z + 0.2))
+        rejilla = bpy.context.object
+        rejilla.name = "MICRO_rejilla"
+        _reubicar(col, rejilla)
 
     bpy.ops.mesh.primitive_torus_add(
         major_radius=0.22, minor_radius=0.018,
@@ -747,7 +779,8 @@ def _reliquias(col):
 
     _props(col, mesa_z)
     _devocion(col, mesa_z)
-    _parche_gorra(col, mesa_z)
+    if bpy.data.objects.get("PROP_gorra_copa") is not None:
+        _parche_gorra(col, mesa_z)
     _mobiliario(col)
     _exvotos(col)
     _gorra(col)

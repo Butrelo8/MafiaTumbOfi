@@ -297,3 +297,30 @@ código versionado en vez de un `.blend` opaco.
   desenlazar y reenlazar a mano si quieres controlar dónde caen.
 - Tras mover objetos o cambiar constraints, `bpy.context.view_layer.update()`
   antes de leer `matrix_world`, o lees la posición vieja.
+
+## Importar assets de terceros
+
+Tres trampas, las tres costaron un render cada una:
+
+**Escalar cada pieza por separado no encoge el conjunto.** Cada objeto se escala
+respecto de su propio origen, así que la distancia entre orígenes no cambia y el
+grupo mantiene su tamaño. Hay que emparentar las piezas a un empty que haga de
+ancla y escalar el ancla.
+
+**`ob.scale = (f, f, f)` sobrescribe, no multiplica.** Si el asset viene ya
+escalado, se pierde su escala original y el resultado no tiene el tamaño
+calculado. Correcto: `ob.scale = tuple(c * f for c in ob.scale)`.
+
+**El origen de un objeto no está ni en su centro ni en su base.** Calcular dónde
+apoyarlo con `location` y `dimensions` lo deja flotando o hundido. Hay que medir
+la caja envolvente real recorriendo `bound_box` y pasando cada esquina por
+`matrix_world`.
+
+Además: un `.glb` puede venir sin materiales ni UV, sólo geometría — que suele
+ser justo lo que interesa, porque los materiales se ponen con los tokens del
+proyecto. Y conviene decimar: 92.000 polígonos para un objeto que ocupa unos
+píxeles en el render final no aportan nada.
+
+**Licencias.** Revisar siempre el archivo de licencia que acompaña al asset, no
+sólo la etiqueta de la web: en Blend Swap un blend puede ser CC-0 y estar además
+marcado como *Fan Art*, lo que prohíbe todo uso comercial.

@@ -1,0 +1,179 @@
+"""Assets 3D externos.
+
+Los `.blend` de terceros viven en `blender/assets/` y **no** se versionan: son
+binarios pesados. Este módulo los trae a la escena, los limpia y los coloca, de
+modo que lo versionado sigue siendo el código que los coloca, no el asset.
+
+Licencias en `blender/assets/*-LICENSE.txt` y en `public/scene/CREDITOS.md`.
+"""
+
+import bpy
+import os
+
+CARPETA = r"E:\Cursor Projects\MTO\blender\assets"
+
+# Micrófono de condensador con araña. "Low Poly Microphone" de mgordon, CC-0.
+# El .blend trae dos copias y su peana de render; sólo interesan estas piezas,
+# que son las del micro centrado en el origen.
+MICROFONO = "microfono.blend"
+MICRO_CAPSULA = ("Cylinder.020", "Cylinder.018", "Cylinder.015")
+MICRO_ARANA = ("Cylinder.019", "Cylinder.014", "Cylinder.012",
+               "BezierCircle", "BezierCircle.003")
+
+# Gorra snapback con relieves góticos, generada por el propio equipo. Viene sin
+# materiales ni UV: sólo geometría, que es justo lo que interesa.
+GORRA = "gorra.glb"
+GORRA_POLIGONOS = 18000     # techo tras decimar; el original trae ~92k
+
+
+def disponible(nombre):
+    return os.path.exists(os.path.join(CARPETA, nombre))
+
+
+def _traer(nombre_blend, piezas):
+    """Append de objetos concretos; devuelve los objetos ya en la escena."""
+    ruta = os.path.join(CARPETA, nombre_blend)
+    with bpy.data.libraries.load(ruta, link=False) as (origen, destino):
+        destino.objects = [n for n in origen.objects if n in piezas]
+    traidos = [o for o in destino.objects if o is not None]
+    for ob in traidos:
+        bpy.context.scene.collection.objects.link(ob)
+    bpy.context.view_layer.update()
+    return traidos
+
+
+def _unir(objetos, nombre, col):
+    """Convierte curvas a malla y une todo en un objeto."""
+    bpy.ops.object.select_all(action="DESELECT")
+    mallas = []
+    for ob in objetos:
+        ob.select_set(True)
+        bpy.context.view_layer.objects.active = ob
+        if ob.type == "CURVE":
+            bpy.ops.object.convert(target="MESH")
+        mallas.append(bpy.context.view_layer.objects.active)
+
+    bpy.ops.object.select_all(action="DESELECT")
+    for ob in mallas:
+        ob.select_set(True)
+    activo = mallas[0]
+    bpy.context.view_layer.objects.active = activo
+    if len(mallas) > 1:
+        bpy.ops.object.join()
+    unido = bpy.context.view_layer.objects.active
+    unido.name = nombre
+    unido.data.materials.clear()
+    for otra in list(unido.users_collection):
+        otra.objects.unlink(unido)
+    col.objects.link(unido)
+    return unido
+
+
+def _caja_mundo(objetos):
+    """Caja envolvente real en coordenadas de mundo.
+
+    El origen de un objeto no tiene por qué estar en su centro ni en su base:
+    medir con `location` y `dimensions` deja el asset flotando.
+    """
+    import mathutils
+    bpy.context.view_layer.update()
+    minimos = [1e9] * 3
+    maximos = [-1e9] * 3
+    for ob in objetos:
+        for esquina in ob.bound_box:
+            punto = ob.matrix_world @ mathutils.Vector(esquina)
+            for eje in range(3):
+                minimos[eje] = min(minimos[eje], punto[eje])
+                maximos[eje] = max(maximos[eje], punto[eje])
+    return minimos, maximos
+
+
+def microfono(col, ubicacion, alto=0.26, giro=0.0):
+    """Trae el micrófono y lo deja de pie sobre la mesa, a escala real.
+
+    Las piezas cuelgan de un empty que hace de ancla: escalar cada objeto por
+    separado no encoge el conjunto, porque cada uno se escala respecto de su
+    propio origen y la distancia entre ellos no cambia.
+
+    La cápsula se llama `PROXY_micro` porque es el objeto al que apunta el foco
+    de la estación de la reliquia: renombrarlo obligaría a tocar el rig.
+    """
+    capsula = _unir(_traer(MICROFONO, MICRO_CAPSULA), "PROXY_micro", col)
+    arana = _unir(_traer(MICROFONO, MICRO_ARANA), "MICRO_arana", col)
+    piezas = (capsula, arana)
+
+    minimos, maximos = _caja_mundo(piezas)
+    ancla = bpy.data.objects.new("MICRO_ancla", None)
+    col.objects.link(ancla)
+    ancla.location = ((minimos[0] + maximos[0]) / 2,
+                      (minimos[1] + maximos[1]) / 2,
+                      minimos[2])
+    bpy.context.view_layer.update()
+    for ob in piezas:
+        matriz = ob.matrix_world.copy()
+        ob.parent = ancla
+        ob.matrix_parent_inverse = ancla.matrix_world.inverted()
+        ob.matrix_world = matriz
+
+    alto_actual = maximos[2] - minimos[2]
+    factor = alto / alto_actual if alto_actual else 1.0
+    ancla.scale = (factor, factor, factor)
+    ancla.rotation_euler.z = giro
+    ancla.location = ubicacion
+    bpy.context.view_layer.update()
+    return capsula, arana
+
+
+def gorra(col, ubicacion, ancho=0.27, giro=0.0, inclinacion=0.0):
+    """Importa la gorra .glb, la decima y la apoya por su base.
+
+    El original trae ~92.000 polígonos para un objeto que en el render final
+    ocupa unos pocos píxeles; se decima para no cargar la escena.
+    """
+    ruta = os.path.join(CARPETA, GORRA)
+    previos = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=ruta)
+    nuevos = [o for o in bpy.data.objects if o not in previos and o.type == "MESH"]
+    if not nuevos:
+        return None
+
+    pieza = nuevos[0]
+    if len(nuevos) > 1:
+        bpy.ops.object.select_all(action="DESELECT")
+        for ob in nuevos:
+            ob.select_set(True)
+        bpy.context.view_layer.objects.active = pieza
+        bpy.ops.object.join()
+        pieza = bpy.context.view_layer.objects.active
+
+    pieza.name = "PROP_gorra"
+    pieza.data.materials.clear()
+    if len(pieza.data.polygons) > GORRA_POLIGONOS:
+        decimar = pieza.modifiers.new("decimar", "DECIMATE")
+        decimar.ratio = GORRA_POLIGONOS / len(pieza.data.polygons)
+        bpy.context.view_layer.objects.active = pieza
+        bpy.ops.object.modifier_apply(modifier=decimar.name)
+
+    for otra in list(pieza.users_collection):
+        otra.objects.unlink(pieza)
+    col.objects.link(pieza)
+
+    minimos, maximos = _caja_mundo([pieza])
+    ancla = bpy.data.objects.new("GORRA_ancla", None)
+    col.objects.link(ancla)
+    ancla.location = ((minimos[0] + maximos[0]) / 2,
+                      (minimos[1] + maximos[1]) / 2,
+                      minimos[2])
+    bpy.context.view_layer.update()
+    matriz = pieza.matrix_world.copy()
+    pieza.parent = ancla
+    pieza.matrix_parent_inverse = ancla.matrix_world.inverted()
+    pieza.matrix_world = matriz
+
+    ancho_actual = maximos[0] - minimos[0]
+    factor = ancho / ancho_actual if ancho_actual else 1.0
+    ancla.scale = (factor, factor, factor)
+    ancla.rotation_euler = (inclinacion, 0.0, giro)
+    ancla.location = ubicacion
+    bpy.context.view_layer.update()
+    return pieza
