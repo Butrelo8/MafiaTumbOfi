@@ -86,6 +86,14 @@ const primeraEscritorio = escritorio?.estaciones[0]
     min-height: 100svh;
   }
 
+  /* Espacio de viaje: los tramos hornacinas->reliquia y reliquia->retirada
+     tenian 900 px de scroll para veinte frames, contra 2005 del tramo de
+     Musica, y la camara iba al doble de velocidad en la segunda mitad. Esto no
+     es relleno: es el recorrido entre dos estaciones, sin nada que leer. */
+  :global(.tramo-espacio) {
+    height: 50svh;
+  }
+
   /* El contenido va encima de la escena: el fondo del body es opaco, así que
      la escena no puede ir a z-index negativo. */
   :global(.marketing-main),

@@ -61,10 +61,14 @@ const releases = catalog.releases.map((release) => ({
     </div>
   </div></section>
 
+  <div class="tramo-espacio" aria-hidden="true"></div>
+
   <section class="section group-section" id="grupo" aria-labelledby="grupo-heading" data-estacion="3"><div class="container">
     <Eyebrow text="La banda" /><h2 id="grupo-heading" class="section-heading gold-text">El grupo</h2>
     <div class="members-grid">{members.map((member) => <MemberCard {...member} />)}</div>
   </div></section>
+
+  <div class="tramo-espacio" aria-hidden="true"></div>
 
   <section class="section booking-section" id="contratacion" aria-labelledby="contratacion-heading" data-estacion="4"><div class="container booking-grid">
     <div><Eyebrow text="Contratar al grupo" /><h2 id="contratacion-heading" class="section-heading gold-text">¿Tienes una <em>fecha disponible?</em></h2></div>

@@ -195,8 +195,13 @@ Dos archivos nuevos:
   la estación.
 
 El contenido actual de `src/pages/index.astro` se conserva íntegro y se
-reposiciona encima. Las secciones definen la altura de scroll, ~500vh en total.
-No se añade ni se pierde contenido.
+reposiciona encima. Las secciones definen la altura de scroll. Cada sección de estación pide
+`100svh` de mínimo y entre las dos últimas parejas hay un `.tramo-espacio` de
+`50svh`, porque con las alturas naturales la cámara recorría veinte frames en
+900 px de scroll en unos tramos y en 2005 en otros —el doble de velocidad en la
+segunda mitad de la página—. Con eso el recorrido queda en ~820vh y los cuatro
+tramos van a 80–105 px por frame. No se añade ni se pierde contenido: el
+espacio de viaje está vacío y es `aria-hidden`.
 
 ## Accesibilidad
 
