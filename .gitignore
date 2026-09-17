@@ -70,3 +70,10 @@ playwright-report/
 
 # Wrangler local state
 .wrangler/
+.mcp.json
+
+# Escena 3D: artefactos de build
+tmp/
+blender/*.blend
+blender/*.blend1
+blender/render-out/
