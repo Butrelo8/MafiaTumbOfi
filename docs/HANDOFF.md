@@ -1,10 +1,40 @@
 # Handoff — Santuario M⚡T
 
-> Escrito 2026-09-17, 02:30 CST; actualizado 02:55. Rama `dev`, 20 commits por
-> delante de `main`.
-> Formato según la skill `matt-handoff` de mpaf, guardado en el repo (y no en
-> el temporal del sistema, como sugiere la skill) para que sobreviva entre
+> Escrito 2026-09-17, 02:30 CST. Reescrito 14:00 CST. Rama `dev`, 41 commits
+> por delante de `main`.
+> Formato según la skill `matt-handoff` de mpaf, guardado en el repo (y no en el
+> temporal del sistema, como sugiere la skill) para que sobreviva entre
 > sesiones.
+
+## Lo primero que te van a pedir
+
+**El usuario está moviendo props en el visor de Blender ahora mismo.** Su
+siguiente instrucción será que revises qué movió y lo guardes. El flujo exacto,
+y el orden importa:
+
+```python
+p = {}
+exec(open(r"E:\Cursor Projects\MTO\blender\poses.py").read(), p)
+p["comparar"](r"E:\Cursor Projects\MTO\tmp\poses-referencia.json")
+```
+
+`comparar()` devuelve, por objeto, la pose de referencia, la actual y el delta.
+Con eso se escriben las constantes en `blender/altar.py`, se reconstruye y se
+vuelve a comparar: el residuo tiene que quedar por debajo del milímetro.
+
+**No reconstruyas la escena antes de comparar.** `build()` borra todo y con ello
+lo que el usuario movió; ya pasó una vez esta sesión. Si tienes que tocar la
+escena por cualquier otro motivo, primero `volcar()` a un JSON nuevo.
+
+Después de congelar, vuelve a volcar la referencia:
+
+```python
+p["volcar"](r"E:\Cursor Projects\MTO\tmp\poses-referencia.json")
+```
+
+Y ojo: si cambia la geometría de la mesa hay que **re-renderizar los frames**,
+porque los 170 AVIF que sirve la web salieron de la escena de las 13:26 CST.
+Mover un prop pequeño no lo justifica; mover la gorra dos metros, sí.
 
 ## Qué se está haciendo
 
@@ -19,118 +49,147 @@ Cinco estaciones: nave, sonido, hornacinas, reliquia, retirada.
 
 | Documento | Qué contiene |
 |---|---|
-| `docs/specs/2026-09-16-santuario-3d-scroll-design.md` | El diseño aprobado: storyboard, presupuesto de peso, capa de primer plano, accesibilidad, verificación. Manda sobre cualquier improvisación |
-| `docs/plans/2026-09-16-santuario-3d-implementation-plan.md` | Fases, puertas y el resultado real de cada una, con las correcciones sobre la marcha y las decisiones de dirección de arte |
-| `docs/blender-notas.md` | **Léelo antes de tocar `blender/`.** Quirks de Blender 5.2, trampas al importar assets, método de medición, y una sección de arranque con el bloque de código que levanta la escena |
+| `docs/specs/2026-09-16-santuario-3d-scroll-design.md` | El diseño aprobado: storyboard, presupuesto de peso, ajustes de render, capa web, accesibilidad. Manda sobre cualquier improvisación |
+| `docs/plans/2026-09-16-santuario-3d-implementation-plan.md` | Fases, puertas y el resultado real de cada una |
+| `docs/blender-notas.md` | **Léelo antes de tocar `blender/`.** Quirks de Blender 5.2, importación de assets, método de medición, congelar poses, detectar lo movido, atajos de navegación |
 | `public/scene/CREDITOS.md` | Licencias de todo lo que no es nuestro |
-| `DESIGN.md` | Tokens de color y tipografía del sitio; la escena 3D los consume |
+| `DESIGN.md` | Tokens de color y tipografía; la escena los consume |
 
-El historial de `git log main..dev` cuenta el resto: cada commit explica **por
-qué**, no sólo qué.
+`git log main..dev` cuenta el resto: cada commit explica **por qué**.
 
 ## Estado
 
-**Fases 0, 1 y 2 cerradas** — entorno verificado, encuadres aprobados, look
-terminado con props y assets externos. La escena son unos 400 objetos, 85.000
-caras en render, y los cinco encuadres en los dos formatos salen en 28 s.
+**Fases 0, 1 y 2 cerradas.** Escena de 343 objetos, Cycles con OptiX, 128
+muestras. Se levanta en 14 s desde código; el `.blend` no se versiona.
 
-Assets externos integrados (ver `public/scene/CREDITOS.md`): micrófono de
-condensador, gorra, guitarra clásica que hace de requinto, trío de velas y
-tololoche. Los `.blend` y `.glb` no se versionan; la escena se construye igual
-sin ellos porque cada uno tiene su fallback.
+**Fase 3 casi cerrada.** Falta sólo el punto 3:
 
-**Fase 3 a medias.** Frames y encode cerrados; quedan los loops de estación,
-que son el punto 3 y arrastran la parte de WebM del punto 4:
+1. ~~Calibrar CRF~~ — 38 tramos, 30 estaciones. Tabla y método en las notas.
+2. ~~Renderizar 4 tramos × 20 frames~~ — 170 PNG de 16 bits en `tmp/frames`
+   (933 MB, ignorados), obturador **0.25**, 10 s por frame, 33 min la tanda.
+3. **Pendiente: los 5 loops de estación** a 24 fps con llama, humo de cigarro,
+   polvo en los haces y parpadeo del neón, cerrados con `ffmpeg xfade`. Hoy la
+   escena no tiene nada de eso animado: es trabajo de animación, no de encode.
+4. ~~`scripts/build-scene.sh`~~ — AVIF + `src/data/scene.json`. Le falta la
+   rama de WebM, que depende del punto 3.
+5. ~~`scripts/check-budget.sh`~~ — mide el formato más pesado, no la suma.
 
-1. ~~Calibrar CRF~~ **hecho 2026-09-17**: CRF 38 para los tramos (14.7 KB por
-   frame, 1.18 MB los 80), CRF 30 para el frame 0. Tabla y método en
-   `docs/blender-notas.md` → "CRF calibrado contra AVIF real".
-2. ~~Renderizar 4 tramos × 20 frames~~ **hecho 2026-09-17**: 170 PNG de 16 bits
-   en `tmp/frames/` (933 MB, no se versionan), obturador 0.25 y 10 s por frame.
-3. Renderizar los 5 loops de estación a 24 fps con llama, humo de cigarro,
-   polvo en los haces y parpadeo del neón; cerrarlos en bucle con `ffmpeg xfade`.
-4. ~~`scripts/build-scene.sh`~~ **hecho** para los AVIF y `src/data/scene.json`;
-   le falta la parte de WebM, que depende del punto 3.
-5. ~~`scripts/check-budget.sh`~~ **hecho**: mide el peor formato, no la suma,
-   porque cada visitante baja uno solo. Ahora mismo 0.85 MB de 3 MB.
+**Fase 4 en marcha y funcionando en el navegador.** `src/components/AltarScene.astro`
+y `src/lib/scrollScene.ts`; las cinco secciones de `index.astro` llevan
+`data-estacion` y el frame se interpola entre sus centros. Verificado con
+Chrome DevTools: centrar cada sección da los frames 0, 20, 40, 60 y 79.
 
-Después, fase 4 (capa web) y fase 5 (accesibilidad y verificación).
+**Fase 5 sin empezar.**
+
+## Números medidos, no estimados
+
+| Qué | Valor |
+|---|---|
+| Peso por visitante | **0.85 MB** (objetivo 2 MB, techo 3 MB) |
+| Frames de tramo | 160–219 KB los 20 de cada tramo |
+| Estaciones | 14–28 KB cada una |
+| Velocidad de cámara | 84 / 105 / 80 / 84 px de scroll por frame |
+| Recorrido total | ~820vh |
+| Velo sobre la escena | `rgba(0,0,0,0.62)`, el mínimo para 4.5:1 |
+
+El velo salió de medir el percentil 95 de luminancia de cada estación contra
+`--text`. La reliquia es la que manda por el cromo del micro. Si cambias la
+iluminación de la escena, **ese 0.62 hay que recalcularlo**.
 
 ## Decisiones cerradas — no las reabras sin motivo nuevo
 
 - **Cycles con OptiX**, no EEVEE: en EEVEE el oro y el cromo salen negros.
 - **Frames pre-renderizados**, no three.js ni glTF en vivo.
-- **El glow del neón va en post con ffmpeg**: el compositor de Blender 5 devuelve
-  negro incluso en passthrough.
-- **Capa de primer plano sólo en las estaciones**, nunca por frame.
-- **Sin sección de fechas** en el sitio (decisión de 2026-09-09).
-- **Presupuesto**: 2 MB objetivo por visitante móvil, 3 MB de techo duro.
-- **Sin marcas reales**: la gorra y la hebilla llevan una marca ficticia propia,
-  SANTO VICIO (constantes `MARCA` y `MARCA_MONOGRAMA` en `blender/altar.py`).
-- **Sin arma en la escena**: decisión de negocio documentada en el plan,
-  reversible si la banda la pide.
+- **Obturador 0.25**, no 0.5 como decía la spec: a 0.5 el retablo y la guitarra
+  quedaban ilegibles a media carrera. Corregido en la spec con el motivo.
+- **El glow del neón va en post con ffmpeg**: el compositor de Blender 5
+  devuelve negro incluso en passthrough.
+- **El vídeo del hero y sus dos velos están apagados** por CSS desde
+  `AltarScene.astro`. El marcado sigue: no se borró nada.
+- **Sin sección de fechas** (2026-09-09). **Sin arma en la escena**.
+- **Sin marcas reales**: `MARCA` y `MARCA_MONOGRAMA` en `blender/altar.py`
+  llevan SANTO VICIO, inventada. La botella de tequila es sólo silueta, sin
+  etiqueta ni logo.
+- **Los cigarros sueltos de terceros se usan igual**: vienen de un foro de
+  videojuegos, sin licencia escrita, y es decisión explícita del usuario del
+  2026-09-17. Anotado en `CREDITOS.md`.
 
 ## Pendientes y bloqueos
 
-- **Licencia de `blender/assets/guitarra.blend` sin verificar.** Se descargó de
-  Blend Swap sin su archivo de licencia. Está marcado en `CREDITOS.md`. Si
-  resulta CC-BY, hay que acreditar al autor **en el sitio**, no sólo en el repo.
-  Es lo único que puede obligar a cambiar la página antes de publicar.
-- **Los detalles que Gemini atribuyó a los videos de la banda** (gorra de
-  parches, marca de tequila, vapes) no están verificados por nadie que conozca
-  su material. Se adoptaron porque funcionan como dirección de arte, no como
-  identidad documentada. Ver el plan.
-- **La tabla de contraste de `DESIGN.md` sigue calculada contra negro plano** y
-  deja de valer en cuanto haya texto sobre la escena. Se recalcula en la fase 5.
-- **Los retratos de las hornacinas** son huecos negros hasta que la capa web
-  ponga encima las fotos reales con su enlace a Instagram.
+- **Licencia de `blender/assets/guitarra.blend` sin verificar.** Blend Swap sin
+  archivo de licencia. Si resulta CC-BY hay que acreditar **en el sitio**, no
+  sólo en el repo. Sigue siendo lo único que puede obligar a cambiar la página
+  antes de publicar.
+- **La tabla de contraste de `DESIGN.md` está calculada contra negro plano** y
+  ya no vale: hay texto sobre la escena. Se recalcula en la fase 5; el 0.62 del
+  velo es el dato de partida.
+- **Los retratos de las hornacinas** siguen siendo huecos negros.
+- **Deuda preexistente en `look.py`**: la fila `("PROP_botella", "vidrio")` gana
+  antes que las de `liquido`, `tapon`, `cinta` y `lazo`, que nunca se aplicaron.
+  No la toqué porque es anterior a esta sesión.
+- **La página mide 820vh.** Es el precio de igualar la velocidad de cámara. Si
+  el usuario lo ve largo, bajar `.tramo-espacio` de `50svh` a `25svh`.
+- **Los 9 platos del candelabro están vacíos** y con el cenicero nuevo
+  desaparecieron las dos `PROP_brasa` emisivas: ya no hay brasa encendida en la
+  mesa.
 
-## Colocar props: el flujo que funciona
+## Cómo trabajar con este repo
 
-El usuario coloca a ojo en el visor de Blender —para esto es mucho mejor que
-calcular coordenadas—, dice qué objeto tocó, y **se lee su transformación y se
-escribe en el script como constante**. Lo que no pase al script se pierde en la
-siguiente reconstrucción, porque `build()` borra la escena entera.
+**Colocar props.** El usuario coloca a ojo en el visor —es mucho mejor que
+calcular coordenadas— y el agente lee la transformación y la escribe como
+constante en `blender/altar.py`. Lo que no pase al script se pierde.
+`blender/poses.py` detecta qué se movió sin preguntar; lee la rotación **del
+mundo**, porque la local no ve el ancla del padre.
 
-Las poses de los instrumentos (`TOLOLOCHE_POSE`, `REQUINTO_POS` en
-`blender/altar.py`) salieron así. Detalles en `docs/blender-notas.md`: anclar
-por el centro de la caja envolvente y no por `location`, y verificar comparando
-cajas después de reconstruir.
+**Medir antes de opinar.** Casi todas las decisiones buenas de esta sesión
+salieron de medir: el CRF contra AVIF reales, el obturador renderizando el
+tramo entero, el velo con luminancias, la colocación de props proyectando a
+cámara (los prerrollos ocupaban 8 px en el escalón y estaban fuera de cuadro en
+cuatro de cinco estaciones), y los huecos de scroll con `getBoundingClientRect`.
+El SSIM **no** sirve en esta escena: va de 0.99 a 0.98 en todo el rango de CRF
+porque casi todo es negro.
+
+**Comprobar intersecciones con cajas envolventes**, nunca a ojo. El candelabro
+sólo cabe en un sitio y se supo probando 18 combinaciones, no mirando renders.
 
 ## Trampas que ya costaron tiempo
 
-Están todas en `docs/blender-notas.md`, pero estas tres se repiten:
+Todas en `docs/blender-notas.md`. Las que se repiten:
 
-1. **Mide, no mires.** `image.pixels` dentro de Blender dio el mismo resultado
-   en todas las pruebas y mandó la investigación por el camino equivocado. Lo
-   fiable es ffmpeg desde fuera, más `md5sum` para descubrir que dos renders
-   "distintos" son idénticos.
-2. **`build()` no resetea los ajustes de escena.** Cualquier A/B tiene que
-   limpiar `view_settings`, `scene.eevee`, `use_nodes` y el volumen del World, o
-   estará midiendo los restos de la prueba anterior.
-3. **Al importar assets**: escalar cada pieza por separado no encoge el grupo,
-   `ob.scale =` sobrescribe en vez de multiplicar, el origen no está en la base,
-   y un Subsurf heredado convierte 2.000 caras en 55.000 al renderizar.
-4. **`rotation_euler` no rota nada en modo quaternion**, que es como llegan los
-   assets generados, y Blender no avisa: al leerlo devuelve lo que escribiste
-   mientras `matrix_world` sigue sin rotación.
+1. **`build()` borra la escena.** Volcar poses antes de reconstruir.
+2. **`rotation_euler` no rota nada en modo quaternion**, que es como llegan los
+   assets generados, y Blender no avisa.
+3. **Los assets generados llegan soldados a su peana.** El micro traía un disco
+   de escenario de 1.9 m y el candelabro y la botella venían a 1.9 de lado: se
+   cortan por geometría o se escalan por el ancho, no por el alto. Unos lentes
+   tumbados miden 4 cm de alto y 14 de ancho: escalarlos por altura los deja del
+   tamaño de la mesa.
+4. **Los atajos de teclado de Blender no sobreviven sin `save_userpref()`.**
+   `blender/keymap.py` los deja fijos: botón 4/5 del ratón y `Ctrl+Shift+W/F`
+   para walk y fly.
+5. **El MCP de Blender corre como `uvx.exe` en Windows**, así que habla al
+   `localhost` de Windows y el NAT de WSL no le afecta. Si "no agarra", casi
+   siempre es que el servidor del add-on no está arrancado (`N` → BlenderMCP →
+   Start).
 
 ## Cómo hablar con el usuario
 
-Escribe en español. Prefiere que se le contradiga con datos antes que
-complacencia: varias decisiones buenas de esta sesión salieron de decirle que
-algo no funcionaba (la gorra a la tercera, el tololoche que no cabía, las
-licencias). Quiere ver resultados renderizados, no descripciones.
+Español. Prefiere que se le contradiga con datos antes que complacencia: esta
+sesión mejoró porque se le dijo que la gorra del nicho era basura flotante, que
+los prerrollos no se veían, y que partir la sección de Música no iba a arreglar
+la velocidad de cámara. Quiere ver renders, no descripciones: se los manda con
+`SendUserFile` o los abre desde Windows en `E:\Cursor Projects\MTO\tmp\ref\`.
 
-Las hojas de contactos se generan con `ffmpeg xstack` a `tmp/`, que está
-ignorado por git; él las abre desde Windows en `E:\Cursor Projects\MTO\tmp\`.
+Decide rápido y delega la decisión técnica ("lo que tú me digas"), pero quiere
+saber el coste de lo que se elige.
 
 ## Skills sugeridas para la próxima sesión
 
-- `brainstorm` — si se replantea alguna estación o entra contenido nuevo; fue el
-  flujo que produjo el spec y el plan.
-- `caveman` / `ponytail` — **apagadas a petición del usuario** para este trabajo.
-  No las reactives sin que lo pida.
-- `cloudflare:web-perf` — en la fase 5, para el Lighthouse móvil y los Core Web
-  Vitals del scrub.
-- `code-review` — antes de mezclar `dev` en `main`.
+- `caveman` / `ponytail` — **apagadas a petición del usuario**. No las
+  reactives sin que lo pida.
+- `cloudflare:web-perf` — para la fase 5: Lighthouse móvil y los Core Web
+  Vitals del scrub con 80 AVIF.
+- `design:accessibility-review` — recalcular la tabla de contraste de
+  `DESIGN.md` con el texto sobre la escena.
+- `code-review` — antes de mezclar `dev` en `main`, que lleva 41 commits.
+- `brainstorm` — sólo si se replantea una estación o entra contenido nuevo.
