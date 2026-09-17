@@ -126,6 +126,56 @@ def _empty(col, nombre, centro):
     return ob
 
 
+def _casco_convexo(puntos):
+    """Casco convexo 2D por monotone chain. En Blender no hay numpy."""
+    def cruz(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    def media(secuencia):
+        pila = []
+        for punto in secuencia:
+            while len(pila) >= 2 and cruz(pila[-2], pila[-1], punto) <= 0:
+                pila.pop()
+            pila.append(punto)
+        return pila[:-1]
+
+    puntos = sorted(set(puntos))
+    return media(puntos) + media(reversed(puntos))
+
+
+# Una púa 351 es el casco convexo de un cuerpo redondo y una punta pequeña.
+# Los dos círculos van en un cuadrado normalizado que luego se escala al ancho
+# y alto reales, así que salen elipses: es lo que hace que la púa sea más ancha
+# que alta, como las de verdad.
+PUA_CIRCULOS = ((0.20, 0.30), (-0.44, 0.06))
+
+
+def _pua(col, nombre, centro, ancho=0.028, alto=0.031, grosor=0.0009):
+    """Púa de verdad. Era una cajita, y en el picado del sonido se notaba."""
+    puntos = []
+    for centro_y, radio in PUA_CIRCULOS:
+        for i in range(48):
+            angulo = i * 2.0 * math.pi / 48
+            puntos.append((round(math.cos(angulo) * radio * (0.5 / 0.30), 6),
+                           round(centro_y + math.sin(angulo) * radio, 6)))
+    contorno = _casco_convexo(puntos)
+
+    malla = bpy.data.meshes.new(nombre)
+    malla.from_pydata([(x * ancho, y * alto, 0.0) for x, y in contorno], [],
+                      [list(range(len(contorno)))])
+    malla.update()
+    ob = bpy.data.objects.new(nombre, malla)
+    ob.location = centro
+    bpy.context.scene.collection.objects.link(ob)
+    # Grosor por modificador: aplicarlo no aporta nada y una púa de 0.9 mm
+    # modelada a mano son cuarenta caras más por nada.
+    solido = ob.modifiers.new("grosor", "SOLIDIFY")
+    solido.thickness = grosor
+    solido.offset = 0.0
+    _reubicar(col, ob)
+    return ob
+
+
 def _reubicar(col, ob):
     for otra in list(ob.users_collection):
         otra.objects.unlink(ob)
@@ -356,7 +406,7 @@ def _props(col, mesa_z):
     for i in range(3):
         foto = _caja(col, "PROP_polaroid_%d" % i,
                      (0.72 + i * 0.1 + azar_foto.uniform(-0.05, 0.05),
-                      ALTAR_Y - 0.28 + azar_foto.uniform(-0.06, 0.06),
+                      ALTAR_Y - 0.34799 + azar_foto.uniform(-0.06, 0.06),
                       mesa_z + 0.004 + i * 0.002),
                      (0.13, 0.108, 0.002))
         foto.rotation_euler = (0, 0, azar_foto.uniform(-0.35, 0.35))
@@ -400,10 +450,9 @@ def _props(col, mesa_z):
 
     # Púas dispersas.
     for i in range(5):
-        pua = _caja(col, "PROP_pua_%d" % i,
-                    (0.15 + azar_anillo.uniform(-0.5, 0.5),
-                     ALTAR_Y + azar_anillo.uniform(-0.3, 0.3), mesa_z + 0.003),
-                    (0.028, 0.03, 0.002))
+        pua = _pua(col, "PROP_pua_%d" % i,
+                   (0.15 + azar_anillo.uniform(-0.5, 0.5),
+                    ALTAR_Y + azar_anillo.uniform(-0.3, 0.3), mesa_z + 0.003))
         pua.rotation_euler = (0, 0, azar_anillo.uniform(0, 3.14))
 
     # Lentes sobre la mesa, del lado de los discos.
@@ -709,7 +758,10 @@ def _devocion(col, mesa_z):
                                     colilla=True)
 
     # Cinturón piteado con hebilla: identidad del género sin marca de nadie.
-    correa = _caja(col, "PROP_cinturon", (1.15, ALTAR_Y - 0.44, mesa_z + 0.008),
+    # CINTURON_DY se colocó a mano en el visor; la hebilla y las puntadas
+    # cuelgan de él para que el conjunto se mueva de una pieza.
+    CINTURON_DY = -0.52472
+    correa = _caja(col, "PROP_cinturon", (1.15, ALTAR_Y + CINTURON_DY, mesa_z + 0.008),
                    (0.62, 0.075, 0.012))
     correa.rotation_euler = (0, 0, -0.12)
     for i in range(22):
@@ -717,18 +769,21 @@ def _devocion(col, mesa_z):
         for borde_y in (-0.028, 0.028):
             puntada = _caja(col, "PROP_pitiado_%d_%d" % (i, int(borde_y * 1000)),
                             (1.15 + avance * math.cos(-0.12),
-                             ALTAR_Y - 0.44 + borde_y + avance * math.sin(-0.12),
+                             ALTAR_Y + CINTURON_DY + borde_y
+                             + avance * math.sin(-0.12),
                              mesa_z + 0.0145), (0.012, 0.004, 0.002))
             puntada.rotation_euler = (0, 0, -0.12)
 
-    hebilla = _caja(col, "PROP_hebilla", (0.78, ALTAR_Y - 0.40, mesa_z + 0.014),
+    hebilla = _caja(col, "PROP_hebilla",
+                    (0.78, ALTAR_Y + CINTURON_DY + 0.04, mesa_z + 0.014),
                     (0.125, 0.092, 0.012))
     hebilla.rotation_euler = (0, 0, -0.12)
     bisel_hebilla = hebilla.modifiers.new("bisel", "BEVEL")
     bisel_hebilla.width = 0.006
     bisel_hebilla.segments = 3
     mono_hebilla = _texto(col, "PROP_hebilla_monograma", MARCA_MONOGRAMA,
-                          (0.78, ALTAR_Y - 0.40, mesa_z + 0.021), alto=0.052,
+                          (0.78, ALTAR_Y + CINTURON_DY + 0.04, mesa_z + 0.021),
+                          alto=0.052,
                           extrusion=0.003)
     mono_hebilla.rotation_euler = (0, 0, -0.12)
 
