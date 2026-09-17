@@ -56,17 +56,17 @@ Malla única enrollada con broche, decimada de 260.000 a 20.000 polígonos.
 Generados por el propio equipo (`prerolls.blend`), sin derechos de terceros.
 Malla única, decimada a 12.000 polígonos.
 
-### Cigarros sueltos — ⚠️ LICENCIA SIN VERIFICAR
+### Cigarros sueltos — origen: foro de videojuegos, sin licencia escrita
 
-`cigarros.blend` (`Cigarette_01_GEO` y `Cigarette_02_GEO`) **no** lo generó el
-equipo: viene con materiales y texturas PBR de un autor sin identificar. Del
-archivo sólo entran las dos mallas, sin material ni textura, pero **la
-geometría sigue siendo de su autor**.
+`cigarros.blend` (`Cigarette_01_GEO` y `Cigarette_02_GEO`) no lo generó el
+equipo: venía con materiales y texturas PBR. Del archivo sólo entran las dos
+mallas, sin material ni textura.
 
-Mismo caso que `guitarra.blend`: antes de publicar hay que averiguar de dónde
-salió y bajo qué licencia. Si resulta CC-BY, hay que acreditar en el sitio. Si
-no aparece la licencia, se sustituye por geometría propia — son dos cilindros,
-cuesta menos rehacerlos que arriesgarse.
+Procedencia según quien lo aportó (2026-09-17): descargado de un foro de
+videojuegos. No hay archivo de licencia. **Decisión del responsable del
+proyecto: se usa igual**, asumiendo el riesgo, que es bajo porque son dos
+cilindros de 7 cm que aparecen a contraluz. Si algún día hace falta quitarlo,
+se rehacen con `_cilindro()` en media hora.
 
 ### Gorra
 

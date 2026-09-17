@@ -723,19 +723,6 @@ def _devocion(col, mesa_z):
     mono_hebilla.rotation_euler = (0, 0, -0.12)
 
 
-def _gorra(col):
-    """Colgada de la esquina de un nicho: rompe la solemnidad del oro."""
-    copa = _cilindro(col, "PROP_gorranicho_copa",
-                     (HORNACINA_X[2] + 0.42, RETABLO_Y - 0.34, HORNACINA_Z - 0.32),
-                     0.105, 0.11, 20)
-    copa.rotation_euler = (0.55, 0, 0.2)
-    visera = _cilindro(col, "PROP_gorranicho_visera",
-                       (HORNACINA_X[2] + 0.48, RETABLO_Y - 0.46, HORNACINA_Z - 0.40),
-                       0.115, 0.016, 20)
-    visera.rotation_euler = (0.95, 0, 0.2)
-    visera.scale = (1.0, 0.75, 1.0)
-
-
 def _alfombra(col):
     """Alfombra del pasillo central, como en cualquier parroquia: guía la vista
     al altar y rompe la losa lisa."""
@@ -919,7 +906,6 @@ def _reliquias(col):
         _parche_gorra(col, mesa_z)
     _mobiliario(col)
     _exvotos(col)
-    _gorra(col)
     _tololoche(col)
     _guirnalda(col)
     _alfombra(col)

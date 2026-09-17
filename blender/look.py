@@ -238,7 +238,6 @@ ASIGNACION = (
     ("PROP_gorra_costura", "hueso"),
     ("PROP_gorra_parche", "terciopelo"),
     ("PROP_gorra_", "fieltro"),
-    ("PROP_gorranicho_", "fieltro"),
     ("PROP_requinto_metal", "cromo"),
     ("PROP_requinto", "madera"),
     ("PROP_rosario", "oro"),
