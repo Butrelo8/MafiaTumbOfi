@@ -119,8 +119,13 @@ empty, no rehacer la escena.
 
 ### Ajustes de render
 
-EEVEE. Verificado en Blender 5.2.2, donde el identifier es `BLENDER_EEVEE`
-y ya corresponde al motor reescrito que antes se llamaba EEVEE Next.
+**Cycles con OptiX**, 128 muestras y denoise. Decidido comparando ambos motores
+sobre el mismo still el 2026-09-17: en EEVEE el oro de las hornacinas y el cromo
+del micro salen **negros**, porque un metal sólo refleja su entorno y aquí el
+entorno es negro. Cycles lo resuelve con rebotes reales, y el oro es media
+identidad de la banda. Cuesta 1.2–1.5 s por frame a 640×360, lo que proyecta
+unos 5 s a 1600×900: los dos juegos completos de frames caben en menos de una
+hora. EEVEE queda como motor de vista previa rápida.
 Motion blur con obturador 0.5. Glare en el compositor para el neón
 (EEVEE Next ya no expone panel de bloom). Dos pasadas sobre el mismo `.blend`,
 cambiando solo el sensor de cámara: 1600×900 escritorio, 900×1600 móvil.

@@ -28,12 +28,18 @@ TOKENS = {
 }
 
 VELA_COLOR = (1.0, 0.50, 0.18)     # llama, ~1900 K
-# Potencias calibradas midiendo la luminancia del render, no estimadas:
-# con AgX y estos albedos, por debajo de esto la nave sale negra.
-VELA_W = 240.0                      # potencia por veladora
-NEON_W = 2400.0
-CENITAL_W = 700.0
-NIEBLA = 0.05                      # densidad del volumen de la nave
+# Motor por defecto: Cycles. EEVEE deja el oro y el cromo negros porque un
+# metal sólo refleja su entorno y aquí el entorno es negro; Cycles lo resuelve
+# con rebotes reales. Ver docs/plans, resultado de la fase 2.
+MOTOR = "CYCLES"
+MUESTRAS = 128
+
+# Potencias calibradas midiendo la luminancia del render, no estimadas.
+# Están ajustadas a Cycles, que suma luz rebotada; en EEVEE se ven más bajas.
+VELA_W = 140.0                      # potencia por veladora
+NEON_W = 1400.0
+CENITAL_W = 350.0
+NIEBLA = 0.012                      # densidad; Cycles resuelve dispersion multiple y lava la escena con mas
 
 
 def _oklch_a_lineal(L, C, H):
@@ -204,7 +210,7 @@ def _mundo_y_niebla():
     salida = arbol.nodes.new("ShaderNodeOutputWorld")
     fondo = arbol.nodes.new("ShaderNodeBackground")
     fondo.inputs[0].default_value = color("bg")
-    fondo.inputs[1].default_value = 0.09
+    fondo.inputs[1].default_value = 0.04
     dispersion = arbol.nodes.new("ShaderNodeVolumeScatter")
     dispersion.inputs["Color"].default_value = (0.75, 0.68, 0.60, 1.0)
     dispersion.inputs["Density"].default_value = NIEBLA
@@ -289,6 +295,7 @@ def aplicar():
     _velas(col, mats)
     _mundo_y_niebla()
     _render()
+    motor(MOTOR, MUESTRAS)
     # El compositor queda fuera a propósito: en Blender 5 el árbol vive en un
     # node group cuya entrada no recibe la imagen del render, y hasta un grupo
     # en passthrough devuelve negro. El glow del neón se hace en post con
@@ -296,3 +303,39 @@ def aplicar():
     # para ajustarlo.
     bpy.context.view_layer.update()
     return {"materiales": len(mats), "objetos_con_material": len(aplicados)}
+
+
+def motor(nombre, samples=128):
+    """Fija el motor de render. 'CYCLES' o 'BLENDER_EEVEE'.
+
+    Cycles no aparece en el enum de `RenderSettings.bl_rna` aunque esté
+    habilitado: los motores de add-on no se listan ahí. Se asigna directo.
+    """
+    escena = bpy.context.scene
+    escena.render.engine = nombre
+    if nombre == "CYCLES":
+        prefs = bpy.context.preferences.addons["cycles"].preferences
+        for tipo in ("OPTIX", "CUDA"):
+            try:
+                prefs.compute_device_type = tipo
+                break
+            except TypeError:
+                continue
+        prefs.get_devices()
+        for dispositivo in prefs.devices:
+            dispositivo.use = dispositivo.type in ("OPTIX", "CUDA")
+        ciclos = escena.cycles
+        ciclos.device = "GPU"
+        ciclos.samples = samples
+        ciclos.use_denoising = True
+        if hasattr(ciclos, "denoiser"):
+            try:
+                ciclos.denoiser = "OPTIX"
+            except TypeError:
+                pass
+        ciclos.max_bounces = 8
+        ciclos.volume_bounces = 2
+        ciclos.caustics_reflective = False
+    else:
+        escena.eevee.taa_render_samples = max(32, samples // 2)
+    return escena.render.engine

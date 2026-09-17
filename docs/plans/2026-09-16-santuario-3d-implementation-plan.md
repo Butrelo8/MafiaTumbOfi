@@ -197,3 +197,48 @@ no está a la altura de los ojos, y esa variedad es justamente lo que aporta.
   cigarro subiendo, polvo cruzando el haz, parpadeo irregular del neón, reflejo
   del oro desplazándose. El humo va solo aquí: es direccional y hacia atrás se
   vería mal.
+
+## Resultado parcial de la fase 2 — 2026-09-17
+
+Materiales, luz y atmósfera en pie; **puerta 2 aún abierta**.
+
+**Cycles gana el duelo y pasa a ser el motor.** Mismo still, mismos materiales:
+en EEVEE los marcos dorados y el micro cromado se ven negros; en Cycles el oro
+recibe la luz de las velas y el cromo refleja la llama y el neón. Coste medido:
+1.2–1.5 s/frame a 640×360 con 128 muestras y OptiX, frente a 0.2–0.4 s de EEVEE.
+Proyectado a 1600×900 son unos 5 s/frame, así que los 320 frames de los dos
+juegos caben en menos de una hora. EEVEE queda para vista previa.
+
+**Corrección a la fase 0.** Allí quedó escrito que Cycles no aparecía entre los
+motores; era un artefacto del método. El enum de `RenderSettings.bl_rna` no
+lista los motores registrados por add-on. Cycles estaba disponible todo el
+tiempo y se selecciona asignando `render.engine = "CYCLES"` directamente.
+
+**Los tokens de DESIGN.md no son albedos.** Son colores de pantalla, ya
+iluminados. Usados como color base dejaron la escena en negro absoluto. La
+piedra tiene ahora albedos propios de render; el oro y el rojo siguen saliendo
+de los tokens, convertidos de OKLCH a sRGB lineal dentro del script.
+
+**Niebla a 0.012, no 0.05.** Cycles resuelve dispersión múltiple y con la
+densidad que en EEVEE apenas se notaba, lava la escena entera y mata los negros.
+
+**Compositor fuera.** En Blender 5 el árbol vive en un node group cuya entrada
+no recibe la imagen del render: incluso un grupo en passthrough devuelve negro.
+El glow del neón se hará en post con ffmpeg en la fase 3, lo que además permite
+ajustarlo sin re-renderizar.
+
+**Lección de método.** Medir la luminancia con `image.pixels` dentro de Blender
+dio el mismo resultado en todas las pruebas y apuntó al problema equivocado. La
+medición fiable fue externa, con ffmpeg, más comparar los md5 de los renders:
+ahí se vio que cinco pruebas distintas eran byte-idénticas y que el estado de
+escena se arrastraba entre ellas. `build()` no resetea los ajustes de escena;
+cualquier prueba A/B tiene que limpiarlos explícitamente.
+
+### Pendiente para cerrar la puerta 2
+
+- Props: ceniceros, cigarros, botella, cera escurrida, billetes (tarea 2.5).
+- Vinilos con etiqueta y brillo: hoy son discos negros planos.
+- Hornacinas como huecos reales con boolean, no marcos salientes.
+- Imperfecciones: polvo, huellas en el oro, rugosidad variable.
+- Stills finales en los dos aspect ratios (tarea 2.6) y calibración de CRF y
+  frames por tramo contra un AVIF real (tarea 2.7, heredada de la fase 0).
