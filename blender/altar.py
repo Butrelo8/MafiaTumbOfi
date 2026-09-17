@@ -206,6 +206,28 @@ def _hornacinas(col):
                   (x + dx, RETABLO_Y - 0.22, HORNACINA_Z + dz), (ancho, 0.12, alto))
 
 
+def _cubana_greybox(col, mesa_z):
+    """Cadena cubana de toros, para cuando el asset no está."""
+    inicio_x, inicio_y = 0.02, ALTAR_Y + 0.34
+    paso = 0.019                      # menor que el diámetro: los eslabones se solapan
+    for i in range(26):
+        avance = inicio_x + paso * i - 0.26
+        lateral = inicio_y + 0.05 * math.sin(i * 0.42)
+        bpy.ops.mesh.primitive_torus_add(
+            major_radius=0.0145, minor_radius=0.0042,
+            major_segments=14, minor_segments=6,
+            location=(avance, lateral, mesa_z + 0.008))
+        eslabon = bpy.context.object
+        eslabon.name = "PROP_cubana_%d" % i
+        # alternar el plano de cada eslabón es lo que hace que se lea como cadena
+        eslabon.rotation_euler = (math.radians(90) if i % 2 else 0.0,
+                                  0.0,
+                                  math.atan2(0.05 * 0.42 * math.cos(i * 0.42), paso))
+        eslabon.scale = (1.0, 1.35, 1.0)
+        bpy.ops.object.shade_smooth()
+        _reubicar(col, eslabon)
+
+
 def _lentes_greybox(col, mesa_z):
     """Lentes de primitivas, para cuando el asset no está."""
     for signo in (-1, 1):
@@ -654,28 +676,16 @@ def _devocion(col, mesa_z):
     _caja(col, "PROP_rosario_cruz_h",
           (x_izq, RETABLO_Y - 0.31, HORNACINA_Z + 0.018), (0.052, 0.01, 0.016))
 
-    # Cadena cubana con el dije del rayo, sobre la mesa.
-    inicio_x, inicio_y = 0.02, ALTAR_Y + 0.34
-    paso = 0.019                      # menor que el diámetro: los eslabones se solapan
-    for i in range(26):
-        avance = inicio_x + paso * i - 0.26
-        lateral = inicio_y + 0.05 * math.sin(i * 0.42)
-        bpy.ops.mesh.primitive_torus_add(
-            major_radius=0.0145, minor_radius=0.0042,
-            major_segments=14, minor_segments=6,
-            location=(avance, lateral, mesa_z + 0.008))
-        eslabon = bpy.context.object
-        eslabon.name = "PROP_cubana_%d" % i
-        # alternar el plano de cada eslabón es lo que hace que se lea como cadena
-        eslabon.rotation_euler = (math.radians(90) if i % 2 else 0.0,
-                                  0.0,
-                                  math.atan2(0.05 * 0.42 * math.cos(i * 0.42), paso))
-        eslabon.scale = (1.0, 1.35, 1.0)
-        bpy.ops.object.shade_smooth()
-        _reubicar(col, eslabon)
-    dije = _rayo(col, "PROP_dije_rayo",
-                 (inicio_x + 0.028 * 22 - 0.30, inicio_y + 0.02, mesa_z + 0.014),
-                 alto=0.075, grosor=0.008)
+    # Cadena cubana con el dije del rayo, sobre la mesa. Con el asset de cadena
+    # los eslabones sobran: se quedaría una cadena encima de la otra.
+    assets_cub = _cargar_assets()
+    if assets_cub is None or not assets_cub.disponible(assets_cub.CADENA):
+        _cubana_greybox(col, mesa_z)
+        dije_pos = (0.02 + 0.028 * 22 - 0.30, ALTAR_Y + 0.36, mesa_z + 0.014)
+    else:
+        # Dentro del rollo de la cadena, que es donde cae un dije al soltarlo.
+        dije_pos = (0.05, ALTAR_Y + 0.22, mesa_z + 0.014)
+    dije = _rayo(col, "PROP_dije_rayo", dije_pos, alto=0.075, grosor=0.008)
     dije.rotation_euler = (1.57, 0.35, 0)
 
     # Cinturón piteado con hebilla: identidad del género sin marca de nadie.
@@ -868,14 +878,21 @@ def _reliquias(col):
         rejilla.name = "MICRO_rejilla"
         _reubicar(col, rejilla)
 
-    bpy.ops.mesh.primitive_torus_add(
-        major_radius=0.22, minor_radius=0.018,
-        major_segments=28, minor_segments=8,
-        location=(0.05, ALTAR_Y + 0.22, mesa_z + 0.02))
-    cadena = bpy.context.object
-    cadena.name = "PROXY_cadena"
-    cadena.scale = (1.0, 0.55, 0.35)
-    _reubicar(col, cadena)
+    # Cadena enrollada sobre la mesa. El proxy era un toro aplastado; con el
+    # asset se ven los eslabones y el broche.
+    assets_cad = _cargar_assets()
+    if assets_cad is not None and assets_cad.disponible(assets_cad.CADENA):
+        assets_cad.cadena(col, (0.05, ALTAR_Y + 0.22, mesa_z), ancho=0.20,
+                          giro=0.4)
+    else:
+        bpy.ops.mesh.primitive_torus_add(
+            major_radius=0.22, minor_radius=0.018,
+            major_segments=28, minor_segments=8,
+            location=(0.05, ALTAR_Y + 0.22, mesa_z + 0.02))
+        cadena = bpy.context.object
+        cadena.name = "PROXY_cadena"
+        cadena.scale = (1.0, 0.55, 0.35)
+        _reubicar(col, cadena)
 
     _caja(col, "PROXY_placa",
           (0, ALTAR_Y - ALTAR_FONDO / 2 - 0.04, 0.58), (1.5, 0.06, 0.62))

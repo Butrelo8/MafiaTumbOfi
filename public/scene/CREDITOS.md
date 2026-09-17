@@ -46,6 +46,11 @@ Cuenco y colillas son una sola malla, decimada de 438.000 a 16.000 polígonos.
 Generados por el propio equipo (`lentes.blend`), sin derechos de terceros.
 Malla única, decimada a 10.000 polígonos.
 
+### Cadena cubana
+
+Generada por el propio equipo (`cadena.blend`), sin derechos de terceros.
+Malla única enrollada con broche, decimada de 260.000 a 20.000 polígonos.
+
 ### Gorra
 
 Generada por el propio equipo (`gorra.glb`), sin derechos de terceros. Se

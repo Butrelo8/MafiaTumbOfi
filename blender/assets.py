@@ -44,6 +44,8 @@ CENICERO = "cenicero.blend"          # cuenco desbordado de colillas
 CENICERO_POLIGONOS = 16000
 LENTES = "lentes.blend"              # montura dorada sin aro, patillas abiertas
 LENTES_POLIGONOS = 10000
+CADENA = "cadena.blend"              # cubana enrollada, con broche
+CADENA_POLIGONOS = 20000
 
 GORRA = "gorra.glb"
 GORRA_POLIGONOS = 18000     # techo tras decimar; el original trae ~92k
@@ -318,6 +320,20 @@ def _plantar(pieza, ubicacion, alto, giro=0.0, inclinacion=0.0, nombre_ancla=Non
     ancla.location = ubicacion
     bpy.context.view_layer.update()
     return pieza
+
+
+def cadena(col, ubicacion, ancho=0.20, giro=0.0):
+    """Cadena cubana enrollada sobre la mesa. Como los lentes, se escala por el
+    ancho: tumbada, el alto es el grosor de un eslabón."""
+    pieza = _malla_unica(CADENA, "PROXY_cadena", col, CADENA_POLIGONOS)
+    if pieza is None:
+        return None
+    minimos, maximos = _caja_mundo([pieza])
+    ancho_actual = maximos[0] - minimos[0]
+    alto_actual = maximos[2] - minimos[2]
+    alto = alto_actual * (ancho / ancho_actual) if ancho_actual else alto_actual
+    return _plantar(pieza, ubicacion, alto, giro=giro,
+                    nombre_ancla="PROXY_cadena_ancla")
 
 
 def lentes(col, ubicacion, ancho=0.14, giro=0.0):
