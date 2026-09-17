@@ -42,6 +42,8 @@ BOTELLA = "botella.blend"            # tequila cuadrado con tapón de bola
 BOTELLA_POLIGONOS = 9000
 CENICERO = "cenicero.blend"          # cuenco desbordado de colillas
 CENICERO_POLIGONOS = 16000
+LENTES = "lentes.blend"              # montura dorada sin aro, patillas abiertas
+LENTES_POLIGONOS = 10000
 
 GORRA = "gorra.glb"
 GORRA_POLIGONOS = 18000     # techo tras decimar; el original trae ~92k
@@ -316,6 +318,24 @@ def _plantar(pieza, ubicacion, alto, giro=0.0, inclinacion=0.0, nombre_ancla=Non
     ancla.location = ubicacion
     bpy.context.view_layer.update()
     return pieza
+
+
+def lentes(col, ubicacion, ancho=0.14, giro=0.0):
+    """Lentes abiertos sobre la mesa.
+
+    Se escalan por el ancho y no por el alto, que aquí es el grosor: unos
+    lentes tumbados miden cuatro centímetros de alto y catorce de ancho, así
+    que ajustar por altura los dejaría del tamaño de una mesa.
+    """
+    pieza = _malla_unica(LENTES, "PROP_lentes_montura", col, LENTES_POLIGONOS)
+    if pieza is None:
+        return None
+    minimos, maximos = _caja_mundo([pieza])
+    ancho_actual = maximos[0] - minimos[0]
+    alto_actual = maximos[2] - minimos[2]
+    alto = alto_actual * (ancho / ancho_actual) if ancho_actual else alto_actual
+    return _plantar(pieza, ubicacion, alto, giro=giro,
+                    nombre_ancla="PROP_lentes_ancla")
 
 
 def cenicero(col, ubicacion, alto=0.10, giro=0.0):

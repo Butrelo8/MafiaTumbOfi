@@ -211,6 +211,7 @@ ASIGNACION = (
     ("PROP_marcador", "plastico"),
     ("PROP_anillo", "plata"),
     ("PROP_pua", "hueso"),
+    ("PROP_lentes_montura", "oro"),
     ("PROP_lentes", "plastico"),
     ("PROP_ceramica", "ceramica"),
     ("PROP_gorra", "fieltro"),

@@ -206,6 +206,17 @@ def _hornacinas(col):
                   (x + dx, RETABLO_Y - 0.22, HORNACINA_Z + dz), (ancho, 0.12, alto))
 
 
+def _lentes_greybox(col, mesa_z):
+    """Lentes de primitivas, para cuando el asset no está."""
+    for signo in (-1, 1):
+        cristal = _caja(col, "PROP_lentes_cristal_%d" % signo,
+                        (1.42 + signo * 0.032, ALTAR_Y + 0.42, mesa_z + 0.012),
+                        (0.055, 0.032, 0.018))
+        cristal.rotation_euler = (0.15, 0, 0.3)
+    _caja(col, "PROP_lentes_patilla", (1.50, ALTAR_Y + 0.5, mesa_z + 0.014),
+          (0.11, 0.008, 0.01)).rotation_euler = (0, 0, 0.9)
+
+
 def _cenicero_greybox(col, mesa_z):
     """Cenicero de primitivas con dos cigarros, para cuando el asset no está."""
     _cilindro(col, "PROP_cenicero", (-0.45, ALTAR_Y - 0.1, mesa_z + 0.015),
@@ -373,14 +384,13 @@ def _props(col, mesa_z):
                     (0.028, 0.03, 0.002))
         pua.rotation_euler = (0, 0, azar_anillo.uniform(0, 3.14))
 
-    # Lentes oscuros sobre la mesa, del lado de los discos.
-    for signo in (-1, 1):
-        cristal = _caja(col, "PROP_lentes_cristal_%d" % signo,
-                        (1.42 + signo * 0.032, ALTAR_Y + 0.42, mesa_z + 0.012),
-                        (0.055, 0.032, 0.018))
-        cristal.rotation_euler = (0.15, 0, 0.3)
-    _caja(col, "PROP_lentes_patilla", (1.50, ALTAR_Y + 0.5, mesa_z + 0.014),
-          (0.11, 0.008, 0.01)).rotation_euler = (0, 0, 0.9)
+    # Lentes sobre la mesa, del lado de los discos.
+    assets_len = _cargar_assets()
+    if assets_len is not None and assets_len.disponible(assets_len.LENTES):
+        assets_len.lentes(col, (1.45, ALTAR_Y + 0.45, mesa_z), ancho=0.14,
+                          giro=0.9)
+    else:
+        _lentes_greybox(col, mesa_z)
 
     # Botella alta de cerámica al fondo de la mesa. La X viene de moverla en el
     # visor: 9 cm hacia el centro, para que no se salga del canto de la mesa.

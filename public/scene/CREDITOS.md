@@ -41,6 +41,11 @@ silueta —cuerpo cuadrado, tapón de bola, lazo— sin logo, etiqueta ni texto.
 Generado por el propio equipo (`cenicero.blend`), sin derechos de terceros.
 Cuenco y colillas son una sola malla, decimada de 438.000 a 16.000 polígonos.
 
+### Lentes de montura dorada
+
+Generados por el propio equipo (`lentes.blend`), sin derechos de terceros.
+Malla única, decimada a 10.000 polígonos.
+
 ### Gorra
 
 Generada por el propio equipo (`gorra.glb`), sin derechos de terceros. Se
