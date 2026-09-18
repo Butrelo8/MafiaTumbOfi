@@ -120,3 +120,20 @@ entra sin texturas: sólo geometría.
 licencia y su fecha interna es de 2013, así que no es del equipo. Antes de
 publicar hay que verificarlo; si resultara ser CC-BY, el crédito debe aparecer
 también en el sitio.
+
+### Tracerías góticas
+
+`ventanas-goticas.blend`, aportado por el usuario el 2026-09-17. **CC0** según
+el propio usuario; falta anotar aquí la URL de Blend Swap.
+
+Son 29 tracerías planas hechas a partir de SVG de dominio público
+(craftsmanspace, patrones de tracería gótica). Del pack se usan sólo dos:
+`window_gothic_8`, de cuatro luces y óculo, como ventanal del presbiterio, y
+`window_gothic_2`, lanceta lisa, repetida cuatro veces por muro entre columna y
+columna.
+
+No traen cristal, ni derrame, ni marco: el hueco del muro se recorta con el
+casco convexo de la propia tracería, y el cristal es ese mismo casco encogido
+un 3% con material emisivo. Llegan a escala de dibujo y con `scale` de 100 ya
+puesta, así que se escalan por altura multiplicando la escala existente —
+sustituirla deja la ventana de 2 cm.

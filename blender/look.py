@@ -40,6 +40,8 @@ VELA_W = 92.0                      # potencia por veladora
 NEON_W = 1400.0
 CENITAL_W = 350.0
 CONTRALUZ_W = 260.0                 # rim light frío; sin él, negro sobre negro
+TORMENTA_COLOR = (0.42, 0.58, 0.95)   # luz de tormenta, fria y azul
+TORMENTA_W = 0.9                      # de fondo; el relampago la multiplica
 NIEBLA = 0.012                      # densidad; Cycles resuelve dispersion multiple y lava la escena con mas
 
 
@@ -150,8 +152,17 @@ def _materiales():
         transmission_weight=0.96, ior=1.36)
     corcho = _material(
         "MTO_corcho", base_color=(0.045, 0.032, 0.026, 1.0), roughness=0.72)
+    # El cristal de las ventanas. No hay dia en esta escena: lo que entra por
+    # la ventana es la tormenta, y subir su emision es el relampago.
+    tormenta = _material(
+        "MTO_tormenta", base_color=TORMENTA_COLOR + (1.0,), roughness=1.0)
+    _fijar(tormenta.node_tree.nodes["Principled BSDF"], "Emission Color",
+           TORMENTA_COLOR + (1.0,))
+    _fijar(tormenta.node_tree.nodes["Principled BSDF"], "Emission Strength",
+           TORMENTA_W)
     return {
         "alfombra": alfombra, "tequila": tequila, "corcho": corcho,
+        "tormenta": tormenta,
         "plata": plata, "plastico": plastico, "ceramica": ceramica,
         "bombilla": bombilla,
         "terciopelo": terciopelo, "laton": laton, "hueso": hueso,
@@ -163,8 +174,32 @@ def _materiales():
     }
 
 
+
+
+def relampago(fuerza=18.0):
+    """Enciende la tormenta. Devuelve la fuerza anterior para poder deshacerlo.
+
+    No es un efecto aparte: es el mismo material del cristal con la emision
+    multiplicada, asi que el relampago ilumina la nave de verdad —muros,
+    bancas y el humo— en vez de ser un parche encima.
+
+    18 y no 28 ni 38: medido mirando los cuatro. Por encima de 20 la nave
+    entera se levanta a gris y se pierde el negro sobre negro.
+    """
+    mat = bpy.data.materials.get("MTO_tormenta")
+    if mat is None:
+        return None
+    entrada = mat.node_tree.nodes["Principled BSDF"].inputs.get("Emission Strength")
+    if entrada is None:
+        return None
+    antes = entrada.default_value
+    entrada.default_value = fuerza
+    return antes
+
 # Prefijo de nombre -> material. El primero que casa, gana.
 ASIGNACION = (
+    ("VENTANA_vidrio", "tormenta"),
+    ("VENTANA_traceria", "piedra_oscura"),
     ("NAVE_", "piedra"),
     ("RETABLO_", "piedra"),
     ("COLUMNA_", "piedra"),

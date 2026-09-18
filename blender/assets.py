@@ -9,6 +9,7 @@ Licencias en `blender/assets/*-LICENSE.txt` y en `public/scene/CREDITOS.md`.
 
 import bmesh
 import bpy
+import math
 import os
 
 CARPETA = r"E:\Cursor Projects\MTO\blender\assets"
@@ -63,6 +64,69 @@ CIGARRO_COLILLA = "Cigarette_02_GEO"
 PUA = "pick.blend"
 PUA_PIEZA = "Plane"
 PUA_POLIGONOS = 400
+
+# Tracerías góticas, CC0: 29 mallas planas en el plano XY —X ancho, Y alto,
+# Z grosor 0.02— sin cristal, sin derrame y sin marco. Llegan a escala de
+# dibujo, no de metros, así que se escalan por altura y nunca por factor.
+VENTANAS = "ventanas-goticas.blend"
+VENTANA_ROSETON = "window_gothic_8"    # cuatro luces y óculo: el presbiterio
+VENTANA_LANCETA = "window_gothic_2"    # lanceta lisa: la nave
+
+
+def ventana(col, pieza, nombre, ubicacion, alto, hacia_dentro):
+    """Tracería de pie contra un muro lateral, con su cristal detrás.
+
+    Devuelve `(traceria, cristal, cortador)`. El cristal es el casco convexo de
+    la propia tracería encogido un 3%, y el cortador es ese mismo casco engordado
+    a lo ancho del muro: así el hueco tiene **la forma del arco** sin recortar
+    nada a mano, y el borde del casco queda escondido detrás del marco.
+
+    La malla llega tumbada. Se levanta y se gira para que el grosor quede en X,
+    que es la normal de los muros laterales; `hacia_dentro` es el signo que
+    empuja la tracería hacia la nave.
+    """
+    traceria = _traer(VENTANAS, (pieza,))[0]
+    traceria.name = nombre
+    # El asset llega con scale 100 ya puesta y `dimensions` la incluye: hay que
+    # multiplicar la escala, no sustituirla, o la ventana sale de 2 cm.
+    escala = alto / traceria.dimensions.y
+    traceria.scale = tuple(v * escala for v in traceria.scale)
+    traceria.rotation_euler = (math.radians(90), 0, math.radians(90))
+    traceria.location = (ubicacion[0] + hacia_dentro * 0.16,
+                         ubicacion[1], ubicacion[2])
+    bpy.ops.object.select_all(action="DESELECT")
+    traceria.select_set(True)
+    bpy.context.view_layer.objects.active = traceria
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+    traceria.data.materials.clear()
+    for otra in list(traceria.users_collection):
+        otra.objects.unlink(traceria)
+    col.objects.link(traceria)
+
+    def _casco(sufijo, grosor, encoger):
+        copia = traceria.copy()
+        copia.data = traceria.data.copy()
+        copia.name = nombre.replace("traceria", sufijo)
+        col.objects.link(copia)
+        bpy.ops.object.select_all(action="DESELECT")
+        copia.select_set(True)
+        bpy.context.view_layer.objects.active = copia
+        bpy.ops.object.mode_set(mode="EDIT")
+        bpy.ops.mesh.select_all(action="SELECT")
+        bpy.ops.mesh.convex_hull()
+        bpy.ops.object.mode_set(mode="OBJECT")
+        bpy.ops.object.origin_set(type="ORIGIN_GEOMETRY", center="BOUNDS")
+        # Ancho del muro en X; en el plano del muro (Y, Z) se encoge para que el
+        # canto del casco no asome por fuera de la tracería.
+        copia.scale = (grosor / max(copia.dimensions.x, 1e-4), encoger, encoger)
+        copia.location = (ubicacion[0], copia.location.y, copia.location.z)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        return copia
+
+    cristal = _casco("vidrio", 0.06, 0.97)
+    cortador = _casco("corte", 1.2, 1.0)
+    return traceria, cristal, cortador
+
 
 GORRA = "gorra.glb"
 GORRA_POLIGONOS = 18000     # techo tras decimar; el original trae ~92k

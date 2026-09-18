@@ -36,6 +36,16 @@ HORNACINA_ALTO = 1.15
 CRUZ_Z = 4.4
 VELADORAS = 8
 
+# Ventanas: la tormenta de fuera. Dos tipos, como el resto de la nave: el
+# ventanal de cuatro luces junto al altar y lancetas lisas a lo largo de la
+# nave, entre columna y columna para no partir ninguna.
+VENTANAL_Y = 6.4
+VENTANAL_ALTO = 4.2
+VENTANAL_Z = 4.1   # mas alto se sale de cuadro en la estacion altar
+LANCETA_Y = (-6.4, -3.2, 0.0, 3.2)
+LANCETA_ALTO = 1.5
+LANCETA_Z = 2.7
+
 # Estación -> (frame, offset, aim, foco, focal mm, altura extra m, f-stop)
 # Seis canales: Follow Path es aditivo sobre la posición del objeto, así que
 # "altura extra" sube la cámara por encima del recorrido — la grúa de la
@@ -224,12 +234,50 @@ def _arquitectura(col):
           (ALTAR_ANCHO + 0.25, ALTAR_FONDO + 0.2, 0.08))
 
     _hornacinas(col)
+    _ventanas(col)
 
     # Cruz de neón
     _caja(col, "CRUZ_vertical",
           (0, RETABLO_Y - 0.3, CRUZ_Z), (0.12, 0.08, 1.6))
     _caja(col, "CRUZ_horizontal",
           (0, RETABLO_Y - 0.3, CRUZ_Z + 0.35), (0.9, 0.08, 0.12))
+
+
+def _ventanas(col):
+    """Ventanas góticas en los dos muros, con el hueco recortado a su forma.
+
+    El cristal es un plano emisivo: de día no hay día en esta escena, así que
+    lo que entra por la ventana es la tormenta. Su fuerza de emisión la manda
+    `look.py`, y subirla es el relámpago.
+
+    Sin el asset no pasa nada: la nave se queda ciega, como estaba.
+    """
+    assets = _cargar_assets()
+    if assets is None or not assets.disponible(assets.VENTANAS):
+        return []
+
+    puestas = []
+    for signo, lado in ((-1, "izq"), (1, "der")):
+        muro = bpy.data.objects["NAVE_muro_%s" % lado]
+        x = signo * NAVE_ANCHO / 2
+        trabajos = [(assets.VENTANA_ROSETON, "ventanal", VENTANAL_Y,
+                     VENTANAL_ALTO, VENTANAL_Z)]
+        for indice, y in enumerate(LANCETA_Y):
+            trabajos.append((assets.VENTANA_LANCETA, "lanceta_%d" % indice, y,
+                             LANCETA_ALTO, LANCETA_Z))
+
+        for pieza, etiqueta, y, alto, z in trabajos:
+            nombre = "VENTANA_traceria_%s_%s" % (lado, etiqueta)
+            _traceria, _cristal, cortador = assets.ventana(
+                col, pieza, nombre, (x, y, z), alto, -signo)
+            modificador = muro.modifiers.new("corte_" + etiqueta, "BOOLEAN")
+            modificador.operation = "DIFFERENCE"
+            modificador.object = cortador
+            bpy.context.view_layer.objects.active = muro
+            bpy.ops.object.modifier_apply(modifier=modificador.name)
+            bpy.data.objects.remove(cortador, do_unlink=True)
+            puestas.append(nombre)
+    return puestas
 
 
 def _hornacinas(col):
