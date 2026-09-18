@@ -25,13 +25,13 @@ Un formulario detrás de una vela es mal UX y no se va a construir.
 
 | Decisión | Motivo |
 |---|---|
-| Capas con alfa, **no** PNG | Un frame 1920×1080 en PNG pesa ~2 MB. AVIF/WebP con alfa: ~20-60 KB |
+| Capas con alfa, **no** PNG | Un frame 1920×1080 en PNG pesa ~2 MB. WebP con alfa: ~20-60 KB |
 | **Dos** capas, no tres | El frame plano ya contiene fondo y medio. Solo falta el frente |
 | Capa de frente **solo en estaciones** | Ya era decisión cerrada en `docs/blender-notas.md`. Por frame sería 170×2 capas |
 | Se mantiene el **scrub** continuo | Lo que hace fade y pop-in es el texto y la capa, no la cámara |
 | Sexta estación: **altar** | Resuelve que `bio-section` fuera la única sección con titular sin parada de cámara |
 | `Marquee.astro` **se borra** | Su texto duplica `hero-meta`, y es un movimiento horizontal peleando con el viaje de cámara |
-| `avifenc`, **no** `ffmpeg` | libaom vía ffmpeg descarta el canal alfa. Alternativa: `cwebp` |
+| Capas en **WebP**, frames en AVIF | Medido 2026-09-17: `ffmpeg -c:v libwebp` conserva el alfa; `ffmpeg -c:v libaom-av1` lo tira. `avifenc` y `cwebp` no están instalados, y WebP no obliga a instalar nada |
 
 ## 1. Render y capas
 
@@ -54,8 +54,8 @@ Trabajo:
 1. Ejecutar `render_capa_frontal()` en los dos formatos → 12 PNG RGBA.
 2. Revisar `margen` estación por estación. Es un factor de distancia, no una
    verdad: si en hornacinas mete la banca entera, baja para esa estación.
-3. Encodear con `avifenc` (alfa) o `cwebp` si no está disponible. CRF más
-   agresivo que el 30 de las estaciones: la capa es casi toda transparente.
+3. Encodear con `ffmpeg -c:v libwebp`. Calidad más agresiva que el CRF 30 de
+   las estaciones: la capa es casi toda transparente.
 4. `scripts/scene-json.py` añade `capaFrente: { imagen, bytes }` por estación.
 
 **Verificación:** componer `frente` sobre el frame plano de la misma estación y

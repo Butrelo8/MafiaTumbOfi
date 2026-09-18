@@ -14,9 +14,10 @@ Barata, y las dos pueden obligar a cambiar algo **antes** de renderizar 35 min.
 |---|---|---|
 | 0.1 | ~~Resolver la licencia de `guitarra.blend`~~ | **Hecho 2026-09-17: CC0** (https://blendswap.com/blend/31078). Sin atribución obligatoria. Anotado en `CREDITOS.md` |
 | 0.2 | ~~Sustituirla~~ | No hace falta: CC0 |
-| 0.3 | Confirmar encoder con alfa | `avifenc --version`. Si no está: `cwebp -version` y la salida pasa a WebP |
+| 0.3 | ~~Confirmar encoder con alfa~~ | **Hecho 2026-09-17: WebP.** Ni `avifenc` ni `cwebp` instalados. Medido con un RGBA de prueba: `ffmpeg -c:v libwebp` conserva el alfa; `ffmpeg -c:v libaom-av1` lo tira y devuelve la imagen opaca |
 
-**Puerta 0:** 0.1 y 0.2 cerradas el 2026-09-17. Queda 0.3.
+**Puerta 0: cerrada el 2026-09-17.** Guitarra CC0 y capas en WebP con el
+`ffmpeg` que ya usa el build, sin instalar nada.
 
 ## Fase 1 — Encuadres
 
@@ -57,7 +58,7 @@ encodear nada.
 
 | # | Tarea | Verificación |
 |---|---|---|
-| 3.1 | `scripts/build-scene.sh`: rama de capas con alfa vía `avifenc`/`cwebp` | Las 12 capas encodean y **conservan el alfa** al abrirlas |
+| 3.1 | `scripts/build-scene.sh`: rama de capas con `ffmpeg -c:v libwebp` | Las 12 capas encodean y **conservan el alfa** al abrirlas |
 | 3.2 | CRF de capa, más agresivo que el 30 de estaciones | Medido, no estimado: mirar una y pesarla |
 | 3.3 | `scripts/scene-json.py`: `capaFrente: { imagen, bytes }` por estación | `scene.json` valida contra el tipo `FormatoEscena` |
 | 3.4 | `scripts/check-budget.sh` | Peso por formato anotado en el commit |
