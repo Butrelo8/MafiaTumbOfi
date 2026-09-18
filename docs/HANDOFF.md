@@ -54,6 +54,9 @@ Cinco estaciones: nave, sonido, hornacinas, reliquia, retirada.
 | `docs/blender-notas.md` | **Léelo antes de tocar `blender/`.** Quirks de Blender 5.2, importación de assets, método de medición, congelar poses, detectar lo movido, atajos de navegación |
 | `public/scene/CREDITOS.md` | Licencias de todo lo que no es nuestro |
 | `DESIGN.md` | Tokens de color y tipografía; la escena los consume |
+| `docs/specs/2026-09-17-santuario-profundidad-design.md` | El diseño de profundidad, pop-in y la sexta estación. Aprobado |
+| `docs/plans/2026-09-17-profundidad-implementation-plan.md` | Sus 7 fases; las 0 a 4 están cerradas |
+| `docs/handoffs/2026-09-18-profundidad.md` | **Dónde se quedó la sesión del 2026-09-17** y las trampas que costaron tiempo |
 
 `git log main..dev` cuenta el resto: cada commit explica **por qué**.
 
