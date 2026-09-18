@@ -25,6 +25,7 @@ FORMATOS = {
 ESTACIONES = (1, 31, 61, 91, 121, 151)   # mismos frames que blender/altar.py
 FRAMES_POR_TRAMO = 30   # 30 y no 20: a 20 el escalon del scrub se nota
 OBTURADOR = 0.25                   # motion blur; ver DECISION en la spec
+RELAMPAGO = 18.0                   # emision del cristal durante el destello
 MUESTRAS = 128
 
 RAIZ = r"E:\Cursor Projects\MTO"
@@ -84,16 +85,32 @@ def tramos(formato, destino=None, desde=0, hasta=None):
     return escritos
 
 
-def estaciones(formato, destino=None):
-    """El frame quieto de cada estación, sin blur. El 0 es el LCP."""
+def estaciones(formato, destino=None, tormenta=None, sufijo=""):
+    """El frame quieto de cada estación, sin blur. El 0 es el LCP.
+
+    Con `tormenta` se fija la emisión del cristal de las ventanas: es el
+    relámpago. No es una capa aparte ni un parche encima, es la misma escena
+    con la tormenta encendida, así que el destello ilumina muros, bancas y
+    humo. La web cruza por opacidad entre la estación y su variante.
+    """
     escena = _escena(formato)
     escena.render.use_motion_blur = False
     destino = destino or os.path.join(RAIZ, "tmp", "frames", formato)
     os.makedirs(destino, exist_ok=True)
+
+    if tormenta is not None:
+        material = bpy.data.materials.get("MTO_tormenta")
+        if material is None:
+            raise RuntimeError("no hay MTO_tormenta: ¿se aplicó el look?")
+        entrada = material.node_tree.nodes["Principled BSDF"].inputs["Emission Strength"]
+        entrada.default_value = tormenta
+        bpy.context.view_layer.update()
+
     escritos = []
     for indice, frame in enumerate(ESTACIONES):
         escena.frame_set(frame)
-        escena.render.filepath = os.path.join(destino, "estacion-%d" % indice)
+        escena.render.filepath = os.path.join(
+            destino, "estacion-%d%s" % (indice, sufijo))
         bpy.ops.render.render(write_still=True)
         escritos.append(escena.render.filepath + ".png")
     return escritos
@@ -121,6 +138,8 @@ if __name__ == "__main__":
             hechos = tramos(formato)
         elif que == "capas":
             hechos = capas(formato, espacio=espacio)
+        elif que == "relampago":
+            hechos = estaciones(formato, tormenta=RELAMPAGO, sufijo="-relampago")
         else:
             hechos = estaciones(formato)
         print("render: %d frames en %s" % (len(hechos), formato))

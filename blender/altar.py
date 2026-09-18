@@ -1233,8 +1233,10 @@ def render_capa_frontal(out_dir, ancho=800, alto=450, margen=0.78):
                 ob.hide_render = not (candidato and distancia < umbral)
                 frontales += not ob.hide_render
 
+            # Mismo nombre que el resto del pipeline: scripts/build-scene.sh
+            # encodea `estacion-N-frente.png` a WebP y scene-json.py lo publica.
             escena.render.filepath = os.path.join(
-                out_dir, "%d-%s-frente.png" % (indice, nombre))
+                out_dir, "estacion-%d-frente.png" % indice)
             bpy.ops.render.render(write_still=True)
             escritos.append((nombre, frontales, round(umbral, 2)))
     finally:

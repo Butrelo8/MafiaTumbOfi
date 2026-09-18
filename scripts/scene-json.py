@@ -26,9 +26,21 @@ def formato(carpeta):
         ruta = os.path.join(base, archivo)
         if not os.path.exists(ruta):
             continue
-        estaciones.append({"nombre": nombre,
-                           "imagen": "/scene/%s/%s" % (carpeta, archivo),
-                           "bytes": _peso(ruta)})
+        estacion = {"nombre": nombre,
+                    "imagen": "/scene/%s/%s" % (carpeta, archivo),
+                    "bytes": _peso(ruta)}
+
+        # Capa con alfa de lo que va DELANTE del texto, y variante con el
+        # relámpago encendido. Las dos son opcionales: si no están, la web se
+        # comporta como antes de existir.
+        for clave, sufijo, extension in (("capaFrente", "-frente", "webp"),
+                                         ("relampago", "-relampago", "avif")):
+            extra = "estacion-%d%s.%s" % (indice, sufijo, extension)
+            ruta_extra = os.path.join(base, extra)
+            if os.path.exists(ruta_extra):
+                estacion[clave] = {"imagen": "/scene/%s/%s" % (carpeta, extra),
+                                   "bytes": _peso(ruta_extra)}
+        estaciones.append(estacion)
 
     tramos = []
     for indice in range(len(NOMBRES) - 1):
@@ -44,7 +56,12 @@ def formato(carpeta):
             "bytes": sum(_peso(os.path.join(carpeta_tramo, f)) for f in archivos),
         })
 
-    total = sum(e["bytes"] for e in estaciones) + sum(t["bytes"] for t in tramos)
+    total = sum(t["bytes"] for t in tramos)
+    for e in estaciones:
+        total += e["bytes"]
+        for clave in ("capaFrente", "relampago"):
+            if clave in e:
+                total += e[clave]["bytes"]
     return {"ancho": ancho, "alto": alto, "estaciones": estaciones,
             "tramos": tramos, "bytes": total}
 
