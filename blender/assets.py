@@ -76,10 +76,10 @@ VENTANA_LANCETA = "window_gothic_2"    # lanceta lisa: la nave
 def ventana(col, pieza, nombre, ubicacion, alto, hacia_dentro):
     """Tracería de pie contra un muro lateral, con su cristal detrás.
 
-    Devuelve `(traceria, cristal, cortador)`. El cristal es el casco convexo de
-    la propia tracería encogido un 3%, y el cortador es ese mismo casco engordado
-    a lo ancho del muro: así el hueco tiene **la forma del arco** sin recortar
-    nada a mano, y el borde del casco queda escondido detrás del marco.
+    Devuelve `(traceria, cristal, cortador)`. Los dos salen del contorno
+    exterior de la propia tracería: el cristal encogido un 3% para que su canto
+    quede detrás del marco, y el cortador engordado a lo ancho del muro. Así el
+    hueco tiene **la forma exacta del arco** sin recortar nada a mano.
 
     La malla llega tumbada. Se levanta y se gira para que el grosor quede en X,
     que es la normal de los muros laterales; `hacia_dentro` es el signo que
@@ -103,28 +103,61 @@ def ventana(col, pieza, nombre, ubicacion, alto, hacia_dentro):
         otra.objects.unlink(traceria)
     col.objects.link(traceria)
 
-    def _casco(sufijo, grosor, encoger):
-        copia = traceria.copy()
-        copia.data = traceria.data.copy()
-        copia.name = nombre.replace("traceria", sufijo)
+    def _perfil(sufijo, grosor, encoger, franjas=160):
+        """El contorno EXTERIOR de la tracería, relleno y engordado.
+
+        Ni el casco convexo ni los bucles de borde sirven: el primero cambia la
+        curva del arco por dos rectas y abre un hueco más alto que la ventana;
+        los segundos no existen, porque la malla es un sólido biselado y no hay
+        ninguna cara mirando de frente.
+
+        Se mide por franjas de altura: a cada altura, el material más a la
+        izquierda y el más a la derecha son el marco de fuera, así que subir por
+        un lado y bajar por el otro dibuja el contorno. Vale para cualquier
+        ventana de este pack porque todas son de una sola luz por altura.
+        """
+        puntos = [v.co for v in traceria.data.vertices]
+        z0 = min(p.z for p in puntos)
+        z1 = max(p.z for p in puntos)
+        paso = (z1 - z0) / franjas
+        izquierda, derecha = [], []
+        for i in range(franjas + 1):
+            z = z0 + paso * i
+            dentro = [p.y for p in puntos if abs(p.z - z) <= paso]
+            if not dentro:
+                continue
+            izquierda.append((min(dentro), z))
+            derecha.append((max(dentro), z))
+
+        contorno = izquierda + list(reversed(derecha))
+        malla = bpy.data.meshes.new(nombre.replace("traceria", sufijo))
+        bm = bmesh.new()
+        vertices = [bm.verts.new((0.0, y, z)) for y, z in contorno]
+        bm.faces.new(vertices)
+        bm.normal_update()
+        salida = bmesh.ops.extrude_face_region(bm, geom=list(bm.faces))
+        movidos = [g for g in salida["geom"] if isinstance(g, bmesh.types.BMVert)]
+        bmesh.ops.translate(bm, vec=(grosor, 0, 0), verts=movidos)
+        bmesh.ops.recalc_face_normals(bm, faces=list(bm.faces))
+        bm.to_mesh(malla)
+        bm.free()
+
+        copia = bpy.data.objects.new(malla.name, malla)
         col.objects.link(copia)
+        copia.matrix_world = traceria.matrix_world.copy()
         bpy.ops.object.select_all(action="DESELECT")
         copia.select_set(True)
         bpy.context.view_layer.objects.active = copia
-        bpy.ops.object.mode_set(mode="EDIT")
-        bpy.ops.mesh.select_all(action="SELECT")
-        bpy.ops.mesh.convex_hull()
-        bpy.ops.object.mode_set(mode="OBJECT")
         bpy.ops.object.origin_set(type="ORIGIN_GEOMETRY", center="BOUNDS")
-        # Ancho del muro en X; en el plano del muro (Y, Z) se encoge para que el
-        # canto del casco no asome por fuera de la tracería.
-        copia.scale = (grosor / max(copia.dimensions.x, 1e-4), encoger, encoger)
+        copia.scale = (1.0, encoger, encoger)
+        # Centrado en el eje del muro: descentrarlo medio grosor deja la mitad
+        # interior del muro sin cortar y la ventana no se ve desde la nave.
         copia.location = (ubicacion[0], copia.location.y, copia.location.z)
         bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
         return copia
 
-    cristal = _casco("vidrio", 0.06, 0.97)
-    cortador = _casco("corte", 1.2, 1.0)
+    cristal = _perfil("vidrio", 0.06, 0.97)
+    cortador = _perfil("corte", 1.2, 0.995)
     return traceria, cristal, cortador
 
 
