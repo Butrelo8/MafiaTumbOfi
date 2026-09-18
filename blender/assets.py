@@ -175,11 +175,11 @@ MUJER_POLIGONOS = 9000
 def mujer(col, ubicacion, estatura=1.62, giro=0.0, pose=None):
     """Trae a la fiel, la escala a estatura humana y la sienta.
 
-    `pose` es un diccionario `hueso -> (dx, dy, dz)` en unidades del asset, en
-    espacio de armadura. Lo que no pase por aquí se pierde: si la pose se
-    retoca en el visor, hay que volcarla a estas constantes.
+    `pose` es un diccionario `hueso -> (traslación, cuaternión)` en espacio de
+    hueso, tal cual `matrix_basis`. Lo que no pase por aquí se pierde: si la
+    pose se retoca en el visor, hay que volcarla a las constantes.
     """
-    from mathutils import Vector
+    from mathutils import Matrix, Quaternion, Vector
 
     traidos = _traer(MUJER, MUJER_PIEZAS)
     armadura = next((o for o in traidos if o.type == "ARMATURE"), None)
@@ -206,14 +206,13 @@ def mujer(col, ubicacion, estatura=1.62, giro=0.0, pose=None):
 
     bpy.context.view_layer.objects.active = armadura
     bpy.ops.object.mode_set(mode="POSE")
-    for hueso, desplazamiento in (pose or {}).items():
+    for hueso, (traslacion, giro) in (pose or {}).items():
         pb = armadura.pose.bones.get(hueso)
         if pb is None:
             continue
-        matriz = pb.matrix.copy()
-        matriz.translation = matriz.translation + Vector(desplazamiento)
-        pb.matrix = matriz
-        bpy.context.view_layer.update()
+        pb.rotation_mode = "QUATERNION"
+        pb.location = Vector(traslacion)
+        pb.rotation_quaternion = Quaternion(giro)
     bpy.ops.object.mode_set(mode="OBJECT")
 
     _decimar(malla, MUJER_POLIGONOS)
