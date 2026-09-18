@@ -1233,7 +1233,13 @@ def render_stills(out_dir, ancho=480, alto=270):
 PREFIJOS_FRENTE = (
     "COLUMNA_", "BANCA_", "CANDELABRO_", "PROP_", "VELADORA_", "LLAMA_",
     "VINILO_", "ETIQUETA_", "MICRO_", "PROXY_micro", "PROXY_cadena",
+    # La fiel queda a 5 m de la cámara en la estación `altar` y el altar a
+    # 10.2: es primer plano, y pasa por delante del titular.
+    "FIEL_",
 )
+
+# Las ventanas NO entran: están en los muros, a media distancia, y un titular
+# pasando por detrás de una lanceta se lee como un error, no como profundidad.
 
 
 def render_capa_frontal(out_dir, ancho=800, alto=450, margen=0.78):
