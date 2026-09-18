@@ -22,7 +22,7 @@ FORMATOS = {
     "escritorio": (1600, 900),
 }
 
-ESTACIONES = (1, 21, 41, 61, 81)   # mismos frames que blender/altar.py
+ESTACIONES = (1, 21, 41, 61, 81, 101)   # mismos frames que blender/altar.py
 FRAMES_POR_TRAMO = 20
 OBTURADOR = 0.25                   # motion blur; ver DECISION en la spec
 MUESTRAS = 128

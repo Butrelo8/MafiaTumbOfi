@@ -9,7 +9,7 @@ import os
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ESCENA = os.path.join(RAIZ, "public", "scene")
-NOMBRES = ("nave", "sonido", "hornacinas", "reliquia", "retirada")
+NOMBRES = ("nave", "altar", "sonido", "hornacinas", "reliquia", "retirada")
 FORMATOS = {"mobile": (900, 1600), "desktop": (1600, 900)}
 
 
