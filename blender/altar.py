@@ -48,12 +48,12 @@ ESTACIONES = (
     # del altar y desviada 0.85 a la derecha; mas alla los muros se levantan a
     # gris. Mismo encuadre sirve en 16:9 y en 9:16, verificado renderizando los
     # dos. Es la estacion mas brillante de las seis: manda sobre el velo.
-    ("altar",      21,  0.350, "AIM_altar",     "AIM_altar",         24.0, 0.00, 4.0),
-    ("sonido",     41,  0.825, "PROXY_vinilo",  "PROXY_vinilo",      70.0, 1.95, 3.2),
+    ("altar",      31,  0.350, "AIM_altar",     "AIM_altar",         24.0, 0.00, 4.0),
+    ("sonido",     61,  0.825, "PROXY_vinilo",  "PROXY_vinilo",      70.0, 1.95, 3.2),
     # 28 mm, no 34: a 34 el retablo no entraba entero.
-    ("hornacinas", 61,  0.885, "AIM_retablo",   "PROXY_hornacina_c", 28.0, 0.10, 3.5),
-    ("reliquia",   81,  0.962, "PROXY_micro",   "PROXY_micro",       58.0, 0.30, 3.2),
-    ("retirada",   101, 0.325, "AIM_altar",     "PROXY_placa",       26.0, 1.05, 5.6),
+    ("hornacinas", 91,  0.885, "AIM_retablo",   "PROXY_hornacina_c", 28.0, 0.10, 3.5),
+    ("reliquia",   121, 0.962, "PROXY_micro",   "PROXY_micro",       58.0, 0.30, 3.2),
+    ("retirada",   151, 0.325, "AIM_altar",     "PROXY_placa",       26.0, 1.05, 5.6),
 )
 
 # Puntos del recorrido de cámara: (x, y, z)
