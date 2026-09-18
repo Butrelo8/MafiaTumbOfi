@@ -91,10 +91,10 @@ El mismo asset se reutiliza escalado a 1,85 m como tololoche apoyado en una
 columna: a esa distancia y en penumbra, la silueta de un contrabajo y la de una
 guitarra grande no se distinguen.
 
-**Pendiente:** confirmar autor y licencia exacta de este blend. Se descargó sin
-su archivo de licencia, así que antes de publicar hay que verificarlo en Blend
-Swap y anotarlo aquí; si resultara ser CC-BY, el crédito debe aparecer también
-en el sitio.
+**Licencia: CC0**, verificada el 2026-09-17 en
+https://blendswap.com/blend/31078 — "Classical guitar", de Centurion_1705541.
+Dominio público: no obliga a atribuir ni a acreditar en el sitio. Se anota aquí
+por trazabilidad, no por obligación.
 
 ### Velas y tololoche
 

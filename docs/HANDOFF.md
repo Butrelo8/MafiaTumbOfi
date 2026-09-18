@@ -116,10 +116,9 @@ iluminación de la escena, **ese 0.62 hay que recalcularlo**.
 
 ## Pendientes y bloqueos
 
-- **Licencia de `blender/assets/guitarra.blend` sin verificar.** Blend Swap sin
-  archivo de licencia. Si resulta CC-BY hay que acreditar **en el sitio**, no
-  sólo en el repo. Sigue siendo lo único que puede obligar a cambiar la página
-  antes de publicar.
+- ~~Licencia de `blender/assets/guitarra.blend`~~ — **CC0**, verificada el
+  2026-09-17: https://blendswap.com/blend/31078. No obliga a acreditar en el
+  sitio. Era el único bloqueo para publicar; ya no hay ninguno.
 - **La tabla de contraste de `DESIGN.md` está calculada contra negro plano** y
   ya no vale: hay texto sobre la escena. Se recalcula en la fase 5; el 0.62 del
   velo es el dato de partida.

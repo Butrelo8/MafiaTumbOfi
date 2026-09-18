@@ -12,11 +12,11 @@ Barata, y las dos pueden obligar a cambiar algo **antes** de renderizar 35 min.
 
 | # | Tarea | Verificación |
 |---|---|---|
-| 0.1 | Resolver la licencia de `blender/assets/guitarra.blend` | Licencia escrita y anotada en `public/scene/CREDITOS.md`. Si es CC-BY: crédito **en el sitio**, no solo en el repo |
-| 0.2 | Si hay que sustituirla, hacerlo ahora | Sustituir en `blender/assets.py`. Afecta a **dos** objetos: el requinto y el contrabajo, que es el mismo asset escalado (`blender/altar.py:494`) |
+| 0.1 | ~~Resolver la licencia de `guitarra.blend`~~ | **Hecho 2026-09-17: CC0** (https://blendswap.com/blend/31078). Sin atribución obligatoria. Anotado en `CREDITOS.md` |
+| 0.2 | ~~Sustituirla~~ | No hace falta: CC0 |
 | 0.3 | Confirmar encoder con alfa | `avifenc --version`. Si no está: `cwebp -version` y la salida pasa a WebP |
 
-**Puerta 0:** las tres cerradas. Sin licencia resuelta no se lanza render.
+**Puerta 0:** 0.1 y 0.2 cerradas el 2026-09-17. Queda 0.3.
 
 ## Fase 1 — Encuadres
 
