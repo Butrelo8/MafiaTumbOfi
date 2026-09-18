@@ -153,9 +153,13 @@ type Opciones = {
   canvas: HTMLCanvasElement
   escena: Escena
   ventana?: Window
+  /** Se llama con el índice recién pintado. Lo usa `capasEstacion`. */
+  alCambiarFrame?: (indice: number) => void
 }
 
-export function mountScrollScene({ canvas, escena, ventana = window }: Opciones): () => void {
+export function mountScrollScene(
+  { canvas, escena, ventana = window, alCambiarFrame }: Opciones,
+): () => void {
   const sinMovimiento = ventana.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
   const clave = formatoParaPantalla(escena, ventana.innerWidth, ventana.innerHeight)
   const formato = escena.formatos[clave]
@@ -195,6 +199,7 @@ export function mountScrollScene({ canvas, escena, ventana = window }: Opciones)
     contexto.drawImage(imagen, 0, 0, canvas.width, canvas.height)
     dibujado = indice
     canvas.dataset.frame = String(indice)
+    alCambiarFrame?.(indice)
   }
 
   // Las anclas dependen del alto de las secciones, que cambia con la ventana y
@@ -250,7 +255,7 @@ export function mountScrollScene({ canvas, escena, ventana = window }: Opciones)
     if (formatoParaPantalla(escena, ventana.innerWidth, ventana.innerHeight) === clave) return
     ventana.removeEventListener('scroll', alScroll)
     ventana.removeEventListener('resize', alRedimensionar)
-    remontar = mountScrollScene({ canvas, escena, ventana })
+    remontar = mountScrollScene({ canvas, escena, ventana, alCambiarFrame })
   }
   ventana.addEventListener('resize', alRedimensionar, { passive: true })
 

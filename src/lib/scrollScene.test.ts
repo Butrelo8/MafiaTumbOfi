@@ -12,11 +12,17 @@ const formato = escena.formatos.mobile
 
 describe('rutasDeFrames', () => {
   test('una ruta por frame, en orden de scroll', () => {
+    // Derivado de scene.json, no escrito a mano: el número de tramos y de
+    // frames por tramo cambia cada vez que se re-renderiza la escena, y un
+    // test con números fijos sólo avisa de eso, que no es un error.
     const rutas = rutasDeFrames(formato)
+    const porTramo = formato.tramos[0].frames
+    const ultimo = formato.tramos.length - 1
     expect(rutas.length).toBe(formato.tramos.reduce((suma, t) => suma + t.frames, 0))
     expect(rutas[0]).toBe('/scene/mobile/tramo-0/000.avif')
-    expect(rutas[20]).toBe('/scene/mobile/tramo-1/000.avif')
-    expect(rutas.at(-1)).toBe('/scene/mobile/tramo-3/019.avif')
+    expect(rutas[porTramo]).toBe('/scene/mobile/tramo-1/000.avif')
+    expect(rutas.at(-1)).toBe(
+      `/scene/mobile/tramo-${ultimo}/${String(formato.tramos[ultimo].frames - 1).padStart(3, '0')}.avif`)
   })
 })
 
@@ -49,7 +55,20 @@ describe('formatoParaPantalla', () => {
 
 describe('framesDeEstacion', () => {
   test('cada estación es el primer frame de su tramo, y la última el final', () => {
-    expect(framesDeEstacion(formato)).toEqual([0, 20, 40, 60, 79])
+    const frames = framesDeEstacion(formato)
+    const total = formato.tramos.reduce((suma, t) => suma + t.frames, 0)
+    expect(frames.length).toBe(formato.tramos.length + 1)
+    expect(frames[0]).toBe(0)
+    expect(frames.at(-1)).toBe(total - 1)
+    let acumulado = 0
+    formato.tramos.forEach((tramo, indice) => {
+      expect(frames[indice]).toBe(acumulado)
+      acumulado += tramo.frames
+    })
+  })
+
+  test('hay una estación por cada nombre de scene.json', () => {
+    expect(framesDeEstacion(formato).length).toBe(formato.estaciones.length)
   })
 })
 

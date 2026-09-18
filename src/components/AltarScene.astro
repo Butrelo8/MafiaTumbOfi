@@ -32,6 +32,30 @@ const primeraEscritorio = escritorio?.estaciones[0]
   </div>
 )}
 
+{primeraMovil && (
+  <div class="altar-frente" aria-hidden="true">
+    {movil.estaciones.map((estacion, indice) => (
+      estacion.capaFrente && (
+        <picture>
+          {escritorio?.estaciones[indice]?.capaFrente && (
+            <source
+              media="(min-aspect-ratio: 1/1)"
+              srcset={escritorio.estaciones[indice].capaFrente.imagen}
+            />
+          )}
+          <img
+            data-capa-frente={indice}
+            src={estacion.capaFrente.imagen}
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        </picture>
+      )
+    ))}
+  </div>
+)}
+
 <style>
   .altar-escena {
     position: fixed;
@@ -54,10 +78,37 @@ const primeraEscritorio = escritorio?.estaciones[0]
      no elegido a ojo: es el alfa mínimo con el que el percentil 95 de la
      estación más brillante (la reliquia, cromo del micro) sigue dando 4.5:1
      contra --text. Bajarlo rompe AA; ver docs/blender-notas.md. */
+  .altar-escena {
+    --velo: 0.62;
+  }
+
   .altar-escena__velo {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.62);
+    background: rgba(0, 0, 0, var(--velo));
+  }
+
+  /* La capa de frente va por ENCIMA del texto, o sea por encima del velo, así
+     que saldría a brillo completo sobre una escena atenuada y se vería como un
+     recorte pegado. Tapar con negro al 0.62 es multiplicar por 0.38, y eso es
+     exactamente lo que hace `brightness`: mismo velo, y respeta el alfa.
+     El número no se repite: se calcula del mismo sitio. */
+  .altar-frente {
+    --velo: 0.62;
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .altar-frente img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    filter: brightness(calc(1 - var(--velo)));
   }
 
   /* El vídeo del hero es un fondo decorativo y tapaba la escena entera. Se
@@ -134,8 +185,24 @@ const primeraEscritorio = escritorio?.estaciones[0]
 
 <script>
   import escena from '../data/scene.json'
-  import { mountScrollScene } from '../lib/scrollScene'
+  import { formatoParaPantalla, framesDeEstacion, mountScrollScene } from '../lib/scrollScene'
+  import { montarCapas } from '../lib/capasEstacion'
 
   const canvas = document.querySelector<HTMLCanvasElement>('[data-altar-canvas]')
-  if (canvas) mountScrollScene({ canvas, escena })
+  if (canvas) {
+    const clave = formatoParaPantalla(escena, window.innerWidth, window.innerHeight)
+    const formato = escena.formatos[clave]
+    const sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    // Un solo lector del scroll: `scrollScene` avisa del frame y las capas se
+    // cuelgan de ese aviso. Dos escuchas del mismo evento se desincronizan.
+    const pintarCapas = formato
+      ? montarCapas({
+          formato,
+          framesDeEstacion: framesDeEstacion(formato),
+          documento: document,
+          sinMovimiento,
+        })
+      : () => {}
+    mountScrollScene({ canvas, escena, alCambiarFrame: pintarCapas })
+  }
 </script>
