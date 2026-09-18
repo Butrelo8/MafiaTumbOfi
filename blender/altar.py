@@ -46,6 +46,23 @@ LANCETA_Y = (-6.4, -3.2, 0.0, 3.2)
 LANCETA_ALTO = 1.5
 LANCETA_Z = 2.7
 
+# La fiel: una sola figura sentada de espaldas, mirando al altar, en la banca
+# izquierda que queda delante de la cámara en la estación `altar`. Una sola, y
+# de espaldas: dos ya serían una congregación y esto es un velorio vacío.
+# Al suelo, no al asiento: el origen del rig está en los pies y es la cadera la
+# que baja al asiento con la pose.
+FIEL_BANCA = (-1.9, 0.75, 0.0)
+FIEL_ESTATURA = 1.62
+FIEL_GIRO = math.radians(180.0)
+# Pose sentada, en unidades del asset y espacio de armadura. La cadera baja al
+# asiento y los dos controles de pie se adelantan; el IK dobla las rodillas.
+FIEL_POSE = {
+    "hips_main": (0.0, 0.35, -1.85),
+    "foot_IK_main.L": (0.0, -1.10, 0.0),
+    "foot_IK_main.R": (0.0, -1.10, 0.0),
+    "spine": (0.0, 0.10, 0.0),
+}
+
 # Estación -> (frame, offset, aim, foco, focal mm, altura extra m, f-stop)
 # Seis canales: Follow Path es aditivo sobre la posición del objeto, así que
 # "altura extra" sube la cámara por encima del recorrido — la grúa de la
@@ -235,12 +252,25 @@ def _arquitectura(col):
 
     _hornacinas(col)
     _ventanas(col)
+    _fiel(col)
 
     # Cruz de neón
     _caja(col, "CRUZ_vertical",
           (0, RETABLO_Y - 0.3, CRUZ_Z), (0.12, 0.08, 1.6))
     _caja(col, "CRUZ_horizontal",
           (0, RETABLO_Y - 0.3, CRUZ_Z + 0.35), (0.9, 0.08, 0.12))
+
+
+def _fiel(col):
+    """Una fiel sentada de espaldas en la banca izquierda.
+
+    Sin el asset no pasa nada: la nave se queda vacía, que es como estaba.
+    """
+    assets = _cargar_assets()
+    if assets is None or not assets.disponible(assets.MUJER):
+        return None
+    return assets.mujer(col, FIEL_BANCA, estatura=FIEL_ESTATURA,
+                        giro=FIEL_GIRO, pose=FIEL_POSE)
 
 
 def _ventanas(col):

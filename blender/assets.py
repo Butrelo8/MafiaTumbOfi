@@ -161,6 +161,67 @@ def ventana(col, pieza, nombre, ubicacion, alto, hacia_dentro):
     return traceria, cristal, cortador
 
 
+# Fiel sentada en una banca. El .blend trae la escena del autor —dos soles, un
+# suelo, una cámara, una icosfera— y una acción de caminar que en esta escena se
+# reproduciría con el scroll: sólo entran la armadura y la malla, y sin acción.
+# Rig de 72 huesos con IK en los pies, así que se sienta moviendo la cadera y
+# los dos controles de pie: las rodillas las dobla el IK solo.
+MUJER = "mujer.blend"
+MUJER_PIEZAS = ("Armature", "Low Poly Characte.001")
+MUJER_ALTO_ORIGEN = 5.88      # estatura en las unidades del asset
+MUJER_POLIGONOS = 9000
+
+
+def mujer(col, ubicacion, estatura=1.62, giro=0.0, pose=None):
+    """Trae a la fiel, la escala a estatura humana y la sienta.
+
+    `pose` es un diccionario `hueso -> (dx, dy, dz)` en unidades del asset, en
+    espacio de armadura. Lo que no pase por aquí se pierde: si la pose se
+    retoca en el visor, hay que volcarla a estas constantes.
+    """
+    from mathutils import Vector
+
+    traidos = _traer(MUJER, MUJER_PIEZAS)
+    armadura = next((o for o in traidos if o.type == "ARMATURE"), None)
+    malla = next((o for o in traidos if o.type == "MESH"), None)
+    if armadura is None or malla is None:
+        return None
+
+    for ob in traidos:
+        ob.animation_data_clear()
+        for otra in list(ob.users_collection):
+            otra.objects.unlink(ob)
+        col.objects.link(ob)
+
+    # El Subsurf del autor multiplica la malla por cuatro al renderizar, y el
+    # Collision no pinta nada en una escena sin física.
+    for modificador in list(malla.modifiers):
+        if modificador.type in {"SUBSURF", "MULTIRES", "COLLISION"}:
+            malla.modifiers.remove(modificador)
+
+    factor = estatura / MUJER_ALTO_ORIGEN
+    armadura.scale = (factor, factor, factor)
+    armadura.rotation_euler = (0, 0, giro)
+    armadura.location = ubicacion
+
+    bpy.context.view_layer.objects.active = armadura
+    bpy.ops.object.mode_set(mode="POSE")
+    for hueso, desplazamiento in (pose or {}).items():
+        pb = armadura.pose.bones.get(hueso)
+        if pb is None:
+            continue
+        matriz = pb.matrix.copy()
+        matriz.translation = matriz.translation + Vector(desplazamiento)
+        pb.matrix = matriz
+        bpy.context.view_layer.update()
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+    _decimar(malla, MUJER_POLIGONOS)
+    malla.name = "FIEL_cuerpo"
+    armadura.name = "FIEL_rig"
+    return armadura
+
+
 GORRA = "gorra.glb"
 GORRA_POLIGONOS = 18000     # techo tras decimar; el original trae ~92k
 
