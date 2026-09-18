@@ -122,7 +122,8 @@ iluminación de la escena, **ese 0.62 hay que recalcularlo**.
 - **La tabla de contraste de `DESIGN.md` está calculada contra negro plano** y
   ya no vale: hay texto sobre la escena. Se recalcula en la fase 5; el 0.62 del
   velo es el dato de partida.
-- **Los retratos de las hornacinas** siguen siendo huecos negros.
+- ~~Los retratos de las hornacinas~~ — ya no son huecos negros: los tres se ven
+  en los renders del 2026-09-17.
 - **Deuda preexistente en `look.py`**: la fila `("PROP_botella", "vidrio")` gana
   antes que las de `liquido`, `tapon`, `cinta` y `lazo`, que nunca se aplicaron.
   No la toqué porque es anterior a esta sesión.

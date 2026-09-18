@@ -123,8 +123,9 @@ también en el sitio.
 
 ### Tracerías góticas
 
-`ventanas-goticas.blend`, aportado por el usuario el 2026-09-17. **CC0** según
-el propio usuario; falta anotar aquí la URL de Blend Swap.
+`ventanas-goticas.blend`, aportado por el usuario el 2026-09-17. **CC0**,
+verificado el mismo día: "Gothic windows", de **ExLibris**,
+https://blendswap.com/blend/29662. Dominio público, sin atribución obligatoria.
 
 Son 29 tracerías planas hechas a partir de SVG de dominio público
 (craftsmanspace, patrones de tracería gótica). Del pack se usan sólo dos:
@@ -137,3 +138,19 @@ casco convexo de la propia tracería, y el cristal es ese mismo casco encogido
 un 3% con material emisivo. Llegan a escala de dibujo y con `scale` de 100 ya
 puesta, así que se escalan por altura multiplicando la escala existente —
 sustituirla deja la ventana de 2 cm.
+
+### Fiel sentada
+
+`mujer.blend`, aportado por el usuario el 2026-09-17. **CC0**, verificado el
+mismo día: "Hijab Woman walking rigged", de **Ahmed047**,
+https://blendswap.com/blend/22965. Dominio público, sin atribución obligatoria.
+
+Del archivo entran sólo la armadura y la malla. Quedan fuera la escena del
+autor —dos soles, un suelo, una cámara, una icosfera— y **la acción de
+caminar**: en esta escena el frame es posición de cámara, así que una acción se
+reproduciría con el scroll. También se quitan el Subsurf, que multiplica la
+malla por cuatro al renderizar, y el Collision, que no pinta nada sin física.
+
+La figura lleva hiyab. A la distancia y el encuadre en que aparece se lee como
+una mantilla, que es lo que se busca; es una prenda con significado propio y la
+decisión de usarla es del usuario, del 2026-09-17.
