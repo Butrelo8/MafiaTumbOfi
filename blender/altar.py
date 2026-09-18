@@ -879,18 +879,19 @@ def _devocion(col, mesa_z):
     # Cinturón piteado con hebilla: identidad del género sin marca de nadie.
     # CINTURON_DY se colocó a mano en el visor; la hebilla y las puntadas
     # cuelgan de él para que el conjunto se mueva de una pieza.
-    CINTURON_DY = -0.52472
+    CINTURON_DY = -0.40515
+    CINTURON_GIRO = 0.02535
     assets_correa = _cargar_assets()
     correa = hebilla_asset = None
     if assets_correa is not None and assets_correa.disponible(assets_correa.CINTURON):
         correa, hebilla_asset = assets_correa.cinturon(
-            col, "PROP_cinturon", (1.15, ALTAR_Y + CINTURON_DY, mesa_z),
-            ancho=0.30, giro=-0.12)
+            col, "PROP_cinturon", (-0.0563, ALTAR_Y + CINTURON_DY, mesa_z),
+            ancho=0.30, giro=CINTURON_GIRO)
     if correa is None:
         correa = _caja(col, "PROP_cinturon",
-                       (1.15, ALTAR_Y + CINTURON_DY, mesa_z + 0.008),
+                       (-0.0563, ALTAR_Y + CINTURON_DY, mesa_z + 0.008),
                        (0.62, 0.075, 0.012))
-        correa.rotation_euler = (0, 0, -0.12)
+        correa.rotation_euler = (0, 0, CINTURON_GIRO)
 
     # La hebilla: la del propio asset si vino, y si no la caja de antes. El
     # monograma se coloca leyendo la caja real de la pieza, no con constantes
@@ -899,6 +900,12 @@ def _devocion(col, mesa_z):
     if hebilla_asset is not None:
         hebilla = hebilla_asset
         hebilla.name = "PROP_hebilla"
+        # 2 cm por encima de donde la deja el ancla: la subió el usuario en el
+        # visor para que la placa apoye en el cuero en vez de hundirse en él.
+        matriz = hebilla.matrix_world.copy()
+        matriz.translation.z += 0.0195
+        hebilla.matrix_world = matriz
+        bpy.context.view_layer.update()
     else:
         esquinas = [correa.matrix_world @ Vector(v) for v in correa.bound_box]
         hebilla = _caja(col, "PROP_hebilla",
@@ -906,20 +913,26 @@ def _devocion(col, mesa_z):
                          min(p.y for p in esquinas) + 0.035,
                          max(p.z for p in esquinas)),
                         (0.125, 0.092, 0.012))
-        hebilla.rotation_euler = (0, 0, -0.12)
+        hebilla.rotation_euler = (0, 0, CINTURON_GIRO)
         bisel_hebilla = hebilla.modifiers.new("bisel", "BEVEL")
         bisel_hebilla.width = 0.006
         bisel_hebilla.segments = 3
 
+    # La hebilla del asset es una placa VERTICAL, fina en Y: el monograma va
+    # acostado sobre su cara delantera, no tumbado encima. El giro y el
+    # desplazamiento los dejó el usuario en el visor el 2026-09-17.
     bpy.context.view_layer.update()
     caja_hebilla = [hebilla.matrix_world @ Vector(v) for v in hebilla.bound_box]
+    centro_hebilla = (sum(p.x for p in caja_hebilla) / 8,
+                      sum(p.y for p in caja_hebilla) / 8,
+                      sum(p.z for p in caja_hebilla) / 8)
     mono_hebilla = _texto(col, "PROP_hebilla_monograma", MARCA_MONOGRAMA,
-                          (sum(p.x for p in caja_hebilla) / 8,
-                           sum(p.y for p in caja_hebilla) / 8,
-                           max(p.z for p in caja_hebilla) + 0.001),
+                          (centro_hebilla[0] + 0.00561,
+                           centro_hebilla[1] - 0.00615,
+                           centro_hebilla[2] + 0.01827),
                           alto=0.038,
                           extrusion=0.003)
-    mono_hebilla.rotation_euler = (0, 0, -0.12)
+    mono_hebilla.rotation_euler = (1.60626, -0.02912, 0.05716)
 
 
 def _alfombra(col):
@@ -1034,7 +1047,7 @@ def _reliquias(col):
         # (x, y respecto del altar), colocadas a mano en el visor: las dos
         # primeras se adelantaron hacia la cámara, las otras dos siguen en fila.
         posiciones = ((-0.92, -0.2188), (0.622, -0.1099), (1.16, -0.32),
-                      (1.36096, -0.32))
+                      (1.47898, -0.46587))
     else:
         posiciones = tuple((-1.05 + i * (1.6 / (VELADORAS - 1)), -0.32)
                            for i in range(VELADORAS))
@@ -1047,18 +1060,19 @@ def _reliquias(col):
     _cilindro(col, "PROXY_vinilo", (1.05, ALTAR_Y + 0.05, mesa_z + 0.012),
               0.175, 0.024, 32)
     disco = _cilindro(col, "VINILO_ladeado",
-                      (1.62938, ALTAR_Y - 0.26732, mesa_z + 0.012),
+                      (1.53061, ALTAR_Y - 0.10353, mesa_z + 0.012),
                       0.175, 0.022, 32)
     disco.rotation_euler = (0, 0, 0.4)
-    pila = _cilindro(col, "VINILO_pila", (0.62, ALTAR_Y + 0.3, mesa_z + 0.05),
+    pila = _cilindro(col, "VINILO_pila",
+                     (0.64236, ALTAR_Y + 0.34904, mesa_z + 0.09361),
                      0.168, 0.09, 32)
     pila.rotation_euler = (0.03, 0.02, 0)
 
     # Etiquetas: sin ellas los discos son manchas negras sin lectura.
     for nombre, (x, y, z) in (
         ("ETIQUETA_principal", (1.05, ALTAR_Y + 0.05, mesa_z + 0.025)),
-        ("ETIQUETA_ladeado", (1.62938, ALTAR_Y - 0.26732, mesa_z + 0.024)),
-        ("ETIQUETA_pila", (0.62, ALTAR_Y + 0.3, mesa_z + 0.101)),
+        ("ETIQUETA_ladeado", (1.53061, ALTAR_Y - 0.10353, mesa_z + 0.024)),
+        ("ETIQUETA_pila", (0.64236, ALTAR_Y + 0.34904, mesa_z + 0.14461)),
     ):
         _cilindro(col, nombre, (x, y, z), 0.058, 0.002, 24)
 
