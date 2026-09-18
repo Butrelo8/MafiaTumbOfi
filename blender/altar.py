@@ -1278,11 +1278,17 @@ PREFIJOS_FRENTE = (
 
 
 def render_capa_frontal(out_dir, ancho=800, alto=450, margen=0.78):
-    """Capa con alfa de lo que queda DELANTE del sujeto enfocado.
+    """Máscara de lo que queda DELANTE del sujeto enfocado.
 
     Se compone por encima del texto HTML, así la tipografía queda dentro de la
     escena en vez de flotar sobre ella: una columna pasa frente al título.
     Sólo se renderiza en las estaciones; durante los tramos se oculta.
+
+    **De este render sólo se usa el canal alfa.** `scripts/build-scene.sh` tira
+    su RGB y pega esa silueta sobre los píxeles del frame plano de la misma
+    estación. El RGB de aquí no sirve porque la niebla del mundo va
+    desconectada —si no, el volumen llena el alfa— y sin ella los mismos
+    objetos salen hasta un 19% más oscuros que en el frame plano.
 
     `margen` define el umbral: es primer plano lo que esté más cerca que la
     distancia cámara->objeto enfocado multiplicada por este factor.
@@ -1329,6 +1335,13 @@ def render_capa_frontal(out_dir, ancho=800, alto=450, margen=0.78):
 
             # Mismo nombre que el resto del pipeline: scripts/build-scene.sh
             # encodea `estacion-N-frente.png` a WebP y scene-json.py lo publica.
+            # Una estación sin nada delante no tiene capa: en los primeros
+            # planos macro —el vinilo a 70 mm, el micro a 58— entre la cámara y
+            # el sujeto no hay un solo objeto, y escribir un PNG transparente
+            # entero sólo sirve para encodearlo y publicarlo vacío.
+            if not frontales:
+                escritos.append((nombre, 0, round(umbral, 2)))
+                continue
             escena.render.filepath = os.path.join(
                 out_dir, "estacion-%d-frente.png" % indice)
             bpy.ops.render.render(write_still=True)

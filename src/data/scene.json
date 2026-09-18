@@ -7,122 +7,226 @@
         {
           "nombre": "nave",
           "imagen": "/scene/mobile/estacion-0.avif",
-          "bytes": 17826
+          "bytes": 21250,
+          "capaFrente": {
+            "imagen": "/scene/mobile/estacion-0-frente.webp",
+            "bytes": 33960
+          },
+          "relampago": {
+            "imagen": "/scene/mobile/estacion-0-relampago.avif",
+            "bytes": 21235
+          }
+        },
+        {
+          "nombre": "altar",
+          "imagen": "/scene/mobile/estacion-1.avif",
+          "bytes": 25620,
+          "capaFrente": {
+            "imagen": "/scene/mobile/estacion-1-frente.webp",
+            "bytes": 14698
+          },
+          "relampago": {
+            "imagen": "/scene/mobile/estacion-1-relampago.avif",
+            "bytes": 25492
+          }
         },
         {
           "nombre": "sonido",
-          "imagen": "/scene/mobile/estacion-1.avif",
-          "bytes": 25216
+          "imagen": "/scene/mobile/estacion-2.avif",
+          "bytes": 22361,
+          "relampago": {
+            "imagen": "/scene/mobile/estacion-2-relampago.avif",
+            "bytes": 22556
+          }
         },
         {
           "nombre": "hornacinas",
-          "imagen": "/scene/mobile/estacion-2.avif",
-          "bytes": 27394
+          "imagen": "/scene/mobile/estacion-3.avif",
+          "bytes": 33331,
+          "capaFrente": {
+            "imagen": "/scene/mobile/estacion-3-frente.webp",
+            "bytes": 31690
+          },
+          "relampago": {
+            "imagen": "/scene/mobile/estacion-3-relampago.avif",
+            "bytes": 32921
+          }
         },
         {
           "nombre": "reliquia",
-          "imagen": "/scene/mobile/estacion-3.avif",
-          "bytes": 15835
+          "imagen": "/scene/mobile/estacion-4.avif",
+          "bytes": 17493,
+          "relampago": {
+            "imagen": "/scene/mobile/estacion-4-relampago.avif",
+            "bytes": 19075
+          }
         },
         {
           "nombre": "retirada",
-          "imagen": "/scene/mobile/estacion-4.avif",
-          "bytes": 22153
+          "imagen": "/scene/mobile/estacion-5.avif",
+          "bytes": 28053,
+          "capaFrente": {
+            "imagen": "/scene/mobile/estacion-5-frente.webp",
+            "bytes": 13610
+          },
+          "relampago": {
+            "imagen": "/scene/mobile/estacion-5-relampago.avif",
+            "bytes": 27746
+          }
         }
       ],
       "tramos": [
         {
           "desde": "nave",
-          "hasta": "sonido",
-          "frames": 20,
+          "hasta": "altar",
+          "frames": 30,
           "patron": "/scene/mobile/tramo-0/%03d.avif",
-          "bytes": 256667
+          "bytes": 399273
+        },
+        {
+          "desde": "altar",
+          "hasta": "sonido",
+          "frames": 30,
+          "patron": "/scene/mobile/tramo-1/%03d.avif",
+          "bytes": 454350
         },
         {
           "desde": "sonido",
           "hasta": "hornacinas",
-          "frames": 20,
-          "patron": "/scene/mobile/tramo-1/%03d.avif",
-          "bytes": 282091
+          "frames": 30,
+          "patron": "/scene/mobile/tramo-2/%03d.avif",
+          "bytes": 462738
         },
         {
           "desde": "hornacinas",
           "hasta": "reliquia",
-          "frames": 20,
-          "patron": "/scene/mobile/tramo-2/%03d.avif",
-          "bytes": 219228
+          "frames": 30,
+          "patron": "/scene/mobile/tramo-3/%03d.avif",
+          "bytes": 370578
         },
         {
           "desde": "reliquia",
           "hasta": "retirada",
-          "frames": 20,
-          "patron": "/scene/mobile/tramo-3/%03d.avif",
-          "bytes": 222119
+          "frames": 30,
+          "patron": "/scene/mobile/tramo-4/%03d.avif",
+          "bytes": 379772
         }
       ],
-      "bytes": 1088529
+      "bytes": 2457802
     },
     "desktop": {
-      "ancho": 1600,
-      "alto": 900,
+      "ancho": 1920,
+      "alto": 1080,
       "estaciones": [
         {
           "nombre": "nave",
           "imagen": "/scene/desktop/estacion-0.avif",
-          "bytes": 16037
+          "bytes": 25271,
+          "capaFrente": {
+            "imagen": "/scene/desktop/estacion-0-frente.webp",
+            "bytes": 46824
+          },
+          "relampago": {
+            "imagen": "/scene/desktop/estacion-0-relampago.avif",
+            "bytes": 26799
+          }
+        },
+        {
+          "nombre": "altar",
+          "imagen": "/scene/desktop/estacion-1.avif",
+          "bytes": 31655,
+          "capaFrente": {
+            "imagen": "/scene/desktop/estacion-1-frente.webp",
+            "bytes": 28706
+          },
+          "relampago": {
+            "imagen": "/scene/desktop/estacion-1-relampago.avif",
+            "bytes": 32082
+          }
         },
         {
           "nombre": "sonido",
-          "imagen": "/scene/desktop/estacion-1.avif",
-          "bytes": 28672
+          "imagen": "/scene/desktop/estacion-2.avif",
+          "bytes": 32627,
+          "relampago": {
+            "imagen": "/scene/desktop/estacion-2-relampago.avif",
+            "bytes": 32888
+          }
         },
         {
           "nombre": "hornacinas",
-          "imagen": "/scene/desktop/estacion-2.avif",
-          "bytes": 34787
+          "imagen": "/scene/desktop/estacion-3.avif",
+          "bytes": 44096,
+          "capaFrente": {
+            "imagen": "/scene/desktop/estacion-3-frente.webp",
+            "bytes": 33200
+          },
+          "relampago": {
+            "imagen": "/scene/desktop/estacion-3-relampago.avif",
+            "bytes": 45058
+          }
         },
         {
           "nombre": "reliquia",
-          "imagen": "/scene/desktop/estacion-3.avif",
-          "bytes": 18827
+          "imagen": "/scene/desktop/estacion-4.avif",
+          "bytes": 25116,
+          "relampago": {
+            "imagen": "/scene/desktop/estacion-4-relampago.avif",
+            "bytes": 27123
+          }
         },
         {
           "nombre": "retirada",
-          "imagen": "/scene/desktop/estacion-4.avif",
-          "bytes": 20638
+          "imagen": "/scene/desktop/estacion-5.avif",
+          "bytes": 33680,
+          "capaFrente": {
+            "imagen": "/scene/desktop/estacion-5-frente.webp",
+            "bytes": 27958
+          },
+          "relampago": {
+            "imagen": "/scene/desktop/estacion-5-relampago.avif",
+            "bytes": 33728
+          }
         }
       ],
       "tramos": [
         {
           "desde": "nave",
-          "hasta": "sonido",
-          "frames": 20,
+          "hasta": "altar",
+          "frames": 30,
           "patron": "/scene/desktop/tramo-0/%03d.avif",
-          "bytes": 250355
+          "bytes": 481705
+        },
+        {
+          "desde": "altar",
+          "hasta": "sonido",
+          "frames": 30,
+          "patron": "/scene/desktop/tramo-1/%03d.avif",
+          "bytes": 567395
         },
         {
           "desde": "sonido",
           "hasta": "hornacinas",
-          "frames": 20,
-          "patron": "/scene/desktop/tramo-1/%03d.avif",
-          "bytes": 259162
+          "frames": 30,
+          "patron": "/scene/desktop/tramo-2/%03d.avif",
+          "bytes": 508177
         },
         {
           "desde": "hornacinas",
           "hasta": "reliquia",
-          "frames": 20,
-          "patron": "/scene/desktop/tramo-2/%03d.avif",
-          "bytes": 237362
+          "frames": 30,
+          "patron": "/scene/desktop/tramo-3/%03d.avif",
+          "bytes": 472850
         },
         {
           "desde": "reliquia",
           "hasta": "retirada",
-          "frames": 20,
-          "patron": "/scene/desktop/tramo-3/%03d.avif",
-          "bytes": 245553
+          "frames": 30,
+          "patron": "/scene/desktop/tramo-4/%03d.avif",
+          "bytes": 524202
         }
       ],
-      "bytes": 1111393
+      "bytes": 3081140
     }
   }
 }

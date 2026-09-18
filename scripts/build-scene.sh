@@ -26,8 +26,19 @@ avif() {   # <png> <avif> <crf>
          -crf "$3" -cpu-used 6 "$2"
 }
 
-webp() {   # <png> <webp> <calidad>  -- conserva el alfa
-  ffmpeg -y -loglevel error -i "$1" -c:v libwebp -q:v "$3" "$2"
+# La capa de frente NO se encodea tal cual. Su RGB se descarta y se queda sólo
+# su alfa, que se pega sobre los píxeles del frame plano de la misma estación.
+#
+# El motivo está medido (2026-09-17): la capa se renderiza con la niebla del
+# mundo desconectada —si no, el volumen llena el alfa entero— y sin esa niebla
+# los mismos objetos salen hasta un 19% más oscuros que en el frame plano. Al
+# fundir la capa se veía oscurecer las columnas. Recortando el frame plano con
+# el alfa de la capa, componer la capa sobre su estación devuelve la estación
+# original por construcción, y no hay nada que compensar a mano.
+capa() {   # <png-plano> <png-frente> <webp> <calidad>
+  ffmpeg -y -loglevel error -i "$1" -i "$2" \
+         -filter_complex "[1:v]format=rgba,alphaextract[a];[0:v]format=rgb24[c];[c][a]alphamerge" \
+         -c:v libwebp -q:v "$4" "$3"
 }
 
 declare -A CARPETA=( [movil]=mobile [escritorio]=desktop )
@@ -46,8 +57,11 @@ for formato in movil escritorio; do
     [ -f "$png" ] || continue
     base="$(basename "${png%.png}")"
     case "$base" in
-      *-frente) webp "$png" "$salida/$base.webp" "$Q_CAPA" ;;
-      *)        avif "$png" "$salida/$base.avif" "$CRF_ESTACION" ;;
+      *-frente)
+        plano="${png%-frente.png}.png"
+        [ -f "$plano" ] || { echo "capa sin su estacion: $png" >&2; exit 1; }
+        capa "$plano" "$png" "$salida/$base.webp" "$Q_CAPA" ;;
+      *) avif "$png" "$salida/$base.avif" "$CRF_ESTACION" ;;
     esac
   done
 done
