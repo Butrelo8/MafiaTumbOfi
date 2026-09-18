@@ -19,10 +19,10 @@ describe('rutasDeFrames', () => {
     const porTramo = formato.tramos[0].frames
     const ultimo = formato.tramos.length - 1
     expect(rutas.length).toBe(formato.tramos.reduce((suma, t) => suma + t.frames, 0))
-    expect(rutas[0]).toBe('/scene/mobile/tramo-0/000.avif')
-    expect(rutas[porTramo]).toBe('/scene/mobile/tramo-1/000.avif')
+    expect(rutas[0]).toBe('/scene/mobile/tramo-0/000.webp')
+    expect(rutas[porTramo]).toBe('/scene/mobile/tramo-1/000.webp')
     expect(rutas.at(-1)).toBe(
-      `/scene/mobile/tramo-${ultimo}/${String(formato.tramos[ultimo].frames - 1).padStart(3, '0')}.avif`)
+      `/scene/mobile/tramo-${ultimo}/${String(formato.tramos[ultimo].frames - 1).padStart(3, '0')}.webp`)
   })
 })
 

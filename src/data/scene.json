@@ -80,39 +80,39 @@
           "desde": "nave",
           "hasta": "altar",
           "frames": 30,
-          "patron": "/scene/mobile/tramo-0/%03d.avif",
-          "bytes": 399273
+          "patron": "/scene/mobile/tramo-0/%03d.webp",
+          "bytes": 829482
         },
         {
           "desde": "altar",
           "hasta": "sonido",
           "frames": 30,
-          "patron": "/scene/mobile/tramo-1/%03d.avif",
-          "bytes": 454350
+          "patron": "/scene/mobile/tramo-1/%03d.webp",
+          "bytes": 938746
         },
         {
           "desde": "sonido",
           "hasta": "hornacinas",
           "frames": 30,
-          "patron": "/scene/mobile/tramo-2/%03d.avif",
-          "bytes": 462738
+          "patron": "/scene/mobile/tramo-2/%03d.webp",
+          "bytes": 963766
         },
         {
           "desde": "hornacinas",
           "hasta": "reliquia",
           "frames": 30,
-          "patron": "/scene/mobile/tramo-3/%03d.avif",
-          "bytes": 370578
+          "patron": "/scene/mobile/tramo-3/%03d.webp",
+          "bytes": 780684
         },
         {
           "desde": "reliquia",
           "hasta": "retirada",
           "frames": 30,
-          "patron": "/scene/mobile/tramo-4/%03d.avif",
-          "bytes": 379772
+          "patron": "/scene/mobile/tramo-4/%03d.webp",
+          "bytes": 792768
         }
       ],
-      "bytes": 2457802
+      "bytes": 4696537
     },
     "desktop": {
       "ancho": 1920,
@@ -194,39 +194,39 @@
           "desde": "nave",
           "hasta": "altar",
           "frames": 30,
-          "patron": "/scene/desktop/tramo-0/%03d.avif",
-          "bytes": 481705
+          "patron": "/scene/desktop/tramo-0/%03d.webp",
+          "bytes": 764020
         },
         {
           "desde": "altar",
           "hasta": "sonido",
           "frames": 30,
-          "patron": "/scene/desktop/tramo-1/%03d.avif",
-          "bytes": 567395
+          "patron": "/scene/desktop/tramo-1/%03d.webp",
+          "bytes": 925196
         },
         {
           "desde": "sonido",
           "hasta": "hornacinas",
           "frames": 30,
-          "patron": "/scene/desktop/tramo-2/%03d.avif",
-          "bytes": 508177
+          "patron": "/scene/desktop/tramo-2/%03d.webp",
+          "bytes": 877116
         },
         {
           "desde": "hornacinas",
           "hasta": "reliquia",
           "frames": 30,
-          "patron": "/scene/desktop/tramo-3/%03d.avif",
-          "bytes": 472850
+          "patron": "/scene/desktop/tramo-3/%03d.webp",
+          "bytes": 814288
         },
         {
           "desde": "reliquia",
           "hasta": "retirada",
           "frames": 30,
-          "patron": "/scene/desktop/tramo-4/%03d.avif",
-          "bytes": 524202
+          "patron": "/scene/desktop/tramo-4/%03d.webp",
+          "bytes": 868898
         }
       ],
-      "bytes": 3081140
+      "bytes": 4776329
     }
   }
 }

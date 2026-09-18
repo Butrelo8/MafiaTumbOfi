@@ -47,12 +47,13 @@ def formato(carpeta):
         carpeta_tramo = os.path.join(base, "tramo-%d" % indice)
         if not os.path.isdir(carpeta_tramo):
             continue
-        archivos = sorted(f for f in os.listdir(carpeta_tramo) if f.endswith(".avif"))
+        # WebP y no AVIF: el decode de AVIF era el cuello del scrub, medido.
+        archivos = sorted(f for f in os.listdir(carpeta_tramo) if f.endswith(".webp"))
         tramos.append({
             "desde": NOMBRES[indice],
             "hasta": NOMBRES[indice + 1],
             "frames": len(archivos),
-            "patron": "/scene/%s/tramo-%d/%%03d.avif" % (carpeta, indice),
+            "patron": "/scene/%s/tramo-%d/%%03d.webp" % (carpeta, indice),
             "bytes": sum(_peso(os.path.join(carpeta_tramo, f)) for f in archivos),
         })
 

@@ -5,9 +5,16 @@
 #           estacion-N-relampago.png,estacion-N-frente.png}
 # Salida:   public/scene/{mobile,desktop}/... y src/data/scene.json
 #
-# El CRF viene medido, no estimado: ver "CRF calibrado contra AVIF real" en
-# docs/blender-notas.md. 38 para los tramos, 30 para las estaciones, que son
-# las que pintan el LCP y tienen presupuesto de sobra.
+# Los tramos van en WebP y las estaciones en AVIF, y no es capricho: está
+# medido en el navegador el 2026-09-17 sobre un frame real de tramo a 1920.
+#
+#   AVIF 1920  45.3 ms de decode   12.7 KB
+#   WebP 1920  17.4 ms             26.3 KB
+#   WebP 1600  11.3 ms             22.4 KB   <- lo que se usa
+#
+# Con 150 frames por formato, el decode se paga 150 veces y era el cuello del
+# scrub: iba a 13.6 fps, y dibujar en el canvas costaba 0.01 ms. Las estaciones
+# se quedan en AVIF porque se decodifican una sola vez y una de ellas es el LCP.
 #
 # Las capas de frente van en WebP y no en AVIF: medido el 2026-09-17, el ffmpeg
 # de este equipo descarta el canal alfa con libaom-av1 y devuelve la imagen
@@ -17,13 +24,22 @@ set -euo pipefail
 RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
 ORIGEN="$RAIZ/tmp/frames"
 DESTINO="$RAIZ/public/scene"
-CRF_TRAMO=38
 CRF_ESTACION=30
+Q_TRAMO=80
+ANCHO_TRAMO=1600   # sólo escritorio; en móvil los frames ya son de 900 px
 Q_CAPA=72          # la capa de frente es casi toda transparente
 
 avif() {   # <png> <avif> <crf>
   ffmpeg -y -loglevel error -i "$1" -c:v libaom-av1 -still-picture 1 \
          -crf "$3" -cpu-used 6 "$2"
+}
+
+tramo_webp() {   # <png> <webp> <ancho|0 para dejarlo como está>
+  if [ "$3" -gt 0 ]; then
+    ffmpeg -y -loglevel error -i "$1" -vf "scale=$3:-2" -c:v libwebp -q:v "$Q_TRAMO" "$2"
+  else
+    ffmpeg -y -loglevel error -i "$1" -c:v libwebp -q:v "$Q_TRAMO" "$2"
+  fi
 }
 
 # La capa de frente NO se encodea tal cual. Su RGB se descarta y se queda sólo
@@ -45,11 +61,17 @@ declare -A CARPETA=( [movil]=mobile [escritorio]=desktop )
 
 for formato in movil escritorio; do
   salida="$DESTINO/${CARPETA[$formato]}"
+  ancho=0
+  [ "$formato" = escritorio ] && ancho=$ANCHO_TRAMO
   for tramo in "$ORIGEN/$formato"/tramo-*; do
     [ -d "$tramo" ] || continue
-    mkdir -p "$salida/$(basename "$tramo")"
+    destino_tramo="$salida/$(basename "$tramo")"
+    mkdir -p "$destino_tramo"
+    # Los AVIF de la tanda anterior estorban: scene-json.py cuenta los ficheros
+    # que hay, no los que deberia haber.
+    rm -f "$destino_tramo"/*.avif
     for png in "$tramo"/*.png; do
-      avif "$png" "$salida/$(basename "$tramo")/$(basename "${png%.png}").avif" "$CRF_TRAMO"
+      tramo_webp "$png" "$destino_tramo/$(basename "${png%.png}").webp" "$ancho"
     done
   done
   mkdir -p "$salida"
