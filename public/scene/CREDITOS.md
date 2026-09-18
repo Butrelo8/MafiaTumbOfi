@@ -154,3 +154,20 @@ malla por cuatro al renderizar, y el Collision, que no pinta nada sin física.
 La figura lleva hiyab. A la distancia y el encuadre en que aparece se lee como
 una mantilla, que es lo que se busca; es una prenda con significado propio y la
 decisión de usarla es del usuario, del 2026-09-17.
+
+### Cinturón
+
+`cinturon.blend`, aportado por el usuario el 2026-09-17. **CC0**, verificado el
+mismo día: "Belt", de **lsgrrd**, https://blendswap.com/blend/3012. Dominio
+público, sin atribución obligatoria.
+
+Del archivo entran la correa de cuero (`BezierCircle`) y la hebilla (`Cube`).
+Quedan fuera la esfera de fondo, las dos luces y la cámara del autor. La correa
+trae un modificador Lattice cuyo objeto no está en el archivo, y se quita. El
+monograma M⚡T se coloca encima de la hebilla del asset.
+
+### Rayo M⚡T
+
+`logo-mt.blend`, generado por el equipo. Malla única, sin materiales ni UV, ya
+en el plano XZ con el grosor en Y, que es la orientación del retablo. Sustituye
+a la cruz de neón que había antes, por decisión del usuario del 2026-09-17.

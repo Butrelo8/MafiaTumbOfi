@@ -228,11 +228,8 @@ ASIGNACION = (
     ("PROP_cera", "cera"),
     ("PROP_escapulario_cordon", "fieltro"),
     ("PROP_escapulario", "fieltro"),
-    ("PROP_rosario_nicho", "madera"),
-    ("PROP_rosario_cruz", "madera"),
     ("PROP_cubana", "oro"),
     ("PROP_dije_rayo", "oro"),
-    ("PROP_pitiado", "hueso"),
     ("PROP_cinturon", "fieltro"),
     ("PROP_hebilla_monograma", "oro"),
     ("PROP_hebilla", "oro"),
@@ -275,7 +272,6 @@ ASIGNACION = (
     ("PROP_gorra_", "fieltro"),
     ("PROP_requinto_metal", "cromo"),
     ("PROP_requinto", "madera"),
-    ("PROP_rosario", "oro"),
     ("PROP_vaso", "vidrio"),
     ("PROP_cerillos", "papel"),
     ("BANCA_", "madera"),
@@ -518,7 +514,10 @@ def _luces(col):
     for ob in [o for o in bpy.data.objects if o.name.startswith("GREYBOX_")]:
         bpy.data.objects.remove(ob, do_unlink=True)
 
-    cruz = bpy.data.objects.get("CRUZ_vertical")
+    # De CRUZ_ cuelga la luz de toda la escena. El objeto es hoy el rayo M⚡T
+    # (`CRUZ_logo`) y antes eran dos cajas (`CRUZ_vertical`): se busca por
+    # prefijo para que cambiar la pieza no apague el santuario.
+    cruz = next((o for o in bpy.data.objects if o.name.startswith("CRUZ_")), None)
     if cruz:
         x, y, z = cruz.matrix_world.translation
         bpy.ops.object.light_add(type="AREA", location=(x, y - 0.35, z + 0.2))

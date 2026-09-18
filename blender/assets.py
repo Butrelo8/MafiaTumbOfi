@@ -221,6 +221,95 @@ def mujer(col, ubicacion, estatura=1.62, giro=0.0, pose=None):
     return armadura
 
 
+# Cinturón de cuero. El .blend trae la escena del autor —esfera de fondo, dos
+# luces, una cámara— y su propia hebilla, que no se usa: la nuestra lleva el
+# monograma. Sólo entra la correa, que además viene con un modificador Lattice
+# cuyo objeto no está en el archivo.
+CINTURON = "cinturon.blend"
+CINTURON_CORREA = "BezierCircle"      # la correa de cuero
+CINTURON_HEBILLA = "Cube"             # la hebilla del autor, en metal
+CINTURON_POLIGONOS = 6000
+
+# Rayo M⚡T, generado por el equipo. Malla única, sin materiales ni UV, ya en el
+# plano XZ con el grosor en Y: la orientación del retablo.
+LOGO = "logo-mt.blend"
+LOGO_PIEZA = "mesh_node"
+LOGO_POLIGONOS = 20000
+
+
+def cinturon(col, nombre, ubicacion, ancho=0.30, giro=0.0, inclinacion=0.0):
+    """Correa enrollada y su hebilla, apoyadas en la mesa.
+
+    Devuelve `(correa, hebilla)` para darles materiales distintos: cuero y
+    metal. Las dos piezas vienen de la misma escena del autor, así que su
+    posición relativa ya es la buena; se cuelgan de un ancla común y se mueven
+    juntas, como la guitarra.
+
+    Apoyar restando el mínimo de la caja envolvente a la ubicación no vale: el
+    origen del asset no está en cero y la correa se fue metro y pico bajo el
+    suelo en el primer intento. De ahí el ancla.
+    """
+    piezas = []
+    for pieza_nombre, sufijo in ((CINTURON_CORREA, ""), (CINTURON_HEBILLA, "_hebilla")):
+        traidas = _traer(CINTURON, (pieza_nombre,))
+        if not traidas:
+            continue
+        ob = traidas[0]
+        ob.name = nombre + sufijo
+        # El Lattice de la correa apunta a un objeto que no viene en el archivo.
+        for modificador in list(ob.modifiers):
+            if modificador.type == "LATTICE":
+                ob.modifiers.remove(modificador)
+        _sin_subdivision(ob)
+        ob.data.materials.clear()
+        for otra in list(ob.users_collection):
+            otra.objects.unlink(ob)
+        col.objects.link(ob)
+        _decimar(ob, CINTURON_POLIGONOS)
+        piezas.append(ob)
+    if not piezas:
+        return None, None
+
+    minimos, maximos = _caja_mundo(piezas)
+    ancla = bpy.data.objects.new(nombre + "_ancla", None)
+    col.objects.link(ancla)
+    ancla.location = ((minimos[0] + maximos[0]) / 2,
+                      (minimos[1] + maximos[1]) / 2,
+                      minimos[2])
+    bpy.context.view_layer.update()
+    for ob in piezas:
+        matriz = ob.matrix_world.copy()
+        ob.parent = ancla
+        ob.matrix_parent_inverse = ancla.matrix_world.inverted()
+        ob.matrix_world = matriz
+
+    ancho_actual = maximos[0] - minimos[0]
+    factor = ancho / ancho_actual if ancho_actual else 1.0
+    ancla.scale = (factor, factor, factor)
+    ancla.rotation_mode = "XYZ"
+    ancla.rotation_euler = (inclinacion, 0.0, giro)
+    ancla.location = ubicacion
+    bpy.context.view_layer.update()
+    return piezas[0], (piezas[1] if len(piezas) > 1 else None)
+
+
+def logo_mt(col, nombre, ubicacion, alto=1.5):
+    """El rayo M⚡T sobre el retablo, en el sitio que ocupaba la cruz."""
+    logo = _traer(LOGO, (LOGO_PIEZA,))[0]
+    logo.name = nombre
+    _sin_subdivision(logo)
+    logo.data.materials.clear()
+    for otra in list(logo.users_collection):
+        otra.objects.unlink(logo)
+    col.objects.link(logo)
+    _decimar(logo, LOGO_POLIGONOS)
+    # `ubicacion` es el CENTRO del rayo, no su base: es lo que era la cruz.
+    minimos, maximos = _caja_mundo([logo])
+    _plantar(logo, (ubicacion[0], ubicacion[1], ubicacion[2] - alto / 2), alto,
+             nombre_ancla="CRUZ_logo_ancla")
+    return logo
+
+
 GORRA = "gorra.glb"
 GORRA_POLIGONOS = 18000     # techo tras decimar; el original trae ~92k
 

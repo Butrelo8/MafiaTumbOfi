@@ -34,6 +34,7 @@ HORNACINA_ANCHO = 0.72
 HORNACINA_ALTO = 1.15
 
 CRUZ_Z = 4.4
+LOGO_ALTO = 1.5      # alto del rayo M⚡T sobre el retablo
 VELADORAS = 8
 
 # Ventanas: la tormenta de fuera. Dos tipos, como el resto de la nave: el
@@ -277,11 +278,26 @@ def _arquitectura(col):
     _ventanas(col)
     _fiel(col)
 
-    # Cruz de neón
+    # Rayo M⚡T de neón, en el sitio que ocupaba la cruz. Mantiene el prefijo
+    # CRUZ_ a propósito: es de lo que cuelgan el material de neón y la luz.
+    _neon_retablo(col)
+
+
+def _neon_retablo(col):
+    """El rayo M⚡T sobre el retablo. Sin el asset, la cruz de cajas de antes.
+
+    El fallback no es adorno defensivo: la luz de neón y el glow de toda la
+    escena cuelgan de este objeto, y sin él el santuario se queda a oscuras.
+    """
+    assets = _cargar_assets()
+    if assets is not None and assets.disponible(assets.LOGO):
+        return assets.logo_mt(col, "CRUZ_logo",
+                              (0, RETABLO_Y - 0.3, CRUZ_Z), alto=LOGO_ALTO)
     _caja(col, "CRUZ_vertical",
           (0, RETABLO_Y - 0.3, CRUZ_Z), (0.12, 0.08, 1.6))
     _caja(col, "CRUZ_horizontal",
           (0, RETABLO_Y - 0.3, CRUZ_Z + 0.35), (0.9, 0.08, 0.12))
+    return None
 
 
 def _fiel(col):
@@ -796,8 +812,11 @@ def _parche_gorra(col, mesa_z):
 
 
 def _devocion(col, mesa_z):
-    """Escapulario y rosario colgando de los nichos, cadena con el rayo en la
-    mesa. Lo que cuelga de un altar real no es decoración: es promesa."""
+    """Escapulario colgando del nicho central y cadena con el rayo en la mesa.
+
+    Lo que cuelga de un altar real no es decoración: es promesa. El rosario que
+    colgaba del nicho izquierdo lo quitó el usuario el 2026-09-17.
+    """
     azar = random.Random(53)
 
     # Escapulario sobre el marco del nicho central.
@@ -828,19 +847,6 @@ def _devocion(col, mesa_z):
                            (x_centro + 0.30 + lado * 0.062, RETABLO_Y - 0.305,
                             borde - 0.07), 0.005, 0.30, 8)
         cordon.rotation_euler = (0, lado * 0.06, 0)
-
-    # Rosario de madera colgando del marco del nicho izquierdo.
-    x_izq = HORNACINA_X[0] - HORNACINA_ANCHO / 2 + 0.06
-    for i in range(18):
-        angulo = i / 18.0 * math.pi * 2
-        _cilindro(col, "PROP_rosario_nicho_%d" % i,
-                  (x_izq + 0.075 * math.cos(angulo), RETABLO_Y - 0.31,
-                   HORNACINA_Z + 0.22 + 0.15 * math.sin(angulo)),
-                  0.011, 0.012, 8)
-    _caja(col, "PROP_rosario_cruz_v",
-          (x_izq, RETABLO_Y - 0.31, HORNACINA_Z - 0.01), (0.016, 0.01, 0.075))
-    _caja(col, "PROP_rosario_cruz_h",
-          (x_izq, RETABLO_Y - 0.31, HORNACINA_Z + 0.018), (0.052, 0.01, 0.016))
 
     # Cadena cubana con el dije del rayo, sobre la mesa. Con el asset de cadena
     # los eslabones sobran: se quedaría una cadena encima de la otra.
@@ -874,29 +880,44 @@ def _devocion(col, mesa_z):
     # CINTURON_DY se colocó a mano en el visor; la hebilla y las puntadas
     # cuelgan de él para que el conjunto se mueva de una pieza.
     CINTURON_DY = -0.52472
-    correa = _caja(col, "PROP_cinturon", (1.15, ALTAR_Y + CINTURON_DY, mesa_z + 0.008),
-                   (0.62, 0.075, 0.012))
-    correa.rotation_euler = (0, 0, -0.12)
-    for i in range(22):
-        avance = -0.28 + i * 0.026
-        for borde_y in (-0.028, 0.028):
-            puntada = _caja(col, "PROP_pitiado_%d_%d" % (i, int(borde_y * 1000)),
-                            (1.15 + avance * math.cos(-0.12),
-                             ALTAR_Y + CINTURON_DY + borde_y
-                             + avance * math.sin(-0.12),
-                             mesa_z + 0.0145), (0.012, 0.004, 0.002))
-            puntada.rotation_euler = (0, 0, -0.12)
+    assets_correa = _cargar_assets()
+    correa = hebilla_asset = None
+    if assets_correa is not None and assets_correa.disponible(assets_correa.CINTURON):
+        correa, hebilla_asset = assets_correa.cinturon(
+            col, "PROP_cinturon", (1.15, ALTAR_Y + CINTURON_DY, mesa_z),
+            ancho=0.30, giro=-0.12)
+    if correa is None:
+        correa = _caja(col, "PROP_cinturon",
+                       (1.15, ALTAR_Y + CINTURON_DY, mesa_z + 0.008),
+                       (0.62, 0.075, 0.012))
+        correa.rotation_euler = (0, 0, -0.12)
 
-    hebilla = _caja(col, "PROP_hebilla",
-                    (0.78, ALTAR_Y + CINTURON_DY + 0.04, mesa_z + 0.014),
-                    (0.125, 0.092, 0.012))
-    hebilla.rotation_euler = (0, 0, -0.12)
-    bisel_hebilla = hebilla.modifiers.new("bisel", "BEVEL")
-    bisel_hebilla.width = 0.006
-    bisel_hebilla.segments = 3
+    # La hebilla: la del propio asset si vino, y si no la caja de antes. El
+    # monograma se coloca leyendo la caja real de la pieza, no con constantes
+    # heredadas de la correa recta: con el aro de cuero quedaban flotando.
+    bpy.context.view_layer.update()
+    if hebilla_asset is not None:
+        hebilla = hebilla_asset
+        hebilla.name = "PROP_hebilla"
+    else:
+        esquinas = [correa.matrix_world @ Vector(v) for v in correa.bound_box]
+        hebilla = _caja(col, "PROP_hebilla",
+                        (sum(p.x for p in esquinas) / 8,
+                         min(p.y for p in esquinas) + 0.035,
+                         max(p.z for p in esquinas)),
+                        (0.125, 0.092, 0.012))
+        hebilla.rotation_euler = (0, 0, -0.12)
+        bisel_hebilla = hebilla.modifiers.new("bisel", "BEVEL")
+        bisel_hebilla.width = 0.006
+        bisel_hebilla.segments = 3
+
+    bpy.context.view_layer.update()
+    caja_hebilla = [hebilla.matrix_world @ Vector(v) for v in hebilla.bound_box]
     mono_hebilla = _texto(col, "PROP_hebilla_monograma", MARCA_MONOGRAMA,
-                          (0.78, ALTAR_Y + CINTURON_DY + 0.04, mesa_z + 0.021),
-                          alto=0.052,
+                          (sum(p.x for p in caja_hebilla) / 8,
+                           sum(p.y for p in caja_hebilla) / 8,
+                           max(p.z for p in caja_hebilla) + 0.001),
+                          alto=0.038,
                           extrusion=0.003)
     mono_hebilla.rotation_euler = (0, 0, -0.12)
 
