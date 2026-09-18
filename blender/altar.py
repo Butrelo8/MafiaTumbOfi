@@ -51,7 +51,7 @@ LANCETA_Z = 2.7
 # de espaldas: dos ya serían una congregación y esto es un velorio vacío.
 # Al suelo, no al asiento: el origen del rig está en los pies y es la cadera la
 # que baja al asiento con la pose.
-FIEL_BANCA = (-1.9, 0.75, 0.0)
+FIEL_BANCA = (-2.2664, 0.75, 0.0)
 FIEL_ESTATURA = 1.62
 FIEL_GIRO = math.radians(180.0)
 # Pose sentada, volcada del visor el 2026-09-17: `hueso -> (traslación,
@@ -59,8 +59,11 @@ FIEL_GIRO = math.radians(180.0)
 # usuario a ojo; el único ajuste calculado es la cadera, que se subió hasta que
 # ningún vértice del cuerpo quedaba por debajo del asiento —estaba hundida 20.7
 # cm—. Se sube la CADERA y no el rig entero: el IK deja los pies donde están.
+# Colocada de nuevo por el usuario el mismo día, 37 cm más hacia el muro, y
+# recalculada la cadera para ese sitio. Los pies quedan 2.5 cm bajo el suelo:
+# es el grosor de la suela y a 229 px de alto son dos píxeles.
 FIEL_POSE = {
-    "hips_main": ((0.00000, 0.96962, -0.02117), (1.00000, 0.00000, 0.00000, 0.00000)),
+    "hips_main": ((0.00000, 0.78994, 0.00906), (1.00000, 0.00000, 0.00000, 0.00000)),
     "spine": ((0.00000, 0.00000, 0.00000), (0.99659, 0.07978, -0.00619, -0.02028)),
     "neck": ((0.00000, 0.00000, 0.00000), (0.99068, 0.13623, 0.00000, 0.00000)),
     "foot_IK_main.L": ((0.05359, -0.12478, 1.45865), (0.99958, 0.00000, 0.02885, 0.00000)),
