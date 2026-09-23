@@ -11,6 +11,9 @@ const movil = escena.formatos.mobile
 const escritorio = escena.formatos.desktop
 const primeraMovil = movil?.estaciones[0]
 const primeraEscritorio = escritorio?.estaciones[0]
+// Cada formato trae su loop de bruma o no; se publican por separado.
+const brumaDe = (estacion?: object) =>
+  estacion && 'bruma' in estacion ? (estacion.bruma as { imagen: string }).imagen : undefined
 ---
 
 {primeraMovil && (
@@ -53,6 +56,22 @@ const primeraEscritorio = escritorio?.estaciones[0]
         </picture>
       )
     ))}
+    {movil.estaciones.map((estacion, indice) => {
+      const enMovil = brumaDe(estacion)
+      const enEscritorio = brumaDe(escritorio?.estaciones[indice])
+      return (enMovil || enEscritorio) && (
+        <video
+          data-capa-frente={indice}
+          data-bruma
+          data-mobile={enMovil}
+          data-desktop={enEscritorio}
+          muted
+          loop
+          playsinline
+          preload="none"
+        ></video>
+      )
+    })}
   </div>
 )}
 
@@ -101,32 +120,21 @@ const primeraEscritorio = escritorio?.estaciones[0]
     pointer-events: none;
   }
 
-  .altar-frente img {
+  .altar-frente img,
+  .altar-frente video {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     opacity: 0;
+  }
+
+  /* Sólo las imágenes llevan el velo. La bruma no: es luz nueva delante del
+     texto, no un recorte de la escena, y atenuada a 0.38 queda igual de clara
+     que la mesa y no se ve (medido sobre la composición de sonido). */
+  .altar-frente img {
     filter: brightness(calc(1 - var(--velo)));
-  }
-
-  /* El vídeo del hero es un fondo decorativo y tapaba la escena entera. Se
-     apaga, no se borra: el marcado sigue ahí. */
-  :global(.hero-video) {
-    display: none;
-  }
-
-  /* Los velos del hero existían para que el texto se leyera sobre ese vídeo.
-     Con la escena detrás sobran: el ::before lo tapaba de negro y el ::after
-     metía un halo rojo que se leía como una banda. La legibilidad ya la da el
-     velo medido de arriba. */
-  :global(.hero::before) {
-    background-image: none;
-  }
-
-  :global(.hero::after) {
-    box-shadow: none;
   }
 
   /* Cada sección de estación ocupa al menos una ventana: así el tramo entre
@@ -213,6 +221,17 @@ const primeraEscritorio = escritorio?.estaciones[0]
           sinMovimiento,
         })
       : () => {}
+    // Bruma: el loop del formato que toca. Safari (y todo iOS, que es WebKit)
+    // ignora el alfa de VP9 y lo pintaría negro, así que no la recibe hasta
+    // tener su HEVC con alfa. ponytail: detección por UA, cambiar a <source
+    // type="video/mp4;codecs=hvc1"> cuando exista ese archivo.
+    const webkit = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+    if (!webkit && !sinMovimiento) {
+      for (const video of document.querySelectorAll<HTMLVideoElement>('[data-bruma]')) {
+        const fuente = video.dataset[clave]
+        if (fuente) video.src = fuente
+      }
+    }
     mountScrollScene({ canvas, escena, alCambiarFrame: pintarCapas })
   }
 </script>

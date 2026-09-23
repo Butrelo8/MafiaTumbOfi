@@ -729,6 +729,17 @@ body.marketing-body img {
   --titular-bajo: 26svh;
 }
 
+/* Móvil, nave: la capa son dos columnas a los lados y bancas desde media
+   altura. Lo libre es arriba, entre columnas (del 17 al 82 % del ancho). */
+.hero .hero-copy.hero-content {
+  margin-left: 12vw;
+  max-width: 64vw;
+}
+
+.hero .hero-title {
+  margin-bottom: 1rem;
+}
+
 /* Escritorio.
    Altar: la banca de la fiel muerde la primera letra, no la palabra.
    Hornacinas: baja hasta las velas, en el hueco entre la caja y el vaso. */
@@ -741,6 +752,25 @@ body.marketing-body img {
     --titular-x: 20vw;
     --titular-bajo: 8svh;
   }
+
+  /* Retirada: la cabeza de la fiel se comía el primer trazo de la M. */
+  .footer-bar .estacion-titular {
+    --titular-x: 6vw;
+  }
+
+  /* Nave: la capa de frente son las columnas y las bancas, y la única franja
+     libre de arriba abajo es el pasillo, del 40 al 60 % del ancho (medido su
+     alfa). A la izquierda, donde estaba, las columnas tapaban el logo y el CTA.
+     El margen va contra la ventana, no contra el contenedor. */
+  .hero .hero-copy.hero-content {
+    margin-left: calc(39vw - (100vw - var(--container)) / 2);
+    max-width: 22vw;
+  }
+
+  .hero .hero-logo-img {
+    width: 100%;
+  }
+
 }
 
 .estacion-titular h2 {
@@ -880,43 +910,6 @@ body.marketing-body img {
   padding-bottom: clamp(3rem, 8vw, 5rem);
 }
 
-.hero-video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.8s ease;
-}
-
-.hero-video[data-loaded] {
-  opacity: 1;
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(90deg, oklch(6% 0 0) 4%, oklch(6% 0 0 / 0.82) 34%, oklch(6% 0 0 / 0.25) 72%, transparent 100%),
-    linear-gradient(0deg, oklch(7% 0 0) 0%, transparent 42%);
-  z-index: 1;
-  pointer-events: none;
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: transparent;
-  box-shadow: inset 0 0 180px 40px oklch(52% 0.20 28 / 0.22);
-  z-index: 2;
-  pointer-events: none;
-}
-
 .hero-deco-line {
   position: absolute;
   top: 0;
@@ -932,16 +925,6 @@ body.marketing-body img {
 .hero-content {
   position: relative;
   z-index: 4;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-video {
-    display: none;
-  }
-
-  .hero {
-    background-color: var(--bg);
-  }
 }
 
 .hero-eyebrow {
@@ -973,7 +956,7 @@ body.marketing-body img {
 .hero-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem;
+  gap: 0.5rem 1.5rem;
   font-size: 0.9rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1374,17 +1357,28 @@ body.marketing-body img {
   outline-offset: 4px;
 }
 
-.footer-bar {
+/* El footer es la estación 5: monograma incrustado arriba y, en el panel,
+   marca, redes y copyright. Ningún enlace detrás de una vela. */
+.footer-bar .estacion-panel {
   padding-block: 2rem;
   border-top: 1px solid var(--border);
 }
 
-.footer-bar .container {
+.footer-bar .estacion-panel .container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
+}
+
+.footer-monograma {
+  display: flex;
+  align-items: center;
+  gap: 0.1em;
+  font-family: var(--ff-display);
+  font-size: clamp(5rem, 14vw, 10rem);
+  line-height: 1;
 }
 
 .footer-brand {
@@ -1464,7 +1458,8 @@ body.marketing-body img {
 }
 
 /* ─── Scroll reveal (replaces AOS) ───────────────────────── */
-[data-reveal] {
+/* Oculto sólo si el script lo marcó: sin JS las tarjetas se ven. */
+[data-reveal="oculto"] {
   opacity: 0;
   transform: translateY(24px);
   transition: opacity 0.8s ease, transform 0.8s ease;
@@ -1772,14 +1767,23 @@ body.marketing-body img {
 }
 
 /* ─── Veracruz Noir — asymmetric hero + blocks ───────────── */
+/* Colocado contra la capa de frente de la nave: arriba entre columnas en
+   móvil, abajo en el pasillo en escritorio. Ver "Colocación por estación". */
 .hero.hero--asymmetric {
-  justify-content: center;
+  justify-content: flex-start;
   min-height: min(100svh, 960px);
-  padding-top: clamp(4rem, 12vw, 7rem);
+  padding-top: 9svh;
   padding-bottom: var(--space-lg, 2rem);
 }
 
-/* Background video uses base .hero-video; copy + grain sit above scrims (::before/::after) */
+@media (min-aspect-ratio: 1/1) {
+  .hero.hero--asymmetric {
+    justify-content: flex-end;
+    padding-top: 0;
+    padding-bottom: 3svh;
+  }
+}
+
 .hero.hero--asymmetric .hero-deco-line {
   display: none;
 }
@@ -1797,16 +1801,6 @@ body.marketing-body img {
 .hero-copy.hero-content {
   text-align: left;
   max-width: min(36rem, 100%);
-}
-
-.hero-grain {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 3;
-  opacity: 0.12;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
 }
 
 .section--fechas {
@@ -1840,63 +1834,6 @@ body.marketing-body img {
   margin-right: 12px;
   vertical-align: middle;
   background: var(--red);
-}
-
-/* Marquee */
-.marquee-wrap {
-  overflow: hidden;
-  border-block: 1px solid var(--border);
-  background: var(--surface2);
-}
-
-.marquee-track {
-  display: flex;
-  width: max-content;
-  gap: 0;
-  padding-block: 0.65rem;
-  animation: marquee-scroll 42s linear infinite;
-}
-
-.marquee-text {
-  font-family: var(--ff-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--red);
-  white-space: nowrap;
-  padding-inline-end: 2rem;
-}
-
-@keyframes marquee-scroll {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track {
-    animation: none;
-    flex-wrap: wrap;
-    width: 100%;
-    justify-content: center;
-    gap: 0.5rem 1rem;
-    padding-block: 0.85rem;
-  }
-
-  .marquee-text {
-    white-space: normal;
-    text-align: center;
-    letter-spacing: 0.12em;
-    padding-inline-end: 0;
-  }
-
-  .marquee-text:last-child {
-    display: none;
-  }
 }
 
 /* Artwork shelf */
