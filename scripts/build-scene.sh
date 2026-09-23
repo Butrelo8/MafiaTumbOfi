@@ -86,6 +86,21 @@ for formato in movil escritorio; do
       *) avif "$png" "$salida/$base.avif" "$CRF_ESTACION" ;;
     esac
   done
+  # Loops de bruma (blender/humo.py): VP9 con alfa, que Chrome y Firefox
+  # reproducen transparente. A 640 px no se distingue de los 960 del render
+  # —es niebla— y pesa 55 KB/s contra 186 (medido 2026-09-23). Safari ignora
+  # el alfa de VP9 y pintaría negro: necesita HEVC con alfa, que sólo se
+  # encodea en macOS, y hasta entonces AltarScene no le da la bruma.
+  ancho_bruma=360
+  [ "$formato" = escritorio ] && ancho_bruma=640
+  for par in 2:sonido 4:reliquia; do
+    indice="${par%%:*}"; estacion="${par#*:}"
+    cuadros="$RAIZ/tmp/bruma/$estacion-$formato"
+    [ -d "$cuadros" ] || continue
+    ffmpeg -y -loglevel error -framerate 30 -i "$cuadros/$estacion-%03d.png" \
+           -vf "scale=$ancho_bruma:-2" -c:v libvpx-vp9 -pix_fmt yuva420p \
+           -b:v 0 -crf 45 -auto-alt-ref 0 "$salida/estacion-$indice-bruma.webm"
+  done
 done
 
 python3 "$RAIZ/scripts/scene-json.py"

@@ -13,6 +13,11 @@
 
 import type { FormatoEscena } from './scrollScene'
 
+/** Loop de bruma: un <video> con `data-bruma` en lugar de una imagen. */
+function esBruma(capa: HTMLElement): capa is HTMLVideoElement {
+  return 'bruma' in capa.dataset
+}
+
 /** Frames de fundido a cada lado de la estación. Medido en el navegador. */
 export const VENTANA = 4
 
@@ -33,6 +38,7 @@ export type Estacion = {
   imagen: string
   bytes: number
   capaFrente?: { imagen: string; bytes: number }
+  bruma?: { imagen: string; bytes: number }
   relampago?: { imagen: string; bytes: number }
 }
 
@@ -74,8 +80,9 @@ export function montarCapas({
 
   if (sinMovimiento) {
     // Sin scrub no hay fundido que valga: cada estación es un still. La capa se
-    // deja puesta y el titular visible, que es lo que pide la spec.
-    for (const capa of capas.values()) capa.style.opacity = '1'
+    // deja puesta y el titular visible, que es lo que pide la spec. La bruma
+    // es movimiento y nada más: no se muestra.
+    for (const capa of capas.values()) capa.style.opacity = esBruma(capa) ? '0' : '1'
     for (const seccion of secciones.values()) seccion.dataset.cerca = '1'
     return () => {}
   }
@@ -84,6 +91,16 @@ export function montarCapas({
     for (const [indice, capa] of capas) {
       const frameEstacion = framesDeEstacion[indice]
       if (frameEstacion === undefined) continue
+      if (esBruma(capa)) {
+        // La bruma es aire pegado a la cámara, no una imagen fija sobre un
+        // fondo que se mueve: no tiene desencaje que esconder y entra con la
+        // ventana ancha del titular. Sólo se reproduce mientras se ve.
+        const nivel = cercania(frame, frameEstacion, ventana * 4)
+        capa.style.opacity = String(nivel)
+        if (nivel > 0 && capa.paused) void capa.play().catch(() => {})
+        else if (nivel === 0 && !capa.paused) capa.pause()
+        continue
+      }
       capa.style.opacity = String(cercania(frame, frameEstacion, ventana))
     }
     for (const [indice, seccion] of secciones) {

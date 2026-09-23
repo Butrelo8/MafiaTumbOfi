@@ -533,3 +533,30 @@ Qué hay en cada estación que merezca animarse, según la spec:
 **Hoy la escena no tiene nada de eso animado.** Las llamas son mallas quietas y
 el neón es un material emisivo constante: los cinco loops son trabajo de
 animación en Blender, no de encode. Es lo único que queda abierto de la fase 3.
+
+## Bruma delante del titular (2026-09-23)
+
+Sonido y reliquia no tienen capa de frente (macro, nada entre cámara y
+sujeto), así que lo que pasa por delante del titular es aire: `blender/humo.py`.
+
+- **Volumen procedural, no Mantaflow.** Ruido 4D en una caja hija de la cámara,
+  mitad baja del cuadro. Nada que hornear. El loop cierra solo: la densidad
+  funde dos ruidos desfasados un periodo, y el cuadro N vale lo que el 0.
+- **Se renderiza sola**: todo lo demás `visible_camera = False`, que sigue
+  iluminando. La niebla del mundo se desconecta, como en la capa de frente.
+- **Necesita emisión propia.** Sólo con la luz de las velas la bruma salía más
+  oscura que la mesa una vez compuesta: invisible. La emisión va multiplicada
+  por la misma densidad, así que no brilla donde no hay bruma.
+- **No lleva el velo** (`brightness(0.38)`) en la web, a diferencia de la capa
+  de frente: atenuada así quedaba igual de clara que el fondo.
+- **Coste**: ~2 s por cuadro en GPU a 960×540, 128 muestras con denoise. 90
+  cuadros (3 s a 30 fps) ≈ 3 min por estación y formato. El MCP corta a 60 s:
+  las tandas van con `blender -b -P blender/humo.py -- <estacion> <formato>`.
+- **Encode**: VP9 con alfa, CRF 45, 640 px de ancho: 55 KB/s. A 960 px pesa 3.4×
+  más y no se distingue. WebP animado: 3.9 MB/s, descartado.
+- **Safari ignora el alfa de VP9** y pinta negro. Necesita HEVC con alfa, que
+  sólo se encodea en macOS (Finder → Encode Selected Video Files → Preserve
+  Transparency, desde un ProRes 4444). Hasta tenerlo, WebKit no recibe bruma.
+- **Probarla con `python3 -m http.server` no deja saltar** en el vídeo (responde
+  200, no 206): se reproduce, pero `currentTime` no se mueve. Ver la ficha
+  `video-que-avanza` de la galería.

@@ -93,3 +93,45 @@ describe('montarCapas', () => {
     expect(capas[0].style.opacity).toBe('1')
   })
 })
+
+describe('bruma', () => {
+  const frames = framesDeEstacion(formato)
+
+  function conBruma(indice: number) {
+    const llamadas: string[] = []
+    const video = {
+      dataset: { capaFrente: String(indice), bruma: '' },
+      style: { opacity: '' },
+      paused: true,
+      play() { llamadas.push('play'); this.paused = false; return Promise.resolve() },
+      pause() { llamadas.push('pause'); this.paused = true },
+    }
+    const documento = {
+      querySelectorAll: (selector: string) => (selector === '[data-capa-frente]' ? [video] : []),
+    } as unknown as Document
+    return { video, llamadas, documento }
+  }
+
+  test('entra con la ventana del titular, no con la de la capa', () => {
+    const { video, documento } = conBruma(2)
+    const pintar = montarCapas({ formato, framesDeEstacion: frames, documento })
+    pintar(frames[2] + VENTANA * 2)
+    expect(Number(video.style.opacity)).toBeGreaterThan(0)
+  })
+
+  test('se reproduce sólo cerca de su estación, y una vez', () => {
+    const { llamadas, documento } = conBruma(2)
+    const pintar = montarCapas({ formato, framesDeEstacion: frames, documento })
+    pintar(frames[2])
+    pintar(frames[2] + 1)
+    pintar(frames[2] + VENTANA * 4)
+    expect(llamadas).toEqual(['play', 'pause'])
+  })
+
+  test('sin movimiento no se reproduce ni se muestra', () => {
+    const { video, llamadas, documento } = conBruma(2)
+    montarCapas({ formato, framesDeEstacion: frames, documento, sinMovimiento: true })
+    expect(video.style.opacity).toBe('0')
+    expect(llamadas).toEqual([])
+  })
+})
