@@ -38,48 +38,62 @@ const releases = catalog.releases.map((release) => ({
 
   <Marquee />
 
-  <section class="section bio-section" id="quienes" aria-labelledby="bio-heading" data-estacion="1"><div class="container bio-grid">
-    <div class="bio-sidebar" data-reveal>
+  <section class="estacion bio-section" id="quienes" aria-labelledby="bio-heading">
+    <div class="estacion-titular" data-estacion="1"><div class="container">
       <Eyebrow text="Quiénes somos" />
       <h2 id="bio-heading">El sonido de <em>Xalapa</em></h2>
+    </div></div>
+    <div class="estacion-panel"><div class="container bio-grid">
       <div class="bio-tags">{['Corridos Tumbados', 'Norteño', 'Regional Mx', 'Covers', 'Canciones propias'].map((tag) => <span class="tag">{tag}</span>)}</div>
-    </div>
-    <div class="bio-body" data-reveal>
-      <p>La Mafia Tumbada es un grupo de Xalapa, Veracruz que lleva cuatro años construyendo su propio espacio dentro del regional mexicano contemporáneo. Con raíces en el corrido tumbado y el norteño, y sin perder el pulso del regional clásico, el grupo mezcla canciones propias con covers ejecutados con honestidad y actitud.</p>
-      <p>Un catálogo de singles originales es la muestra de un proyecto que toma en serio la composición propia. Al mismo tiempo, su versatilidad en tarima los ha llevado a barras y escenarios tanto en Veracruz como fuera del estado.</p>
-    </div>
-  </div></section>
+      <div class="bio-body">
+        <p>La Mafia Tumbada es un grupo de Xalapa, Veracruz que lleva cuatro años construyendo su propio espacio dentro del regional mexicano contemporáneo. Con raíces en el corrido tumbado y el norteño, y sin perder el pulso del regional clásico, el grupo mezcla canciones propias con covers ejecutados con honestidad y actitud.</p>
+        <p>Un catálogo de singles originales es la muestra de un proyecto que toma en serio la composición propia. Al mismo tiempo, su versatilidad en tarima los ha llevado a barras y escenarios tanto en Veracruz como fuera del estado.</p>
+      </div>
+    </div></div>
+  </section>
 
-  <section class="section music-section" id="musica" aria-labelledby="musica-heading" data-estacion="2"><div class="container">
-    <Eyebrow text="Escucha" />
-    <h2 id="musica-heading" class="section-heading gold-text">Música</h2>
-    <ArtworkShelf items={releases} />
-    <a class="music-link" href={bandSocialUrls.appleMusic} target="_blank" rel="noopener noreferrer">Escúchanos en Apple Music</a>
-    <h3 class="videos-heading">Videos</h3>
-    <ul class="video-row">{catalog.videos.map((video) => <li><a href={video.href} target="_blank" rel="noopener noreferrer"><img src={video.thumbnail} alt="" width="480" height="360" loading="lazy" decoding="async" /><span>{video.title}</span></a></li>)}</ul>
-  </div></section>
+  <section class="estacion music-section" id="musica" aria-labelledby="musica-heading">
+    <div class="estacion-titular" data-estacion="2"><div class="container">
+      <Eyebrow text="Escucha" />
+      <h2 id="musica-heading" class="gold-text">Música</h2>
+    </div></div>
+    <div class="estacion-panel"><div class="container">
+      <ArtworkShelf items={releases} />
+      <a class="music-link" href={bandSocialUrls.appleMusic} target="_blank" rel="noopener noreferrer">Escúchanos en Apple Music</a>
+      <h3 class="videos-heading">Videos</h3>
+      <ul class="video-row">{catalog.videos.map((video) => <li><a href={video.href} target="_blank" rel="noopener noreferrer"><img src={video.thumbnail} alt="" width="480" height="360" loading="lazy" decoding="async" /><span>{video.title}</span></a></li>)}</ul>
+    </div></div>
+  </section>
 
   <FilmStrip />
 
   <div class="tramo-espacio" aria-hidden="true"></div>
 
-  <section class="section group-section" id="grupo" aria-labelledby="grupo-heading" data-estacion="3"><div class="container">
-    <Eyebrow text="La banda" /><h2 id="grupo-heading" class="section-heading gold-text">El grupo</h2>
-    <div class="members-grid">{members.map((member) => <MemberCard {...member} />)}</div>
-  </div></section>
+  <section class="estacion group-section" id="grupo" aria-labelledby="grupo-heading">
+    <div class="estacion-titular" data-estacion="3"><div class="container">
+      <Eyebrow text="La banda" />
+      <h2 id="grupo-heading" class="gold-text">El grupo</h2>
+    </div></div>
+    <div class="estacion-panel"><div class="container">
+      <div class="members-grid">{members.map((member) => <MemberCard {...member} />)}</div>
+    </div></div>
+  </section>
 
   <div class="tramo-espacio" aria-hidden="true"></div>
   <div class="tramo-espacio" aria-hidden="true"></div>
 
-  <section class="section booking-section" id="contratacion" aria-labelledby="contratacion-heading" data-estacion="4"><div class="container booking-grid">
-    <div><Eyebrow text="Contratar al grupo" /><h2 id="contratacion-heading" class="section-heading gold-text">¿Tienes una <em>fecha disponible?</em></h2></div>
-    <div class="booking-copy">
+  <section class="estacion booking-section" id="contratacion" aria-labelledby="contratacion-heading">
+    <div class="estacion-titular" data-estacion="4"><div class="container">
+      <Eyebrow text="Contratar al grupo" />
+      <h2 id="contratacion-heading" class="gold-text">¿Tienes una <em>fecha disponible?</em></h2>
+    </div></div>
+    <div class="estacion-panel"><div class="container booking-copy">
       <p>El grupo está disponible para presentaciones, festivales, eventos privados y giras regionales. Cuentan con equipo propio y experiencia para adaptarse a diferentes formatos de producción.</p>
       <p class="booking-urgency">Agenda limitada — los fines de semana suelen reservarse con tres o cuatro semanas de anticipación.</p>
       <a href={bandSocialUrls.whatsapp} target="_blank" rel="noopener noreferrer" class="btn-primary" data-plausible-event="whatsapp_contratacion">Escríbenos por WhatsApp</a>
       <p>O llámanos: <a href="tel:+522283538827">+52 228 353 8827</a></p>
-    </div>
-  </div></section>
+    </div></div>
+  </section>
 
   <div class="tramo-espacio" aria-hidden="true"></div>
   <div class="tramo-espacio" aria-hidden="true"></div>

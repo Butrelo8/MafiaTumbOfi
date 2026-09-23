@@ -150,10 +150,20 @@ const primeraEscritorio = escritorio?.estaciones[0]
      por encima del texto en flujo, que no está posicionado. El hero se salvaba
      sólo porque es `position: relative` y va después en el DOM; el resto de las
      secciones son estáticas y quedaban tapadas por el canvas. Hay que subirlas
-     explícitamente. */
-  :global(.marketing-main > *:not(.altar-escena)) {
+     explícitamente.
+     La capa de frente queda fuera: esta regla le ganaba a su `position: fixed`
+     por orden y la dejaba en un bloque de 0 px, invisible. */
+  :global(.marketing-main > *:not(.altar-escena, .altar-frente)) {
     position: relative;
     z-index: 1;
+  }
+
+  /* Una sección con panel NO puede ser contexto de apilado: su titular tiene
+     que quedar bajo la capa de frente (z:2) y su panel encima (z:3), y dentro
+     de un contexto en z:1 las dos cosas quedarían debajo. El hero y el footer
+     sí lo son, enteros bajo la capa: no tienen panel. */
+  :global(.marketing-main > .estacion) {
+    z-index: auto;
   }
 
   /* El contenido va encima de la escena: el fondo del body es opaco, así que

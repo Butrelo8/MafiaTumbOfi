@@ -705,6 +705,81 @@ body.marketing-body img {
   padding-block: var(--space-section);
 }
 
+/* Estación: titular incrustado en la escena + panel opaco. El titular vive
+   entre el canvas y la capa de frente, así que las velas y las bancas le pasan
+   por delante; el panel sube por encima de todo porque ahí se lee y se toca.
+   La altura del titular (100svh) viene de [data-estacion] en AltarScene.
+   Va abajo porque ahí está lo que tapa: medido el alfa de las capas, en las
+   cuatro estaciones que la tienen lo que queda delante son bancas, la fiel y
+   velas, todo en el tercio inferior del cuadro. */
+.estacion-titular {
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: var(--titular-bajo, 12svh);
+}
+
+.estacion-titular > .container {
+  padding-inline-start: var(--titular-x, 0);
+}
+
+/* Colocación por estación, a ojo sobre capturas a 1440x900 y 500x844. Cada
+   formato tiene su propia capa y lo que tapa cae en otro sitio.
+   Móvil, hornacinas: por encima de la mesa; abajo el cinturón se comía "po". */
+.group-section .estacion-titular {
+  --titular-bajo: 26svh;
+}
+
+/* Escritorio.
+   Altar: la banca de la fiel muerde la primera letra, no la palabra.
+   Hornacinas: baja hasta las velas, en el hueco entre la caja y el vaso. */
+@media (min-aspect-ratio: 1/1) {
+  .bio-section .estacion-titular {
+    --titular-x: 12.5vw;
+  }
+
+  .group-section .estacion-titular {
+    --titular-x: 20vw;
+    --titular-bajo: 8svh;
+  }
+}
+
+.estacion-titular h2 {
+  font-family: var(--ff-display);
+  font-size: clamp(2.8rem, 8vw, 6rem);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.estacion-titular h2 em {
+  font-style: italic;
+  font-weight: 600;
+  color: var(--gold);
+}
+
+.estacion-panel {
+  position: relative;
+  z-index: 3;
+  background: var(--bg-raised);
+  padding-block: var(--space-section);
+}
+
+/* Pop-in: capasEstacion escribe data-cerca. Se oculta sólo con "0", no por
+   defecto, para que sin JS se lea todo. */
+[data-estacion] > .container {
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+[data-estacion][data-cerca="0"] > .container {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-estacion] > .container {
+    transition: none;
+  }
+}
+
 .divider {
   border: none;
   border-top: 1px solid var(--border);
@@ -978,19 +1053,6 @@ body.marketing-body img {
   .bio-grid {
     grid-template-columns: 1fr;
   }
-}
-
-.bio-sidebar h2 {
-  font-family: var(--ff-display);
-  font-size: clamp(2.8rem, 7vw, 5rem);
-  font-weight: 400;
-  line-height: 1.05;
-}
-
-.bio-sidebar h2 em {
-  font-style: italic;
-  font-weight: 600;
-  color: var(--gold);
 }
 
 .bio-tags {
