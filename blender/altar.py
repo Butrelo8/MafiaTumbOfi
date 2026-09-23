@@ -89,11 +89,12 @@ FIEL_POSE = {
 
 # Cirios de latón (Poly Haven) delante de los titulares de las dos estaciones
 # macro, que no tienen otro primer plano: (x, y respecto del altar) de la base
-# sobre la mesa. Sonido, colocado por el usuario en el visor el 2026-09-23.
-# Reliquia, la posición más cercana a la cámara que no choca con ninguna caja
-# envolvente —la gorra estaba en medio— y deja la llama dentro del recorte web.
+# sobre la mesa. Las dos, la posición más cercana a la cámara que no choca con
+# ninguna caja envolvente y deja la llama dentro del recorte web de escritorio
+# y de móvil. En reliquia la gorra estaba en medio; en sonido la del usuario
+# quedaba en el borde y la web recortaba la vela entera.
 CIRIOS = {
-    "sonido": (0.40762, -0.49631),
+    "sonido": (0.7876, -0.5563),
     "reliquia": (-1.2137, -0.5768),
 }
 
