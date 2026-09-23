@@ -37,10 +37,6 @@
           "relampago": {
             "imagen": "/scene/mobile/estacion-2-relampago.avif",
             "bytes": 22556
-          },
-          "bruma": {
-            "imagen": "/scene/mobile/estacion-2-bruma.webm",
-            "bytes": 122311
           }
         },
         {
@@ -63,10 +59,6 @@
           "relampago": {
             "imagen": "/scene/mobile/estacion-4-relampago.avif",
             "bytes": 19075
-          },
-          "bruma": {
-            "imagen": "/scene/mobile/estacion-4-bruma.webm",
-            "bytes": 135048
           }
         },
         {
@@ -120,7 +112,7 @@
           "bytes": 792768
         }
       ],
-      "bytes": 4953896
+      "bytes": 4696537
     },
     "desktop": {
       "ancho": 1920,
@@ -159,10 +151,6 @@
           "relampago": {
             "imagen": "/scene/desktop/estacion-2-relampago.avif",
             "bytes": 32888
-          },
-          "bruma": {
-            "imagen": "/scene/desktop/estacion-2-bruma.webm",
-            "bytes": 148560
           }
         },
         {
@@ -185,10 +173,6 @@
           "relampago": {
             "imagen": "/scene/desktop/estacion-4-relampago.avif",
             "bytes": 27123
-          },
-          "bruma": {
-            "imagen": "/scene/desktop/estacion-4-bruma.webm",
-            "bytes": 154115
           }
         },
         {
@@ -242,7 +226,7 @@
           "bytes": 868898
         }
       ],
-      "bytes": 5079004
+      "bytes": 4776329
     }
   }
 }
