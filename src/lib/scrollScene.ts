@@ -112,11 +112,12 @@ export function frameEnAnclas(scrollY: number, anclas: Ancla[]): number {
  *
  * ## Para navegar por clicks
  *
- * Las cinco estaciones están marcadas con `[data-estacion]` y con un `id`
- * estable: `#inicio`, `#musica`, `#grupo`, `#contratacion`, `#cierre`. Un botón
+ * Las seis estaciones están marcadas con `[data-estacion]` y con un `id`
+ * estable: `#inicio`, `#quienes`, `#musica`, `#grupo`, `#contratacion`,
+ * `#cierre`. Un botón
  * que quiera saltar a una estación tiene que **centrar** el elemento:
  *
- *     document.querySelector('[data-estacion="2"]')
+ *     document.querySelector('[data-estacion="3"]')
  *       .scrollIntoView({ block: 'center' })
  *
  * Y no puede usar un enlace `#hash`: el hash deja el borde superior de la
