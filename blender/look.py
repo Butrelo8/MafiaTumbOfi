@@ -484,6 +484,25 @@ def _luces_trio(col, mats):
             col.objects.link(luz)
 
 
+def _cirios(col):
+    """La llama del cirio es una foto: no ilumina. Una luz en la punta de la vela."""
+    for ob in [o for o in bpy.data.objects if o.name.startswith("CIRIO_") and o.type == "MESH"]:
+        punta = max((ob.matrix_world @ v.co for v in ob.data.vertices), key=lambda v: v.z)
+        bpy.ops.object.light_add(type="POINT", location=(punta.x, punta.y, punta.z - 0.01))
+        luz = bpy.context.object
+        luz.name = "LUZ_" + ob.name
+        luz.data.energy = VELA_W
+        luz.data.color = VELA_COLOR
+        luz.data.shadow_soft_size = 0.01
+        # Hija del cirio: si se mueve en el visor, la luz va con él.
+        matriz = luz.matrix_world.copy()
+        luz.parent = ob
+        luz.matrix_world = matriz
+        for otra in list(luz.users_collection):
+            otra.objects.unlink(luz)
+        col.objects.link(luz)
+
+
 def _velas(col, mats):
     """Cada veladora lleva su punto de luz: en EEVEE la emisión no ilumina."""
     for ob in [o for o in bpy.data.objects if o.name.startswith("VELADORA_")]:
@@ -683,6 +702,7 @@ def aplicar():
     _luces(col)
     _velas(col, mats)
     _luces_trio(col, mats)
+    _cirios(col)
     _mundo_y_niebla()
     _render()
     motor(MOTOR, MUESTRAS)

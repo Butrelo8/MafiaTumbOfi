@@ -81,3 +81,5 @@ blender/render-out/
 # Assets 3D externos pesados (los .blend de terceros)
 blender/assets/*.blend
 blender/assets/*.glb
+# Poly Haven trae el .blend con sus texturas en carpeta aparte (84 MB)
+blender/assets/candelabros-laton/

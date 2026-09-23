@@ -87,6 +87,16 @@ FIEL_POSE = {
     "thumb.01.R": ((0.00000, 0.00000, 0.00000), (0.99490, 0.04941, -0.05175, 0.07105)),
 }
 
+# Cirios de latón (Poly Haven) delante de los titulares de las dos estaciones
+# macro, que no tienen otro primer plano: (x, y respecto del altar) de la base
+# sobre la mesa. Sonido, colocado por el usuario en el visor el 2026-09-23.
+# Reliquia, la posición más cercana a la cámara que no choca con ninguna caja
+# envolvente —la gorra estaba en medio— y deja la llama dentro del recorte web.
+CIRIOS = {
+    "sonido": (0.40762, -0.49631),
+    "reliquia": (-1.2137, -0.5768),
+}
+
 # Estación -> (frame, offset, aim, foco, focal mm, altura extra m, f-stop)
 # Seis canales: Follow Path es aditivo sobre la posición del objeto, así que
 # "altura extra" sube la cámara por encima del recorrido — la grúa de la
@@ -1055,6 +1065,10 @@ def _reliquias(col):
         _cilindro(col, "VELADORA_%d" % i,
                   (x, ALTAR_Y + dy, mesa_z + 0.11), 0.055, 0.22, 16)
 
+    if assets_velas is not None and assets_velas.disponible(assets_velas.CIRIO):
+        for estacion, (x, dy) in CIRIOS.items():
+            assets_velas.cirio(col, "CIRIO_" + estacion, (x, ALTAR_Y + dy, mesa_z))
+
     # Vinilos acostados sobre la mesa del altar: la estación del sonido
     # los mira en picado, no de frente.
     _cilindro(col, "PROXY_vinilo", (1.05, ALTAR_Y + 0.05, mesa_z + 0.012),
@@ -1266,7 +1280,7 @@ def render_stills(out_dir, ancho=480, alto=270):
 # está en el centro de una malla enorme, así que la distancia al origen no dice
 # nada sobre si tapa o no a la cámara.
 PREFIJOS_FRENTE = (
-    "COLUMNA_", "BANCA_", "CANDELABRO_", "PROP_", "VELADORA_", "LLAMA_",
+    "COLUMNA_", "BANCA_", "CANDELABRO_", "PROP_", "VELADORA_", "LLAMA_", "CIRIO_",
     "VINILO_", "ETIQUETA_", "MICRO_", "PROXY_micro", "PROXY_cadena",
     # La fiel queda a 5 m de la cámara en la estación `altar` y el altar a
     # 10.2: es primer plano, y pasa por delante del titular.
@@ -1330,7 +1344,13 @@ def render_capa_frontal(out_dir, ancho=800, alto=450, margen=0.78):
             for ob in mallas:
                 candidato = ob.name.startswith(PREFIJOS_FRENTE)
                 distancia = (ob.matrix_world.translation - origen).length
-                ob.hide_render = not (candidato and distancia < umbral)
+                # El cirio de cada estación se puso para eso: va en SU capa
+                # esté donde esté. En sonido la cámara mira la mesa en picado y
+                # todo lo que hay en ella queda a la distancia del sujeto; aun
+                # así una vela de pie tapa el titular, que se pinta sobre la
+                # mesa. En la capa de otra estación sigue la regla general.
+                forzado = ob.name == "CIRIO_" + nombre
+                ob.hide_render = not (forzado or (candidato and distancia < umbral))
                 frontales += not ob.hide_render
 
             # Mismo nombre que el resto del pipeline: scripts/build-scene.sh

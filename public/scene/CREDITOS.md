@@ -25,6 +25,15 @@ Sustituye al "Low Poly Microphone" de **mgordon** (Blend Swap 40491, CC-0) que
 usó la escena hasta el 2026-09-17. Aquel no imponía condiciones, así que su
 retirada no deja nada pendiente.
 
+### Cirios de latón
+
+**Brass Candleholders**, de **Tina** para Poly Haven, **CC0** (verificado el
+2026-09-23 en https://polyhaven.com/a/brass_candleholders). No obliga a
+acreditar. Se usa sólo `brass_candleholder_01`, el candelero sencillo, con sus
+materiales y texturas de 2K: la llama es una fotografía sobre una tarjeta y es
+lo que se buscaba. Dos copias sobre la mesa del altar, delante de los titulares
+de sonido y reliquia.
+
 ### Candelabro de nueve brazos
 
 Generado por el propio equipo (`candelabro.blend`), sin derechos de terceros.

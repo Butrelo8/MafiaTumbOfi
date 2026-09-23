@@ -72,6 +72,25 @@ VENTANAS = "ventanas-goticas.blend"
 VENTANA_ROSETON = "window_gothic_8"    # cuatro luces y óculo: el presbiterio
 VENTANA_LANCETA = "window_gothic_2"    # lanceta lisa: la nave
 
+# Candelero de latón con vela encendida, Poly Haven (CC0, autora Tina). Al
+# revés que los assets generados, conserva sus materiales: la llama es una
+# fotografía sobre una tarjeta y es justo lo que se viene a buscar. Llega a
+# escala real (37 cm) con el origen en la base. La carpeta trae las texturas.
+CIRIO = os.path.join("candelabros-laton", "brass_candleholders_2k.blend")
+CIRIO_PIEZA = "brass_candleholder_01"
+
+
+def cirio(col, nombre, ubicacion, giro=0.0):
+    """Candelero con su vela, de pie en `ubicacion` (la base)."""
+    with bpy.data.libraries.load(os.path.join(CARPETA, CIRIO), link=False) as (origen, destino):
+        destino.objects = [CIRIO_PIEZA]
+    pieza = destino.objects[0]
+    pieza.name = nombre
+    col.objects.link(pieza)
+    pieza.location = ubicacion
+    pieza.rotation_euler = (0.0, 0.0, giro)
+    return pieza
+
 
 def ventana(col, pieza, nombre, ubicacion, alto, hacia_dentro):
     """Tracería de pie contra un muro lateral, con su cristal detrás.
