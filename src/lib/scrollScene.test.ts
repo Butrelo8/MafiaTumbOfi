@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'bun:test'
 import {
+  acercar,
   frameEnAnclas,
+  posicionEnAnclas,
   framesDeEstacion,
   formatoParaPantalla,
   frameEnScroll,
@@ -101,5 +103,45 @@ describe('frameEnAnclas', () => {
 
   test('sin anclas devuelve el primer frame', () => {
     expect(frameEnAnclas(300, [])).toBe(0)
+  })
+})
+
+describe('posicionEnAnclas', () => {
+  const anclas = [
+    { scroll: 0, frame: 0 },
+    { scroll: 1000, frame: 20 },
+  ]
+
+  test('entre dos anclas da el frame con decimales, sin redondear', () => {
+    expect(posicionEnAnclas(510, anclas)).toBeCloseTo(10.2)
+  })
+
+  test('frameEnAnclas es su versión redondeada', () => {
+    expect(frameEnAnclas(510, anclas)).toBe(10)
+    expect(frameEnAnclas(530, anclas)).toBe(11)
+  })
+})
+
+describe('acercar', () => {
+  test('sin tiempo no se mueve', () => {
+    expect(acercar(10, 20, 0)).toBe(10)
+  })
+
+  test('avanza hacia el objetivo sin pasarse', () => {
+    const paso = acercar(10, 20, 16)
+    expect(paso).toBeGreaterThan(10)
+    expect(paso).toBeLessThan(20)
+  })
+
+  test('llega en un tiempo finito, en cualquier dirección', () => {
+    let pos = 50
+    for (let i = 0; i < 120; i += 1) pos = acercar(pos, 0, 16)
+    expect(pos).toBe(0)
+  })
+
+  test('no depende de los fps: 4 pasos de 4 ms ≈ 1 de 16 ms', () => {
+    let a = 0
+    for (let i = 0; i < 4; i += 1) a = acercar(a, 10, 4)
+    expect(a).toBeCloseTo(acercar(0, 10, 16), 6)
   })
 })

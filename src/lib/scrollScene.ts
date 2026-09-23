@@ -79,14 +79,15 @@ export function framesDeEstacion(formato: FormatoEscena): number[] {
 }
 
 /**
- * Interpola el frame entre anclas.
+ * Posición en la secuencia entre anclas, con decimales: 30.4 es el frame 30
+ * con el 31 fundido al 40 %.
  *
  * Entre dos anclas el avance es lineal, así que el tramo se reproduce mientras
  * se scrollea de una sección a la siguiente y la cámara llega a la estación
  * justo cuando la sección queda centrada. Fuera del rango se queda en el ancla
  * del extremo en vez de extrapolar.
  */
-export function frameEnAnclas(scrollY: number, anclas: Ancla[]): number {
+export function posicionEnAnclas(scrollY: number, anclas: Ancla[]): number {
   if (anclas.length === 0) return 0
   if (scrollY <= anclas[0].scroll) return anclas[0].frame
   const ultima = anclas[anclas.length - 1]
@@ -99,9 +100,29 @@ export function frameEnAnclas(scrollY: number, anclas: Ancla[]): number {
     const tramo = actual.scroll - previa.scroll
     if (tramo <= 0) return actual.frame
     const avance = (scrollY - previa.scroll) / tramo
-    return Math.round(previa.frame + avance * (actual.frame - previa.frame))
+    return previa.frame + avance * (actual.frame - previa.frame)
   }
   return ultima.frame
+}
+
+/** El frame entero más cercano: el que manda sobre las capas y `data-frame`. */
+export function frameEnAnclas(scrollY: number, anclas: Ancla[]): number {
+  return Math.round(posicionEnAnclas(scrollY, anclas))
+}
+
+/** Constante de tiempo del suavizado, en ms. Más alta = más inercia. */
+export const INERCIA_MS = 90
+
+/**
+ * Un paso del suavizado: acerca `actual` a `objetivo` lo que toque en `dt` ms.
+ *
+ * Amortiguador exponencial: la fracción que se recorre depende del tiempo
+ * transcurrido, no del número de pasos, así que da lo mismo a 60 Hz que a 144.
+ * Por debajo de una centésima de frame se engancha, para que el bucle termine.
+ */
+export function acercar(actual: number, objetivo: number, dt: number, inercia = INERCIA_MS): number {
+  const siguiente = actual + (objetivo - actual) * (1 - Math.exp(-dt / inercia))
+  return Math.abs(objetivo - siguiente) < 0.01 ? objetivo : siguiente
 }
 
 /**
@@ -179,9 +200,10 @@ export function mountScrollScene(
     : rutasDeFrames(formato)
 
   const cache = new Map<number, HTMLImageElement>()
-  let dibujado = -1
-  let pedido = -1
-  let animando = false
+  let pintado = -1
+  let actual = -1
+  let ultimoTiempo = 0
+  let corriendo = false
 
   const cargar = (indice: number): Promise<HTMLImageElement> | undefined => {
     if (indice < 0 || indice >= rutas.length) return undefined
@@ -194,19 +216,43 @@ export function mountScrollScene(
     return imagen.decode().then(() => imagen)
   }
 
-  const pintar = (indice: number) => {
-    const imagen = cache.get(indice)
-    if (!imagen?.complete || dibujado === indice) return
-    contexto.drawImage(imagen, 0, 0, canvas.width, canvas.height)
-    dibujado = indice
-    canvas.dataset.frame = String(indice)
-    alCambiarFrame?.(indice)
+  // Pinta una posición con decimales: el frame de abajo entero y el de arriba
+  // encima con la fracción como opacidad. Entre dos frames de 30 por tramo la
+  // cámara no salta: se funde.
+  const pintar = (posicion: number) => {
+    if (posicion === pintado) return
+    const base = Math.floor(posicion)
+    const mezcla = posicion - base
+    const abajo = cache.get(base)
+    if (!abajo?.complete) {
+      void cargar(base)?.then(arrancar)
+      return
+    }
+    contexto.globalAlpha = 1
+    contexto.drawImage(abajo, 0, 0, canvas.width, canvas.height)
+    if (mezcla > 0.01) {
+      const arriba = cache.get(base + 1)
+      if (arriba?.complete) {
+        contexto.globalAlpha = mezcla
+        contexto.drawImage(arriba, 0, 0, canvas.width, canvas.height)
+        contexto.globalAlpha = 1
+      } else {
+        // Se repinta con el fundido en cuanto llegue.
+        void cargar(base + 1)?.then(() => { pintado = -1; arrancar() })
+      }
+    }
+    pintado = posicion
+    const indice = Math.round(posicion)
+    if (canvas.dataset.frame !== String(indice)) {
+      canvas.dataset.frame = String(indice)
+      alCambiarFrame?.(indice)
+    }
   }
 
   // Las anclas dependen del alto de las secciones, que cambia con la ventana y
-  // con las fuentes: se releen en cada scroll, que es una lectura de layout ya
-  // dentro del rAF.
-  const indiceDeScroll = () => {
+  // con las fuentes: se releen en cada cuadro, que es una lectura de layout ya
+  // dentro del rAF (medido: 0.01 ms).
+  const posicionDeScroll = () => {
     if (sinMovimiento) {
       const recorrido = ventana.document.documentElement.scrollHeight - ventana.innerHeight
       return frameEnScroll(ventana.scrollY, recorrido, rutas.length)
@@ -216,27 +262,38 @@ export function mountScrollScene(
       const recorrido = ventana.document.documentElement.scrollHeight - ventana.innerHeight
       return frameEnScroll(ventana.scrollY, recorrido, rutas.length)
     }
-    return frameEnAnclas(ventana.scrollY, anclas)
+    return posicionEnAnclas(ventana.scrollY, anclas)
   }
 
-  const alScroll = () => {
-    if (animando) return
-    animando = true
-    ventana.requestAnimationFrame(() => {
-      animando = false
-      const indice = indiceDeScroll()
-      if (indice === pedido) return
-      pedido = indice
-      const carga = cargar(indice)
-      if (carga) void carga.then(() => { if (pedido === indice) pintar(indice) })
-      // el siguiente, para que el scrub no espere al decode
-      void cargar(indice + 1)
-    })
+  // Un bucle de rAF que persigue al scroll y se apaga al alcanzarlo. La rueda
+  // del ratón llega a tirones de 100 px; el suavizado los reparte en cuadros.
+  // Sin movimiento no hay inercia ni fundido: salta a la estación.
+  const cuadro = (tiempo: number) => {
+    const objetivo = posicionDeScroll()
+    const dt = ultimoTiempo ? Math.min(tiempo - ultimoTiempo, 100) : 16
+    ultimoTiempo = tiempo
+    actual = actual < 0 || sinMovimiento ? objetivo : acercar(actual, objetivo, dt)
+    pintar(actual)
+    for (const cercano of [Math.floor(actual) - 1, Math.ceil(actual) + 1]) void cargar(cercano)
+    if (actual !== objetivo) {
+      ventana.requestAnimationFrame(cuadro)
+    } else {
+      corriendo = false
+      ultimoTiempo = 0
+    }
   }
+
+  function arrancar() {
+    if (corriendo) return
+    corriendo = true
+    ventana.requestAnimationFrame(cuadro)
+  }
+
+  const alScroll = () => arrancar()
 
   // Precarga en orden, sin bloquear el primer pintado: son ~780 KB en total.
   void cargar(0)?.then(() => {
-    pintar(0)
+    arrancar()
     let siguiente = 1
     const seguir = () => {
       if (siguiente >= rutas.length) return
