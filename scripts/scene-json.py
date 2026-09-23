@@ -30,13 +30,11 @@ def formato(carpeta):
                     "imagen": "/scene/%s/%s" % (carpeta, archivo),
                     "bytes": _peso(ruta)}
 
-        # Capa con alfa de lo que va DELANTE del texto, variante con el
-        # relámpago encendido y loop de bruma (sólo sonido y reliquia, que no
-        # tienen capa). Todas opcionales: si no están, la web se comporta como
-        # antes de existir.
+        # Capa con alfa de lo que va DELANTE del texto, y variante con el
+        # relámpago encendido. Las dos son opcionales: si no están, la web se
+        # comporta como antes de existir.
         for clave, sufijo, extension in (("capaFrente", "-frente", "webp"),
-                                         ("relampago", "-relampago", "avif"),
-                                         ("bruma", "-bruma", "webm")):
+                                         ("relampago", "-relampago", "avif")):
             extra = "estacion-%d%s.%s" % (indice, sufijo, extension)
             ruta_extra = os.path.join(base, extra)
             if os.path.exists(ruta_extra):
@@ -62,7 +60,7 @@ def formato(carpeta):
     total = sum(t["bytes"] for t in tramos)
     for e in estaciones:
         total += e["bytes"]
-        for clave in ("capaFrente", "relampago", "bruma"):
+        for clave in ("capaFrente", "relampago"):
             if clave in e:
                 total += e[clave]["bytes"]
     return {"ancho": ancho, "alto": alto, "estaciones": estaciones,

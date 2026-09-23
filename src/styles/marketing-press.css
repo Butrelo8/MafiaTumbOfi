@@ -729,6 +729,11 @@ body.marketing-body img {
   --titular-bajo: 26svh;
 }
 
+/* Móvil, reliquia: el candelero sube por el borde izquierdo y se comía "¿Ti". */
+.booking-section .estacion-titular {
+  --titular-x: 12vw;
+}
+
 /* Móvil, nave: la capa son dos columnas a los lados y bancas desde media
    altura. Lo libre es arriba, entre columnas (del 17 al 82 % del ancho). */
 .hero .hero-copy.hero-content {
@@ -751,6 +756,10 @@ body.marketing-body img {
   .group-section .estacion-titular {
     --titular-x: 20vw;
     --titular-bajo: 8svh;
+  }
+
+  .booking-section .estacion-titular {
+    --titular-x: 0;
   }
 
   /* Retirada: la cabeza de la fiel se comía el primer trazo de la M. */

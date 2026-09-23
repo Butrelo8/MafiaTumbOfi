@@ -534,10 +534,13 @@ Qué hay en cada estación que merezca animarse, según la spec:
 el neón es un material emisivo constante: los cinco loops son trabajo de
 animación en Blender, no de encode. Es lo único que queda abierto de la fase 3.
 
-## Bruma delante del titular (2026-09-23)
+## Bruma delante del titular (2026-09-23) — DESCARTADA
 
-Sonido y reliquia no tienen capa de frente (macro, nada entre cámara y
-sujeto), así que lo que pasa por delante del titular es aire: `blender/humo.py`.
+Se probó y se quitó el mismo día: **leía como caricatura** (emisión propia,
+ruido grande y suave, sin fuente que la produjera: una manta, no humo). En su
+lugar van los cirios de latón (`CIRIOS` en `altar.py`), objetos reales en la
+capa de frente. `blender/humo.py` se borró; está en el historial (`30ad3b1`).
+Lo medido, por si se vuelve a intentar con humo simulado de verdad:
 
 - **Volumen procedural, no Mantaflow.** Ruido 4D en una caja hija de la cámara,
   mitad baja del cuadro. Nada que hornear. El loop cierra solo: la densidad
