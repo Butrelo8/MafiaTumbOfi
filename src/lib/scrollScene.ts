@@ -164,8 +164,21 @@ export function anclasDelDocumento(
     if (!Number.isInteger(indice) || indice < 0 || indice >= frames.length) continue
     const caja = elemento.getBoundingClientRect()
     const centro = caja.top + ventana.scrollY + caja.height / 2
-    const scroll = Math.min(Math.max(centro - ventana.innerHeight / 2, 0), Math.max(recorrido, 0))
+    const limite = (y: number) => Math.min(Math.max(y, 0), Math.max(recorrido, 0))
+    const scroll = limite(centro - ventana.innerHeight / 2)
     anclas.push({ scroll, frame: frames[indice] })
+
+    // Salida: si el titular encabeza una sección con panel, la cámara se queda
+    // en la estación hasta que el pie del panel toca el pie de la ventana. El
+    // panel es opaco y tapa la escena mientras sube, así que la espera no se
+    // ve; y el viaje queda en lo que mide el hueco entre secciones más una
+    // ventana, igual en todos los tramos sea cual sea el largo del panel.
+    const seccion = elemento.parentElement
+    if (seccion?.classList.contains('estacion')) {
+      const fondo = seccion.getBoundingClientRect().bottom + ventana.scrollY
+      const salida = limite(fondo - ventana.innerHeight)
+      if (salida > scroll) anclas.push({ scroll: salida, frame: frames[indice] })
+    }
   }
   anclas.sort((a, b) => a.scroll - b.scroll)
   return anclas

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
   acercar,
+  anclasDelDocumento,
   frameEnAnclas,
   posicionEnAnclas,
   framesDeEstacion,
@@ -143,5 +144,45 @@ describe('acercar', () => {
     let a = 0
     for (let i = 0; i < 4; i += 1) a = acercar(a, 10, 4)
     expect(a).toBeCloseTo(acercar(0, 10, 16), 6)
+  })
+})
+
+describe('anclasDelDocumento', () => {
+  // Ventana de 1000 px. Estación 0 sin panel (hero); estación 1 es el titular
+  // de una sección con panel que termina en 5000.
+  function ventanaFalsa() {
+    const titular = (estacion: number, top: number, fondoSeccion?: number) => ({
+      dataset: { estacion: String(estacion) },
+      getBoundingClientRect: () => ({ top, height: 1000 }),
+      parentElement: fondoSeccion === undefined
+        ? { classList: { contains: () => false } }
+        : { classList: { contains: (c: string) => c === 'estacion' }, getBoundingClientRect: () => ({ bottom: fondoSeccion }) },
+    })
+    const elementos = [titular(0, 0), titular(1, 2000, 5000), titular(2, 7000)]
+    return {
+      innerHeight: 1000,
+      scrollY: 0,
+      document: {
+        documentElement: { scrollHeight: 20000 },
+        querySelectorAll: () => elementos,
+      },
+    } as unknown as Window
+  }
+
+  test('una estación con panel se queda quieta hasta que el panel acaba', () => {
+    const anclas = anclasDelDocumento(formato, ventanaFalsa())
+    const f = framesDeEstacion(formato)
+    // llegada al centrar el titular, salida cuando el pie del panel toca el pie de la ventana
+    expect(anclas).toEqual([
+      { scroll: 0, frame: f[0] },
+      { scroll: 2000, frame: f[1] },
+      { scroll: 4000, frame: f[1] },
+      { scroll: 7000, frame: f[2] },
+    ])
+  })
+
+  test('mientras sube el panel la cámara no se mueve', () => {
+    const anclas = anclasDelDocumento(formato, ventanaFalsa())
+    expect(posicionEnAnclas(3000, anclas)).toBe(framesDeEstacion(formato)[1])
   })
 })

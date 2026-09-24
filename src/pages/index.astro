@@ -32,6 +32,8 @@ const releases = catalog.releases.map((release) => ({
     </div></div>
   </section>
 
+  <div class="tramo-espacio" aria-hidden="true"></div>
+
   <section class="estacion bio-section" id="quienes" aria-labelledby="bio-heading">
     <div class="estacion-titular" data-estacion="1"><div class="container">
       <Eyebrow text="Quiénes somos" />
@@ -47,6 +49,8 @@ const releases = catalog.releases.map((release) => ({
     </div></div>
   </section>
 
+  <div class="tramo-espacio" aria-hidden="true"></div>
+
   <section class="estacion music-section" id="musica" aria-labelledby="musica-heading">
     <div class="estacion-titular" data-estacion="2"><div class="container">
       <Eyebrow text="Escucha" />
@@ -57,10 +61,8 @@ const releases = catalog.releases.map((release) => ({
       <a class="music-link" href={bandSocialUrls.appleMusic} target="_blank" rel="noopener noreferrer">Escúchanos en Apple Music</a>
       <h3 class="videos-heading">Videos</h3>
       <ul class="video-row">{catalog.videos.map((video) => <li><a href={video.href} target="_blank" rel="noopener noreferrer"><img src={video.thumbnail} alt="" width="480" height="360" loading="lazy" decoding="async" /><span>{video.title}</span></a></li>)}</ul>
-    </div></div>
+    </div><FilmStrip /></div>
   </section>
-
-  <FilmStrip />
 
   <div class="tramo-espacio" aria-hidden="true"></div>
 
@@ -74,7 +76,6 @@ const releases = catalog.releases.map((release) => ({
     </div></div>
   </section>
 
-  <div class="tramo-espacio" aria-hidden="true"></div>
   <div class="tramo-espacio" aria-hidden="true"></div>
 
   <section class="estacion booking-section" id="contratacion" aria-labelledby="contratacion-heading">
@@ -90,7 +91,6 @@ const releases = catalog.releases.map((release) => ({
     </div></div>
   </section>
 
-  <div class="tramo-espacio" aria-hidden="true"></div>
   <div class="tramo-espacio" aria-hidden="true"></div>
 
   <footer class="estacion footer-bar" id="cierre">

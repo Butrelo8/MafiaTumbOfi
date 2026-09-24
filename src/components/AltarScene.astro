@@ -119,12 +119,13 @@ const primeraEscritorio = escritorio?.estaciones[0]
     min-height: 100svh;
   }
 
-  /* Espacio de viaje: los tramos hornacinas->reliquia y reliquia->retirada
-     tenian 900 px de scroll para veinte frames, contra 2005 del tramo de
-     Musica, y la camara iba al doble de velocidad en la segunda mitad. Esto no
-     es relleno: es el recorrido entre dos estaciones, sin nada que leer. */
+  /* Espacio de viaje entre dos estaciones, uno en cada hueco. La cámara se
+     queda quieta mientras sube el panel (ver anclasDelDocumento) y viaja
+     desde que el pie del panel toca el pie de la ventana hasta centrar el
+     titular siguiente: este hueco más una ventana. Iguales en todos los
+     tramos, la cámara va a la misma velocidad en todos. */
   :global(.tramo-espacio) {
-    height: 50svh;
+    height: 100svh;
   }
 
   /* La escena vive DENTRO de <main>, así que subir <main> no basta: dentro de
