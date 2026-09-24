@@ -762,6 +762,12 @@ body.marketing-body img {
     --titular-x: 0;
   }
 
+  /* Sonido: el tallo del cirio (x 403-453 a 1440) muerde el lado derecho de
+     la "a" final; más a la izquierda se comía la letra entera. */
+  .music-section .estacion-titular {
+    --titular-x: 7.4vw;
+  }
+
   /* Retirada: la cabeza de la fiel se comía el primer trazo de la M. */
   .footer-bar .estacion-titular {
     --titular-x: 6vw;

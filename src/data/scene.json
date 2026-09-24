@@ -7,79 +7,79 @@
         {
           "nombre": "nave",
           "imagen": "/scene/mobile/estacion-0.avif",
-          "bytes": 21557,
+          "bytes": 21548,
           "capaFrente": {
             "imagen": "/scene/mobile/estacion-0-frente.webp",
-            "bytes": 33930
+            "bytes": 34148
           },
           "relampago": {
             "imagen": "/scene/mobile/estacion-0-relampago.avif",
-            "bytes": 21666
+            "bytes": 21621
           }
         },
         {
           "nombre": "altar",
           "imagen": "/scene/mobile/estacion-1.avif",
-          "bytes": 26031,
+          "bytes": 25927,
           "capaFrente": {
             "imagen": "/scene/mobile/estacion-1-frente.webp",
-            "bytes": 14718
+            "bytes": 14792
           },
           "relampago": {
             "imagen": "/scene/mobile/estacion-1-relampago.avif",
-            "bytes": 25691
+            "bytes": 25782
           }
         },
         {
           "nombre": "sonido",
           "imagen": "/scene/mobile/estacion-2.avif",
-          "bytes": 22384,
+          "bytes": 22681,
           "capaFrente": {
             "imagen": "/scene/mobile/estacion-2-frente.webp",
-            "bytes": 6324
+            "bytes": 12934
           },
           "relampago": {
             "imagen": "/scene/mobile/estacion-2-relampago.avif",
-            "bytes": 22872
+            "bytes": 23683
           }
         },
         {
           "nombre": "hornacinas",
           "imagen": "/scene/mobile/estacion-3.avif",
-          "bytes": 32663,
+          "bytes": 31812,
           "capaFrente": {
             "imagen": "/scene/mobile/estacion-3-frente.webp",
-            "bytes": 35426
+            "bytes": 30764
           },
           "relampago": {
             "imagen": "/scene/mobile/estacion-3-relampago.avif",
-            "bytes": 31655
+            "bytes": 31056
           }
         },
         {
           "nombre": "reliquia",
           "imagen": "/scene/mobile/estacion-4.avif",
-          "bytes": 19621,
+          "bytes": 19505,
           "capaFrente": {
             "imagen": "/scene/mobile/estacion-4-frente.webp",
-            "bytes": 38150
+            "bytes": 38248
           },
           "relampago": {
             "imagen": "/scene/mobile/estacion-4-relampago.avif",
-            "bytes": 20995
+            "bytes": 21049
           }
         },
         {
           "nombre": "retirada",
           "imagen": "/scene/mobile/estacion-5.avif",
-          "bytes": 28396,
+          "bytes": 28682,
           "capaFrente": {
             "imagen": "/scene/mobile/estacion-5-frente.webp",
-            "bytes": 13542
+            "bytes": 13624
           },
           "relampago": {
             "imagen": "/scene/mobile/estacion-5-relampago.avif",
-            "bytes": 28057
+            "bytes": 28195
           }
         }
       ],
@@ -89,38 +89,38 @@
           "hasta": "altar",
           "frames": 30,
           "patron": "/scene/mobile/tramo-0/%03d.webp",
-          "bytes": 846312
+          "bytes": 843384
         },
         {
           "desde": "altar",
           "hasta": "sonido",
           "frames": 30,
           "patron": "/scene/mobile/tramo-1/%03d.webp",
-          "bytes": 956636
+          "bytes": 950562
         },
         {
           "desde": "sonido",
           "hasta": "hornacinas",
           "frames": 30,
           "patron": "/scene/mobile/tramo-2/%03d.webp",
-          "bytes": 950344
+          "bytes": 937080
         },
         {
           "desde": "hornacinas",
           "hasta": "reliquia",
           "frames": 30,
           "patron": "/scene/mobile/tramo-3/%03d.webp",
-          "bytes": 752452
+          "bytes": 752178
         },
         {
           "desde": "reliquia",
           "hasta": "retirada",
           "frames": 30,
           "patron": "/scene/mobile/tramo-4/%03d.webp",
-          "bytes": 824542
+          "bytes": 822852
         }
       ],
-      "bytes": 4773964
+      "bytes": 4752107
     },
     "desktop": {
       "ancho": 1920,
@@ -129,79 +129,79 @@
         {
           "nombre": "nave",
           "imagen": "/scene/desktop/estacion-0.avif",
-          "bytes": 25613,
+          "bytes": 25618,
           "capaFrente": {
             "imagen": "/scene/desktop/estacion-0-frente.webp",
-            "bytes": 48068
+            "bytes": 47744
           },
           "relampago": {
             "imagen": "/scene/desktop/estacion-0-relampago.avif",
-            "bytes": 27178
+            "bytes": 26904
           }
         },
         {
           "nombre": "altar",
           "imagen": "/scene/desktop/estacion-1.avif",
-          "bytes": 31910,
+          "bytes": 32013,
           "capaFrente": {
             "imagen": "/scene/desktop/estacion-1-frente.webp",
-            "bytes": 29284
+            "bytes": 28990
           },
           "relampago": {
             "imagen": "/scene/desktop/estacion-1-relampago.avif",
-            "bytes": 32499
+            "bytes": 32577
           }
         },
         {
           "nombre": "sonido",
           "imagen": "/scene/desktop/estacion-2.avif",
-          "bytes": 33159,
+          "bytes": 31159,
           "capaFrente": {
             "imagen": "/scene/desktop/estacion-2-frente.webp",
-            "bytes": 16780
+            "bytes": 16156
           },
           "relampago": {
             "imagen": "/scene/desktop/estacion-2-relampago.avif",
-            "bytes": 33415
+            "bytes": 31347
           }
         },
         {
           "nombre": "hornacinas",
           "imagen": "/scene/desktop/estacion-3.avif",
-          "bytes": 42119,
+          "bytes": 42068,
           "capaFrente": {
             "imagen": "/scene/desktop/estacion-3-frente.webp",
-            "bytes": 34828
+            "bytes": 33914
           },
           "relampago": {
             "imagen": "/scene/desktop/estacion-3-relampago.avif",
-            "bytes": 42521
+            "bytes": 42037
           }
         },
         {
           "nombre": "reliquia",
           "imagen": "/scene/desktop/estacion-4.avif",
-          "bytes": 23856,
+          "bytes": 24013,
           "capaFrente": {
             "imagen": "/scene/desktop/estacion-4-frente.webp",
-            "bytes": 37342
+            "bytes": 37208
           },
           "relampago": {
             "imagen": "/scene/desktop/estacion-4-relampago.avif",
-            "bytes": 25288
+            "bytes": 25519
           }
         },
         {
           "nombre": "retirada",
           "imagen": "/scene/desktop/estacion-5.avif",
-          "bytes": 34277,
+          "bytes": 34580,
           "capaFrente": {
             "imagen": "/scene/desktop/estacion-5-frente.webp",
-            "bytes": 28814
+            "bytes": 28254
           },
           "relampago": {
             "imagen": "/scene/desktop/estacion-5-relampago.avif",
-            "bytes": 34359
+            "bytes": 34374
           }
         }
       ],
@@ -211,38 +211,38 @@
           "hasta": "altar",
           "frames": 30,
           "patron": "/scene/desktop/tramo-0/%03d.webp",
-          "bytes": 779114
+          "bytes": 779218
         },
         {
           "desde": "altar",
           "hasta": "sonido",
           "frames": 30,
           "patron": "/scene/desktop/tramo-1/%03d.webp",
-          "bytes": 947338
+          "bytes": 935136
         },
         {
           "desde": "sonido",
           "hasta": "hornacinas",
           "frames": 30,
           "patron": "/scene/desktop/tramo-2/%03d.webp",
-          "bytes": 869264
+          "bytes": 852546
         },
         {
           "desde": "hornacinas",
           "hasta": "reliquia",
           "frames": 30,
           "patron": "/scene/desktop/tramo-3/%03d.webp",
-          "bytes": 791000
+          "bytes": 792644
         },
         {
           "desde": "reliquia",
           "hasta": "retirada",
           "frames": 30,
           "patron": "/scene/desktop/tramo-4/%03d.webp",
-          "bytes": 889546
+          "bytes": 887670
         }
       ],
-      "bytes": 4857572
+      "bytes": 4821689
     }
   }
 }
