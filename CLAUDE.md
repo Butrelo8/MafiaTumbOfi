@@ -49,3 +49,12 @@ or motion that ignores `prefers-reduced-motion`.
 Use `.env.example` for the current site and build-only catalog variables. Keep
 credentials private; variables intended for the browser must be explicitly
 prefixed `PUBLIC_`.
+
+<!-- mpaf:animacion-blender:start -->
+Blender: para movimiento humano realista (Mixamo → Blender → ffmpeg), carga la skill `blender`.
+<!-- mpaf:animacion-blender:end -->
+
+<!-- mpaf:deploy-cloudflare:start -->
+Cloudflare: antes de tocar `wrangler.*` o código de Workers, usa las skills `cloudflare:*` (wrangler,
+workers-best-practices) y el MCP `cloudflare-docs` en vez de escribir la config de memoria.
+<!-- mpaf:deploy-cloudflare:end -->

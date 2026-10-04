@@ -1,0 +1,25 @@
+name: blender
+type: skill
+version: 1.0.0
+description: >-
+  Movimiento humano realista para web con Mixamo + Blender + ffmpeg (video o frames), con el MCP oficial
+  de Blender opcional. Flujo probado, escala 0.01 de Mixamo, render ortográfico, compresión WebM/MP4 y
+  licencia de Mixamo (qué se puede entregar a un cliente).
+tags:
+  - animation
+  - blender
+  - 3d
+  - mixamo
+  - video
+inputs:
+  - name: movimiento
+    required: false
+    default: ''
+    description: Qué movimiento humano se quiere (baile, deporte, gesto) y dónde va en la web.
+outputs:
+  - name: video
+    description: WebM + MP4 del render, listos para el sitio
+dependsOn: []
+execution:
+  mode: instruction
+riskLevel: low

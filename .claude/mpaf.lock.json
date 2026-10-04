@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "pristine": {
+    "CLAUDE.md": "# CLAUDE.md\n\n## Project\n\nMafia Tumbada is one static Astro page. The build output in `dist/` is served\nby Cloudflare Workers Static Assets.\n\n## Commands\n\n```bash\nbun dev\nbun run build\nbun test\nnpx wrangler deploy\n```\n\n## Structure\n\n- `src/pages/index.astro` — page entry point\n- `src/components/` — page components\n- `src/data/` — catalog, member, and social data\n- `src/styles/` — global and marketing styles\n- `public/` — static media, favicon, robots, and redirects\n- `wrangler.jsonc` — Cloudflare Workers Static Assets configuration\n- `DESIGN.md` — visual-system source of truth\n- `blender/` — scene and look scripts for the scroll-driven 3D santuario\n- `docs/HANDOFF.md` — **start here**: current state, what is blocked, and\n  pointers to every other document\n- `docs/blender-notas.md` — **read before touching `blender/`**: Blender 5.2\n  quirks, measurement method and decisions already taken\n\n## Design rules\n\nRead [`DESIGN.md`](./DESIGN.md) before changing the page. Preserve the\nGótico Tumbado direction: black-on-black surfaces, Grenze Gotisch for display\ntype only, Archivo for body/UI, JetBrains Mono for tabular data, red neon for\nlinks, rules and glow, and gold for display type, the MTO monogram and CTAs.\n\nCormorant Garamond, Inter and the coastal turquoise belong to the retired\nVeracruz Noir direction — do not reintroduce them.\n\nKeep the asymmetric editorial layout, responsive spacing, WCAG AA contrast,\nvisible focus states, Spanish-first labels, 44px touch targets, and\nreduced-motion support. Do not add centered stock-hero layouts, gold body text,\nor motion that ignores `prefers-reduced-motion`.\n\n## Environment\n\nUse `.env.example` for the current site and build-only catalog variables. Keep\ncredentials private; variables intended for the browser must be explicitly\nprefixed `PUBLIC_`.\n",
+    ".claude/settings.json": "{\r\n\r\n}"
+  },
+  "presets": {
+    "animacion-blender": {
+      "skills": [
+        "blender"
+      ],
+      "localSkills": [],
+      "rules": [],
+      "claudeMd": true,
+      "hooks": [],
+      "permissions": {
+        "allow": [],
+        "deny": []
+      },
+      "plugins": [],
+      "mcpServers": []
+    },
+    "deploy-cloudflare": {
+      "skills": [],
+      "localSkills": [],
+      "rules": [],
+      "claudeMd": true,
+      "hooks": [],
+      "permissions": {
+        "allow": [],
+        "deny": []
+      },
+      "plugins": [
+        "cloudflare@cloudflare"
+      ],
+      "mcpServers": []
+    }
+  }
+}
