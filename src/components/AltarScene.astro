@@ -141,6 +141,13 @@ const primeraEscritorio = escritorio?.estaciones[0]
     z-index: 1;
   }
 
+  /* El hero lleva su propio video de fondo y tiene que tapar la capa de frente
+     (z:2): si no, las columnas de la nave se pegan encima del video. Al subir con
+     el scroll destapa la escena. */
+  :global(.marketing-main > .hero) {
+    z-index: 3;
+  }
+
   /* Una sección con panel NO puede ser contexto de apilado: su titular tiene
      que quedar bajo la capa de frente (z:2) y su panel encima (z:3), y dentro
      de un contexto en z:1 las dos cosas quedarían debajo. El hero y el footer
