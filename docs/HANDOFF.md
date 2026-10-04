@@ -1,5 +1,9 @@
 # Handoff — Santuario M⚡T
 
+> **Más reciente: [`docs/handoffs/2026-10-04-hero-y-transiciones.md`](handoffs/2026-10-04-hero-y-transiciones.md)**
+> (hero nuevo y el plan de rehacer la escena con transiciones con movimiento).
+> Lo de abajo es el estado del 2026-09-17.
+
 > Escrito 2026-09-17, 02:30 CST. Reescrito 14:00 CST. Rama `dev`, 41 commits
 > por delante de `main`.
 > Formato según la skill `matt-handoff` de mpaf, guardado en el repo (y no en el
