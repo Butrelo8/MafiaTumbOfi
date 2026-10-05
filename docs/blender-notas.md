@@ -563,3 +563,22 @@ Lo medido, por si se vuelve a intentar con humo simulado de verdad:
 - **Probarla con `python3 -m http.server` no deja saltar** en el vídeo (responde
   200, no 206): se reproduce, pero `currentTime` no se mueve. Ver la ficha
   `video-que-avanza` de la galería.
+
+## Lo que se ve desde el pasillo, medido con rayos (2026-10-05, ticket 13)
+
+Antes de poner utilería en la maqueta, preguntar a la escena qué se ve: `scene.ray_cast(depsgraph, cámara,
+dirección, distance=largo − 0.05)` sobre una rejilla de puntos, más `world_to_camera_view` para el píxel. En la
+nave, desde el pasillo central, hacia el muro del fondo de las naves laterales sólo hay una rendija de ~30 px: lo
+que se ve son los arcos entre pilares. Para validar una pieza ya puesta: contar cuántas esquinas de su
+`bound_box` llegan sin chocar (el Cristo en y 11 daba 17/64: lo tapaba el pilar 1; en y 12, 35/64).
+
+Otros que costaron una vuelta:
+- **BVH cuenta como cruce el contacto coplanar.** Una veladora con la base a z 0.9 sobre un remate cuyo tope es
+  0.9 sale en `overlap()`. No es un cruce: es apoyo. Leer qué par cruza antes de mover nada.
+- **Cilindro de un punto a otro:** `(b − a).to_track_quat("Z", "Y").to_euler()` en un `primitive_cylinder_add`
+  centrado en `(a + b) / 2`. Para apuntar un spot: `to_track_quat("-Z", "Y")` (los spots alumbran hacia −Z).
+- **Piezas en coordenadas locales:** crearlas con el empty en el origen y luego hacer `parent` → mover/girar el
+  empty. Con el padre en identidad, `matrix_parent_inverse` queda en identidad y no hay que compensar nada.
+- **Desde atrás una banca también es casi un tablero.** Lo que la hace leer como banca (y no como caja, que es lo
+  que Klein copiaba) es el remate delgado, los costados con perfil y el hueco entre filas. Lo que apoyes "en la
+  banca" va sobre el remate (0.9 m) o en el asiento (0.45 m, casi siempre tapado por el respaldo).
