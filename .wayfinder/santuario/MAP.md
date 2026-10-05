@@ -33,6 +33,10 @@ Lista para producir sin decisiones pendientes. Llegamos cuando no queda ningún 
   12 GB); FlashVSR descartado (inventa); a 1080p un loop pesa ~1 MB por 5 s.
 - [12 Que el tololoche se lea como contrabajo](tickets/12-contrabajo.md): asset de contrabajo, requinto en una
   bocina, sahumador como fuente del humo; las reliquias van con su silueta real y a la altura del asiento o más.
+- [13 Placa fija + capas](tickets/13-placa-y-capas.md): cámara quieta en los loops; placa de Klein fija y H3 sólo en
+  zonas vivas (canny solo no basta); humo en loop propio, llamas chicas en post; muros de tezontle, bancas de verdad,
+  capillas y rayo de luna en la nave.
+
 ## Not yet specified
 
 - **Atrio con la troca del videoclip.** Propuesto, sin aprobar; se decide al guionizar los espacios.
