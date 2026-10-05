@@ -29,6 +29,10 @@ OCLUSORES = ("pilar_0_1", "jambaje")
 A, T, B = 1, 301, 401
 PERIODO = 120         # 5 s (ticket 04: a 1280×704, 10 s no cabe en 12 GB): la cámara vuelve a su inicio
 N_LOOP = 141          # MiniMax pide 17n+5; los 20 de más funden la costura del humo
+# Móvil (ticket 06): cámara vertical propia, misma trayectoria. Con la de escritorio en 9:16 el contrabajo, el Cristo y
+# la lámpara quedan fuera; aquí arrancan más a la derecha y el shift sube el sujeto (hueco abajo, ticket 03).
+MOVIL = {"lente": 28, "shift_y": -0.25, "nave_x": 0.8, "sac_fin": 45.4}  # 45.4: el neón en u ≤ 0.84, dentro de 19.5:9
+_movil = False
 
 
 def _mat(nombre, color, emision=0.0):
@@ -303,18 +307,21 @@ def _pose(f):
     def deriva(t, ax, ay):
         return ax * (1 - math.cos(2 * math.pi * t)), ay * (1 - math.cos(4 * math.pi * t))
 
+    x0, fin = (MOVIL["nave_x"], MOVIL["sac_fin"]) if _movil else (0, SAC_FIN)
     if A <= f < A + N_LOOP:
         dx, dy = deriva((f - A) / PERIODO, 0.03, 0.025)
-        return dx, 2 + dy
+        return x0 + dx, 2 + dy
     if B <= f < B + N_LOOP:
         dx, dy = deriva((f - B) / PERIODO, 0.025, 0.02)
-        return SAC_FIN + dx, dy
+        return fin + dx, dy
     t = (f - T) / (N_T - 1)
-    s = (SAC_FIN - SAC_X0 + PILAR_X) * t * t * (3 - 2 * t)  # recorrido total, velocidad continua en el corte
+    s = x0 + (fin - SAC_X0 + PILAR_X - x0) * t * t * (3 - 2 * t)  # recorrido total, velocidad continua en el corte
     return (s, 2) if s <= PILAR_X else (SAC_X0 + s - PILAR_X, 0)
 
 
-def build():
+def build(movil=False):
+    global _movil
+    _movil = movil
     # No read_factory_settings: apagaría el add-on MCP.
     for col in (bpy.data.objects, bpy.data.meshes, bpy.data.lights, bpy.data.cameras, bpy.data.materials):
         for d in list(col):
@@ -340,6 +347,8 @@ def build():
 
     cd = bpy.data.cameras.new("cam")
     cd.lens, cd.sensor_width, cd.clip_start = LENTE, 36, 0.05
+    if movil:
+        cd.lens, cd.shift_y = MOVIL["lente"], MOVIL["shift_y"]
     cam = bpy.data.objects.new("cam", cd)
     sc.collection.objects.link(cam)
     sc.camera = cam
