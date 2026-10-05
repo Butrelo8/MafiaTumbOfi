@@ -1,5 +1,8 @@
 # Handoff — Santuario M⚡T
 
+> **Mapa vivo (2026-10-04): [`.wayfinder/santuario/MAP.md`](../.wayfinder/santuario/MAP.md)** — destino,
+> decisiones y tickets abiertos del santuario en movimiento. Se trabaja con `matt-wayfinder` (mpaf).
+
 > **Más reciente: [`docs/handoffs/2026-10-04-hero-y-transiciones.md`](handoffs/2026-10-04-hero-y-transiciones.md)**
 > (hero nuevo y el plan de rehacer la escena con transiciones con movimiento).
 > Lo de abajo es el estado del 2026-09-17.
