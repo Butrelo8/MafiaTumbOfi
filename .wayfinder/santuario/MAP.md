@@ -36,12 +36,14 @@ Lista para producir sin decisiones pendientes. Llegamos cuando no queda ningún 
 - [13 Placa fija + capas](tickets/13-placa-y-capas.md): cámara quieta en los loops; placa de Klein fija y H3 sólo en
   zonas vivas (canny solo no basta); humo en loop propio, llamas chicas en post; muros de tezontle, bancas de verdad,
   capillas y rayo de luna en la nave.
+- [03 Layout de la UI sobre la escena](tickets/03-layout-ui.md): el contenido va sobre la escena, mezclado por sección: C en el hero,
+  D (titular que se abre) en texto, E (una pieza a la vez, sin scroll) en Música y El grupo; hueco oscuro abajo a la izquierda.
 
 ## Not yet specified
 
 - **Atrio con la troca del videoclip.** Propuesto, sin aprobar; se decide al guionizar los espacios.
-- **Los retratos de El grupo en el camarín**: cómo entran los tres de `members.ts` (HTML encima, como hoy, o
-  compuestos en la escena) y el "empujar hacia un retrato que se abre" del handoff.
+- **Los retratos de El grupo en el camarín**: entran como HTML encima, uno a la vez (ticket 03); queda si la toma
+  "empuja hacia un retrato que se abre" (handoff) o no.
 - **El texto y el neón M⚡T** compuestos sobre la escena (nunca generados): dónde aparecen.
 - **Pendientes heredados** que pueden tocar la especificación: el escudo de la selección en la camiseta del
   hero, el permiso de los directores de los videos y el test roto `capasEstacion.test.ts` (puede morir con la
