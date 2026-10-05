@@ -16,6 +16,7 @@ import os
 
 import bmesh
 import bpy
+from mathutils import Vector
 
 LENTE = 35
 ALTO_OJO = 1.6
@@ -88,6 +89,19 @@ def _boveda(x, y0, y1, z, r, mat):
     o.data.materials.append(mat)
 
 
+def _banca(nombre, x0, x1, y, mat):
+    """Banca de iglesia vista desde atrás (ticket 13: las cajas macizas se leían como cajas). Mira al altar (+Y):
+    respaldo delgado del lado de la cámara con un remate de 12 cm a 0.9 m (ahí se paran requinto y veladoras),
+    asiento a 0.45 m y hueco debajo, costados con perfil: descansabrazos bajo y alto junto al respaldo.
+    """
+    _caja(f"{nombre}_remate", x0, x1, y, y + 0.12, 0.86, 0.9, mat)
+    _caja(f"{nombre}_respaldo", x0, x1, y, y + 0.04, 0.46, 0.86, mat)
+    _caja(f"{nombre}_asiento", x0, x1, y + 0.04, y + 0.5, 0.42, 0.46, mat)
+    for x in (x0, x1 - 0.05):
+        _caja(f"{nombre}_costado_{x}", x, x + 0.05, y, y + 0.5, 0, 0.62, mat)
+        _caja(f"{nombre}_brazo_{x}", x, x + 0.05, y, y + 0.14, 0.62, 0.94, mat)
+
+
 def nave(gris, negro, oro, neon, cera):
     _caja("suelo_nave", -7, 7, -2, 31, -0.1, 0, gris)
     for s in (-1, 1):
@@ -104,7 +118,7 @@ def nave(gris, negro, oro, neon, cera):
     for i in range(12):
         y = 6 + 1.2 * i
         for x0, x1 in ((-2.6, -0.5), (0.5, 2.6)):
-            _caja(f"banca_{i}_{x0}", x0, x1, y, y + 0.5, 0, 0.9, gris)
+            _banca(f"banca_{i}_{x0}", x0, x1, y, gris)
     _caja("mesa_altar", -1.5, 1.5, 26, 27, 0, 1.1, gris)
     _caja("retablo", -3, 3, 29.4, 29.8, 0, 8, oro)
     for x in (-1.8, 0, 1.8):
@@ -163,7 +177,8 @@ def instrumentos(mat, negro, cera):
     bajo.data.materials.append(mat)
     # Bocina de pie en el asiento y el requinto delante, recargado en su frente (ticket 12): 9° es el último ángulo
     # sin cruzarla, medido con BVH. Parado solo en la orilla de la banca "desafiaba la gravedad".
-    _caja("bocina", 0.58, 0.98, 6.2, 6.48, 0.9, 1.52, negro)
+    # Con bancas de verdad (ticket 13) la bocina baja hasta el asiento; el requinto se para en el remate del respaldo.
+    _caja("bocina", 0.58, 0.98, 6.2, 6.48, 0.46, 1.52, negro)
     _instrumento("requinto", (0.78, 6.07, 0.9), 0.9, 0.52, 0.1, (-9, 0, -8), mat)
     # El humo necesita fuente (ticket 12: salía "de la guitarra"): sahumador de copal en la bocina, a la derecha del
     # clavijero. Brasa = luz naranja baja dentro del cuenco. Las veladoras nuevas (bocina y segunda banca) sólo dan hilos.
@@ -171,9 +186,89 @@ def instrumentos(mat, negro, cera):
     _cil("sahumador", 0.9, 6.36, 1.57, 1.66, 0.045, mat, conico=0.075)
     _luz("brasa", "POINT", (0.9, 6.36, 1.64), 6, (1.0, 0.35, 0.1), 0.03)
     for i, (x, y, z) in enumerate(((0.75, 5.4, 0), (0.95, 5.3, 0), (1.7, 5.45, 0),
-                                   (0.66, 6.3, 1.52), (0.6, 7.35, 0.9), (1.6, 7.3, 0.9))):
+                                   (0.66, 6.3, 1.52), (0.6, 7.24, 0.9), (1.6, 7.24, 0.9))):  # 7.24: sobre el remate
         _cil(f"veladora_{i}", x, y, z, z + 0.12, 0.035, cera)
         _luz(f"veladora_{i}", "POINT", (x, y, z + 0.2), 25, (1.0, 0.55, 0.2), 0.02)
+
+
+def _barra(nombre, p0, p1, r, mat):
+    """Cilindro de p0 a p1 (para brazos y cuerpos tumbados)."""
+    a, b = Vector(p0), Vector(p1)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=r, depth=(b - a).length, location=(a + b) / 2)
+    o = bpy.context.object
+    o.name = nombre
+    o.rotation_euler = (b - a).to_track_quat("Z", "Y").to_euler()
+    o.data.materials.append(mat)
+    return o
+
+
+def _grupo(nombre, ubicacion, giro, piezas):
+    """Empty en `ubicacion` con giro en Z; las piezas se crearon en coordenadas locales (empty en el origen)."""
+    piv = bpy.data.objects.new(nombre, None)
+    bpy.context.collection.objects.link(piv)
+    for o in piezas:
+        o.parent = piv
+    piv.location = ubicacion
+    piv.rotation_euler = (0, 0, giro)
+    return piv
+
+
+def capillas(madera, negro, oro, gris, cera):
+    """Utilería de las capillas y los pilares (ticket 13). Desde el pasillo sólo se ven los arcos entre pilares
+    (medido con rayos: hacia el muro del fondo de la nave lateral sólo hay una rendija de ~30 px), así que todo va
+    justo dentro de los arcos 1 (y 8.7–12.7) y 2 (y 13.7–17.7). Referencia: catedral de Xalapa (neogótica,
+    santos estofados del XVIII–XIX, relicario de Santa Teodora).
+    """
+    rojo = _mat("vaso_rojo", (0.8, 0.06, 0.03), emision=1.5)
+    # Cristo negro crucificado, arco 1 derecho, girado hacia la cámara.
+    p = [_caja("cristo_peana", -0.3, 0.3, -0.3, 0.3, 0, 0.5, madera),
+         _caja("cristo_cruz", -0.06, 0.06, -0.04, 0.04, 0.5, 3.3, madera),
+         _caja("cristo_travesano", -0.75, 0.75, -0.04, 0.04, 2.78, 2.9, madera),
+         _barra("cristo_torso", (0, -0.1, 2.25), (0, -0.1, 2.8), 0.13, negro),
+         _barra("cristo_brazo_i", (-0.12, -0.1, 2.75), (-0.68, -0.1, 2.88), 0.04, negro),
+         _barra("cristo_brazo_d", (0.12, -0.1, 2.75), (0.68, -0.1, 2.88), 0.04, negro),
+         _barra("cristo_piernas", (0, -0.1, 1.5), (0, -0.1, 2.25), 0.08, negro)]
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.1, location=(0.05, -0.12, 2.92))
+    bpy.context.object.name = "cristo_cabeza"; bpy.context.object.data.materials.append(negro)
+    p.append(bpy.context.object)
+    _grupo("cristo", (3.3, 12.0, 0), -math.atan2(3.3, 10.0), p)  # mira hacia la cámara (0, 2); en y 11 lo tapaba el pilar 1
+    # Urna de cristal con santo tendido, arco 1 izquierdo, a lo largo de la nave. Sin vidrio: lo pone Klein.
+    x0, x1, y0, y1, z0, z1 = -0.3, 0.3, -0.8, 0.8, 0.9, 1.45
+    p = [_caja("urna_peana", -0.35, 0.35, -1.05, 1.05, 0, 0.9, madera)]
+    for i, (a, b) in enumerate((((x0, y0), (x0, y1)), ((x1, y0), (x1, y1)), ((x0, y0), (x1, y0)), ((x0, y1), (x1, y1)))):
+        for z in (z0, z1):
+            p.append(_caja(f"urna_canto_{i}_{z}", min(a[0], b[0]) - 0.02, max(a[0], b[0]) + 0.02,
+                           min(a[1], b[1]) - 0.02, max(a[1], b[1]) + 0.02, z, z + 0.04, oro))
+    for i, (x, y) in enumerate(((x0, y0), (x0, y1), (x1, y0), (x1, y1))):
+        p.append(_caja(f"urna_poste_{i}", x - 0.02, x + 0.02, y - 0.02, y + 0.02, z0, z1, oro))
+    p.append(_barra("urna_santo", (0, -0.55, 1.05), (0, 0.45, 1.05), 0.12, gris))
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.1, location=(0, 0.58, 1.08))
+    bpy.context.object.name = "urna_cabeza"; bpy.context.object.data.materials.append(gris)
+    p.append(bpy.context.object)
+    _grupo("urna", (-3.6, 11.3, 0), 0, p)
+    for i, y in enumerate((10.35, 12.25)):  # en las puntas de la peana
+        _cil(f"urna_cirio_{i}", -3.6, y, 0.9, 1.25, 0.03, cera)
+        _luz(f"urna_cirio_{i}", "POINT", (-3.6, y, 1.33), 25, (1.0, 0.55, 0.2), 0.02)
+    # Candelero de veladoras en vaso rojo, al fondo del arco 2 izquierdo (más cerca lo tapa el pilar 2): gradas que suben hacia atrás.
+    for g in range(3):
+        _caja(f"candelero_{g}", -3.65, -3.2 - 0.15 * g, 16.4, 17.6, 0, 0.7 + 0.15 * g, negro)
+        for j in range(6):
+            _cil(f"veladora_roja_{g}_{j}", -3.27 - 0.15 * g, 16.52 + 0.19 * j, 0.7 + 0.15 * g,
+                 0.78 + 0.15 * g, 0.03, rojo)
+    _luz("candelero", "POINT", (-3.3, 17.0, 1.3), 60, (1.0, 0.3, 0.12), 0.3)
+    # Vía Crucis en la cara interior de los pilares, a 2 m. El del pilar 3 derecho cae en la zona del humo: no va.
+    for k, s in ((1, 1), (1, -1), (2, 1), (2, -1), (3, -1)):
+        y, x = 3.2 + 5 * k, s * 2.8
+        _caja(f"via_{k}_{s}", x - s * 0.04, x, y - 0.17, y + 0.17, 1.95, 2.4, oro)
+        _caja(f"via_cruz_{k}_{s}", x - s * 0.04, x, y - 0.012, y + 0.012, 2.4, 2.56, oro)
+        _caja(f"via_brazo_{k}_{s}", x - s * 0.04, x, y - 0.05, y + 0.05, 2.49, 2.51, oro)
+    # Ventanal: lanceta en el muro sobre la arquería, arco del fondo izquierdo (pilares 3–4), y rayo de luna que
+    # baja hasta el pasillo. Fuera de las capillas no hay muro sobre los arcos en la maqueta: se pone este tramo.
+    _caja("claristorio", -2.9, -2.8, 18.7, 22.7, 4.4, 8, gris)
+    _caja("ventanal", -2.8, -2.78, 20.1, 21.3, 4.8, 6.8, _mat("luna_vidrio", (0.6, 0.7, 0.9), emision=3.0))
+    luna = _luz("luna", "SPOT", (-2.7, 20.7, 5.8), 4000, (0.75, 0.82, 1.0), 0.4)
+    luna.rotation_euler = (Vector((0.4, 13.0, 0)) - luna.location).to_track_quat("-Z", "Y").to_euler()  # al pasillo
+    luna.data.spot_size = math.radians(18)
 
 
 def sacristia(gris, negro, madera, neon, cera):
@@ -240,6 +335,7 @@ def build():
     cera = _mat("cera", (0.9, 0.8, 0.6), emision=0.5)
     nave(gris, negro, oro, neon, cera)
     instrumentos(gris, negro, cera)
+    capillas(madera, negro, oro, gris, cera)
     sacristia(gris, negro, madera, neon, cera)
 
     cd = bpy.data.cameras.new("cam")
