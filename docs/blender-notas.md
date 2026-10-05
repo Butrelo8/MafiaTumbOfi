@@ -582,3 +582,21 @@ Otros que costaron una vuelta:
 - **Desde atrás una banca también es casi un tablero.** Lo que la hace leer como banca (y no como caja, que es lo
   que Klein copiaba) es el remate delgado, los costados con perfil y el hueco entre filas. Lo que apoyes "en la
   banca" va sobre el remate (0.9 m) o en el asiento (0.45 m, casi siempre tapado por el respaldo).
+
+## Klein ignora el `shift_y` de la lente (2026-10-05, ticket 06)
+
+Una maqueta con `shift_y` (horizonte fuera del centro) sale de Klein **recentrada**: todo baja ~15 % y crece, y la placa deja
+de coincidir con la profundidad de la maqueta. El shift equivale exactamente a recortar un lienzo más grande sin shift:
+misma lente, `sensor_fit = "VERTICAL"`, `sensor_height` escalado con los píxeles (36 mm → 1280 px ⇒ 54 mm → 1920 px) y se
+recorta la franja que corresponde (con `shift_y = −0.25` sobre 1280 px: los 2/3 de abajo de 1920). Medido: diferencia
+media 0.02 contra el render con shift. Klein se corre sobre el lienzo alto y la placa se recorta igual. Antes de dar una
+placa por buena, superponer la maqueta al 50 %: el ojo no ve un corrimiento uniforme.
+
+Y `render()` de `transicion.py` deja la escena en el estado de su último pase (mallas ocultas, fondo transparente,
+material de profundidad): un render suelto después sale negro. Restaurar `hide_render`, `film_transparent`,
+`color_mode`, `view_transform` y `material_override` antes.
+
+**`BVHTree.FromObject` está en coordenadas locales del objeto** (2026-10-05): comparar dos objetos así da cruces
+falsos (una caja chocaba con la banca del otro lado del pasillo). Para cruces en el mundo, armar el árbol con
+`BVHTree.FromPolygons([mw @ v.co for v in malla.vertices], [p.vertices[:] for p in malla.polygons])` desde
+`objeto.evaluated_get(dg).to_mesh()`.
