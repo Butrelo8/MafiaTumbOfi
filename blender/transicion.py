@@ -181,16 +181,21 @@ def instrumentos(mat, negro, cera):
     bajo.data.materials.append(mat)
     # Bocina de pie en el asiento y el requinto delante, recargado en su frente (ticket 12): 9° es el último ángulo
     # sin cruzarla, medido con BVH. Parado solo en la orilla de la banca "desafiaba la gravedad".
-    # Con bancas de verdad (ticket 13) la bocina baja hasta el asiento; el requinto se para en el remate del respaldo.
-    _caja("bocina", 0.58, 0.98, 6.2, 6.48, 0.46, 1.52, negro)
-    _instrumento("requinto", (0.78, 6.07, 0.9), 0.9, 0.52, 0.1, (-9, 0, -8), mat)
+    # Ticket 06: en el asiento, detrás del respaldo, Klein le dibujaba la base sobre el remate y "flotaba". Ahora sub +
+    # bocina en el piso, frente a la banca (como monta su equipo una banda). El sub es hondo (75 cm, uno de 18"): el
+    # requinto se para sobre él, delante de la bocina; en el piso, el borde del cuadro de escritorio le cortaba el cuerpo.
+    _caja("sub", 0.40, 0.90, 5.2, 5.95, 0, 0.6, negro)
+    _caja("bocina", 0.45, 0.85, 5.55, 5.93, 0.6, 1.35, negro)
+    # Madera clara en la maqueta: delante de la bocina negra, en gris, Klein lo fundía con el woofer (Klein copia los tonos).
+    clara = _mat("madera_clara", (0.75, 0.58, 0.38))
+    _instrumento("requinto", (0.62, 5.41, 0.588), 0.9, 0.52, 0.1, (-9, 0, -8), clara)  # BVH: toca sub y bocina
     # El humo necesita fuente (ticket 12: salía "de la guitarra"): sahumador de copal en la bocina, a la derecha del
     # clavijero. Brasa = luz naranja baja dentro del cuenco. Las veladoras nuevas (bocina y segunda banca) sólo dan hilos.
-    _cil("sahumador_pie", 0.9, 6.36, 1.52, 1.57, 0.035, mat, conico=0.025)
-    _cil("sahumador", 0.9, 6.36, 1.57, 1.66, 0.045, mat, conico=0.075)
-    _luz("brasa", "POINT", (0.9, 6.36, 1.64), 6, (1.0, 0.35, 0.1), 0.03)
-    for i, (x, y, z) in enumerate(((0.75, 5.4, 0), (0.95, 5.3, 0), (1.7, 5.45, 0),
-                                   (0.66, 6.3, 1.52), (0.6, 7.24, 0.9), (1.6, 7.24, 0.9))):  # 7.24: sobre el remate
+    _cil("sahumador_pie", 0.74, 5.8, 1.35, 1.4, 0.035, mat, conico=0.025)
+    _cil("sahumador", 0.74, 5.8, 1.4, 1.49, 0.045, mat, conico=0.075)
+    _luz("brasa", "POINT", (0.74, 5.8, 1.47), 6, (1.0, 0.35, 0.1), 0.03)
+    for i, (x, y, z) in enumerate(((0.35, 5.05, 0), (1.05, 5.0, 0), (1.7, 5.45, 0),
+                                   (0.53, 5.74, 1.35), (0.6, 7.24, 0.9), (1.6, 7.24, 0.9))):  # 7.24: sobre el remate
         _cil(f"veladora_{i}", x, y, z, z + 0.12, 0.035, cera)
         _luz(f"veladora_{i}", "POINT", (x, y, z + 0.2), 25, (1.0, 0.55, 0.2), 0.02)
 
