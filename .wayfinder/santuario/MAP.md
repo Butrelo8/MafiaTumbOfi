@@ -38,6 +38,8 @@ Lista para producir sin decisiones pendientes. Llegamos cuando no queda ningún 
   capillas y rayo de luna en la nave.
 - [03 Layout de la UI sobre la escena](tickets/03-layout-ui.md): el contenido va sobre la escena, mezclado por sección: C en el hero,
   D (titular que se abre) en texto, E (una pieza a la vez, sin scroll) en Música y El grupo; hueco oscuro abajo a la izquierda.
+- [05 Peso y carga](tickets/05-peso-carga.md): experiencia completa siempre; entrada ≤ 3 MB y gesto ≤ 1 MB en móvil medidos con
+  `scripts/medir-peso.mjs`; AV1 → HEVC → H.264; lo inmediato y luego cascada de todo el sitio; saltos con fundido a negro.
 
 ## Not yet specified
 
