@@ -5,9 +5,9 @@ description: Movimiento humano realista (baile, deporte, gesto) para web con Mix
 
 # blender
 
-Fuente: `/mnt/e/Cursor Projects/ProyectoInvestigación/research/visuales.md`, sección
+Fuente: `/mnt/e/Cursor Projects/visual-lab/web/visuales.md`, sección
 "Prueba: animar personajes — Rive vs Blender" (probado 2026-09-22). Script completo:
-`ProyectoInvestigación/research/visuales-assets/bailarina_blender.py`.
+`/mnt/e/Cursor Projects/visual-lab/web/visuales-assets/bailarina_blender.py`.
 
 ## ¿Blender o Rive?
 
@@ -36,7 +36,7 @@ de Windows). Controla un Blender abierto.
   otra escena (p.ej. la de MTO).
 - `bpy.ops.wm.read_homefile` rompe el contexto del import FBX: borrar los objetos a mano.
 - Sin MCP también funciona: `blender -b -P script.py` con el script de la prueba.
-- MCP que la sesión no tiene cargado: `ProyectoInvestigación/research/visuales-assets/mcp_stdio.py`.
+- MCP que la sesión no tiene cargado: `/mnt/e/Cursor Projects/visual-lab/web/visuales-assets/mcp_stdio.py`.
 
 ## Licencia de Mixamo (verificado 2026-09-22)
 
