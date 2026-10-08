@@ -9,6 +9,7 @@
       "skills": [
         "blender"
       ],
+      "linkedSkills": [],
       "localSkills": [],
       "rules": [],
       "claudeMd": true,
@@ -22,6 +23,7 @@
     },
     "deploy-cloudflare": {
       "skills": [],
+      "linkedSkills": [],
       "localSkills": [],
       "rules": [],
       "claudeMd": true,
@@ -33,6 +35,22 @@
       "plugins": [
         "cloudflare@cloudflare"
       ],
+      "mcpServers": []
+    },
+    "edicion-resolve": {
+      "skills": [],
+      "linkedSkills": [
+        "diseccion-video"
+      ],
+      "localSkills": [],
+      "rules": [],
+      "claudeMd": true,
+      "hooks": [],
+      "permissions": {
+        "allow": [],
+        "deny": []
+      },
+      "plugins": [],
       "mcpServers": []
     }
   }

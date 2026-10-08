@@ -64,9 +64,15 @@ workers-best-practices) y el MCP `cloudflare-docs` en vez de escribir la config 
 This repo is where the scene work happens; reusable methods live elsewhere. When a technique fails, or before
 trial and error: `~/.claude/scripts/buscar-research <term>` (visual-lab, ComfyUI, this repo, Resolve).
 Keep here only what is specific to this site (tickets, scene scripts). Distill general lessons into
-`/home/black/projects/visual-lab` (routing table in its `CLAUDE.md`; Blender notes: `blender/blender-notas.md`)
-or ComfyUI `research/` (generation, upscaling).
+`/home/black/projects/visual-lab` (routing table in its `CLAUDE.md`; Blender notes: `blender/blender-notas.md`;
+ComfyUI generation/upscaling: `comfyui/`).
 
 Other repos' `CLAUDE.md` (Davincy Resolve, visual-lab, ComfyUI) do **not** load in a session started
 here, nor do their settings, skills or MCP servers. Quick visit (a few edits there): read that repo's `CLAUDE.md`
 first and follow it. Real work in that repo: start a new session in its folder.
+
+<!-- mpaf:edicion-resolve:start -->
+DaVinci Resolve: antes de usar el MCP `resolve`, el humano arranca CursorBridge en Resolve (Workspace → Scripts).
+Técnica, límites de la API y helpers (`prep_clip.sh`, `luts.sh`, `parallax.py`): /home/black/projects/visual-lab/resolve/CLAUDE.md.
+Iniciar render o borrar media/timelines/proyectos = pedir permiso por acción.
+<!-- mpaf:edicion-resolve:end -->
