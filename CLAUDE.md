@@ -64,7 +64,7 @@ workers-best-practices) y el MCP `cloudflare-docs` en vez de escribir la config 
 This repo is where the scene work happens; reusable methods live elsewhere. When a technique fails, or before
 trial and error: `~/.claude/scripts/buscar-research <term>` (visual-lab, ComfyUI, this repo, Resolve).
 Keep here only what is specific to this site (tickets, scene scripts). Distill general lessons into
-`/mnt/e/Cursor Projects/visual-lab` (routing table in its `CLAUDE.md`; Blender notes: `blender/blender-notas.md`)
+`/home/black/projects/visual-lab` (routing table in its `CLAUDE.md`; Blender notes: `blender/blender-notas.md`)
 or ComfyUI `research/` (generation, upscaling).
 
 Other repos' `CLAUDE.md` (Davincy Resolve, visual-lab, ComfyUI) do **not** load in a session started

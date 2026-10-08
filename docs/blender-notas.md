@@ -66,4 +66,4 @@ en vez de comprobarlo. Hay una sección entera sobre eso en las notas generales 
 ## Notas generales de Blender 5
 
 Las trampas de API, rig de cámara, medición, render/look, alfa y entorno (no son de MTO) viven en
-`/mnt/e/Cursor Projects/visual-lab/blender/blender-notas.md` (movidas 2026-10-06). Léelas antes de tocar `blender/`.
+`/home/black/projects/visual-lab/blender/blender-notas.md` (movidas 2026-10-06). Léelas antes de tocar `blender/`.
