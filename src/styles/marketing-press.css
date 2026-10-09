@@ -841,6 +841,15 @@ body.marketing-body img {
   pointer-events: none;
 }
 
+/* On phones the copy spans the full width, so the left-to-right fade just buried
+   the video. Even scrim + bottom fade instead; rgba, not oklch, for WebKit. */
+@media (max-width: 900px) {
+  .hero::before {
+    background-image: linear-gradient(0deg, #0a0a0a 0%, rgba(10, 10, 10, 0) 42%);
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+}
+
 .hero-deco-line {
   position: absolute;
   top: 0;
