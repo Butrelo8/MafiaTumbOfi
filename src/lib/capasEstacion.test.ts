@@ -82,13 +82,16 @@ describe('montarCapas', () => {
   })
 
   test('una estación sin capa no rompe el resto', () => {
-    // sonido y reliquia no tienen capa: son primeros planos macro y no hay
-    // nada entre la cámara y el sujeto.
-    const sinCapa = formato.estaciones.filter((e) => !('capaFrente' in e))
-    expect(sinCapa.length).toBeGreaterThan(0)
+    // Hoy las seis estaciones tienen capa; se quita la última para cubrir el caso.
+    const estaciones = formato.estaciones.map((e, i, todas) => {
+      if (i !== todas.length - 1) return e
+      const { capaFrente: _, ...sinCapa } = e
+      return sinCapa
+    })
+    expect(estaciones.some((e) => !('capaFrente' in e))).toBe(true)
 
     const { documento, capas } = documentoFalso([0])
-    const pintar = montarCapas({ formato, framesDeEstacion: frames, documento })
+    const pintar = montarCapas({ formato: { ...formato, estaciones } as typeof formato, framesDeEstacion: frames, documento })
     pintar(frames[0])
     expect(capas[0].style.opacity).toBe('1')
   })
