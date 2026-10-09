@@ -12,6 +12,7 @@
     "@fontsource/archivo": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@fontsource/pirata-one": "^5.3.0",
+    "@sentry/browser": "^11.6.0",
     "astro": "^6.1.9"
   },
   "devDependencies": {
