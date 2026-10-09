@@ -192,7 +192,6 @@ body.marketing-body img {
   height: auto;
   object-fit: contain;
   opacity: 0.97;
-  mix-blend-mode: screen;
   filter:
     drop-shadow(0 0 10px var(--gold))
     drop-shadow(0 0 30px color-mix(in oklch, var(--gold) 50%, transparent))
