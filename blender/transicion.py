@@ -31,7 +31,11 @@ PERIODO = 120         # 5 s (ticket 04: a 1280×704, 10 s no cabe en 12 GB): la 
 N_LOOP = 141          # MiniMax pide 17n+5; los 20 de más funden la costura del humo
 # Móvil (ticket 06): cámara vertical propia, misma trayectoria. Con la de escritorio en 9:16 el contrabajo, el Cristo y
 # la lámpara quedan fuera; aquí arrancan más a la derecha y el shift sube el sujeto (hueco abajo, ticket 03).
-MOVIL = {"lente": 28, "shift_y": -0.25, "nave_x": 0.8, "sac_fin": 45.4}  # 45.4: el neón en u ≤ 0.84, dentro de 19.5:9
+MOVIL = {"lente": 28, "shift_y": -0.25, "nave_x": 0.8, "sac_fin": 45.4,  # 45.4: el neón en u ≤ 0.84, dentro de 19.5:9
+         "micro": (0.609, 3.8, 1.62)}  # u 0.35, v 0.24: mitad de arriba, sobre el retablo, sin tapar la guitarra
+# Micrófono colgado (docs/specs/2026-10-10-micro-colgado-design.md): centro de la rejilla, a 1.8 m de la cámara y a la
+# altura de la boca. Escritorio en u 0.575: a 0.55 tocaba el halo de la cruz y el borde del panel de texto (Fable).
+MICRO = (0.138, 3.8, 1.62)
 _movil = False
 
 
@@ -280,6 +284,48 @@ def capillas(madera, negro, oro, gris, cera):
     luna.data.spot_size = math.radians(18)
 
 
+def micro(oro, negro):
+    """Shure 55 colgado de la bóveda por su cable, como lámpara del Santísimo (spec 2026-10-10). Rejilla hacia abajo:
+    la cámara, a su altura, ve el capuchón y las costillas, no la cara. Cable del conector a la bóveda (z 15, medido con
+    rayo: libre). Rosa roja oscura en el capuchón, sostenida por un moño de listón negro atado al cable (el usuario,
+    2026-10-10: "como si el moño la sostuviera"). Sin luz: la brasa la pinta Klein y se modula en post.
+    Rejilla de 13 × 8 × 6 cm (más grande que un 55 real: es el sujeto). Una posición por formato (MICRO / MOVIL).
+    """
+    rosa = _mat("rosa", (0.3, 0.01, 0.02))
+    tallo = _mat("tallo", (0.05, 0.12, 0.04))
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=1)
+    rejilla = bpy.context.object
+    rejilla.name, rejilla.scale = "micro_rejilla", (0.04, 0.03, 0.065)
+    rejilla.data.materials.append(oro)
+    p = [rejilla,
+         _caja("micro_horquilla", -0.012, 0.012, -0.01, 0.01, 0.06, 0.11, oro),
+         _caja("micro_cuerpo", -0.022, 0.022, -0.02, 0.02, 0.11, 0.20, negro),
+         _cil("micro_xlr", 0, 0, 0.20, 0.27, 0.011, negro),
+         _barra("micro_rosa_tallo", (0.003, -0.017, 0.205), (0.025, -0.035, 0.09), 0.004, tallo)]  # sube al nudo del moño
+    x, y, z = MOVIL["micro"] if _movil else MICRO
+    p.append(_cil("micro_cable", 0, 0, 0.27, 14.99 - z, 0.004, negro))
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.03, location=(0.028, -0.04, 0.08))
+    bpy.context.object.name = "micro_rosa"
+    bpy.context.object.data.materials.append(rosa)
+    p.append(bpy.context.object)
+    # Moño: nudo al frente del cable, dos gazas a los lados y dos colas que bajan hacia la rosa.
+    liston = _mat("liston", (0.015, 0.015, 0.015))
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.008, location=(0, -0.016, 0.205))
+    bpy.context.object.name = "micro_mono_nudo"
+    p.append(bpy.context.object)
+    for lado in (-1, 1):
+        bpy.ops.mesh.primitive_torus_add(major_radius=0.016, minor_radius=0.004, location=(lado * 0.02, -0.016, 0.21),
+                                         rotation=(math.pi / 2, 0, 0))
+        bpy.context.object.name = f"micro_mono_gaza_{lado}"
+        bpy.context.object.scale = (1, 0.6, 1)
+        p.append(bpy.context.object)
+        p.append(_barra(f"micro_mono_cola_{lado}", (0, -0.016, 0.2), (lado * 0.014, -0.03, 0.14), 0.003, liston))
+    for o in p[-5:]:
+        if not o.data.materials:
+            o.data.materials.append(liston)
+    _grupo("micro", (x, y, z), 0, p)
+
+
 def sacristia(gris, negro, madera, neon, cera):
     x0 = 40
     _caja("suelo_sac", x0, x0 + 8, -1, 4.0, -0.1, 0, gris)
@@ -348,6 +394,7 @@ def build(movil=False):
     nave(gris, negro, oro, neon, cera)
     instrumentos(gris, negro, cera)
     capillas(madera, negro, oro, gris, cera)
+    micro(oro, negro)
     sacristia(gris, negro, madera, neon, cera)
 
     cd = bpy.data.cameras.new("cam")
