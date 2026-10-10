@@ -42,6 +42,7 @@ Lista para producir sin decisiones pendientes. Llegamos cuando no queda ningún 
   `scripts/medir-peso.mjs`; AV1 → HEVC → H.264; lo inmediato y luego cascada de todo el sitio; saltos con fundido a negro.
 - [14 Look de cine](tickets/14-look-de-cine.md): transiciones a 24p con obturador de 180° (FILM ×8, 20 % menos
   peso); halación + difusión fuerte sobre el LOOK 2383; loops a 24p sin obturador; grano en HTML; sin recorte.
+  v5: placa real (Klein 4 MP con tono de la placa NR) + foco de lente T2.8 desde profundidad MoGe (510 → 287 KB).
 
 ## Not yet specified
 
