@@ -40,6 +40,8 @@ Lista para producir sin decisiones pendientes. Llegamos cuando no queda ningún 
   D (titular que se abre) en texto, E (una pieza a la vez, sin scroll) en Música y El grupo; hueco oscuro abajo a la izquierda.
 - [05 Peso y carga](tickets/05-peso-carga.md): experiencia completa siempre; entrada ≤ 3 MB y gesto ≤ 1 MB en móvil medidos con
   `scripts/medir-peso.mjs`; AV1 → HEVC → H.264; lo inmediato y luego cascada de todo el sitio; saltos con fundido a negro.
+- [14 Look de cine](tickets/14-look-de-cine.md): transiciones a 24p con obturador de 180° (FILM ×8, 20 % menos
+  peso); halación + difusión fuerte sobre el LOOK 2383; loops a 24p sin obturador; grano en HTML; sin recorte.
 
 ## Not yet specified
 
