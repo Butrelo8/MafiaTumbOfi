@@ -61,5 +61,10 @@ Decidido por el usuario el 2026-10-09 con los lado a lado:
 - **Halación + difusión, versión fuerte**, en todos los loops y transiciones, después del LOOK.
 - Loops a 24p sin obturador; grano en HTML; sin recorte de formato.
 - **Placa real + foco de lente T2.8** (v5) como base del santuario: aprobado por el usuario el 2026-10-09 ("we keeping
-  that"). Falta llevarlo a la vertical y a las transiciones (éstas piden profundidad por cuadro).
+  that"). Vertical hecha (2026-10-09, noche): `tmp/cine-look/nave_v5.mp4`, 259 → 197 KB, foco en la guitarra y ~7 px
+  de desenfoque; Klein redibuja la geometría de la vertical (25–47 px) y se alinea con flujo (`alinear_flujo.py`), y
+  la zona de placa real va relativa al foco (`PROF_LO/PROF_HI`). Detalle en `tmp/cine-look/NOTAS.md`. Falta llevarlo a
+  las transiciones (piden profundidad por cuadro).
 - Siguiente (usuario): un sujeto/objeto en el centro del cuadro para que el bokeh tenga más protagonismo.
+  Diseño: micrófono Shure 55 de oro viejo colgado de la bóveda, foco en él
+  ([`docs/specs/2026-10-10-micro-colgado-design.md`](../../../docs/specs/2026-10-10-micro-colgado-design.md)).
