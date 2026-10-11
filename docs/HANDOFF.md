@@ -3,9 +3,10 @@
 > **Mapa vivo (2026-10-04): [`.wayfinder/santuario/MAP.md`](../.wayfinder/santuario/MAP.md)** — destino,
 > decisiones y tickets abiertos del santuario en movimiento. Se trabaja con `matt-wayfinder` (mpaf).
 
-> **Más reciente: [`docs/handoffs/2026-10-10-micro-colgado.md`](handoffs/2026-10-10-micro-colgado.md)**
-> (micrófono colgado en la nave: loop de escritorio hecho, a la rosa le faltan trozos; vertical v5 hecha).
-> Anterior: [`docs/handoffs/2026-10-05-movil-y-props.md`](handoffs/2026-10-05-movil-y-props.md).
+> **Más reciente: [`docs/handoffs/2026-10-11-gente-reproyeccion.md`](handoffs/2026-10-11-gente-reproyeccion.md)**
+> (gente y ofrendas en la nave; la vertical sale de la placa de escritorio por reproyección; detalle de las transiciones).
+> Anteriores: [`2026-10-10-micro-colgado.md`](handoffs/2026-10-10-micro-colgado.md),
+> [`2026-10-05-movil-y-props.md`](handoffs/2026-10-05-movil-y-props.md).
 > Lo de abajo es el estado del 2026-09-17.
 
 > Escrito 2026-09-17, 02:30 CST. Reescrito 14:00 CST. Rama `dev`, 41 commits
