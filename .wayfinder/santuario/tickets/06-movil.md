@@ -129,3 +129,5 @@ spec. La maqueta trae la pila (bocina y sub en el piso) y la placa vertical vige
   la misma razón que escritorio medida igual (41.6 / 27.8). 222 KB, costura 0.41. Reconstruir:
   `GANA_ORO=1.26 tmp/micro/movil/armar_micro_v.sh placa_micro_vb_s4_suj.png mascara_trasplante.png nave_micro_10s.mp4`.
   Falta: que el usuario vea el loop; y la rama de pila y props/gente.
+- **Visto por el usuario (2026-10-11): bien.** El micro en la vertical queda; el 06 sigue abierto sólo por la rama de pila
+  y props/gente.
