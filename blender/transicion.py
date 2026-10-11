@@ -36,6 +36,9 @@ MOVIL = {"lente": 28, "shift_y": -0.25, "nave_x": 0.8, "sac_fin": 45.4,  # 45.4:
 # Micrófono colgado (docs/specs/2026-10-10-micro-colgado-design.md): centro de la rejilla, a 1.8 m de la cámara y a la
 # altura de la boca. Escritorio en u 0.575: a 0.55 tocaba el halo de la cruz y el borde del panel de texto (Fable).
 MICRO = (0.138, 3.8, 1.62)
+# Gente y ofrendas (ticket 06): asiento (x, fila i) de cada figura; la texana va en el remate de su banca. Texana y fiel
+# siguen a la placa de escritorio elegida (s44), que las puso ahí: la vertical tiene que ver lo mismo (el usuario).
+PROPS = {"senora": (1.9, 3), "joven": (2.3, 2), "texana": (-0.95, 0), "fiel": (1.6, 11)}
 _movil = False
 
 
@@ -284,6 +287,67 @@ def capillas(madera, negro, oro, gris, cera):
     luna.data.spot_size = math.radians(18)
 
 
+def props():
+    """Gente y ofrendas en las bancas vacías (ticket 06, handoff 2026-10-05). Gente de espaldas, sin cara y a 7–9 m;
+    grises que se lean (Klein copia los tonos), nada más claro que los instrumentos. Asientos medidos con rayos en las dos
+    cámaras (tmp/props-06/medir_asientos.py): fuera del micro (esc. u 0.52–0.63), de la columna de humo (u ≈ 0.69), de la
+    pila y del hueco del texto (bancas izquierdas). Banca de la fila i: respaldo en y = 6 + 1.2·i, asiento z 0.46.
+    """
+    # Con rebozo 0.1 y pelo 0.07 las figuras se perdían contra el muro oscuro: un gris más arriba.
+    cuerpo, oscuro, claro = _mat("cuerpo", (0.38, 0.38, 0.38)), _mat("oscuro", (0.2, 0.2, 0.2)), _mat("nardo", (0.75, 0.74, 0.7))
+    velo = _mat("velo", (0.55, 0.54, 0.52))  # mantilla de encaje clara: que no se parezca al joven (el usuario: variedad)
+    pelo = _mat("pelo", (0.15, 0.13, 0.11))
+
+    def esfera(nombre, loc, r, mat, escala=(1, 1, 1)):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=r, location=loc)
+        o = bpy.context.object
+        o.name, o.scale = nombre, escala
+        o.data.materials.append(mat)
+        return o
+
+    # Mujer con velo (mantilla de encaje) sobre la cabeza y los hombros, rezando con la cabeza baja, en lugar del rebozo
+    # (el usuario, 2026-10-11: sólo dos personas en toda la nave, una mujer con velo y un joven con gorra).
+    p = [_barra("senora_torso", (0, 0.02, 0), (0, 0.1, 0.5), 0.15, cuerpo),
+         esfera("senora_cabeza", (0, 0.16, 0.62), 0.095, pelo)]
+    bpy.ops.mesh.primitive_cone_add(radius1=0.2, radius2=0.08, depth=0.32, location=(0, 0.11, 0.58), rotation=(-0.12, 0, 0))  # punta hacia adelante, con la cabeza baja
+    bpy.context.object.name = "senora_velo"; bpy.context.object.data.materials.append(velo)
+    p.append(bpy.context.object)
+    x, i = PROPS["senora"]
+    _grupo("senora", (x, 6 + 1.2 * i + 0.25, 0.46), 0, p)
+    # Joven de gorra y sudadera, de espaldas, al fondo de la iglesia (cerca de la cámara): 3.ª banca derecha (i 2), x 2.3.
+    p = [_barra("joven_torso", (0, 0, 0), (0, 0.03, 0.55), 0.18, cuerpo),
+         esfera("joven_capucha", (0, -0.09, 0.53), 1, cuerpo, (0.12, 0.06, 0.07)),
+         esfera("joven_cabeza", (0, 0.03, 0.68), 0.1, pelo),
+         esfera("joven_gorra", (0, 0.03, 0.71), 0.105, oscuro, (1, 1, 0.6)),
+         _caja("joven_visera", -0.07, 0.07, 0.1, 0.22, 0.7, 0.712, oscuro)]
+    for s in (-1, 1):
+        p.append(_barra(f"joven_brazo_{s}", (s * 0.17, 0, 0.48), (s * 0.2, 0.14, 0.2), 0.055, cuerpo))
+    x, i = PROPS["joven"]
+    _grupo("joven", (x, 6 + 1.2 * i + 0.31, 0.46), 0, p)  # 0.31: con 0.25 la espalda cruzaba el remate (BVH)
+    # Fiel sentado solo en la primera banca derecha, junto al altar (lo añadió Klein en s44).
+    p = [_barra("fiel_torso", (0, 0, 0), (0, 0.04, 0.52), 0.16, cuerpo), esfera("fiel_cabeza", (0, 0.05, 0.64), 0.095, pelo)]
+    x, i = PROPS["fiel"]
+    _grupo("fiel", (x, 6 + 1.2 * i + 0.28, 0.46), 0, p)
+    # Texana negra con un rosario, dejada en el remate del respaldo de la 1.ª banca izquierda, junto al pasillo: en el asiento
+    # la tapa el respaldo (desde la cámara se ve el asiento sólo arriba de z 0.87). El rosario cuelga hacia la cámara.
+    x, i = PROPS["texana"]; y = 6 + 1.2 * i
+    _cil("texana_ala", x, y + 0.06, 0.899, 0.912, 0.2, oscuro)
+    _cil("texana_copa", x, y + 0.06, 0.912, 1.04, 0.09, oscuro, conico=0.075)
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.13, minor_radius=0.005, location=(x, y - 0.004, 0.79), rotation=(math.pi / 2, 0, 0))
+    bpy.context.object.name = "texana_rosario"; bpy.context.object.data.materials.append(claro)
+    _caja("texana_cruz", x - 0.005, x + 0.005, y - 0.01, y, 0.6, 0.66, claro)
+    # Nardos blancos con listón en las cabeceras del pasillo, filas 2–6 (i 1–5): atados al brazo de cada banca.
+    for i in range(1, 6):
+        y = 6 + 1.2 * i
+        for s, xb in ((1, 0.5), (-1, -0.5)):  # cara del brazo que da al pasillo
+            x = xb - s * 0.03
+            _cil(f"nardo_tallos_{i}_{s}", x, y + 0.07, 0.62, 1.0, 0.03, cuerpo)
+            _caja(f"nardo_liston_{i}_{s}", min(x, xb) - 0.035, max(x, xb) + 0.005, y + 0.03, y + 0.11, 0.8, 0.86, claro)
+            for k, (dx, dy) in enumerate(((0, 0), (-0.02, 0.03), (0.02, -0.02))):
+                for j in range(5):
+                    esfera(f"nardo_{i}_{s}_{k}_{j}", (x + dx, y + 0.07 + dy, 1.0 + 0.05 * j + 0.03 * k), 0.022, claro)
+
+
 def micro(oro, negro):
     """Shure 55 colgado de la bóveda por su cable, como lámpara del Santísimo (spec 2026-10-10). Rejilla hacia abajo:
     la cámara, a su altura, ve el capuchón y las costillas, no la cara. Cable del conector a la bóveda (z 15, medido con
@@ -395,6 +459,7 @@ def build(movil=False):
     nave(gris, negro, oro, neon, cera)
     instrumentos(gris, negro, cera)
     capillas(madera, negro, oro, gris, cera)
+    props()
     micro(oro, negro)
     sacristia(gris, negro, madera, neon, cera)
 

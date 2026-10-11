@@ -101,6 +101,8 @@ Lo que falta para cerrar el 06, en dos ramas que no se han decidido:
   y loops de los dos formatos.
 - El usuario eligió primero **el micro en la vertical** (2026-10-11); la rama de pila y props/gente queda **abierta, sin
   decidir** (no descartada), así que el 06 no cierra con el micro.
+- **Decidido por el usuario (2026-10-11): pila + props/gente ahora**, con stills de escritorio y vertical antes de H3 (el
+  plan del handoff del 2026-10-05); después se rehacen placas, loops y las transiciones del 17 en los dos formatos.
 
 ### v5: micro en la vertical, stills (2026-10-11)
 `tmp/micro/movil/`. Maqueta vertical headless (`render_movil.py`, `build(movil=True)`): micro en u 0.35, v 0.24 como en la
@@ -131,3 +133,92 @@ spec. La maqueta trae la pila (bocina y sub en el piso) y la placa vertical vige
   Falta: que el usuario vea el loop; y la rama de pila y props/gente.
 - **Visto por el usuario (2026-10-11): bien.** El micro en la vertical queda; el 06 sigue abierto sólo por la rama de pila
   y props/gente.
+
+### v6: pila + props/gente, maqueta (2026-10-11)
+`props()` en `blender/transicion.py` (asientos en `PROPS`), `tmp/props-06/`. Asientos medidos con rayos en las dos cámaras
+(`medir_asientos.py`; ojo: sin fijar la resolución, la vertical se proyecta a 16:9 y da otra u). Contactos BVH en
+`render_props.py`: figuras en el asiento, texana en el remate (en el asiento la tapa el respaldo: desde la cámara sólo se ve
+arriba de z 0.87), rosario contra el respaldo, nardos en el brazo de las cabeceras del pasillo, filas 2–6, los dos lados.
+Tonos: con rebozo 0.1 / pelo 0.07 las figuras se perdían en el muro; subidos a 0.2 / 0.15, cuerpo 0.38.
+Disposición (`disposicion.py`, `hoja_disp_esc.png`, `hoja_disp_vert.png`, verde = props, con el micro):
+- **A, los asientos del handoff** (señora fila 4 x 1.9, joven fila 3 x 2.3, texana fila 6 x 2.3): en escritorio quedan entre
+  la bocina y el contrabajo, la cabeza del joven contra la voluta: amontona la esquina de los instrumentos. En vertical se
+  leen bien, sobre el contrabajo.
+- **B, bancas del fondo** (señora fila 10 x 1.4, joven fila 9 x 2.3, texana fila 7 x 1.0): diminutas (12–13 m), la señora
+  detrás del sahumador y bajo el micro.
+- Lo libre a la derecha lo ocupan los instrumentos; la izquierda es el hueco del texto (03). Pendiente: que el usuario elija.
+- **Klein de escritorio, disposición A** (`klein_props.sh p3`, 3 semillas, sin referencia; `hoja_klein_A.jpg`: placa pila s22
+  | s11 / s22 | s33). Klein toma las figuras como permiso para repartir gente: s11 corre el encuadre, agranda los nardos y
+  deja la texana en una banca izquierda; **s22** conserva el encuadre de la placa vigente, pero sienta al joven en una banca
+  **izquierda** (en el hueco del texto), cuelga el rosario de la bocina y añade otra figura con rebozo; s33 corre el
+  encuadre e inventa 4–5 personas. La gente sí se lee creíble (de espaldas, sin cara). El usuario la vio por ssh
+  (SendUserFile).
+- **Ronda 2** (el usuario: "una mujer con velo y un joven con gorra, no varios", con variedad): en la maqueta la señora lleva
+  velo de encaje claro (0.55, sólo cabeza y hombros) en vez del rebozo; prompt estricto ("exactly two people… the pews on
+  the left side are completely empty"), semillas 22, 44, 55 sin referencia (`SEMILLAS=… klein_props.sh p4`,
+  `hoja_klein_A2.jpg`). **s22** conserva el encuadre de la placa vigente y trae justo las dos figuras a la derecha, bancas
+  izquierdas vacías y los nardos en el pasillo; falla en el rosario (vuelve a colgar de la bocina) y la texana no se
+  distingue. s44 y s55 corren el encuadre y añaden gente (s44 deja la texana en una banca izquierda).
+- **Elegida por el usuario: s44** (abajo a la izquierda en `hoja_klein_A2.jpg`), aunque corre el encuadre y deja la texana a la izquierda. Sigue la vertical con s44 de referencia.
+- **Vertical** (`klein_props_v.sh p4 klein/nave13props_p4_s44_00001_.png`, lienzo alto + s44 de referencia, 3 semillas;
+  `hoja_vert_A2.jpg`: placa vigente | s11 | s22 | s33). La maqueta al 50 % sobre s33 (`hoja_ov_v.jpg`) coincide en
+  arquitectura, instrumentos y gente (cabezas en u 0.68 / 0.82, v 0.31): las dos figuras quedan justo detrás del
+  contrabajo, como en la maqueta A; el velo toca el mástil en s11 y s22. La texana cae al piso junto al contrabajo (s11,
+  s33). Ojo: el prompt base termina en "no people" (desde el 13), que contradice a la gente; Klein la dibujó igual,
+  pero hay que quitarlo en la siguiente ronda.
+- El usuario: la vertical tiene que ver **lo mismo que escritorio** (mismos sujetos, nada distinto; el ángulo está bien).
+  s44 tiene tres personas, no dos (añadió un fiel solo en la primera banca derecha, junto al altar) y la texana en el
+  remate de la 2.ª banca izquierda, junto al pasillo. La maqueta las sigue (`PROPS`: texana −0.8 / i 1, fiel 1.6 / i 11;
+  medido con `medir_s44.py`: escritorio u 0.35 y 0.59 / v 0.55, como en s44; en vertical la texana queda en u 0.07, al
+  borde: un 19.5:9 la recorta). Prompt vertical con esos sujetos y sin el "no people" (`klein_props_v.sh p5 …s44…`).
+  `hoja_vert_p5.jpg`, `hoja_vert_p5_arriba.jpg`: las tres semillas traen texana con rosario en la banca izquierda y el
+  fiel del altar; s11 deja además otra texana en el piso, s22 cuelga otro rosario de la bocina; **s33 coincide con s44**
+  sin nada de más (`par_s44_v33.jpg`). Propuesta: s33.
+- ~~s44 corrió el encuadre~~: falso. La maqueta al 50 % sobre s44 (`ov_s44.jpg`) coincide sin dobles (altar, bancas, pila,
+  contrabajo, cruz); el error fue juzgarlo lado a lado con la placa vieja.
+- El usuario: se aprueba sólo si son iguales en los dos formatos los detalles, props y personas (lo que traen puesto y su
+  posición). Comparado sujeto por sujeto al 100 % (`detalle_final.jpg`): velo de encaje blanco, joven de sudadera gris y
+  gorra negra, fiel de sudadera gris junto al altar, nardos, velas blanca y roja en el remate detrás de la texana:
+  iguales. Única diferencia real: s33 colgaba un rosario de la texana y s44 no lo tiene. Quitado con retoque local de
+  Klein (`preset_edit`, "remove the rosary…", 1.08 MP): Klein quitó también la texana, así que `pegar_zona.py` pega sólo
+  la caja del hilo (x 52–104, y 503–615, alineada por correlación de fase, borde suave) → `nave06props_final.png`.
+  Queda: bajo el velo, s44 se ve claro y s33 oscuro. Pendiente: aprobación del usuario.
+- Bajo el velo (pedido del usuario: igualarlo): en s44 la mujer lleva un abrigo beige/camello, en s33 ropa negra. Retoque
+  local de Klein ("a plain beige camel-coloured coat under the veil", semillas 7 y 8) pegado sólo en la caja de la ropa
+  (x 462–528, y 468–548): s7 deja velo y contrabajo intactos; s8 ensancha el velo. `ropa_s44_v33_s7_s8.png`.
+  **`nave06props_final.png` = s33 sin rosario + abrigo beige (s7).** Pendiente: aprobación del usuario.
+- El usuario, viendo el par final: la texana está en otra banca en cada formato; la bocina está recargada distinto (en s44
+  pegada a la banca con el requinto en su frente; en vertical sobre el sub, suelta delante de la banca); y algo "en
+  textura de madera" en horizontal sale oscuro en vertical. La texana: en s44 está en la **1.ª** banca izquierda (la
+  superposición la pone ahí), no en la 2.ª que estimé de la imagen; la maqueta y la vertical la llevaban una fila atrás.
+  Parchar detalle por detalle no converge: dos tiradas de Klein con dos cámaras siempre difieren en algo.
+- **Vertical sacada de s44 por reproyección** (elegido por el usuario; "la madera" era la bocina). `pases_reproy.py`:
+  profundidad de vista en PNG de 16 bits sin el micro (escritorio 1712×944, vertical 704×1280 con shift) y las dos cámaras
+  (`camaras.json`: matriz y `view_frame`, que ya trae shift y ajuste de sensor). `reproyectar.py`: cada píxel vertical al
+  mundo con su Z, a la cámara de escritorio, y toma s44 sólo si escritorio ve ese punto (Z dentro del 3 %): 36.9 %
+  reproyectado, 56.4 % fuera del cuadro de escritorio (sobre todo el piso de abajo), 6.7 % ocluido. Huecos con la s33
+  corregida como base, un pase de Klein ("one seamless photograph… change nothing else", 1.56 MP) y `pegar_huecos.py`
+  pega Klein **sólo en los huecos** (dilatados 7 px, borde suave): todo lo que ven las dos cámaras queda con los píxeles
+  de s44. Texana corregida en la maqueta a la 1.ª banca izquierda. `nave06props_reproy_final.png` (s7), `par_reproy.jpg`.
+  Método general: la segunda cámara de una placa aprobada se saca de ella, no de otra tirada de Klein.
+- El usuario sobre `par_reproy.jpg`: fantasma en el joven junto a la del velo, y la texana tapada por la cabecera de la
+  banca, "no se acomoda natural como en horizontal". Causa: Klein dibujó gente y texana un poco fuera de donde las tiene la
+  maqueta; reproyectadas con la Z de la maqueta, sus orillas toman la Z del respaldo y se doblan. La texana sí está donde
+  la pone la geometría: desde la cámara vertical (0.8 m a la derecha) la cabecera de la 1.ª banca izquierda queda delante.
+- **Capas** (`reproyectar_capas.py`): Klein vacía s44 (gente y texana fuera, `s44_vacia_s7`, limpio); silueta = diferencia
+  dentro de cada caja (texana: umbral 12, la negra sobre madera cambia poco), sin lo que en escritorio está delante (Z);
+  fondo vacío reproyectado con `z_*_vacio` (`pases_reproy.py -- vacio`); cada figura como plano a su Z de maqueta (medirla
+  bajo la silueta falló: asoman contrabajo y bocina), por una afín, pintada sólo donde lo de la vertical queda detrás.
+  **No sirvió para el joven:** en s44 el contrabajo le tapa medio cuerpo y en la vertical eso se destapa; Klein lo inventa
+  (ronda con capas antes del pase: inventó otra persona de gorra roja de frente). Antes, la base de huecos (s33) traía su
+  propia gente y se colaba como fantasma: la base tiene que ir vacía (`s33_vacia_s7`).
+- Retoque local del joven sobre la primera reproyección (`v1_hombre_s7/8`): s7 le quita la gorra y le pone bufanda beige;
+  s8 lo vuelve otra mujer con velo. Ninguno. `hombre_fix.png`. Pendiente de decidir con el usuario.
+- **Elegido por el usuario: mover a la gente donde las dos cámaras la vean entera.** `medir_libre.py` (rayos a 9 puntos de
+  la figura y holgura ±0.3 m en las dos cámaras; escritorio fuera del micro, vertical en u 0.1–0.9): para el joven **sólo
+  quedan bancas izquierdas** (filas 6–12, x −1.9 / −2.3: escritorio u 0.31–0.39, v 0.55–0.59; vertical u 0.12–0.28), que en
+  escritorio caen en el hueco del texto (03); a la derecha todo lo tapan bocina, contrabajo o el micro. Texana: remates
+  izquierdos fila 4 x −1.2 (esc. 0.35 / vert. 0.13), fila 5 x −1.2 o −1.6, fila 6 x −2.0. **Siguiente paso:** confirmar con
+  el usuario el hueco del texto; luego, sobre `s44_vacia.png` (sin gente, limpio) devolver mujer y fiel de s44 y que Klein
+  añada joven y texana en recortes centrados en su sitio medido; mover `PROPS` igual; reproyectar la vertical
+  (`reproyectar.py`, Klein sólo en huecos con base vacía `s33_vacia_s7`).
