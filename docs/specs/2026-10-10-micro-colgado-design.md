@@ -17,7 +17,7 @@ de fondo. El usuario quiere un sujeto al centro del cuadro para que la profundid
 | **Colgado de la bóveda por su cable**, no en pie | Referencia del usuario: lámpara colgante de micrófono (Etsy). Hace de lámpara del Santísimo: reliquia de la voz. Sin base ni cable en el piso que choquen con bancas, sub o rayo de luna |
 | **Oro viejo, deslustrado** | Oro es el color de la paleta (monograma, CTA); oro rosa brillante compite con el dorado de los CTA |
 | **Brasa tenue dentro**, a nivel de veladora | La luz de la lámpara del Santísimo; nunca más brillante que los instrumentos |
-| **Una rosa roja oscura en el capuchón, sostenida por un moño de listón negro** atado al cable | Fable: a la altura de la cruz peleaba con el neón rojo. El moño lo pidió el usuario al elegir la semilla 1 (2026-10-10): "como si la sostuviera" |
+| **Una rosa roja oscura en el capuchón, con su tallo de espinas bajando en espiral alrededor del cable** | Fable: a la altura de la cruz peleaba con el neón rojo. La espiral la pidió el usuario al elegir la semilla 1 (2026-10-10), con una referencia de Gemini (enredadera de rosa en el pie del micro); antes probó un moño negro y lo descartó |
 | **Quieto**, sin vaivén | Los loops son de cámara quieta (ticket 13); un vaivén pediría H3 propio |
 | **A 1.8 m de la lente**, a la altura de la boca (1.62 m) | El usuario lo eligió entre 1.3 / 1.8 / 2.4 m (`tmp/micro/dist_cmp.jpg`). "El micrófono del cantante ausente, no una lámpara" (Fable) |
 | **Foco en el micrófono** | El usuario eligió "micro nítido, a media nave": el retablo, la cruz y las veladoras se vuelven bokeh grande; los instrumentos quedan apenas suaves |
@@ -34,8 +34,9 @@ de fondo. El usuario quiere un sujeto al centro del cuadro para que la profundid
 - Brasa: Klein la pinta fija en la placa, "luz cálida tenue que se escapa por las costillas laterales y deja una mancha
   cálida en el escalón de abajo" (este prompt es lo que evita que dibuje la rejilla de frente). En post sólo se modula
   su brillo (paso 4).
-- Rosa: roja oscura (más oscura que el vidrio de las veladoras), en el capuchón, con un solo filo de luz,
-  sostenida por un moño de listón negro satinado atado al cable, con dos colas.
+- Rosa: roja oscura (más oscura que el vidrio de las veladoras), en el capuchón, con un solo filo de luz. Su tallo
+  es uno solo, leñoso y seco, color tierra, con espinas y sin hojas; baja en espiral alrededor del cable (dos vueltas
+  y media) hasta la rosa. Nada baja de la rosa ni envuelve la rejilla.
 - Escala: la rejilla del bloqueo mide 13 cm de alto × 8 de ancho × 6 de fondo (un 55 real es más chico, ~7.5 cm de
   ancho). Se acepta, igual en los dos formatos: el micro es el sujeto y a escala real saldría ~78 px de alto a 1920 y
   ~40 px a 704.

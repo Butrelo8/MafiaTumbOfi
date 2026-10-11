@@ -287,12 +287,12 @@ def capillas(madera, negro, oro, gris, cera):
 def micro(oro, negro):
     """Shure 55 colgado de la bóveda por su cable, como lámpara del Santísimo (spec 2026-10-10). Rejilla hacia abajo:
     la cámara, a su altura, ve el capuchón y las costillas, no la cara. Cable del conector a la bóveda (z 15, medido con
-    rayo: libre). Rosa roja oscura en el capuchón, sostenida por un moño de listón negro atado al cable (el usuario,
-    2026-10-10: "como si el moño la sostuviera"). Sin luz: la brasa la pinta Klein y se modula en post.
+    rayo: libre). Rosa roja oscura en el capuchón; su tallo con espinas baja en espiral alrededor del cable. Sin luz:
+    la brasa la pinta Klein y se modula en post.
     Rejilla de 13 × 8 × 6 cm (más grande que un 55 real: es el sujeto). Una posición por formato (MICRO / MOVIL).
     """
     rosa = _mat("rosa", (0.3, 0.01, 0.02))
-    tallo = _mat("tallo", (0.05, 0.12, 0.04))
+    tallo = _mat("tallo", (0.1, 0.06, 0.03))  # leñoso y seco, color tierra; sin hojas (el usuario)
     bpy.ops.mesh.primitive_uv_sphere_add(radius=1)
     rejilla = bpy.context.object
     rejilla.name, rejilla.scale = "micro_rejilla", (0.04, 0.03, 0.065)
@@ -301,28 +301,29 @@ def micro(oro, negro):
          _caja("micro_horquilla", -0.012, 0.012, -0.01, 0.01, 0.06, 0.11, oro),
          _caja("micro_cuerpo", -0.022, 0.022, -0.02, 0.02, 0.11, 0.20, negro),
          _cil("micro_xlr", 0, 0, 0.20, 0.27, 0.011, negro),
-         _barra("micro_rosa_tallo", (0.003, -0.017, 0.205), (0.025, -0.035, 0.09), 0.004, tallo)]  # sube al nudo del moño
+         _barra("micro_rosa_tallo", (0.0, -0.024, 0.2), (0.025, -0.035, 0.09), 0.004, tallo)]  # de la espiral, por delante del cuerpo
     x, y, z = MOVIL["micro"] if _movil else MICRO
     p.append(_cil("micro_cable", 0, 0, 0.27, 14.99 - z, 0.004, negro))
     bpy.ops.mesh.primitive_uv_sphere_add(radius=0.03, location=(0.028, -0.04, 0.08))
     bpy.context.object.name = "micro_rosa"
     bpy.context.object.data.materials.append(rosa)
     p.append(bpy.context.object)
-    # Moño: nudo al frente del cable, dos gazas a los lados y dos colas que bajan hacia la rosa.
-    liston = _mat("liston", (0.015, 0.015, 0.015))
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.008, location=(0, -0.016, 0.205))
-    bpy.context.object.name = "micro_mono_nudo"
-    p.append(bpy.context.object)
-    for lado in (-1, 1):
-        bpy.ops.mesh.primitive_torus_add(major_radius=0.016, minor_radius=0.004, location=(lado * 0.02, -0.016, 0.21),
-                                         rotation=(math.pi / 2, 0, 0))
-        bpy.context.object.name = f"micro_mono_gaza_{lado}"
-        bpy.context.object.scale = (1, 0.6, 1)
-        p.append(bpy.context.object)
-        p.append(_barra(f"micro_mono_cola_{lado}", (0, -0.016, 0.2), (lado * 0.014, -0.03, 0.14), 0.003, liston))
-    for o in p[-5:]:
-        if not o.data.materials:
-            o.data.materials.append(liston)
+    # Un solo tallo leñoso con espinas, sin hojas, que baja en espiral alrededor del cable y acaba en la rosa; nada debajo
+    # del micro (el usuario, 2026-10-10, con una
+    # referencia de Gemini: la enredadera de rosa en el pie del micro). Dos vueltas y media de 0.62 a 0.2 m sobre la rejilla,
+    # a 16 mm del eje: libra el conector XLR (r 11 mm). Acaba al frente, de donde baja el tallo corto a la rosa.
+    pts = [(0.016 * math.sin(t), 0.016 * math.cos(t), 0.62 - 0.42 * t / (5 * math.pi))
+           for t in [i * 5 * math.pi / 40 for i in range(41)]]
+    cu = bpy.data.curves.new("micro_espiral", "CURVE")
+    cu.dimensions, cu.bevel_depth = "3D", 0.003
+    sp = cu.splines.new("POLY")
+    sp.points.add(len(pts) - 1)
+    for punto, (px, py, pz) in zip(sp.points, pts):
+        punto.co = (px, py, pz, 1)
+    cu.materials.append(tallo)
+    espiral = bpy.data.objects.new("micro_espiral", cu)
+    bpy.context.collection.objects.link(espiral)
+    p.append(espiral)
     _grupo("micro", (x, y, z), 0, p)
 
 
