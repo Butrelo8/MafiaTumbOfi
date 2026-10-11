@@ -52,3 +52,19 @@ Elegido por el usuario: capa 2D seguida con la cámara y profundidad de Blender.
   PNG se toman de `E:\ComfyUI\ComfyUI\output\mto\ida_micro_film8`) → `obturador.py` (promedio centrado de medio intervalo
   en luz lineal, cuadros 0–1 y 58–59 sin barrido) → micro, foco, LOOK y halación. `ida_micro.mp4` 452 → **397 KB**,
   `vuelta_micro.mp4` 380 KB. La vista previa ahora compara contra la ida vigente con obturador (`cine-look/web/ida.mp4`).
+
+### Escritorio desde cero (2026-10-11)
+`tmp/micro/trans_esc/`. La última transición de escritorio era de 864×480 y no hay placa de sacristía de escritorio
+moderna. Pases de Blender con la maqueta **de antes de la pila** (`git show cccf32c:blender/transicion.py`; coincide con
+la placa r6, sin dobles al superponer): T a 1280×704 (gris, z, máscara) y los grises en reposo a 1712×944 (`pases.py`).
+Sacristía con Klein de 2 imágenes (maqueta + la sacristía vertical aprobada como referencia, `klein_sac.sh`), 3 semillas:
+`hoja_sac.jpg` (maqueta | s11 / s22 | s33). s11 y s33 respetan la maqueta (s33 con dos cuadros); s22 mueve la lámpara.
+**Pendiente: que el usuario elija.**
+- **Elegida por el usuario: s11.** H3 de las dos mitades a 1280×704 con la profundidad de antes de la pila (`h3_esc.sh`,
+  ~150 s cada una), corte en 34 (negro del pilar 32–36, medido con la máscara). `armar_ida_esc.sh`: máscara de oclusores →
+  FILM ×8 + obturador **a 1280×704** (a 1080p FILM guardaría ~12 GB de cuadros) → RTX ×1.5 → 1920×1080 → micro seguido
+  (sale del cuadro en ~0.7 s) + foco por cuadro (coc 13.0, calibrado contra el loop de escritorio) → LOOK → halación.
+  `ida_micro.mp4` **774 KB**, `vuelta_micro.mp4` 770 KB; empalme loop → ida 7.65. Vista previa loop → ida → sacristía
+  quieta: `preview_esc.mp4`. Peso: con el loop de 354 KB el gesto pasa de 1 MB (el tope del 05 es para móvil; en
+  escritorio no hay tope escrito). Visto por el usuario: bien. Falta la placa real (v5) por cuadro, un loop de la
+  sacristía de escritorio (s11) y bajar el peso.
