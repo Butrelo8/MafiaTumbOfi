@@ -1,5 +1,5 @@
 # 06 — Versión móvil 9:16
-Type: prototype · Status: open · Blocks: 09 · Blocked by: 03 · Assignee: —
+Type: prototype · Status: open · Blocks: 09 · Blocked by: 03 · Assignee: claude
 
 ## Question
 ¿Cada toma tiene su propia cámara vertical en Blender (render y generación aparte) o sale de recortar la
@@ -90,3 +90,42 @@ requinto también se para en el remate: se lee como una caja de 1 m balanceada e
 > Nota (2026-10-10, [15](15-micro-colgado.md)): la vertical queda sin el micro colgado. Va con la misma cadena del 15
 > (`MOVIL["micro"]`: foco u 0.35, v 0.24; Klein redibuja la vertical 25–47 px, así que pegar y refinar con máscara, no
 > flujo; rosa desde Blender con la cámara vertical). El largo del loop vertical lo decidió el [16](16-loops-de-10s.md): 10 s, H3 a 512×928, sólo lo que se mueve.
+
+## Estado (2026-10-11)
+Lo que falta para cerrar el 06, en dos ramas que no se han decidido:
+- **Vertical con el micro** (spec del micro: `MOVIL["micro"]`, foco u 0.35 / v 0.24) sobre la placa vertical vigente
+  (`movil-06/viva/placa.png`, anterior a la pila) y el loop de 10 s del 16 (`micro/largo/capas240/nave_10s_240.mp4`).
+- **Pila y props/gente** (handoff `docs/handoffs/2026-10-05-movil-y-props.md`): sub + bocina en el piso aprobados "para
+  seguir" (v4) y la prueba de señora con rebozo, nardos, texana con rosario y joven de gorra, **nunca corridos**. Todo lo
+  hecho después (v5, micro, 10 s) está sobre las placas de antes de la pila (r6 y viva): hacer la pila ahora rehace placas
+  y loops de los dos formatos.
+- El usuario eligió primero **el micro en la vertical** (2026-10-11); la rama de pila y props/gente queda **abierta, sin
+  decidir** (no descartada), así que el 06 no cierra con el micro.
+
+### v5: micro en la vertical, stills (2026-10-11)
+`tmp/micro/movil/`. Maqueta vertical headless (`render_movil.py`, `build(movil=True)`): micro en u 0.35, v 0.24 como en la
+spec. La maqueta trae la pila (bocina y sub en el piso) y la placa vertical vigente no: sólo se usa el alfa del micro.
+- **Trasplante** en vez de rehacer la cadena de escritorio (desvío de la spec, que pedía la misma secuencia): las dos
+  cámaras ven el micro casi de frente (4° y 6° de lado), así que el micro y la rosa **aprobados** de escritorio
+  (`placa_micro_rosa.png` dentro de `mascara_micro_ajustada.png`) se escalan 0.598 (28 mm sobre 1280 contra 35 mm sobre
+  1712; los alfas dan 45/75 = 0.60) y se anclan por la silueta del alfa (correlación 0.984) → `trasplantar.py`,
+  `placa_trasplante.png`. Conserva rosa, espiral, oro viejo y la brasa dentro de la rejilla.
+- **Klein encima** (`klein_v.sh`, 4 MP, 3 semillas, "integra al cuadro, misma forma") + `componer_v.py` (sólo dentro de la
+  máscara dilatada; deriva del sujeto caja contra caja): s1 24 px y s2 30 px (no valen), **s3 2.4 px**. s3 integra luz y
+  grano, pero aclara el oro a amarillo, quita la brasa y agranda la rosa con filo de luz. `candidatos_v_100.jpg`
+  (trasplante | s3), `candidatos_v_full.jpg`. **Pendiente: que el usuario elija.** Después: `micro_viva` vertical (tope
+  contra la guitarra, máscaras de humo y foco, disparidad rellenada) sobre el loop de 10 s del 16.
+- **Más semillas** (pedido del usuario; `prompt_klein_v2.txt`: oro viejo oscuro, brasa visible, rosa del mismo tamaño):
+  s4, s5 y s6 conservan oro viejo y brasa, pero Klein corrió el cuadro ~21–24 px (s4, s5) o el sujeto 25 px (s6). Con
+  `SUJETO=1` en `componer_v.py` el sujeto de Klein se corre de vuelta a su sitio (deriva que queda ≤ 0.4 px) y se compone
+  con la máscara exacta, sin dilatar (borde y fondo de la placa). `candidatos_v3_100.jpg`: trasplante | s3 | s4 | s5 | s6.
+- **Elegida por el usuario: s4** (`placa_micro_vb_s4_suj.png`). Loop vertical de 10 s con el micro (`armar_micro_v.sh`:
+  base de 240 "rápido" del 16, `micro_viva_v.py` con la caja de la guitarra y el corte de la rosa de la vertical, humo por
+  detrás del sujeto, foco en el micro con disparidad 0.60 = guitarra 0.341 × 1.77 de escritorio, ~10 px de fondo,
+  `montar_mov_v.py`, halación): `tmp/micro/movil/nave_micro_10s.mp4`, **222 KB**, costura 0.40; lado a lado sin | con
+  micro `sbs_sin_con_micro_v.mp4`. Oro L p99 30.2 contra el cuerpo de la guitarra 28.6 (1.06×; en escritorio el usuario
+  lo dejó ~1.4×): el anillo de luz lo bajó 0.84 y el tope no actuó (la caja vertical incluye una veladora).
+  **Igualado a escritorio a pedido del usuario:** `GANA_ORO=1.26` (sólo el oro) → oro 42.7 contra guitarra 28.6, **1.49×**,
+  la misma razón que escritorio medida igual (41.6 / 27.8). 222 KB, costura 0.41. Reconstruir:
+  `GANA_ORO=1.26 tmp/micro/movil/armar_micro_v.sh placa_micro_vb_s4_suj.png mascara_trasplante.png nave_micro_10s.mp4`.
+  Falta: que el usuario vea el loop; y la rama de pila y props/gente.
