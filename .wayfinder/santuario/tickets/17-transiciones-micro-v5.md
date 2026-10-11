@@ -68,3 +68,50 @@ Sacristía con Klein de 2 imágenes (maqueta + la sacristía vertical aprobada c
   quieta: `preview_esc.mp4`. Peso: con el loop de 354 KB el gesto pasa de 1 MB (el tope del 05 es para móvil; en
   escritorio no hay tope escrito). Visto por el usuario: bien. Falta la placa real (v5) por cuadro, un loop de la
   sacristía de escritorio (s11) y bajar el peso.
+
+### Peso: la cascada de códecs del 05 (2026-10-11)
+`tmp/micro/trans_esc/cod/`. El 05 ya decidió AV1 → HEVC → H.264 (un `<source>` por códec); aquí se calibra con la ida.
+`halacion.sh` acepta `VC` (p. ej. `VC="-c:v ffv1"`) para sacar un maestro sin pérdida y codificar desde él, no desde el
+H.264; sin `VC` sale byte a byte igual que antes. `ladder.sh <maestro> <prefijo>`: tamaño y SSIM contra el maestro, `-g 60`.
+
+| Códec | Escritorio | Vertical |
+|---|---|---|
+| H.264 crf 23 (vigente) | 755 KB | 387 KB |
+| H.264 crf 26 | 517 KB | 263 KB |
+| HEVC crf 26 (`hvc1`) | 358 KB | 210 KB |
+| HEVC crf 28 | 279 KB | 160 KB |
+| AV1 crf 40 (SVT, preset 4) | **172 KB** | **107 KB** |
+| AV1 crf 45, 10 bits | 123 KB | 77 KB |
+
+El SSIM queda en 0.962–0.968 en todos (el piso lo pone el ruido fino, no distingue). Al 100 %
+(`hoja_codecs.png`: micro, piedra oscura, muro de la sacristía; maestro | H.264 23 | HEVC 26 | AV1 40 | AV1 45) AV1 40 y
+HEVC 26 no se distinguen del maestro; AV1 45 suaviza la piedra. Para ver en movimiento con el mismo cuadro:
+`index.html` (teclas 1–4) desde `trans_esc/cod/`.
+
+### Detalle: la ida se veía blanda (2026-10-11)
+El usuario, viendo los códecs: "se ve muy blurosa, y no hablo del blur intencionado". No era el códec (el maestro sin
+pérdida igual). Medido por etapa (`hoja_etapas`, Laplaciano por cuadro): H3 a 1280×704 pierde detalle al moverse (123 →
+57 → 31 en los cuadros 0, 10, 20) y RTX ×1.5 no lo devuelve; la halación + Pro-Mist "fuerte" lava el muro iluminado de la
+sacristía; además H3 arrancaba de la placa r6, no de la v5. El usuario pidió probar las cuatro salidas:
+- **H3 a 1920×1056** (`W=1920 H=1056 NAVE=../../cine-look/placa_real_s2b_nr.png TAG=_1056 ./h3_esc.sh`; 39 cuadros × 2 MP
+  caben en 12 GB, 390 + 372 s a 20 pasos) desde la placa v5 → `armar_hd.sh hd_h3` (sin RTX, FILM ×8 a 1920×1056).
+  Detalle real en piedra, retablo y Cristo; empalme loop → ida **7.65 → 5.17** (arranca de la misma placa que el loop).
+  AV1 crf 40: 197 KB.
+- **Detalle de la placa real** (`detalle.py`, `DET=1 armar_hd.sh hd_det`): la cámara sólo se corre en x dentro de cada
+  mitad, así que la placa se reproyecta exacta con la Z de Blender (x + f·Δx/Z) y entra como razón P/G(P) donde la Z
+  coincide y la luz baja se parece (con desfase, no ganancia: H3 baja el negro ~0.015). **H3 no sigue el tiempo del
+  control**: en la sacristía de 1280 va 27 px donde la cámara pide 108 (cuadro 7) y casi lineal; se busca, por cuadro, la Δx
+  de cámara que reproduce a H3 (1D a 1/4 y continua). Con H3 a 1080p aporta poco más (H3 ya se acerca a la placa); el
+  flujo residual pasa de 8 px hacia el cuadro 15 y ahí no entra (lo tapa el obturador). AV1 189 KB.
+- **Difusión más ligera** (`halacion.sh … 0.5 0.2` en vez de 0.8 / 0.45): devuelve la textura dentro del charco de la
+  lámpara. Ojo: los loops se aprobaron con la fuerte; para el empalme, va en todo o sólo durante el movimiento.
+- **SeedVR2 ×1.5 en vez de RTX** (`seedvr_esc.sh`, 181 s): mucho más filo pero sobreafilado (talla "grabada"), vira a
+  amarillo y satura (rompe el grado del loop) y en reposo cambia ~40 % más por cuadro (4.5–5 contra 3.5, alternando): detalle
+  inventado que titila, como FlashVSR en el 04. AV1 301 KB.
+Para ver con el mismo cuadro: `detalle_web/index.html` (teclas 1–5: vigente, H3 1080p, + placa, + difusión ligera, SeedVR2;
+todos H.264 crf 16).
+- **Elegido por el usuario:** base **H3 a 1080p + detalle de la placa** (`hd_det`) y difusión **ligera sólo al moverse**:
+  `mezcla_difusion.py` mezcla por cuadro el maestro fuerte (0.8 / 0.45, empalma con los loops) y el ligero (0.5 / 0.2) con
+  la velocidad del smoothstep, 6t(1−t)/1.5. Cascada del 05: ida **AV1 189 KB** (vuelta 194), HEVC 375, H.264 794
+  (`hd_det/ida_final_*.mp4`); antes 774 KB en H.264. Tecla 6 de `detalle_web/`. Falta la vertical con el mismo método y
+  todo esto se rehace sobre las placas con la pila (06).

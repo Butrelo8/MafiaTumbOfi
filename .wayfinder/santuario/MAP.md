@@ -21,6 +21,9 @@ Lista para producir sin decisiones pendientes. Llegamos cuando no queda ningún 
 - Método probado: transiciones como en el ticket 01 (maqueta gris → Klein → H3 + ControlNet de profundidad → LOOK);
   loops con cámara quieta como en `~/projects/visual-lab/comfyui/playbooks.md` › *Web loop on a locked-off plate*
   (placa fija + H3 en máscaras, sujeto difícil desde Blender, 10 s nativo, foco, codificación). Tickets 13, 14 y 15.
+  Con un sujeto compuesto en una toma que se mueve (ticket 17, aprobado): el sujeto es una capa 2D seguida con la
+  cámara de Blender (H3 no lo toca), foco de lente por cuadro con la profundidad de Blender, y FILM ×8 + obturador de
+  180° sólo en el fondo, antes del RTX y del LOOK.
 - El usuario: español, conciso, decide rápido y quiere ver renders. Rutas Windows (`E:\Cursor Projects\MTO\...`).
 - Mapa de secciones: hero (video) → nave = Quiénes somos → sacristía = Música → camarín de las hornacinas =
   El grupo → cripta = Contratación → atrio = cierre.
@@ -49,12 +52,17 @@ Lista para producir sin decisiones pendientes. Llegamos cuando no queda ningún 
   v5: placa real (Klein 4 MP con tono de la placa NR) + foco de lente T2.8 desde profundidad MoGe (510 → 287 KB).
 - [15 Micrófono colgado](tickets/15-micro-colgado.md): Shure 55 de oro al centro de la nave, más brillante que la
   guitarra (decisión del usuario); rosa roja renderizada en Blender y retocada por Klein; loop de 10 s con H3 nativo
-  a 928×512, 40 pasos y `tmix` (383 KB); FILM y tomas encadenadas descartados. Vertical y transiciones, pendientes.
+  a 928×512, 40 pasos y `tmix` (383 KB); FILM y tomas encadenadas descartados. La vertical con el micro quedó aprobada
+  en el [06](tickets/06-movil.md) (v5, 222 KB); las transiciones con el micro van en el [17](tickets/17-transiciones-micro-v5.md).
 - [16 Loops de 10 s en todo el santuario](tickets/16-loops-de-10s.md): 10 s en todos los loops; vertical con H3 a
   512×928 tomando sólo lo que se mueve; velas y polvo de 240 al mismo tempo sin repetirse; 354 / 262 KB por 10 s.
 
 ## Not yet specified
 
+- **Pila y props/gente en la nave** ([06](tickets/06-movil.md) v4): sub y bocina en el piso aprobados "para seguir";
+  la señora con rebozo, los nardos, la texana con rosario y el joven de gorra nunca se corrieron. Todo lo hecho después
+  (v5, micro, loops de 10 s y las transiciones del 17, en los dos formatos) está sobre placas y profundidad de antes de
+  la pila: hacerla rehace placas, loops y transiciones. El usuario la pidió ahora (2026-10-11), stills antes de H3.
 - **Atrio con la troca del videoclip.** Propuesto, sin aprobar; se decide al guionizar los espacios.
 - **Los retratos de El grupo en el camarín**: entran como HTML encima, uno a la vez (ticket 03); queda si la toma
   "empuja hacia un retrato que se abre" (handoff) o no.
