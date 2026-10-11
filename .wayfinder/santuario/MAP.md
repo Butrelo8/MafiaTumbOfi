@@ -18,8 +18,9 @@ Lista para producir sin decisiones pendientes. Llegamos cuando no queda ningún 
 - UI (ticket 10): `frontend-design` como única skill general de diseño; `review-animations` y `animation-vocabulary`
   (Emil Kowalski, en `.claude/skills/`) para el movimiento; auditoría anti-slop con `npx -y impeccable@4.5.2 detect --json`
   sobre cada prototipo; variantes de UI en un lienzo de Claude Design (`/design`). Avance del 2026-10-10 en el ticket 10.
-- Método probado: maqueta gris y cámara en Blender → cuadro de estilo con Klein → MiniMax H3 + ControlNet de
-  profundidad → LOOK de `scripts/build-hero.sh`. Detalle en el ticket 01.
+- Método probado: transiciones como en el ticket 01 (maqueta gris → Klein → H3 + ControlNet de profundidad → LOOK);
+  loops con cámara quieta como en `~/projects/visual-lab/comfyui/playbooks.md` › *Web loop on a locked-off plate*
+  (placa fija + H3 en máscaras, sujeto difícil desde Blender, 10 s nativo, foco, codificación). Tickets 13, 14 y 15.
 - El usuario: español, conciso, decide rápido y quiere ver renders. Rutas Windows (`E:\Cursor Projects\MTO\...`).
 - Mapa de secciones: hero (video) → nave = Quiénes somos → sacristía = Música → camarín de las hornacinas =
   El grupo → cripta = Contratación → atrio = cierre.
@@ -31,13 +32,13 @@ Lista para producir sin decisiones pendientes. Llegamos cuando no queda ningún 
 - [02 Instrumentos como reliquias](tickets/02-instrumentos-nave.md): Klein y MiniMax los sostienen sin
   deformar; 3 semillas por cuadro (acierta 1 de 3); veladoras de ofrenda dan luz y movimiento al loop.
 - [11 Navegación: un gesto, una sección](tickets/11-navegacion-por-gesto.md): la transición se reproduce
-  entera (ida/vuelta), oclusor enmascarado desde Blender, loops con costura de 0.83 s (10 s → 5 s por el 04).
-- [04 Resolución](tickets/04-resolucion.md): H3 a 1280×704 + RTX ×1.5 → 1080p; loops de 5 s (10 s no cabe en
-  12 GB); FlashVSR descartado (inventa); a 1080p un loop pesa ~1 MB por 5 s.
+  entera (ida/vuelta), oclusor enmascarado desde Blender, loops con costura de 0.83 s (de nuevo 10 s desde el 15).
+- [04 Resolución](tickets/04-resolucion.md): H3 a 1280×704 + RTX ×1.5 → 1080p; FlashVSR descartado (inventa); loops
+  de 5 s, revisado en el 15 y el 16: 10 s en todo (928×512 / 512×928 nativo + RTX).
 - [12 Que el tololoche se lea como contrabajo](tickets/12-contrabajo.md): asset de contrabajo, requinto en una
   bocina, sahumador como fuente del humo; las reliquias van con su silueta real y a la altura del asiento o más.
 - [13 Placa fija + capas](tickets/13-placa-y-capas.md): cámara quieta en los loops; placa de Klein fija y H3 sólo en
-  zonas vivas (canny solo no basta); humo en loop propio, llamas chicas en post; muros de tezontle, bancas de verdad,
+  zonas vivas (canny solo no basta); humo por el periodo completo (desde el 15), llamas chicas en post; muros de tezontle, bancas de verdad,
   capillas y rayo de luna en la nave.
 - [03 Layout de la UI sobre la escena](tickets/03-layout-ui.md): el contenido va sobre la escena, mezclado por sección: C en el hero,
   D (titular que se abre) en texto, E (una pieza a la vez, sin scroll) en Música y El grupo; hueco oscuro abajo a la izquierda.
@@ -46,6 +47,11 @@ Lista para producir sin decisiones pendientes. Llegamos cuando no queda ningún 
 - [14 Look de cine](tickets/14-look-de-cine.md): transiciones a 24p con obturador de 180° (FILM ×8, 20 % menos
   peso); halación + difusión fuerte sobre el LOOK 2383; loops a 24p sin obturador; grano en HTML; sin recorte.
   v5: placa real (Klein 4 MP con tono de la placa NR) + foco de lente T2.8 desde profundidad MoGe (510 → 287 KB).
+- [15 Micrófono colgado](tickets/15-micro-colgado.md): Shure 55 de oro al centro de la nave, más brillante que la
+  guitarra (decisión del usuario); rosa roja renderizada en Blender y retocada por Klein; loop de 10 s con H3 nativo
+  a 928×512, 40 pasos y `tmix` (383 KB); FILM y tomas encadenadas descartados. Vertical y transiciones, pendientes.
+- [16 Loops de 10 s en todo el santuario](tickets/16-loops-de-10s.md): 10 s en todos los loops; vertical con H3 a
+  512×928 tomando sólo lo que se mueve; velas y polvo de 240 al mismo tempo sin repetirse; 354 / 262 KB por 10 s.
 
 ## Not yet specified
 

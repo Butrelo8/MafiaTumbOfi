@@ -1,5 +1,5 @@
 # 09 — Integración web
-Type: grilling · Status: open · Blocks: — · Blocked by: 05, 06, 08, 11 · Assignee: —
+Type: grilling · Status: open · Blocks: — · Blocked by: 05, 06, 08, 11, 16, 17 · Assignee: —
 
 ## Question
 ¿Qué reemplaza a `AltarScene.astro` (frames AVIF en canvas, `capaFrente`, `scene.json`)? El nuevo contrato

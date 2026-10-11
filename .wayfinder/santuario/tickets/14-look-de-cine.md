@@ -68,3 +68,4 @@ Decidido por el usuario el 2026-10-09 con los lado a lado:
 - Siguiente (usuario): un sujeto/objeto en el centro del cuadro para que el bokeh tenga más protagonismo.
   Diseño: micrófono Shure 55 de oro viejo colgado de la bóveda, foco en él
   ([`docs/specs/2026-10-10-micro-colgado-design.md`](../../../docs/specs/2026-10-10-micro-colgado-design.md)).
+  Resuelto en [15 Micrófono colgado](15-micro-colgado.md). Falta la v5 en las transiciones: [17](17-transiciones-micro-v5.md).

@@ -112,3 +112,7 @@ detalle que hierve. Los loops de cada espacio se hacen así:
 - La nave queda con bancas de verdad, muros de tezontle, capillas (Cristo negro, urna con santo yacente, candelero
   de veladoras rojas), Vía Crucis en los pilares y rayo de luna por un ventanal alto. Peso: 417 KB por 5 s a 1080p.
 - Pendiente para el 08 (hero → nave): la transición llega a la pose de reposo = la placa; empalmar ahí.
+
+> Revisado 2026-10-10 ([15](15-micro-colgado.md)): el humo ya no va en un loop propio de 60 cuadros fundido de punta a
+> punta (cada cuadro mezclaba dos momentos y se repetía cada 2.5 s); pasa por el periodo completo del loop
+> (`tmp/micro/largo/montar_largo.sh`). El usuario lo prefirió. Lo demás del método sigue igual.

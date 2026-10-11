@@ -40,3 +40,6 @@ El usuario vio un salto al llegar a la sacristía. Tres causas, corregidas y med
 Unión transición → loop: 0.87 / 1.5, al nivel del ruido entre dos encodes.
 
 > Nota (2026-10-04): el ticket 04 bajó los loops a 5 s (140 cuadros a 1280×704); la costura de 20 cuadros se mantiene.
+
+> Revisado 2026-10-10 ([15](15-micro-colgado.md)): los loops volvieron a 10 s (240 + 20 de fundido, H3 nativo a 928×512);
+> lo de "10 s → 5 s por el 04" ya no vale para la nave. Resto del santuario: [16](16-loops-de-10s.md).

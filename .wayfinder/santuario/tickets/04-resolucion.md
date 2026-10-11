@@ -37,3 +37,7 @@ a 704 en 12 GB; el usuario vio el loop de 5 s y lo aceptó. Las mitades de trans
 FlashVSR queda fuera (inventa detalle y tiembla al doble). Vertical: lo resuelve el 06 con el mismo método.
 
 Al verlo salió otro defecto, no de resolución: el tololoche se lee como "una guitarra gigante" → ticket 12.
+
+> Revisado 2026-10-10 ([15](15-micro-colgado.md)): el loop de 10 s **sí cabe** en 12 GB con H3 nativo a 928×512
+> (260 cuadros, cuadros × MP ≈ 127) + RTX ×2; el usuario lo eligió para la nave de escritorio. 1280×704 + RTX ×1.5 sigue
+> para los loops de 5 s y las transiciones. Si 10 s se extiende a todo: [16](16-loops-de-10s.md).

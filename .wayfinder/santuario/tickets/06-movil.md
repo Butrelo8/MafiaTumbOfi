@@ -86,3 +86,7 @@ requinto también se para en el remate: se lee como una caja de 1 m balanceada e
 - Placas (`klein_pila.sh`): escritorio sin referencia, **s22** (casi idéntica a r6 salvo la pila); vertical con la s22 como
   referencia en lienzo alto, **s33** (coincide con la maqueta). `placas_pila.jpg`, `zoom_pc3.jpg`, `hoja_pila3_h.jpg`, `hoja_pc3.jpg`.
 - Antes de H3 el usuario pidió **más props y gente** en las bancas vacías (siguiente sesión, ver handoff 2026-10-05).
+
+> Nota (2026-10-10, [15](15-micro-colgado.md)): la vertical queda sin el micro colgado. Va con la misma cadena del 15
+> (`MOVIL["micro"]`: foco u 0.35, v 0.24; Klein redibuja la vertical 25–47 px, así que pegar y refinar con máscara, no
+> flujo; rosa desde Blender con la cámara vertical). El largo del loop vertical lo decidió el [16](16-loops-de-10s.md): 10 s, H3 a 512×928, sólo lo que se mueve.
