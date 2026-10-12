@@ -51,12 +51,15 @@ credentials private; variables intended for the browser must be explicitly
 prefixed `PUBLIC_`.
 
 <!-- mpaf:animacion-blender:start -->
-Blender: para movimiento humano realista (Mixamo → Blender → ffmpeg), carga la skill `blender`.
+Blender: for realistic human movement (Mixamo → Blender → ffmpeg), load the skill `blender`.
+Do not call the `*_for_cli` tools of the `blender` MCP: from Claude Code they hang until killed at 120 s
+(/home/black/projects/visual-lab/blender/lab/headless-for-cli-tools/). For a saved .blend, without the UI:
+`/mnt/e/Blender/blender.exe -b "$(wslpath -w file.blend)" --python script.py`.
 <!-- mpaf:animacion-blender:end -->
 
 <!-- mpaf:deploy-cloudflare:start -->
-Cloudflare: antes de tocar `wrangler.*` o código de Workers, usa las skills `cloudflare:*` (wrangler,
-workers-best-practices) y el MCP `cloudflare-docs` en vez de escribir la config de memoria.
+Cloudflare: before touching `wrangler.*` or Workers code, use the `cloudflare:*` skills (wrangler,
+workers-best-practices) and the `cloudflare-docs` MCP instead of writing the config from memory.
 <!-- mpaf:deploy-cloudflare:end -->
 
 ## Research and methods
@@ -72,7 +75,24 @@ here, nor do their settings, skills or MCP servers. Quick visit (a few edits the
 first and follow it. Real work in that repo: start a new session in its folder.
 
 <!-- mpaf:edicion-resolve:start -->
-DaVinci Resolve: antes de usar el MCP `resolve`, el humano arranca CursorBridge en Resolve (Workspace → Scripts).
-Técnica, límites de la API y helpers (`prep_clip.sh`, `luts.sh`, `parallax.py`): /home/black/projects/visual-lab/resolve/CLAUDE.md.
-Iniciar render o borrar media/timelines/proyectos = pedir permiso por acción.
+DaVinci Resolve: before using the `resolve` MCP, the user starts CursorBridge in Resolve (Workspace → Scripts).
+Technique, API limits and helpers (`prep_clip.sh`, `luts.sh`, `parallax.py`): /home/black/projects/visual-lab/resolve/CLAUDE.md.
+Starting a render or deleting media/timelines/projects = ask permission for each action.
+Generated clips (ComfyUI, Blender): before importing, read the `Deliver:` line of the technique in
+/home/black/projects/visual-lab/STATUS.md (size, fps, loop, how it enters at 24p). Prep:
+`prep_clip.sh in out [W H FPS]` (default 1920 1080 24); it refuses if the clip has more fps than FPS: a 48 fps loop
+enters at 24p as a half-speed variant (`RETIME=1`), never with `fps=24`, which drops every other frame.
+i2v clips: trim 2 frames from the start of each one when joining them (avoids a 2–3 frame freeze).
 <!-- mpaf:edicion-resolve:end -->
+
+<!-- mpaf:animacion-rive:start -->
+Rive: to animate characters or interactive UI, load the skill `rive`. `rive-mcp` is the default MCP;
+`rive` (official) only connects when the desktop editor is open.
+<!-- mpaf:animacion-rive:end -->
+
+<!-- mpaf:produccion-visual:start -->
+Visual production: `director` for shots, script and notes on a cut; `frameref` (user skill) for the look
+of each shot; `comfy-local` (user skill) to generate, never the generate/run tools of the comfy MCP.
+ComfyUI methods (transitions, loops with a fixed plate): /home/black/projects/visual-lab/comfyui/playbooks.md.
+Blender: `blender` skill (+ `kiln-prop` for props). Do not call the `*_for_cli` tools of the `blender` MCP: they hang.
+<!-- mpaf:produccion-visual:end -->
