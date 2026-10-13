@@ -42,6 +42,18 @@ en la propuesta de abajo):
   al tocador, el cuerpo en el asiento de tule y el cuello en el respaldo, a la luz de las velas. Placa:
   `tmp/07/e3/out/e3_vestidor_silla_s11_00001_.png`; prompt `prompts/07-guion-espacios/e3_vestidor_silla.txt`. El muro
   blanco del vestidor todavía aclara el hueco (luma media 47): lo baja la placa real (Klein 4 MP + tono NR).
+- **Verticales (E4), primer intento rechazado por el usuario (2026-10-13 05:20):** "pixeleado donde Klein rellenó",
+  la cripta "se ve horrible", el teléfono no se lee, la guitarra se ve rota; el atrio, el menos malo. Causa, medida en
+  `tmp/07/e4/lado_*.jpg` y `detalle_*.jpg`: **la cámara vertical de `espacios07.py` (28 mm, más atrás, shift −0.25) es
+  demasiado abierta**: todo sale a ~40–50 % del tamaño de escritorio (el teléfono en ~25 px) y el 53–56 % del cuadro cae
+  fuera de lo que vio la placa de escritorio, así que lo inventa Klein. Además, Klein con una sola imagen vertical
+  **reencuadra** (base y pase: bajó el contenido 150–300 px y lo escaló): la correlación de fase de `pegar_huecos.py`
+  no lo alinea (respuesta 0.05); `tmp/07/e4/pegar_alineado.py` (SIFT + RANSAC, semejanza) sí. Las placas de escritorio
+  sí coinciden con su maqueta (superpuestas al 50 %). Siguiente: cámara vertical medida, con lente más larga desde la
+  posición de escritorio, el sujeto arriba y entero dentro del cuadro de escritorio (prueba gris → gris de
+  `reproyectar.py`, que imprime `fuera del cuadro`), un tablero de 2–3 encuadres para que el usuario elija; la banda de
+  abajo (el hueco vertical, que el escritorio nunca vio) como extensión oscura y no con Klein; si pide contenido real,
+  el método de dos imágenes del 17 (maqueta + placa aprobada como referencia, `prompts/17-transiciones-micro-v5/sac17.txt`).
 - **El atrio elegido todavía no deja limpia la esquina** (`tmp/07/tablero/atrio_C2_lobo_hueco.jpg`: luma media 24 en
   el hueco contra 46 en el cuadro): el poste, el muro que alumbra el sodio y el canto izquierdo del portal caen dentro.
   En la placa de producción el poste se mueve a la derecha del portal o el muro bajo la lámpara cae a negro, para que
