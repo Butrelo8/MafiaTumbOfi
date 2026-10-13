@@ -88,3 +88,23 @@ Decidido por el usuario el 2026-10-11 (cerrado a su pedido; el último montaje v
   aplique en la mitad de la sacristía de la ida (corrimientos de cuadro a cuadro, detrás de los oclusores) y funde los
   últimos 12 cuadros hacia los últimos del loop corridos con la cámara: el último cuadro de la ida = cuadro 0 del loop.
   Costura del loop 0.68; ida AV1 225 KB / HEVC 438 / H.264 923, vuelta AV1 234; loop H.264 490 KB.
+
+## Sacristía, vertical (paso 2, 2026-10-13)
+- **Primer intento rechazado** (`tmp/sac10/vert/`, el usuario 14:53: "no es la misma que la horizontal"): salía de la
+  placa propia de la ida vertical (`movil-06/ctl/first06d_B.png`), otro cuarto: otro santo, lámpara chica a la derecha,
+  sin aplique, cómoda al fondo con piso. Regenerar con la cámara vertical tampoco da el mismo cuarto: esa cámara
+  (`MOVIL` en `blender/transicion.py`: 28 mm, `shift_y` −0.25, x final 45.4 contra 44.5) ve 0.9 m más a la derecha y
+  mucho piso que el escritorio nunca vio, así que Klein/H3 lo inventarían otra vez.
+- **Rehecho sin GPU** (`tmp/sac10/vert2/armar.sh`): la vertical es un **recorte 9:16 del maestro de escritorio**
+  (x 1020, ancho 900 de 1920, a 704 de ancho; encuadre **C**, elegido por el usuario entre B/M/C), con la banda oscura
+  de `07/e4/encuadre/verticales.py` abajo (34 %, el hueco de abajo de la vertical) calculada por cuadro
+  (`reencuadre.py`). Mismos pixeles, placa s3, aplique, cuadro, lámpara, tocadiscos y lo que se mueve. El cuadro queda
+  cortado arriba, como en escritorio.
+- **Ida:** la mitad de la nave de G7 tal cual (cuadros 0–29, dif 0.0 contra la aprobada) y desde el 30 la ida de escritorio
+  recortada igual; los dos están negros ahí (jambaje: vertical 26–30, ventana de escritorio 29–35), así que sigue en
+  60 cuadros. El negro de la nave vertical (luma 3.9) baja al del escritorio (0.6) en 6 cuadros (`pegar_ida.py`; el
+  blend de ffmpeg cambiaba de formato y dejaba el empalme en 1.1). El negro dura ~10 cuadros (antes 5) y el jambaje
+  destapa la ventana en 3 (37–39). Grano de la banda con semilla por cuadro (`DESFASE=-59` en la ida) → último cuadro
+  de la ida = cuadro 0 del loop: **revisar end 0.0** (maestro), 1.0 en H.264/AV1/HEVC; loop **seam 0.51**, crawl 0.02,
+  flicker 0.08. Loop H.264 177 KB; ida AV1 82 KB / HEVC 165 / H.264 317, vuelta AV1 80 / H.264 305.
+- La halación es la del escritorio (radio de 1920 escalado ×0.78), algo más ancha que la de la nave vertical a 704.

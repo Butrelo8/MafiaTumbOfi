@@ -6,11 +6,12 @@ escritorio/ida-h264.mp4	60	923	f2a72aa50f766bdc	tmp/sac10/esc/cod/ida_h264_crf23
 escritorio/vuelta-av1.mp4	60	234	767811157f084976	tmp/sac10/esc/cod/vuelta_av1_crf40.mp4
 escritorio/sacristia.mp4	240	490	25f76e34c49dcbfb	tmp/sac10/esc/sac_esc.mp4
 vertical/nave.mp4	240	195	66960f83e0b0644f	tmp/g6/vert/nave_g6_vert.mp4
-vertical/ida-av1.mp4	60	105	706b9dab1aed6ef7	tmp/g7/vert/cod/ida_av1_crf40.mp4
-vertical/ida-hevc.mp4	60	207	b662a71d428ab0d1	tmp/g7/vert/cod/ida_hevc_crf26.mp4
-vertical/ida-h264.mp4	60	374	c0b6ab6dd0d23a2a	tmp/g7/vert/ida/ida_micro.mp4
-vertical/vuelta-h264.mp4	60	364	677009088a9094ef	tmp/g7/vert/ida/vuelta_micro.mp4
-vertical/sacristia-5s.mp4	120	150	2f11d545dcfe45af	tmp/movil-06/web/sacristia.mp4
+vertical/ida-av1.mp4	60	82	80aecb6cee40d000	tmp/sac10/vert2/cod/ida_av1_crf40.mp4
+vertical/ida-hevc.mp4	60	164	ae49b47ac1bf544a	tmp/sac10/vert2/cod/ida_hevc_crf26.mp4
+vertical/ida-h264.mp4	60	317	04f7e76a94180b6b	tmp/sac10/vert2/cod/ida_h264_crf23.mp4
+vertical/vuelta-av1.mp4	60	79	b6379cee79d2e2c1	tmp/sac10/vert2/cod/vuelta_av1_crf40.mp4
+vertical/vuelta-h264.mp4	60	304	b9645fd47a066149	tmp/sac10/vert2/cod/vuelta_h264_crf23.mp4
+vertical/sacristia.mp4	240	176	371622dfb4c4cf2f	tmp/sac10/vert2/sac_vert.mp4
 escritorio/grupo-ida-provisional-h264.mp4	185	3592	34495db3d0d57e00	tmp/07/e6prov/grupo-ida-provisional-h264.mp4
 placas/sacristia-esc-s11.png	1	2668	436dc8af5f324fa7	tmp/micro/trans_esc/klein/sac17_s11_00001_.png
 placas/sacristia-esc-real-s3-aplique.png	1	2408	e2fb022d2450841f	tmp/sac10/esc/real_s3_aplique.png
@@ -44,6 +45,7 @@ placas/nave-esc-g6-copal-real.png	1	3025	84aa0905ae83e092	tmp/g6/copal/nave_g6_e
 placas/nave-esc-g6-copal-klein.png	1	3007	949b97a696ad6e5c	tmp/g6/copal/nave_g6_esc_klein_copal.png
 maestros/esc-ida.mkv	60	51670	5fbc7678e52c1fab	tmp/sac10/esc/ida_empalme.mkv
 maestros/esc-sacristia.mkv	240	196561	1fb2b262e020a0f8	tmp/sac10/esc/maestro_sac_esc.mkv
-maestros/vert-ida.mkv	60	13954	f497c5516eaa4209	tmp/g7/vert/ida/ida_master.mkv
+maestros/vert-ida.mkv	60	21741	8040b01e0c4970ab	tmp/sac10/vert2/ida_master.mkv
+maestros/vert-sacristia.mkv	240	159091	aa99dbe8120f2d50	tmp/sac10/vert2/maestro_sac_vert.mkv
 maestros/esc-nave.mkv	240	134105	6ecd8f7d909b5106	tmp/g6/esc/maestro_nave_esc.mkv
 maestros/vert-nave.mkv	240	79494	a4b7d8d4991f31f8	tmp/g6/vert/maestro_nave_vert.mkv

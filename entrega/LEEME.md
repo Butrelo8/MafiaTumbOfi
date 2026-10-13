@@ -33,3 +33,8 @@ pila** (camino B: G2–G7 lo reemplazan con los mismos nombres). `maestros/` no 
   polvo en la luz, la lámpara de mesa (±9 %), el aplique (±4 %) y el neón; sin H3, ciclos enteros en 240. La ida de
   escritorio (`ida-*`, `vuelta-av1`) es la de G7 con el aplique pegado en su mitad de la sacristía y los últimos 12 cuadros
   fundidos al loop: su último cuadro es el cuadro 0 del loop. Cadena `tmp/sac10/esc/armar.sh` + `tmp/sac10/empalme.py`.
+- **Sacristía, vertical (paso 2, 2026-10-13):** `vertical/sacristia.mp4` es un recorte 9:16 del loop de escritorio
+  (x 1020, ancho 900 de 1920, a 704×1280) con una banda oscura abajo (34 %): el mismo cuarto y el mismo movimiento. La
+  ida vertical (`ida-*`, `vuelta-*`) es la nave de G7 hasta el cuadro 29 y la sacristía de escritorio recortada igual
+  desde el 30 (negro del jambaje en las dos); su último cuadro es el cuadro 0 del loop. Sustituye a `sacristia-5s.mp4`.
+  Cadena `tmp/sac10/vert2/armar.sh`; ticket 16.
