@@ -149,6 +149,16 @@ en la propuesta de abajo):
   candles", otra semilla) o titileo procedural de las llamas sobre la placa sin GPU (`velas240.py` del 16).
   Ojo: con `--ref` a 1696 px (la placa nativa) `revisar.sh` da nitidez 0.36–0.38 aun con la placa quieta como video;
   comparar contra la placa escalada al tamaño del clip (`vestidor/placa_vestidor_1920.png`).
+  **Ruta (b), vibeship 15:29:** todas las llamas (vestidor, cripta, candelabro del atrio) con titileo procedural sobre
+  la placa, sin GPU; H3 sólo para humo/neblina (haz de la cripta primero, `end_percent` 1.0; si redibuja geometría,
+  alto y proponer polvo procedural). **Vestidor escritorio, procedural (15:36):** `tmp/07/e5/velas_e5.py` (la fórmula
+  de `velas240.py` con RAPIDO; además la llama y su reflejo en la cómoda comparten fase y cada parte tiene su radio:
+  arbotantes 60 px, veladoras 22) con `vestidor/velas_esc.json`. Tres amplitudes (0.10 / 0.16 / 0.24,
+  `variantes_amp_esc.mp4`); **0.16**, la de las velas aprobadas del 13/16. Medido: costura 239→0 dentro del paso normal
+  (arbotantes 0.92 y 0.73 contra pasos de mediana 0.53–0.61), fuera de las cajas la placa salvo ≤ 5 niveles de halo en
+  el muro junto a los arbotantes; `revisar.sh` video: costura 0.01, crawl/flicker 0.00, nitidez 1.00; cuadro 100 con
+  máscara: 0 regiones cambiadas, color dE 0.01, halo 0 % (el `mask-notch` 11.6 % es la forma de la máscara, igual con
+  cualquier cuadro). Loop `vestidor/loop/loop_esc.mkv` (240), revisión `revision_esc.mp4`. Espera el OK del usuario.
 
 ## Propuesta (2026-10-13)
 Vuelve en la versión 1 a pedido del usuario. Tres opciones por espacio, cada una con dos fotogramas de referencia,
