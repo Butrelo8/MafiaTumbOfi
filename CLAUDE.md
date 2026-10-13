@@ -109,4 +109,9 @@ Visual production: `director` for shots, script and notes on a cut; `frameref` (
 of each shot; `comfy-local` (user skill) to generate, never the generate/run tools of the comfy MCP.
 ComfyUI methods (transitions, loops with a fixed plate): /home/black/projects/visual-lab/comfyui/playbooks.md.
 Blender: `blender` skill (+ `kiln-prop` for props). Do not call the `*_for_cli` tools of the `blender` MCP: they hang.
+Methods come from the Routing table of /home/black/projects/visual-lab/CLAUDE.md. Call the scripts in
+/home/black/projects/visual-lab/scripts, never copy them.
+Findings go to: general method -> visual-lab (report `gotchas:` lines, they land in its gotchas-inbox.md);
+site-specific notes -> this repo's `docs/`. Every discovery goes in the report as a `gotchas:` line
+(`symptom -> what worked`, one per line).
 <!-- mpaf:produccion-visual:end -->
