@@ -158,7 +158,20 @@ en la propuesta de abajo):
   (arbotantes 0.92 y 0.73 contra pasos de mediana 0.53–0.61), fuera de las cajas la placa salvo ≤ 5 niveles de halo en
   el muro junto a los arbotantes; `revisar.sh` video: costura 0.01, crawl/flicker 0.00, nitidez 1.00; cuadro 100 con
   máscara: 0 regiones cambiadas, color dE 0.01, halo 0 % (el `mask-notch` 11.6 % es la forma de la máscara, igual con
-  cualquier cuadro). Loop `vestidor/loop/loop_esc.mkv` (240), revisión `revision_esc.mp4`. Espera el OK del usuario.
+  cualquier cuadro). Loop `vestidor/loop/loop_esc.mkv` (240), revisión `revision_esc.mp4`. **OK del usuario (15:38,
+  amplitud 0.16).** Vestidor vertical igual (`velas_movil.json`): costura 0.03, crawl/flicker 0.00, nitidez 1.00.
+  - **Cripta (16:20).** Llamas procedurales (`velas_<f>.json`, dos veladoras). Haz: el H3 de prueba (`FIN=1.0`, 1073 s,
+    nuevo `FIN` en `loop-vivo.sh h3`) **no redibuja la piedra** (alineación 0 px, escala 0.999 entre los cuadros 0, 130 y
+    259), pero no da polvo: el haz se ensancha y, con "sólo lo que se mueve", suma un segundo haz que deriva al lado
+    del de la placa (+2.7 niveles de media, p99 20). Contra el polvo procedural de `polvo240.py` (`techo` 0.55;
+    `haz_variantes_esc.mp4`): **el usuario eligió polvo 260** (16:15). Vertical: el encuadre es ~3× más cerrado, así
+    que `polvo240.py` lleva un `K` nuevo (escala de tamaño; por omisión W/1712): con `K=1.2` y 260 motas la energía de
+    motas (pasa-altos en la máscara) da 0.51 contra 0.50 del escritorio; el calibrado de la nave vertical (90) da 0.37
+    (`haz_variantes_movil.mp4`). Derrame fuera de la máscara: 0.07 % / 0.24 % de píxeles > 3 niveles, en el borde del
+    altar (escritorio) y en la piedra junto a la reja (vertical). revisar: costura 0.01 / 0.05, crawl 0.00, flicker
+    ≤ 0.01, nitidez 1.00 / 1.01. Loops `cripta/loop/loop_{esc,movil}.mkv`; el compuesto H3 queda en `loop_esc_h3.mkv`.
+  - Tras un H3, ComfyUI se queda con ~3.5 GB de VRAM y la puerta (< 4000 MiB) no abre: `POST /free`
+    `{"unload_models":true,"free_memory":true}` entre trabajos (ya va al final de cada lanzamiento).
 
 ## Propuesta (2026-10-13)
 Vuelve en la versión 1 a pedido del usuario. Tres opciones por espacio, cada una con dos fotogramas de referencia,
