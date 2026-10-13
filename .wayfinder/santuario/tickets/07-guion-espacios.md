@@ -78,6 +78,10 @@ en la propuesta de abajo):
   cuartos en los bordes, y la cripta llega más fría y sus velas suben hasta ~176. Veredicto: **E6 provisional (0–184,
   sin audio); el final por H3** con oclusor de máscara, salvo que el usuario lo acepte al verlo a velocidad
   (`tmp/07/tablero/flow_job1_vs_job2.{jpg,mp4}`, `tmp/07/flow/job2/veredicto.md`).
+  **Upscale 1080p de Flow (job2):** no mueve los extremos (0 px) ni cambia el color (< 1 nivel), pero sobreafila: el
+  laplaciano queda en 2.3–2.5× el de las placas, inventa relieve en el yeso y el tezontle, deja halo en el teléfono, y
+  la textura se arrastra 1.8× más que en el 720p + lanczos. Al empalmar con los loops de E5 se notaría el salto de
+  textura: fundir ~8–12 cuadros con la placa en cada extremo o suavizarlo (`tmp/07/flow/upscale_job2.md`).
 - **El atrio elegido todavía no deja limpia la esquina** (`tmp/07/tablero/atrio_C2_lobo_hueco.jpg`: luma media 24 en
   el hueco contra 46 en el cuadro): el poste, el muro que alumbra el sodio y el canto izquierdo del portal caen dentro.
   En la placa de producción el poste se mueve a la derecha del portal o el muro bajo la lámpara cae a negro, para que
