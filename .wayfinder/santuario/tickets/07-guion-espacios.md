@@ -82,6 +82,24 @@ en la propuesta de abajo):
   laplaciano queda en 2.3–2.5× el de las placas, inventa relieve en el yeso y el tezontle, deja halo en el teléfono, y
   la textura se arrastra 1.8× más que en el 720p + lanczos. Al empalmar con los loops de E5 se notaría el salto de
   textura: fundir ~8–12 cuadros con la placa en cada extremo o suavizarlo (`tmp/07/flow/upscale_job2.md`).
+- **E6 provisional = Flow job2 (decisión de meltingship, delegada por el usuario, 2026-10-13 06:17).** Es el 720p
+  original (no el upscale de Flow), cuadros 0–184, sin audio, llevado a 1920×1080 con nuestro paso RTX
+  (`scripts/loop-vivo.sh rtx`, ×1.5 por medir 1280 de ancho), y está en `entrega/escritorio/grupo-ida-provisional-h264.mp4`.
+  **Por qué:** los extremos son las placas aprobadas (cuadro 0 = camarín, 184 = cripta), no hay morph, la cámara es
+  lateral y creíble, y salió a la segunda generación en Flow (40 créditos en total). Mientras tanto, la sección queda con
+  una transición que sí lleva de un espacio al otro.
+  **Defectos que se aceptan por ahora:** nunca llega a negro (como máximo 86 % del cuadro oscuro), los dos cuartos se ven
+  en los bordes en 82–85 y la cripta llega más fría con sus velas subiendo hasta ~176.
+  **No está en la web:** `src/data/santuario.ts` tiene `ida` por espacio, pero «El grupo» y «Contratación» están en
+  negro (aún no hay loops) y el reproductor espera que cada ida traiga los 20 cuadros crudos del loop al principio
+  (`COSTURA` en `src/lib/montarSantuario.ts`). Conectarla pide loops o quietas de los dos espacios y es otra decisión.
+  No hay vertical: Flow dio 16:9; la vertical cruza por negro.
+  **Lo que pide el E6 final (H3, en su turno de GPU):**
+  - el oclusor como máscara: la puerta del ropero o tela animada en la maqueta, presente en el control de
+    profundidad y en la máscara, que tape ≥ 90 % del cuadro durante ~5–6 cuadros, con el empalme por `maskedmerge`;
+  - la geografía del plan 1 (la puerta del ropero y bajar la escalera);
+  - los extremos exactos con los loops de E5 de camarín y cripta, incluidos sus 20 cuadros crudos;
+  - su vertical con las cámaras de E4.
 - **El atrio elegido todavía no deja limpia la esquina** (`tmp/07/tablero/atrio_C2_lobo_hueco.jpg`: luma media 24 en
   el hueco contra 46 en el cuadro): el poste, el muro que alumbra el sodio y el canto izquierdo del portal caen dentro.
   En la placa de producción el poste se mueve a la derecha del portal o el muro bajo la lámpara cae a negro, para que

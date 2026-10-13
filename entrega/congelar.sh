@@ -22,6 +22,7 @@ vertical/ida-hevc.mp4          $V/cod/ida_hevc_crf26.mp4
 vertical/ida-h264.mp4          $V/ida_micro.mp4
 vertical/vuelta-h264.mp4       $V/vuelta_micro.mp4
 vertical/sacristia-5s.mp4      $T/movil-06/web/sacristia.mp4
+escritorio/grupo-ida-provisional-h264.mp4  $T/07/e6prov/grupo-ida-provisional-h264.mp4
 placas/sacristia-esc-s11.png   $T/micro/trans_esc/klein/sac17_s11_00001_.png
 placas/nave-esc-micro.png      $T/micro/g5/placa_micro_tallo.png
 placas/nave-vert-micro-s4.png  $T/micro/movil/placa_micro_vb_s4_suj.png

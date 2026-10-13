@@ -20,3 +20,8 @@ pila** (camino B: G2–G7 lo reemplazan con los mismos nombres). `maestros/` no 
 - **Tallo y rosa (2026-10-13, después de G6):** los dos loops se rehicieron con el tallo de espinas enrollado en el cable
   y la luz C (igualada al micro de oro): `placas/nave-esc-micro.png` es ya `g5/placa_micro_tallo.png`, con sus máscaras,
   la vertical y las disparidades en `placas/*-tallo*`. Mismo fondo y mismo H3 que G6; costura igual (0.75 / 0.51).
+- **PROVISIONAL — E6, camarín → cripta (2026-10-13):** `escritorio/grupo-ida-provisional-h264.mp4` es Google Flow
+  job2 (Veo 3.1 Fast): cuadros 0–184, sin audio, 1280×720 llevado a 1920×1080 con el paso RTX de los loops (×1.5).
+  Sus extremos son las placas aprobadas del camarín y de la cripta. **Todavía no está en la web**: «El grupo» y
+  «Contratación» siguen en negro y la ida no trae los 20 cuadros crudos del loop. El final se hace con H3 y oclusor de
+  máscara y reemplaza este archivo (ticket 07).
