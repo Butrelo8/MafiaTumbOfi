@@ -32,6 +32,13 @@ en la propuesta de abajo):
   no de placa. Corregir el muro verde menta del vestidor a cal/almagre en el prompt; modelar la guitarra y el
   teléfono en Blender con su silueta real (lección del 12); la troca con un asset o la maqueta `troca2` mejorada,
   nunca la caja del primer tablero. Prompts: `prompts/07-guion-espacios/`.
+- **Placas de escritorio (E3, 2026-10-13).** Tres semillas por espacio desde las maquetas de producción de
+  `blender/espacios07.py` (`tmp/07/tablero/tablero_e3.jpg`, el hueco medido en luma media): el usuario eligió
+  **cripta s22** (hueco 10.5, el haz cae entero sobre el teléfono), **atrio s22** (esquina 22.5, la más oscura) y
+  **vestidor s11** (hueco 42.5), éste con una corrección: la guitarra recargada en el tocador queda en una postura
+  imposible. Se prueban dos soportes en la maqueta (`SOPORTE=atril|gancho`): un atril de piso entre el tocador y el
+  rincón, o colgada de un gancho entre el espejo y el ropero, con la misma semilla. El muro blanco del vestidor todavía
+  aclara el hueco: lo baja la placa real (Klein 4 MP + tono NR).
 - **El atrio elegido todavía no deja limpia la esquina** (`tmp/07/tablero/atrio_C2_lobo_hueco.jpg`: luma media 24 en
   el hueco contra 46 en el cuadro): el poste, el muro que alumbra el sodio y el canto izquierdo del portal caen dentro.
   En la placa de producción el poste se mueve a la derecha del portal o el muro bajo la lámpara cae a negro, para que
