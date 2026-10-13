@@ -16,7 +16,7 @@ Cómo está montado el santuario en `src/` y qué falta para cambiar los provisi
 
 | Archivo en `public/video/` | Origen | Falta |
 |---|---|---|
-| `escritorio/nave.mp4`, `vertical/nave.mp4` | `entrega/*/nave.mp4` | G6; AV1 y HEVC (paso 4) |
+| `escritorio/nave.mp4`, `vertical/nave.mp4` | `entrega/*/nave.mp4` | AV1 y HEVC (paso 4) |
 | `escritorio/ida-{av1,hevc,h264}.mp4`, `vertical/ida-*` | `entrega/*/ida-*` | G7 |
 | `escritorio/vuelta-av1.mp4` | `entrega/escritorio/` | HEVC y H.264 (paso 4). Sin ellas, Safari sin AV1 cruza por negro |
 | `vertical/vuelta-{av1,h264}.mp4` | `entrega/vertical/` | HEVC (paso 4) |
