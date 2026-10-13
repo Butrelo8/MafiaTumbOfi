@@ -28,6 +28,7 @@ placas/nave-vert-micro-s4.png  $T/micro/movil/placa_micro_vb_s4_suj.png
 placas/nave-esc-s44.png        $T/props-06/klein/nave13props_p4_s44_00001_.png
 placas/nave-esc-s44-vacia.png  $T/props-06/s44_vacia.png
 placas/nave-vert-s33-vacia.png $T/props-06/klein/s33_vacia_s7_00001_.png
+placas/nave-esc-g2.png         $T/props-06/nave_g2.png
 maestros/esc-ida.mkv           $H/ida_master_mezcla.mkv
 maestros/vert-ida.mkv          $V/cod/ida_master.mkv
 "

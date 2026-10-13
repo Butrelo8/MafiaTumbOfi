@@ -227,3 +227,18 @@ Disposición (`disposicion.py`, `hoja_disp_esc.png`, `hoja_disp_vert.png`, verde
   del hueco del texto de D, cerca del borde de arriba de la esquina del titular) y texana en el **remate de la 4.ª banca
   izquierda, x −1.2**. `PROPS` ya movido en `blender/transicion.py`. Hojas: `medir_libre.py` rehecho sin cambios
   (17 sitios, los mismos) y la proyección de los sitios sobre s44 y la reproyección vertical.
+- **G2, placa de escritorio con gente (2026-10-13), elegida por el usuario: `tmp/props-06/nave_g2.png`**
+  (= `entrega/placas/nave-esc-g2.png`). Referencia: el joven y la texana de s44 (sudadera gris, gorra negra, de espaldas;
+  sudadera L* p50 20.8); cambia sólo el sitio. Cadena: `devolver.py` (mujer del velo y fiel de s44 sobre `s44_vacia.png`:
+  s44_vacia sólo difiere dentro de `siluetas.png`) → `pases_reproy.py` y `-- vacio` con los `PROPS` nuevos (cámaras
+  iguales; las Z anteriores quedan como `z_*_g0.png`) → `guia_g2.py` (silueta = Z con gente más cerca que la vacía, en
+  gris sobre la base, recorte de 384 px) → `klein_g2.sh` (Klein a 1.56 MP sobre el recorte, 3 semillas por ronda) →
+  `pegar_g2.py` → `bajar_g2.py`. Rondas: "light grey" salió casi blanco (L* 44–49, 2.3× s44); "charcoal" 9–12 y con
+  la sudadera partida en luz y sombra en dos semillas; "mid grey" 30 → **c_s11 bajada en luz lineal a L* 21** (ganancia
+  0.53, sólo el joven). BVH: joven sólo toca su asiento, texana su remate y respaldo.
+  - El usuario vio que c_s11 y c_s22 perdían un trozo de hombro: la máscara de pegado era la silueta de la maqueta
+    dilatada 9 px y Klein dibuja la figura más ancha. `pegar_g2.py` suma lo que Klein cambió (> 18) a ≤ 41 px de la
+    silueta, **sólo donde la escena vacía queda detrás del joven** (si no, Klein le pinta el cuerpo encima del respaldo de
+    la banca de delante); las siluetas del joven y la texana se tocan y se separan por Otsu sobre la Z; junto a la
+    texana, lo que Klein no pinta más oscuro que la base sobre el respaldo vuelve a la base.
+  - Siguiente: G3, vertical por reproyección desde `nave_g2.png`.
