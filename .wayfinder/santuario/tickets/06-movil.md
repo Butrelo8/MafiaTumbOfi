@@ -312,3 +312,18 @@ Disposición (`disposicion.py`, `hoja_disp_esc.png`, `hoja_disp_vert.png`, verde
     (A + (R' − R), para que velas240/llevar.py sigan igual). Zonas: brasas en CUMULOS (cada una titila por su lado), H3 en
     el humo y la llama de la veladora; prompt `h3_g6_esc_c.txt`. Salida `tmp/g6/esc/nave_g6_esc_c.mp4`, 557 KB, costura
     0.75 (el humo espeso se mueve más). Maestros ffv1 `tmp/g6/{esc,vert}/maestro_nave_*.mkv`; todo congelado en `entrega/`.
+- **Tallo de espinas y rosa del micro rehechos (2026-10-13, después de G6), luz aprobada por el usuario.** Todo en
+  `tmp/micro/tallo/`; congelado como `tmp/micro/g5/placa_micro_tallo.png` + `mascara_micro_tallo.png` (no pisa
+  `placa_micro_rosa.png`, que siguen usando `reconstruir.sh` y `trasplantar.py`).
+  - Geometría por código (`tallo2.py 2.5`): hélice en contacto con el cable (radio cable 3 px / conector 5.5 + tallo 4.5),
+    media vuelta de atrás tapada por el cable, sombra de contacto, espinas, entra a los sépalos. Klein con guía doblaba el
+    cable; una pasada "fotográfica" de Klein sobre la geometría ya correcta sí la respeta (`pegar_foto.py`, s2, ~1 px).
+  - Luz: la versión fotográfica salió rechazada ("el micrófono es más oscuro y éstos se ven sólidos"): tallo con altas
+    luces quemadas (L p99 99) y 3× más nítido que el micro, rosa con los negros aplastados (p5 0, p50 4) bajo un borde claro.
+    Referencia: el micro de oro del mismo cuadro. `tallo/luz/luz.py C`, en el dominio de salida de `micro_viva_v.py` y de
+    vuelta a la placa: curva de L* por percentiles sólo en tallo (separado del cable por croma) y rosa (destino tallo
+    3/11/26/37, rosa 2.5/8/25/36 contra el micro 0.8/11/29/41), caída de luz del micro (×0.58 a la derecha del eje, ×0.77
+    hacia abajo en la rosa), croma del muro en la sombra, σ 0.6, grano fino sólo en L* (1.4) y borde de máscara 0.8 px
+    más suave. Se presentaron A (ganancia lisa del handoff), B (nivel intermedio, sin caída) y C; el usuario eligió C.
+    El grano tomado del muro con paso alto metía el dibujo de los ladrillos en la rosa, y el ruido gris en BGR salpicaba
+    el rojo oscuro: por eso es sintético y sólo en L*. Con `ROSA_GAN=lum` en `micro_viva_v.py` (la rosa no vira a magenta).
