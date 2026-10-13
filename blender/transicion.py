@@ -38,7 +38,8 @@ MOVIL = {"lente": 28, "shift_y": -0.25, "nave_x": 0.8, "sac_fin": 45.4,  # 45.4:
 MICRO = (0.138, 3.8, 1.62)
 # Gente y ofrendas (ticket 06): asiento (x, fila i) de cada figura; la texana va en el remate de su banca. Texana y fiel
 # siguen a la placa de escritorio elegida (s44), que las puso ahí: la vertical tiene que ver lo mismo (el usuario).
-PROPS = {"senora": (1.9, 3), "joven": (2.3, 2), "texana": (-0.95, 0), "fiel": (1.6, 11)}
+# joven y texana: sitios que las dos cámaras ven enteros (tmp/props-06/medir_libre.py), elegidos el 2026-10-13 (06 v6)
+PROPS = {"senora": (1.9, 3), "joven": (-1.9, 5), "texana": (-1.2, 3), "fiel": (1.6, 11)}
 _movil = False
 
 
@@ -314,7 +315,7 @@ def props():
     p.append(bpy.context.object)
     x, i = PROPS["senora"]
     _grupo("senora", (x, 6 + 1.2 * i + 0.25, 0.46), 0, p)
-    # Joven de gorra y sudadera, de espaldas, al fondo de la iglesia (cerca de la cámara): 3.ª banca derecha (i 2), x 2.3.
+    # Joven de gorra y sudadera, de espaldas, 6.ª banca izquierda (i 5), x −1.9.
     p = [_barra("joven_torso", (0, 0, 0), (0, 0.03, 0.55), 0.18, cuerpo),
          esfera("joven_capucha", (0, -0.09, 0.53), 1, cuerpo, (0.12, 0.06, 0.07)),
          esfera("joven_cabeza", (0, 0.03, 0.68), 0.1, pelo),
@@ -328,7 +329,7 @@ def props():
     p = [_barra("fiel_torso", (0, 0, 0), (0, 0.04, 0.52), 0.16, cuerpo), esfera("fiel_cabeza", (0, 0.05, 0.64), 0.095, pelo)]
     x, i = PROPS["fiel"]
     _grupo("fiel", (x, 6 + 1.2 * i + 0.28, 0.46), 0, p)
-    # Texana negra con un rosario, dejada en el remate del respaldo de la 1.ª banca izquierda, junto al pasillo: en el asiento
+    # Texana negra con un rosario, dejada en el remate del respaldo de la 4.ª banca izquierda (x −1.2): en el asiento
     # la tapa el respaldo (desde la cámara se ve el asiento sólo arriba de z 0.87). El rosario cuelga hacia la cámara.
     x, i = PROPS["texana"]; y = 6 + 1.2 * i
     _cil("texana_ala", x, y + 0.06, 0.899, 0.912, 0.2, oscuro)

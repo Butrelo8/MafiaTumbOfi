@@ -222,3 +222,8 @@ Disposición (`disposicion.py`, `hoja_disp_esc.png`, `hoja_disp_vert.png`, verde
   el usuario el hueco del texto; luego, sobre `s44_vacia.png` (sin gente, limpio) devolver mujer y fiel de s44 y que Klein
   añada joven y texana en recortes centrados en su sitio medido; mover `PROPS` igual; reproyectar la vertical
   (`reproyectar.py`, Klein sólo en huecos con base vacía `s33_vacia_s7`).
+- **Elegido por el usuario (2026-10-13, G1 del alcance):** joven en la **6.ª banca izquierda, x −1.9** (el sitio libre
+  más cercano: sentado mide 138 px en escritorio a 1712 y 82 px en vertical, contra 212 / 126 donde estaba; queda dentro
+  del hueco del texto de D, cerca del borde de arriba de la esquina del titular) y texana en el **remate de la 4.ª banca
+  izquierda, x −1.2**. `PROPS` ya movido en `blender/transicion.py`. Hojas: `medir_libre.py` rehecho sin cambios
+  (17 sitios, los mismos) y la proyección de los sitios sobre s44 y la reproyección vertical.
