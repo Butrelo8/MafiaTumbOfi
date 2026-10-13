@@ -4,6 +4,7 @@
 > decisiones y tickets abiertos del santuario en movimiento. Se trabaja con `matt-wayfinder` (mpaf).
 
 > **Ticket 07 en producción (camarín, cripta, atrio; E1–E4): [`docs/handoffs/2026-10-13-07-produccion.md`](handoffs/2026-10-13-07-produccion.md)**
+> **Ticket 07, E5 (loops de 10 s; E4 rehecho, E6 provisional de Flow): [`docs/handoffs/2026-10-13-07-e5-loops.md`](handoffs/2026-10-13-07-e5-loops.md)**
 
 > **Más reciente: [`docs/handoffs/2026-10-13-tallo-y-rosa.md`](handoffs/2026-10-13-tallo-y-rosa.md)**
 > (G5 y G6 hechos). Después: tallo y rosa rehechos con la luz C, loops recongelados y **G7 hecho** (2026-10-13; ticket 06
