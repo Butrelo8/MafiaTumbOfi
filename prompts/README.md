@@ -54,6 +54,8 @@ con `gen.sh`, `ffmpeg` y `cp` simulados.
 | `16-loops-de-10s/h3_calmo_260.txt` | `micro/largo/` (`reconstruir_10s.sh`, `prompt_calmo.txt`) | `preset_posevideo_ff` | 7 | `12.width=928 12.height=512 12.length=260 15.steps=40 10.end_percent=0.5` |
 | `07-guion-espacios/real_{vestidor,cripta,atrio}.txt` | `07/produccion/` (`real07.sh`; esqueleto de `mto_placa_real_s2b.json`) | `preset_edit` | 2 3 | `75/80.upscale_method=lanczos 75/80.megapixels=4` |
 | `07-guion-espacios/h3_{vestidor,cripta,atrio}_{esc,movil}.txt` | `07/e5/` (`e5.sh` → `loop-vivo.sh h3`, DUR=10; esqueleto de `h3_calmo_260`) | `preset_posevideo_ff` | 7 | escritorio `12.width=928 12.height=512`, móvil `512×928`; `12.length=260 15.steps=40 10.end_percent=0.5` |
+| `07-guion-espacios/camioneta_atrio.txt` | `07/e5/charcos/coche/` (sobre `placa_atrio_limpia.png`; registrar sólo con desplazamiento) | `preset_edit` | 2 3 5 (elegida 2) | `75/80.upscale_method=lanczos 75/80.megapixels=4` |
+| `07-guion-espacios/charcos_atrio.txt` | `07/e5/charcos/klein3/` (sobre la placa con el SUV; `armar_atrio.sh`) | `preset_edit` | 3 7 (elegida 3) | `75/80.upscale_method=lanczos 75/80.megapixels=4` |
 
 ## Fuera de ComfyUI
 
