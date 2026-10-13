@@ -704,45 +704,8 @@ body.marketing-body img {
   padding-block: var(--space-section);
 }
 
-/* Estación: titular incrustado en la escena + panel opaco. El titular vive
-   entre el canvas y la capa de frente, así que las velas y las bancas le pasan
-   por delante; el panel sube por encima de todo porque ahí se lee y se toca.
-   La altura del titular (100svh) viene de [data-estacion] en AltarScene.
-   Va abajo porque ahí está lo que tapa: medido el alfa de las capas, en las
-   cuatro estaciones que la tienen lo que queda delante son bancas, la fiel y
-   velas, todo en el tercio inferior del cuadro. */
-.estacion-titular {
-  display: flex;
-  align-items: flex-end;
-  padding-bottom: var(--titular-bajo, 12svh);
-}
-
-.estacion-titular > .container {
-  padding-inline-start: var(--titular-x, 0);
-}
-
 .hero .hero-title {
   margin-bottom: 1rem;
-}
-
-.estacion-titular h2 {
-  font-family: var(--ff-display);
-  font-size: clamp(2.8rem, 8vw, 6rem);
-  font-weight: 400;
-  line-height: 1.05;
-}
-
-.estacion-titular h2 em {
-  font-style: italic;
-  font-weight: 600;
-  color: var(--gold);
-}
-
-.estacion-panel {
-  position: relative;
-  z-index: 3;
-  background: var(--bg-raised);
-  padding-block: var(--space-section);
 }
 
 .divider {
@@ -958,19 +921,6 @@ body.marketing-body img {
   color: var(--muted);
   margin-top: 0.4rem;
   display: block;
-}
-
-.bio-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.6fr;
-  gap: clamp(2rem, 6vw, 5rem);
-  align-items: start;
-}
-
-@media (max-width: 700px) {
-  .bio-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .bio-tags {
@@ -1292,21 +1242,6 @@ body.marketing-body img {
   outline-offset: 4px;
 }
 
-/* El footer es la estación 5: monograma incrustado arriba y, en el panel,
-   marca, redes y copyright. Ningún enlace detrás de una vela. */
-.footer-bar .estacion-panel {
-  padding-block: 2rem;
-  border-top: 1px solid var(--border);
-}
-
-.footer-bar .estacion-panel .container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
 .footer-monograma {
   display: flex;
   align-items: center;
@@ -1343,43 +1278,6 @@ body.marketing-body img {
   margin: 0;
 }
 
-.members-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1px;
-  border: 1px solid var(--border);
-  background: var(--border);
-  margin-top: 2.5rem;
-}
-
-.member-card {
-  background: var(--surface);
-  padding: 2rem 1.8rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  transition: background 0.2s;
-}
-
-.member-card:hover {
-  background: var(--surface2);
-}
-
-.member-role {
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--gold);
-}
-
-.member-name {
-  font-family: var(--ff-display);
-  font-size: 1.5rem;
-  font-weight: 400;
-  line-height: 1.2;
-}
-
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -1389,29 +1287,6 @@ body.marketing-body img {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* ─── Scroll reveal (replaces AOS) ───────────────────────── */
-/* Oculto sólo si el script lo marcó: sin JS las tarjetas se ven. */
-[data-reveal="oculto"] {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-[data-reveal].is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [data-reveal],
-  [data-reveal].is-visible {
-    opacity: 1;
-    transform: none;
-    transition: none;
-    animation: none;
   }
 }
 
@@ -1899,56 +1774,6 @@ body.marketing-body img {
   }
 }
 
-/* Film strip */
-.film-strip {
-  padding-block: clamp(2rem, 5vw, 3rem);
-  border-block: 1px solid var(--border);
-  background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
-}
-
-.film-strip-inner {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  justify-content: center;
-  max-width: var(--container, 72rem);
-  margin-inline: auto;
-  padding-inline: 1.25rem;
-}
-
-.film-strip-frame {
-  display: block;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: zoom-in;
-}
-
-.film-strip-frame:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 4px;
-}
-
-.film-strip-img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  box-shadow: 0 12px 40px oklch(5% 0 0 / 0.5);
-  filter: grayscale(100%) contrast(1.05);
-  transition: filter 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
-}
-
-.film-strip-frame:hover .film-strip-img {
-  filter: grayscale(0%) contrast(1);
-  transform: translateY(-4px) scale(1.02);
-  box-shadow:
-    0 20px 50px oklch(5% 0 0 / 0.7),
-    0 0 30px color-mix(in oklch, var(--red-glow) 65%, transparent);
-}
 .footer-github-link {
   color: inherit;
   text-decoration: none;
@@ -1958,51 +1783,4 @@ body.marketing-body img {
 .footer-github-link:hover,
 .footer-github-link:focus-visible {
   color: var(--red-link);
-}
-
-/* Photo lightbox — native <dialog> */
-.zoom-dialog {
-  position: fixed;
-  inset: 0;
-  margin: auto;
-  max-width: min(92vw, 1200px);
-  max-height: 92vh;
-  padding: 0;
-  border: 1px solid var(--gold-dim);
-  background: var(--bg-sunk);
-  color: var(--text);
-  overflow: visible;
-}
-
-.zoom-dialog::backdrop {
-  background: oklch(4% 0 0 / 0.88);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
-.zoom-dialog img {
-  display: block;
-  max-width: min(92vw, 1200px);
-  max-height: 92vh;
-  width: auto;
-  height: auto;
-}
-
-.zoom-dialog-close {
-  position: absolute;
-  top: 0;
-  right: 0;
-  min-width: 44px;
-  min-height: 44px;
-  font-size: 1.5rem;
-  line-height: 1;
-  color: var(--text);
-  background: oklch(4% 0 0 / 0.6);
-  border: none;
-  cursor: pointer;
-}
-
-.zoom-dialog-close:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: -4px;
 }

@@ -60,12 +60,12 @@ export function montarSantuario() {
       if (!respuesta.ok || !respuesta.body) throw new Error(`${fuente.src}: ${respuesta.status}`)
       const total = Number(respuesta.headers.get('content-length')) || 0
       const lector = respuesta.body.getReader()
-      const partes: Uint8Array[] = []
+      const partes: BlobPart[] = [] // los trozos de un fetch siempre son ArrayBuffer, nunca compartidos
       let recibido = 0
       for (;;) {
         const { done, value } = await lector.read()
         if (done) break
-        partes.push(value)
+        partes.push(value as Uint8Array<ArrayBuffer>)
         recibido += value.length
         if (total) progreso.set(clave, Math.min(recibido / total, 0.99))
         pintarAviso()
@@ -137,9 +137,14 @@ export function montarSantuario() {
       if (k === indice) enlace.setAttribute('aria-current', 'true')
       else enlace.removeAttribute('aria-current')
     })
-    history.replaceState(null, '', `#${espacios[indice].id}`)
+    // Entrar por `/` deja la URL limpia; desde ahí, cada sección deja su ancla.
+    if (indice !== 0 || location.hash) history.replaceState(null, '', `#${espacios[indice].id}`)
     if (enfocar) secciones[indice].focus({ preventScroll: true })
+    document.dispatchEvent(new Event('santuario:llega'))
   }
+
+  /** La E (ticket 03) pasa de pieza con ←/→ y el swipe lateral; ver montarUi.ts. */
+  const pasar = (paso: number) => secciones[actual].dispatchEvent(new CustomEvent('santuario:paso', { detail: paso }))
 
   function avisar(indice: number | null, claves: Clave[] = []) {
     for (const enlace of enlaces) {
@@ -246,6 +251,10 @@ export function montarSantuario() {
     const sobreControl = objetivo?.closest('a, button') !== null
     const adelante = ['ArrowDown', 'PageDown'].includes(evento.key) || (evento.key === ' ' && !evento.shiftKey && !sobreControl)
     const atras = ['ArrowUp', 'PageUp'].includes(evento.key) || (evento.key === ' ' && evento.shiftKey && !sobreControl)
+    if (evento.key === 'ArrowLeft' || evento.key === 'ArrowRight') {
+      if (!ocupado) pasar(evento.key === 'ArrowLeft' ? -1 : 1)
+      return
+    }
     const destino = adelante ? actual + 1 : atras ? actual - 1 : evento.key === 'Home' ? 0 : evento.key === 'End' ? espacios.length - 1 : null
     if (destino === null) return
     if ((adelante || atras) && panelQueScrollea(document.activeElement, adelante ? 1 : -1)) return
@@ -265,7 +274,9 @@ export function montarSantuario() {
     const panel = evento.target instanceof Element ? evento.target.closest<HTMLElement>('[data-panel-scroll]') : null
     const scrolleo = panel !== null && panel.scrollTop !== toque.scroll
     toque = null
-    if (ejeDelGesto(dx, dy) === 'y' && !scrolleo) viajar(actual + Math.sign(dy))
+    const eje = ejeDelGesto(dx, dy)
+    if (eje === 'y' && !scrolleo) viajar(actual + Math.sign(dy))
+    if (eje === 'x' && !ocupado) pasar(Math.sign(dx))
   })
 
   addEventListener('hashchange', () => {

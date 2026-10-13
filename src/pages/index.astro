@@ -1,10 +1,7 @@
 ---
 import MarketingLayout from '../layouts/MarketingLayout.astro'
 import Santuario from '../components/Santuario.astro'
-import ArtworkShelf from '../components/ArtworkShelf.astro'
 import Eyebrow from '../components/Eyebrow.astro'
-import FilmStrip from '../components/FilmStrip.astro'
-import MemberCard from '../components/MemberCard.astro'
 import { members } from '../data/members'
 import { bandSocialUrls } from '../data/socials'
 import { loadCatalog } from '../lib/catalog'
@@ -14,10 +11,27 @@ const title = 'Mafia Tumbada — Oficial'
 const description = 'Sitio oficial de Mafia Tumbada. Música, videos, integrantes y contacto para contrataciones desde Xalapa, Veracruz.'
 const canonicalUrl = homeCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)
 const catalog = await loadCatalog()
-const releases = catalog.releases.map((release) => ({
-  ...release,
-  subtitle: /^\d{4}$/.test(release.subtitle ?? '') ? release.subtitle : undefined,
-}))
+// Piezas de la E (ticket 03): una a la vez, contador 01/N. Música lleva discos y videos.
+const musica = [
+  ...catalog.releases.map((release) => ({
+    titulo: release.title,
+    detalle: /^\d{4}$/.test(release.subtitle ?? '') ? release.subtitle : undefined,
+    imagen: release.cover,
+    href: release.href,
+    accion: `Escuchar en ${release.label}`,
+  })),
+  ...catalog.videos.map((video) => ({
+    titulo: video.title,
+    detalle: 'Video',
+    imagen: video.thumbnail,
+    video: true,
+    href: video.href,
+    accion: 'Ver en YouTube',
+  })),
+]
+const contador = (indice: number, total: number) =>
+  `${String(indice + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`
+const flechas = { anterior: 'M15 5l-7 7 7 7', siguiente: 'M9 5l7 7-7 7' }
 ---
 
 <MarketingLayout title={title} description={description} canonicalUrl={canonicalUrl} hasHero={true}>
@@ -39,101 +53,125 @@ const releases = catalog.releases.map((release) => ({
     </div></div>
   </section>
 
-  <section class="seccion estacion bio-section" data-panel-scroll id="quienes" aria-labelledby="bio-heading">
-    <div class="estacion-titular"><div class="container">
+  <section class="seccion layout-d" id="quienes" aria-labelledby="bio-heading">
+    <div class="velo" aria-hidden="true"></div>
+    <div class="bloque" data-panel-scroll>
       <Eyebrow text="Quiénes somos" />
-      <h2 id="bio-heading">El sonido de <em>Xalapa</em></h2>
-    </div></div>
-    <div class="estacion-panel"><div class="container bio-grid">
-      <div class="bio-tags">{['Corridos Tumbados', 'Norteño', 'Regional Mx', 'Covers', 'Canciones propias'].map((tag) => <span class="tag">{tag}</span>)}</div>
-      <div class="bio-body">
-        <p class="bio-lede">La Mafia Tumbada es un grupo de corridos tumbados y regional mexicano con base en Xalapa, Veracruz. Canciones propias, covers con actitud y cuatro años de tarima.</p>
-        <p>La Mafia Tumbada es un grupo de Xalapa, Veracruz que lleva cuatro años construyendo su propio espacio dentro del regional mexicano contemporáneo. Con raíces en el corrido tumbado y el norteño, y sin perder el pulso del regional clásico, el grupo mezcla canciones propias con covers ejecutados con honestidad y actitud.</p>
-        <p>Un catálogo de singles originales es la muestra de un proyecto que toma en serio la composición propia. Al mismo tiempo, su versatilidad en tarima los ha llevado a barras y escenarios tanto en Veracruz como fuera del estado.</p>
+      <h2 id="bio-heading" class="titular gold-text">El sonido de <em>Xalapa</em></h2>
+      <p class="linea">La Mafia Tumbada es un grupo de corridos tumbados y regional mexicano con base en Xalapa, Veracruz. Canciones propias, covers con actitud y cuatro años de tarima.</p>
+      <div class="acciones">
+        <button type="button" class="btn-secondary" data-abrir aria-expanded="false" aria-controls="quienes-mas">Leer más</button>
       </div>
-    </div></div>
-  </section>
-
-  <section class="seccion estacion music-section" data-panel-scroll id="musica" aria-labelledby="musica-heading">
-    <div class="estacion-titular"><div class="container">
-      <Eyebrow text="Escucha" />
-      <h2 id="musica-heading" class="gold-text">Música</h2>
-    </div></div>
-    <div class="estacion-panel"><div class="container">
-      <ArtworkShelf items={releases} />
-      <a class="music-link" href={bandSocialUrls.appleMusic} target="_blank" rel="noopener noreferrer">Escúchanos en Apple Music</a>
-      <h3 class="videos-heading">Videos</h3>
-      <ul class="video-row">{catalog.videos.map((video) => <li><a href={video.href} target="_blank" rel="noopener noreferrer"><img src={video.thumbnail} alt="" width="480" height="360" loading="lazy" decoding="async" /><span>{video.title}</span></a></li>)}</ul>
-    </div><FilmStrip /></div>
-  </section>
-
-  <section class="seccion estacion group-section" data-panel-scroll id="grupo" aria-labelledby="grupo-heading">
-    <div class="estacion-titular"><div class="container">
-      <Eyebrow text="La banda" />
-      <h2 id="grupo-heading" class="gold-text">El grupo</h2>
-    </div></div>
-    <div class="estacion-panel"><div class="container">
-      <div class="members-grid">{members.map((member) => <MemberCard {...member} />)}</div>
-    </div></div>
-  </section>
-
-  <section class="seccion estacion booking-section" data-panel-scroll id="contratacion" aria-labelledby="contratacion-heading">
-    <div class="estacion-titular"><div class="container">
-      <Eyebrow text="Contratar al grupo" />
-      <h2 id="contratacion-heading" class="gold-text">¿Tienes una <em>fecha disponible?</em></h2>
-    </div></div>
-    <div class="estacion-panel"><div class="container booking-copy">
-      <p>El grupo está disponible para presentaciones, festivales, eventos privados y giras regionales. Cuentan con equipo propio y experiencia para adaptarse a diferentes formatos de producción.</p>
-      <p class="booking-urgency">Agenda limitada — los fines de semana suelen reservarse con tres o cuatro semanas de anticipación.</p>
-      <a href={bandSocialUrls.whatsapp} target="_blank" rel="noopener noreferrer" class="btn-primary" data-plausible-event="whatsapp_contratacion">Escríbenos por WhatsApp</a>
-      <p>O llámanos: <a href="tel:+522283538827">+52 228 353 8827</a></p>
-    </div></div>
-  </section>
-
-  <footer class="seccion estacion footer-bar" id="cierre" data-panel-scroll>
-    <div class="estacion-titular"><div class="container">
-      <p class="footer-monograma gold-text" aria-hidden="true"><span>M</span><svg class="header-mark-bolt" viewBox="0 0 46 86" focusable="false"><path d="M28 2L6 48h14L16 84l24-48H26L28 2z" fill="currentColor" /></svg><span>T</span></p>
-    </div></div>
-    <div class="estacion-panel"><div class="container">
-    <span class="footer-brand gold-text">Mafia Tumbada</span>
-    <div class="footer-socials">
-      <a href={bandSocialUrls.spotify} target="_blank" rel="noopener noreferrer">Spotify</a><a href={bandSocialUrls.appleMusic} target="_blank" rel="noopener noreferrer">Apple Music</a><a href={bandSocialUrls.instagram} target="_blank" rel="noopener noreferrer">Instagram</a><a href={bandSocialUrls.tiktok} target="_blank" rel="noopener noreferrer">TikTok</a><a href={bandSocialUrls.youtube} target="_blank" rel="noopener noreferrer">YouTube</a><a href={bandSocialUrls.whatsapp} target="_blank" rel="noopener noreferrer" data-plausible-event="whatsapp_footer">WhatsApp</a>
+      <div class="mas" id="quienes-mas">
+        <div class="bio-tags">{['Corridos Tumbados', 'Norteño', 'Regional Mx', 'Covers', 'Canciones propias'].map((tag) => <span class="tag">{tag}</span>)}</div>
+        <div class="bio-body">
+          <p>La Mafia Tumbada es un grupo de Xalapa, Veracruz que lleva cuatro años construyendo su propio espacio dentro del regional mexicano contemporáneo. Con raíces en el corrido tumbado y el norteño, y sin perder el pulso del regional clásico, el grupo mezcla canciones propias con covers ejecutados con honestidad y actitud.</p>
+          <p>Un catálogo de singles originales es la muestra de un proyecto que toma en serio la composición propia. Al mismo tiempo, su versatilidad en tarima los ha llevado a barras y escenarios tanto en Veracruz como fuera del estado.</p>
+        </div>
+      </div>
     </div>
-    <p class="footer-copy">© {new Date().getFullYear()} · Xalapa, Veracruz · Todos los derechos reservados</p>
-    </div></div>
+  </section>
+
+  <section class="seccion layout-e" id="musica" aria-labelledby="musica-heading" data-pasos>
+    <div class="velo" aria-hidden="true"></div>
+    <div class="bloque">
+      <Eyebrow text="Escucha" />
+      <h2 id="musica-heading" class="titular gold-text">Música</h2>
+      <ol class="piezas" aria-live="polite">
+        {musica.map((pieza, indice) => (
+          <li class:list={['pieza', { 'pieza--video': pieza.video }]} data-pieza>
+            {pieza.imagen && <img src={pieza.imagen} alt="" width={pieza.video ? 480 : 640} height={pieza.video ? 270 : 640} loading={indice === 0 ? 'eager' : 'lazy'} decoding="async" />}
+            <div class="pieza-texto">
+              <span class="pieza-contador">{contador(indice, musica.length)}</span>
+              <h3>{pieza.titulo}</h3>
+              {pieza.detalle && <span class="pieza-detalle">{pieza.detalle}</span>}
+              <a class="btn-primary" href={pieza.href} target="_blank" rel="noopener noreferrer">{pieza.accion}</a>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <div class="controles">
+        <button type="button" data-paso="-1" aria-label="Pieza anterior"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d={flechas.anterior} /></svg></button>
+        <button type="button" data-paso="1" aria-label="Pieza siguiente"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d={flechas.siguiente} /></svg></button>
+        <span class="pista" aria-hidden="true">← → o desliza</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion layout-e" id="grupo" aria-labelledby="grupo-heading" data-pasos>
+    <div class="velo" aria-hidden="true"></div>
+    <div class="bloque">
+      <Eyebrow text="La banda" />
+      <h2 id="grupo-heading" class="titular gold-text">El grupo</h2>
+      <ol class="piezas" aria-live="polite">
+        {members.map((member, indice) => (
+          <li class="pieza pieza--retrato" data-pieza>
+            <picture>
+              <source srcset={member.image.replace('.jpg', '.webp')} type="image/webp" />
+              <img src={member.image} alt="" width="1440" height="1081" loading="lazy" decoding="async" />
+            </picture>
+            <div class="pieza-texto">
+              <span class="pieza-contador">{contador(indice, members.length)}</span>
+              <h3>{member.name}</h3>
+              <span class="pieza-detalle">{member.role}</span>
+              <a class="btn-primary" href={member.instagram} target="_blank" rel="noopener noreferrer">Instagram</a>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <div class="controles">
+        <button type="button" data-paso="-1" aria-label="Integrante anterior"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d={flechas.anterior} /></svg></button>
+        <button type="button" data-paso="1" aria-label="Integrante siguiente"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d={flechas.siguiente} /></svg></button>
+        <span class="pista" aria-hidden="true">← → o desliza</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion layout-d" id="contratacion" aria-labelledby="contratacion-heading">
+    <div class="velo" aria-hidden="true"></div>
+    <div class="bloque" data-panel-scroll>
+      <Eyebrow text="Contratar al grupo" />
+      <h2 id="contratacion-heading" class="titular gold-text">¿Tienes una <em>fecha disponible?</em></h2>
+      <p class="linea">Agenda limitada — los fines de semana suelen reservarse con tres o cuatro semanas de anticipación.</p>
+      <div class="acciones">
+        <a href={bandSocialUrls.whatsapp} target="_blank" rel="noopener noreferrer" class="btn-primary" data-plausible-event="whatsapp_contratacion">Escríbenos por WhatsApp</a>
+        <button type="button" class="btn-secondary" data-abrir aria-expanded="false" aria-controls="contratacion-mas">Leer más</button>
+      </div>
+      <div class="mas" id="contratacion-mas">
+        <p>El grupo está disponible para presentaciones, festivales, eventos privados y giras regionales. Cuentan con equipo propio y experiencia para adaptarse a diferentes formatos de producción.</p>
+        <p>O llámanos: <a class="enlace" href="tel:+522283538827">+52 228 353 8827</a></p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="seccion layout-d" id="cierre">
+    <div class="velo" aria-hidden="true"></div>
+    <div class="bloque">
+      <p class="footer-monograma gold-text" aria-hidden="true"><span>M</span><svg class="header-mark-bolt" viewBox="0 0 46 86" focusable="false"><path d="M28 2L6 48h14L16 84l24-48H26L28 2z" fill="currentColor" /></svg><span>T</span></p>
+      <span class="footer-brand gold-text">Mafia Tumbada</span>
+      <div class="footer-socials">
+        <a class="enlace" href={bandSocialUrls.spotify} target="_blank" rel="noopener noreferrer">Spotify</a><a class="enlace" href={bandSocialUrls.appleMusic} target="_blank" rel="noopener noreferrer">Apple Music</a><a class="enlace" href={bandSocialUrls.instagram} target="_blank" rel="noopener noreferrer">Instagram</a><a class="enlace" href={bandSocialUrls.tiktok} target="_blank" rel="noopener noreferrer">TikTok</a><a class="enlace" href={bandSocialUrls.youtube} target="_blank" rel="noopener noreferrer">YouTube</a><a class="enlace" href={bandSocialUrls.whatsapp} target="_blank" rel="noopener noreferrer" data-plausible-event="whatsapp_footer">WhatsApp</a>
+      </div>
+      <p class="footer-copy">© {new Date().getFullYear()} · Xalapa, Veracruz · Todos los derechos reservados</p>
+    </div>
   </footer>
 </MarketingLayout>
 
 <script>
   import { trackPlausible } from '../lib/plausibleClient'
-  const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
-    if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target) }
-  }), { threshold: 0.1, rootMargin: '0px 0px -50px 0px' })
-  document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((element) => { element.dataset.reveal = 'oculto'; observer.observe(element) })
+  import { montarUi } from '../lib/montarUi'
+  montarUi()
   document.querySelectorAll('[data-plausible-event]').forEach((element) => {
     element.addEventListener('click', () => trackPlausible(element.getAttribute('data-plausible-event') ?? ''))
   })
 </script>
 
 <style>
-  /* Hasta la capa de UI (paso 6), cada sección larga scrollea dentro de su pantalla. */
-  :global(html.santuario) .estacion { overflow-y: auto; }
   .hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   /* Velo medido como el de la escena: percentil 95 de luminancia del video detrás
-     del texto contra --text a 4.5:1. Móvil (texto arriba, entre las columnas) pide
-     0.44; escritorio (pasillo, abajo) ya pasa sin velo, 0.15 es margen. */
+     del texto contra --text a 4.5:1. Móvil pedía 0.44 con el texto arriba; escritorio
+     ya pasa sin velo, 0.15 es margen. Con el texto abajo (03) se vuelve a medir en el paso 7. */
   .hero::after { content: ''; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); pointer-events: none; }
   @media (min-aspect-ratio: 1/1) { .hero::after { background: rgba(0, 0, 0, 0.15); } }
-  .bio-lede { max-width: 38rem; font-size: clamp(0.95rem, 2vw, 1.1rem); line-height: 1.6; font-weight: 600; opacity: 0.85; margin: 0; }
-  .hero-actions, .music-link { margin-top: 2rem; }
-  .music-link, .booking-copy a:not(.btn-primary), .footer-socials a { display: inline-flex; align-items: center; min-height: 44px; padding-block: 0.5rem; }
-  .videos-heading { margin-top: var(--space-lg); }
-  .video-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; list-style: none; margin: 1rem 0 0; padding: 0; }
-  .video-row a { color: inherit; text-decoration: none; }
-  .video-row img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; margin-bottom: 0.6rem; }
-  .video-row span, .music-link, .booking-copy a:not(.btn-primary), .footer-socials a { color: var(--red-link); }
-  .booking-copy { display: grid; gap: 1.25rem; align-items: start; justify-items: start; }
-  .booking-urgency { font-weight: 600; }
-  .members-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 2rem; }
-  .footer-socials { display: flex; flex-wrap: wrap; gap: 1rem; }
+  .hero-actions { margin-top: 2rem; }
 </style>
