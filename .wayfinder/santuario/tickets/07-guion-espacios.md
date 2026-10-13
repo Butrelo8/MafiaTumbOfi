@@ -72,6 +72,12 @@ en la propuesta de abajo):
   aparece detrás de los sacos todavía colgados, o sea un morph. Además inventa un perchero suelto con dos sacos, una luz
   blanca con destello cian y muro más allá del ropero. No sirve como E6 final; sí como referencia de velocidad de cámara
   y de movimiento de la tela. Tablero `tmp/07/tablero/flow_job1_ab.jpg`, veredicto `tmp/07/flow/job1/veredicto.md`.
+  **job2** (reintento con OK del usuario; negro forzado, cámara lateral, sin luces nuevas): mucho mejor. No hay morph
+  (la cripta se descubre más allá del oclusor), no hay destello, cian ni luces nuevas; se corta otra vez en 184. Pero
+  tampoco llega a negro: luma mínima 11.9 y como máximo 86 % del cuadro bajo luma 20. Además, en 82–85 se ven los dos
+  cuartos en los bordes, y la cripta llega más fría y sus velas suben hasta ~176. Veredicto: **E6 provisional (0–184,
+  sin audio); el final por H3** con oclusor de máscara, salvo que el usuario lo acepte al verlo a velocidad
+  (`tmp/07/tablero/flow_job1_vs_job2.{jpg,mp4}`, `tmp/07/flow/job2/veredicto.md`).
 - **El atrio elegido todavía no deja limpia la esquina** (`tmp/07/tablero/atrio_C2_lobo_hueco.jpg`: luma media 24 en
   el hueco contra 46 en el cuadro): el poste, el muro que alumbra el sodio y el canto izquierdo del portal caen dentro.
   En la placa de producción el poste se mueve a la derecha del portal o el muro bajo la lámpara cae a negro, para que
