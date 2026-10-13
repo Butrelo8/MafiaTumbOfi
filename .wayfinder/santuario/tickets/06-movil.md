@@ -254,3 +254,18 @@ Disposición (`disposicion.py`, `hoja_disp_esc.png`, `hoja_disp_vert.png`, verde
   de la silueta en gris + la figura de escritorio como referencia), pegado dentro de la silueta de maqueta ∪ capa, sólo
   donde la escena vacía queda detrás del plano. Elegidas: mujer s22, joven s11. En la vertical la texana queda justo
   debajo del joven (la geometría de la 4.ª y la 6.ª banca desde esa cámara); el usuario la aprobó así.
+- **G4, placa real v5 de los dos formatos (2026-10-13), elegida por el usuario: s2 en los dos.** Escritorio
+  `tmp/props-06/nave_g4_esc.png`, vertical `nave_g4_vert.png`, disparidades de MoGe `nave_g4_*_disp.png` (todo también
+  en `entrega/placas`). Cadena de v5 (ticket 14) en `tmp/props-06/g4/`: DLSS NR `--nr-color 0` de la placa → Klein 4 MP
+  con el prompt de `mto_placa_real_s2b.json` **cambiando el final "no people"** por "the same people … no added people"
+  (`klein_real.sh`) → vertical: `alinear_flujo.py` → `placa_real.py` con el tono del NR de la **placa nueva** (el NR
+  de v5 es de la placa sin pila: su luz fina σ 8 borraría la gente) y los PROF de v5 → `moge.sh` (grafo API de v5 por
+  curl). La gente sale igual (la luz fina viene del NR). Vista con foco en la guitarra (`dof.py`, FOCO_D 0.60 / 0.50);
+  el foco del loop va en el micro (G5/G6). Escalas de disparidad iguales a v5 (fondo y piso), salvo la guitarra vertical,
+  más cerca por la pila (0.50 contra 0.36).
+  - **Guitarra vertical** (el usuario: "rara", luego "cortada abajo a la izquierda"): venía de G3, la guitarra de la
+    maqueta es más grande que la de Klein; la reproyección estiraba el borde y la base de huecos añadía un segundo
+    contorno. `guitarra_g3.py`: la guitarra nativa de la vertical de Klein (`s33_vacia_s7`), alineada, con media y
+    desviación Lab de la de escritorio, en la cara del altavoz + franja del cuello + la guitarra de s33 dilatada (sobresale
+    del altavoz por la izquierda). `nave_g3.png` es ya esa versión (la anterior, `nave_g3_v0.png`). El logo del altavoz
+    vertical se pierde.
