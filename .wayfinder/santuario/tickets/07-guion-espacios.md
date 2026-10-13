@@ -170,6 +170,18 @@ en la propuesta de abajo):
     (`haz_variantes_movil.mp4`). Derrame fuera de la máscara: 0.07 % / 0.24 % de píxeles > 3 niveles, en el borde del
     altar (escritorio) y en la piedra junto a la reja (vertical). revisar: costura 0.01 / 0.05, crawl 0.00, flicker
     ≤ 0.01, nitidez 1.00 / 1.01. Loops `cripta/loop/loop_{esc,movil}.mkv`; el compuesto H3 queda en `loop_esc_h3.mkv`.
+  - **Atrio (17:00).** El H3 de escritorio (`FIN=1.0`, 1147 s) no mueve la geometría (0.2 px) pero **se va a noche**:
+    la luma de la zona de niebla baja de 89 a 17.5 y el resto de 26 a 11 en 260 cuadros; la niebla desaparece. Alto sin
+    más GPU (regla de vibeship) y niebla procedural: `tmp/07/e5/niebla_e5.py` (ruido periódico fractal estirado ASP
+    veces en x, dos capas a media fase con pesos en triángulo para derivar a VEL px/s y cerrar el loop exacto, contraste
+    normalizado; más niebla = hacia su color, menos = sólo más oscuro). Primera versión con ruido de banda: celdas
+    redondas y manchas rojas (alejarse del color azul) → corregido. Escritorio: `DENS=0.3 VEL=8` (ESCALA 200, ASP 3),
+    color de la placa; zona 1–2 niveles bajo la placa, sesgo de color neutro (−1.4/−1.2/−1.2), costura 0.03 contra
+    pasos de 0.06–0.08, fuera de la máscara 0 (`niebla_variantes_esc.mp4`: 0.5 deja manchas oscuras en el cielo, sin
+    estirar parece humo). Vertical: neblina baja `ESCALA=150 ASP=4`, color gris cálido `84,92,118` (el automático da
+    el rojo oscuro de los adoquines y casi no se ve; `niebla_variantes_movil.mp4`); aclara la banda 15.7 → 19.4.
+    Llamas: candelabro (tres llamas) y lámpara de sodio con zumbido 0.04 (`velas_<f>.json`). revisar: costura
+    0.00 / 0.01, crawl 0.00, flicker ≤ 0.01, nitidez 0.98 / 0.96. Loops `atrio/loop/loop_{esc,movil}.mkv`.
   - Tras un H3, ComfyUI se queda con ~3.5 GB de VRAM y la puerta (< 4000 MiB) no abre: `POST /free`
     `{"unload_models":true,"free_memory":true}` entre trabajos (ya va al final de cada lanzamiento).
 
