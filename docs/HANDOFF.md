@@ -3,6 +3,8 @@
 > **Mapa vivo (2026-10-04): [`.wayfinder/santuario/MAP.md`](../.wayfinder/santuario/MAP.md)** — destino,
 > decisiones y tickets abiertos del santuario en movimiento. Se trabaja con `matt-wayfinder` (mpaf).
 
+> **Ticket 07 en producción (camarín, cripta, atrio; E1–E4): [`docs/handoffs/2026-10-13-07-produccion.md`](handoffs/2026-10-13-07-produccion.md)**
+
 > **Más reciente: [`docs/handoffs/2026-10-13-tallo-y-rosa.md`](handoffs/2026-10-13-tallo-y-rosa.md)**
 > (G5 y G6 hechos; tallo de espinas y rosa del micro a medio rehacer: falta igualar su luz a la del micro).
 > Anteriores: [`2026-10-11-gente-reproyeccion.md`](handoffs/2026-10-11-gente-reproyeccion.md),
