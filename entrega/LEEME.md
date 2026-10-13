@@ -17,3 +17,6 @@ pila** (camino B: G2–G7 lo reemplazan con los mismos nombres). `maestros/` no 
   corte hasta que G6 los rehaga.
 - **G6 (2026-10-13):** `escritorio/nave.mp4` y `vertical/nave.mp4` son los loops de 10 s sobre las placas G4 con el
   micro de G5; escritorio con el copal real (`placas/nave-esc-g6-copal-*.png`). Ticket 06, bullet G6.
+- **Tallo y rosa (2026-10-13, después de G6):** los dos loops se rehicieron con el tallo de espinas enrollado en el cable
+  y la luz C (igualada al micro de oro): `placas/nave-esc-micro.png` es ya `g5/placa_micro_tallo.png`, con sus máscaras,
+  la vertical y las disparidades en `placas/*-tallo*`. Mismo fondo y mismo H3 que G6; costura igual (0.75 / 0.51).

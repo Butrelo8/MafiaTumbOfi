@@ -23,7 +23,7 @@ vertical/ida-h264.mp4          $V/ida_micro.mp4
 vertical/vuelta-h264.mp4       $V/vuelta_micro.mp4
 vertical/sacristia-5s.mp4      $T/movil-06/web/sacristia.mp4
 placas/sacristia-esc-s11.png   $T/micro/trans_esc/klein/sac17_s11_00001_.png
-placas/nave-esc-micro.png      $T/micro/placa_micro_rosa.png
+placas/nave-esc-micro.png      $T/micro/g5/placa_micro_tallo.png
 placas/nave-vert-micro-s4.png  $T/micro/movil/placa_micro_vb_s4_suj.png
 placas/nave-esc-s44.png        $T/props-06/klein/nave13props_p4_s44_00001_.png
 placas/nave-esc-s44-vacia.png  $T/props-06/s44_vacia.png
@@ -42,6 +42,12 @@ placas/mascara-micro-vert-g5.png $T/micro/g5/vert_mascara_g5.png
 placas/mascara-rosa-vert-g5.png  $T/micro/g5/vert_rosa_g5.png
 placas/nave-esc-g5-disp.png    $T/micro/g5/esc_disp_g5.png
 placas/nave-vert-g5-disp.png   $T/micro/g5/vert_disp_g5.png
+placas/mascara-micro-esc-tallo.png  $T/micro/g5/mascara_micro_tallo.png
+placas/micro-vert-tallo.png         $T/micro/g5/vert_placa_micro_tallo.png
+placas/mascara-micro-vert-tallo.png $T/micro/g5/vert_mascara_tallo.png
+placas/mascara-rosa-vert-tallo.png  $T/micro/g5/vert_rosa_tallo.png
+placas/nave-esc-tallo-disp.png      $T/micro/g5/esc_disp_tallo.png
+placas/nave-vert-tallo-disp.png     $T/micro/g5/vert_disp_tallo.png
 placas/nave-esc-g6-copal-real.png  $T/g6/copal/nave_g6_esc_real_copal.png
 placas/nave-esc-g6-copal-klein.png $T/g6/copal/nave_g6_esc_klein_copal.png
 maestros/esc-ida.mkv           $H/ida_master_mezcla.mkv

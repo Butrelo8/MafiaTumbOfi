@@ -337,3 +337,6 @@ Disposición (`disposicion.py`, `hoja_disp_esc.png`, `hoja_disp_vert.png`, verde
     absoluto de escritorio (p90 23.1 / 23.9 contra 23.5 / 24.3); el oro vertical sigue en el aprobado (p99 49.0 contra 49.8).
   - `tmp/g6/tanda.sh` apunta a los `*_tallo` con `ROSA_GAN=lum` y reutiliza `real240.mkv` (el fondo aprobado queda
     idéntico); la versión con el tallo viejo es `tanda_g6_tallo_viejo.sh`, salidas aprobadas en `tmp/g6/tallo_viejo/`.
+  - **Loops rehechos con el tallo nuevo y congelados** (`entrega/`, LEEME): mismo `real240.mkv` y mismo H3 que G6, sólo
+    cambia el micro; costura 0.75 / 0.51 (igual que G6). Probado subir el tallo +25 % en L* (`luz.py` `TALLO_SUBE=1.25`,
+    p90 23.5 → 28.6) porque con el LOOK quedaba apagado; el usuario volvió a C.
