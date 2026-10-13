@@ -184,6 +184,36 @@ en la propuesta de abajo):
     0.00 / 0.01, crawl 0.00, flicker ≤ 0.01, nitidez 0.98 / 0.96. Loops `atrio/loop/loop_{esc,movil}.mkv`.
   - Tras un H3, ComfyUI se queda con ~3.5 GB de VRAM y la puerta (< 4000 MiB) no abre: `POST /free`
     `{"unload_models":true,"free_memory":true}` entre trabajos (ya va al final de cada lanzamiento).
+  - **Atrio v3 (pedidos del usuario 16:50–17:45; todo en `tmp/07/e5/charcos/`, se rehace con `armar_atrio.sh`).**
+    - **Lluvia congelada:** Klein pintó rayas de lluvia en el cielo de la placa; en el loop quedaban fijas. Se quitan de
+      la placa (`quitar_rayas.py`: top-hat de líneas finas verticales > 3 niveles y ≥ 12 px, inpaint y el grano de
+      vuelta; 0.86 % de la zona, grano 598.5 → 599.4).
+    - **Camioneta → SUV tipo G (referencia del usuario):** Klein `prompts/07-guion-espacios/camioneta_atrio.txt`,
+      semillas 2 3 5; **eligió s2**, sin emblemas. Se registra sólo con desplazamiento (≈ +3.7, +0.7 px):
+      `alinear_flujo.py` derrite un objeto que cambió (empuja el coche nuevo hacia los bordes del viejo). Pintura
+      **atenuada a gris oscuro** (usuario): máscara GrabCut + envolvente convexa, −65 % en la pintura sin tocar los
+      focos rojos ni los brillos (luma 40 → 19; la camioneta vieja: 26). La rueda deforme que vio el usuario estaba en
+      la placa aprobada (Klein de producción), no en los efectos (0–4 niveles), y se fue con la camioneta.
+    - **Charco:** Klein `prompts/07-guion-espacios/charcos_atrio.txt` sobre la placa con el SUV, s3 (s7 dibujó una
+      fuente de luz falsa), pegado sólo el charco (`pegar_charco.py`, 1.31 % del cuadro).
+      **Placa v3 = `tmp/07/e5/final/placa_atrio_v3.png`: es el extremo del E6 final.**
+    - **Lluvia con dirección** (usuario: "needs direction"): referencia con frameref, *Prisoners* 005 (Deakins,
+      gasolinera bajo lluvia; `/mnt/e/ComfyUI/storyboards/mto-atrio/shotspec.md`). `lluvia_e5.py`: rayas largas y
+      finas casi verticales (3° a la derecha, la deriva de la niebla), lejos 1400 + cerca 120, sólo a contraluz; el
+      adoquín mojado que hierve de salpicaduras de 1–2 px donde refleja luz; muchos anillos chicos y rápidos en el
+      charco y su reflejo temblando. Antes (sin referencia) el charco se movía 0.18 niveles por cuadro y el usuario lo
+      vio falso; las gotas sueltas blancas parecían brillantina.
+    - **Gotas en los vidrios** (`vidrio_e5.py`, máscara `vidrios.png`): 45 que resbalan con rastro (cruzan su vidrio un
+      número entero de veces por loop y se apagan junto a los bordes) y 140 que caen y se apagan; especular cálido.
+    - revisar: escritorio costura 0.49 / crawl 0.12 / nitidez 1.01; vertical 0.42 / 0.10 / 0.98 (el crawl es la lluvia).
+  - **Verticales = recorte del escritorio (usuario 17:05: "¿coinciden?")**, como la sacristía (`tmp/sac10/vert2`):
+    `tmp/07/e5/reencuadre_e5.py` compone la afín de `verticales.py` (marco.json) con 1696 → 1920 y rehace la banda por
+    cuadro con el grano fijo (con semilla por cuadro la banda hervía: crawl 0.07–0.14). Contra las placas verticales
+    aprobadas: 0.00 px, |dif| 0.5, nitidez 0.86–0.90 (un remuestreo más). Llamas, polvo, lluvia y anillos son los mismos
+    píxeles en los dos formatos; sólo la neblina baja del atrio es de la vertical (decisión del usuario).
+  - **Final (17:55): `tmp/07/e5/final/{vestidor,cripta,atrio}_{esc,movil}.mkv`** (240 cuadros, ffv1, sin grade;
+    `MANIFIESTO.tsv`). Pendiente: el pase de LOOK + halación sobre E5 y E6 juntos, la escalera de códecs y llevarlos a
+    `entrega/` y a la web; el E6 final termina en la placa v3 del atrio.
 
 ## Propuesta (2026-10-13)
 Vuelve en la versión 1 a pedido del usuario. Tres opciones por espacio, cada una con dos fotogramas de referencia,
