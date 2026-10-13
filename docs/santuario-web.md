@@ -28,7 +28,8 @@ a la lista de su `transicion(...)`; un loop en varios códecs pide pasar `loop()
 
 ## Decisiones tomadas aquí
 
-- Formato por `(min-aspect-ratio: 1/1)` al cargar, como el hero. Girar el teléfono no cambia de formato hasta recargar.
+- Formato por `(min-aspect-ratio: 1/1)`, como el hero. Si la pantalla cambia de proporción (girar el teléfono,
+  cambiar la ventana), el juego de videos cambia en el acto, o al terminar el viaje en curso, y se precarga el nuevo.
 - Fundido a negro: 0.3 s de bajada + 0.3 s de subida (los 0.6 s del 05).
 - Hero ↔ nave, sacristía → grupo y los saltos de más de una sección cruzan por negro; nave ↔ sacristía reproduce
   ida o vuelta. El gesto durante un viaje se ignora; un `#ancla` pedido a medio viaje se cumple al llegar.

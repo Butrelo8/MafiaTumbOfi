@@ -26,7 +26,11 @@ function panelQueScrollea(objetivo: EventTarget | null, dy: number): boolean {
 
 export function montarSantuario() {
   const raiz = document.documentElement
-  const formato: Formato = matchMedia('(min-aspect-ratio: 1/1)').matches ? 'escritorio' : 'vertical'
+  // Escritorio o vertical, como el hero. Girar el teléfono o cambiar la ventana de proporción cambia el
+  // juego de videos: en el acto si no hay viaje, o al terminar el que esté en curso.
+  const consultaFormato = matchMedia('(min-aspect-ratio: 1/1)')
+  const formatoDe = (consulta: { matches: boolean }): Formato => (consulta.matches ? 'escritorio' : 'vertical')
+  let formato = formatoDe(consultaFormato)
   const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches
   const sonda = document.createElement('video')
   const puede = (tipo: string) => sonda.canPlayType(tipo)
@@ -38,19 +42,22 @@ export function montarSantuario() {
     document.querySelector<HTMLVideoElement | HTMLImageElement>(`.escena [data-formato="${formato}"][data-clave="${clave}"]`)
 
   // ── Precarga ───────────────────────────────────────────────────────────────
-  const bajadas = new Map<Clave, Promise<boolean>>()
-  const progreso = new Map<Clave, number>()
+  // Por formato y clave: los dos juegos de videos conviven si la pantalla cambia de proporción.
+  const llave = (clave: Clave) => `${formato}/${clave}`
+  const bajadas = new Map<string, Promise<boolean>>()
+  const progreso = new Map<string, number>()
   let avisando: { indice: number; claves: Clave[] } | null = null
 
   function pintarAviso() {
     if (!avisando) return
     const { indice, claves } = avisando
-    const hecho = claves.reduce((suma, clave) => suma + (progreso.get(clave) ?? 0), 0) / claves.length
+    const hecho = claves.reduce((suma, clave) => suma + (progreso.get(llave(clave)) ?? 0), 0) / claves.length
     enlaces[indice]?.style.setProperty('--carga', hecho.toFixed(3))
   }
 
   function bajar(clave: Clave): Promise<boolean> {
-    const previa = bajadas.get(clave)
+    const id = llave(clave)
+    const previa = bajadas.get(id)
     if (previa) return previa
     const fuente = fuenteDe(espacios, formato, clave, puede)
     const video = capa(clave)
@@ -67,20 +74,20 @@ export function montarSantuario() {
         if (done) break
         partes.push(value as Uint8Array<ArrayBuffer>)
         recibido += value.length
-        if (total) progreso.set(clave, Math.min(recibido / total, 0.99))
+        if (total) progreso.set(id, Math.min(recibido / total, 0.99))
         pintarAviso()
       }
       video.preload = 'auto'
       video.src = URL.createObjectURL(new Blob(partes, { type: 'video/mp4' }))
       await listo(video)
-      progreso.set(clave, 1)
+      progreso.set(id, 1)
       pintarAviso()
       return true
     })().catch(() => {
-      bajadas.delete(clave) // el siguiente gesto lo vuelve a intentar
+      bajadas.delete(id) // el siguiente gesto lo vuelve a intentar
       return false
     })
-    bajadas.set(clave, bajada)
+    bajadas.set(id, bajada)
     return bajada
   }
 
@@ -92,8 +99,10 @@ export function montarSantuario() {
   }
 
   // ── Escena ─────────────────────────────────────────────────────────────────
-  for (const imagen of document.querySelectorAll<HTMLImageElement>(`.escena img[data-formato="${formato}"]`)) {
-    imagen.src = imagen.dataset.src ?? ''
+  function ponerImagenes() {
+    for (const imagen of document.querySelectorAll<HTMLImageElement>(`.escena img[data-formato="${formato}"]`)) {
+      if (!imagen.src) imagen.src = imagen.dataset.src ?? ''
+    }
   }
 
   const mostrar = (elemento: Element | null, on: boolean) => elemento?.classList.toggle('on', on)
@@ -169,7 +178,7 @@ export function montarSantuario() {
 
     // El gesto espera a que la transición pueda reproducirse entera (ticket 05, decisión 9).
     const claves = clavesDelViaje(espacios, formato, viaje, hasta, puede)
-    if (claves.some((clave) => progreso.get(clave) !== 1)) {
+    if (claves.some((clave) => progreso.get(llave(clave)) !== 1)) {
       avisar(hasta, claves)
       const listos = await Promise.all(claves.map(bajar))
       avisar(null)
@@ -206,6 +215,7 @@ export function montarSantuario() {
     actual = hasta
     activar(hasta, true)
     await espera(viaje.tipo === 'corte' ? 0 : INERCIA)
+    if (formatoPendiente) cambiarFormato(formatoPendiente)
     ocupado = false
     if (pedido !== null) {
       const siguiente = pedido
@@ -214,18 +224,43 @@ export function montarSantuario() {
     }
   }
 
+  /** Enciende el fondo del espacio; si su loop aún no baja, aparece en cuanto llega. */
+  function entrarEn(indice: number) {
+    const enFormato = formato
+    encenderFondo(indice)
+    bajar(`${indice}:loop`).then(() => {
+      const fondo = capa(`${indice}:loop`)
+      if (actual === indice && formato === enFormato && !ocupado && !fondo?.classList.contains('on')) encenderFondo(indice)
+    })
+  }
+
+  // ── Formato ────────────────────────────────────────────────────────────────
+  let formatoPendiente: Formato | null = null
+
+  function cambiarFormato(nuevo: Formato) {
+    formatoPendiente = null
+    if (nuevo === formato) return
+    apagarFondo(actual)
+    formato = nuevo
+    ponerImagenes()
+    heroVideo?.load() // el hero vuelve a elegir su <source> por `media`
+    entrarEn(actual)
+    precargar(actual)
+  }
+
+  consultaFormato.addEventListener('change', (cambio) => {
+    if (ocupado) formatoPendiente = formatoDe(cambio)
+    else cambiarFormato(formatoDe(cambio))
+  })
+
   // ── Entrada ────────────────────────────────────────────────────────────────
   const indiceDelHash = () => espacios.findIndex((espacio) => `#${espacio.id}` === location.hash)
   actual = Math.max(0, indiceDelHash())
   secciones.forEach((seccion) => (seccion.tabIndex = -1))
-  const entrada = actual
-  activar(entrada, false)
-  encenderFondo(entrada)
-  // Entrando directo a un espacio con loop, aparece en cuanto baja.
-  bajar(`${entrada}:loop`).then(() => {
-    if (actual === entrada && !ocupado) encenderFondo(entrada)
-  })
-  precargar(entrada)
+  activar(actual, false)
+  ponerImagenes()
+  entrarEn(actual)
+  precargar(actual)
 
   // ── Gestos ─────────────────────────────────────────────────────────────────
   const hayModal = () =>
