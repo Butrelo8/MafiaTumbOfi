@@ -24,7 +24,7 @@ interface Props {
 const { title, description, canonicalUrl, robots } = Astro.props
 
 const navItems = [
-  { href: '/', label: 'Inicio' },
+  { href: '/#inicio', label: 'Inicio' },
   { href: '/#musica', label: 'Música' },
   { href: '/#grupo', label: 'Integrantes' },
   { href: '/#contratacion', label: 'Contrataciones' },
@@ -87,7 +87,7 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
 
     <!-- ─── HEADER ──────────────────────────────────────────── -->
     <header class="site-header" id="site-header">
-      <a href="/" class="header-mark" aria-label="Mafia Tumbada — Inicio">
+      <a href="/#inicio" class="header-mark" aria-label="Mafia Tumbada — Inicio">
         <span class="gold-text" aria-hidden="true">M</span>
         <svg class="header-mark-bolt" viewBox="0 0 46 86" aria-hidden="true" focusable="false">
           <path d="M28 2L6 48h14L16 84l24-48H26L28 2z" fill="currentColor" />
@@ -194,38 +194,12 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
       <slot />
     </main>
 
-    <dialog id="zoom-dialog" class="zoom-dialog" aria-label="Foto ampliada">
-      <img id="zoom-dialog-img" src="" alt="" />
-      <button type="button" id="zoom-dialog-close" class="zoom-dialog-close" aria-label="Cerrar">&times;</button>
-    </dialog>
-
     <script>
       // Off when PUBLIC_SENTRY_DSN is unset: Vite folds the branch away and the SDK is not bundled.
       const sentryDsn = import.meta.env.PUBLIC_SENTRY_DSN
       if (sentryDsn) {
         import('@sentry/browser').then((Sentry) => Sentry.init({ dsn: sentryDsn }))
       }
-    </script>
-
-    <script>
-      const zoomDialog = document.getElementById('zoom-dialog') as HTMLDialogElement
-      const zoomImg = document.getElementById('zoom-dialog-img') as HTMLImageElement
-
-      document.addEventListener('click', (e) => {
-        const trigger = (e.target as HTMLElement).closest<HTMLElement>('[data-zoom-src]')
-        if (trigger) {
-          zoomImg.src = trigger.dataset.zoomSrc!
-          zoomImg.alt = trigger.dataset.zoomAlt ?? ''
-          zoomDialog.showModal()
-          return
-        }
-        // backdrop or close button
-        if (zoomDialog.open && (e.target === zoomDialog || (e.target as HTMLElement).id === 'zoom-dialog-close')) {
-          zoomDialog.close()
-        }
-      })
-
-      zoomDialog.addEventListener('close', () => { zoomImg.removeAttribute('src') })
     </script>
 
     <script>

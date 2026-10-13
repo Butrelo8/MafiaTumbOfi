@@ -704,124 +704,8 @@ body.marketing-body img {
   padding-block: var(--space-section);
 }
 
-/* Estación: titular incrustado en la escena + panel opaco. El titular vive
-   entre el canvas y la capa de frente, así que las velas y las bancas le pasan
-   por delante; el panel sube por encima de todo porque ahí se lee y se toca.
-   La altura del titular (100svh) viene de [data-estacion] en AltarScene.
-   Va abajo porque ahí está lo que tapa: medido el alfa de las capas, en las
-   cuatro estaciones que la tienen lo que queda delante son bancas, la fiel y
-   velas, todo en el tercio inferior del cuadro. */
-.estacion-titular {
-  display: flex;
-  align-items: flex-end;
-  padding-bottom: var(--titular-bajo, 12svh);
-}
-
-.estacion-titular > .container {
-  padding-inline-start: var(--titular-x, 0);
-}
-
-/* Colocación por estación, a ojo sobre capturas a 1440x900 y 500x844. Cada
-   formato tiene su propia capa y lo que tapa cae en otro sitio.
-   Móvil, hornacinas: por encima de la mesa; abajo el cinturón se comía "po". */
-.group-section .estacion-titular {
-  --titular-bajo: 26svh;
-}
-
-/* Móvil, reliquia: el candelero sube por el borde izquierdo y se comía "¿Ti". */
-.booking-section .estacion-titular {
-  --titular-x: 12vw;
-}
-
-/* Móvil, nave: la capa son dos columnas a los lados y bancas desde media
-   altura. Lo libre es arriba, entre columnas (del 17 al 82 % del ancho). */
-.hero .hero-copy.hero-content {
-  margin-left: 12vw;
-  max-width: 64vw;
-}
-
 .hero .hero-title {
   margin-bottom: 1rem;
-}
-
-/* Escritorio.
-   Altar: la banca de la fiel muerde la primera letra, no la palabra.
-   Hornacinas: baja hasta las velas, en el hueco entre la caja y el vaso. */
-@media (min-aspect-ratio: 1/1) {
-  .bio-section .estacion-titular {
-    --titular-x: 12.5vw;
-  }
-
-  .group-section .estacion-titular {
-    --titular-x: 20vw;
-    --titular-bajo: 8svh;
-  }
-
-  .booking-section .estacion-titular {
-    --titular-x: 0;
-  }
-
-  /* Sonido: el tallo del cirio (x 403-453 a 1440) muerde el lado derecho de
-     la "a" final; más a la izquierda se comía la letra entera. */
-  .music-section .estacion-titular {
-    --titular-x: 7.4vw;
-  }
-
-  /* Retirada: la cabeza de la fiel se comía el primer trazo de la M. */
-  .footer-bar .estacion-titular {
-    --titular-x: 6vw;
-  }
-
-  /* Nave: la capa de frente son las columnas y las bancas, y la única franja
-     libre de arriba abajo es el pasillo, del 40 al 60 % del ancho (medido su
-     alfa). A la izquierda, donde estaba, las columnas tapaban el logo y el CTA.
-     El margen va contra la ventana, no contra el contenedor. */
-  .hero .hero-copy.hero-content {
-    margin-left: calc(39vw - (100vw - var(--container)) / 2);
-    max-width: 22vw;
-  }
-
-  .hero .hero-logo-img {
-    width: 100%;
-  }
-
-}
-
-.estacion-titular h2 {
-  font-family: var(--ff-display);
-  font-size: clamp(2.8rem, 8vw, 6rem);
-  font-weight: 400;
-  line-height: 1.05;
-}
-
-.estacion-titular h2 em {
-  font-style: italic;
-  font-weight: 600;
-  color: var(--gold);
-}
-
-.estacion-panel {
-  position: relative;
-  z-index: 3;
-  background: var(--bg-raised);
-  padding-block: var(--space-section);
-}
-
-/* Pop-in: capasEstacion escribe data-cerca. Se oculta sólo con "0", no por
-   defecto, para que sin JS se lea todo. */
-[data-estacion] > .container {
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-[data-estacion][data-cerca="0"] > .container {
-  opacity: 0;
-  transform: translateY(24px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [data-estacion] > .container {
-    transition: none;
-  }
 }
 
 .divider {
@@ -1037,19 +921,6 @@ body.marketing-body img {
   color: var(--muted);
   margin-top: 0.4rem;
   display: block;
-}
-
-.bio-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.6fr;
-  gap: clamp(2rem, 6vw, 5rem);
-  align-items: start;
-}
-
-@media (max-width: 700px) {
-  .bio-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .bio-tags {
@@ -1371,21 +1242,6 @@ body.marketing-body img {
   outline-offset: 4px;
 }
 
-/* El footer es la estación 5: monograma incrustado arriba y, en el panel,
-   marca, redes y copyright. Ningún enlace detrás de una vela. */
-.footer-bar .estacion-panel {
-  padding-block: 2rem;
-  border-top: 1px solid var(--border);
-}
-
-.footer-bar .estacion-panel .container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
 .footer-monograma {
   display: flex;
   align-items: center;
@@ -1422,43 +1278,6 @@ body.marketing-body img {
   margin: 0;
 }
 
-.members-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1px;
-  border: 1px solid var(--border);
-  background: var(--border);
-  margin-top: 2.5rem;
-}
-
-.member-card {
-  background: var(--surface);
-  padding: 2rem 1.8rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  transition: background 0.2s;
-}
-
-.member-card:hover {
-  background: var(--surface2);
-}
-
-.member-role {
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--gold);
-}
-
-.member-name {
-  font-family: var(--ff-display);
-  font-size: 1.5rem;
-  font-weight: 400;
-  line-height: 1.2;
-}
-
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -1468,29 +1287,6 @@ body.marketing-body img {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* ─── Scroll reveal (replaces AOS) ───────────────────────── */
-/* Oculto sólo si el script lo marcó: sin JS las tarjetas se ven. */
-[data-reveal="oculto"] {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-[data-reveal].is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [data-reveal],
-  [data-reveal].is-visible {
-    opacity: 1;
-    transform: none;
-    transition: none;
-    animation: none;
   }
 }
 
@@ -1781,21 +1577,11 @@ body.marketing-body img {
 }
 
 /* ─── Veracruz Noir — asymmetric hero + blocks ───────────── */
-/* Colocado contra la capa de frente de la nave: arriba entre columnas en
-   móvil, abajo en el pasillo en escritorio. Ver "Colocación por estación". */
+/* Layout C del ticket 03: logo, chips y la acción abajo a la izquierda; en vertical, la mitad de abajo. */
 .hero.hero--asymmetric {
-  justify-content: flex-start;
+  justify-content: flex-end;
   min-height: min(100svh, 960px);
-  padding-top: 9svh;
-  padding-bottom: var(--space-lg, 2rem);
-}
-
-@media (min-aspect-ratio: 1/1) {
-  .hero.hero--asymmetric {
-    justify-content: flex-end;
-    padding-top: 0;
-    padding-bottom: 3svh;
-  }
+  padding-bottom: max(3svh, 1.5rem);
 }
 
 .hero.hero--asymmetric .hero-deco-line {
@@ -1988,56 +1774,6 @@ body.marketing-body img {
   }
 }
 
-/* Film strip */
-.film-strip {
-  padding-block: clamp(2rem, 5vw, 3rem);
-  border-block: 1px solid var(--border);
-  background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
-}
-
-.film-strip-inner {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  justify-content: center;
-  max-width: var(--container, 72rem);
-  margin-inline: auto;
-  padding-inline: 1.25rem;
-}
-
-.film-strip-frame {
-  display: block;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: zoom-in;
-}
-
-.film-strip-frame:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 4px;
-}
-
-.film-strip-img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  box-shadow: 0 12px 40px oklch(5% 0 0 / 0.5);
-  filter: grayscale(100%) contrast(1.05);
-  transition: filter 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
-}
-
-.film-strip-frame:hover .film-strip-img {
-  filter: grayscale(0%) contrast(1);
-  transform: translateY(-4px) scale(1.02);
-  box-shadow:
-    0 20px 50px oklch(5% 0 0 / 0.7),
-    0 0 30px color-mix(in oklch, var(--red-glow) 65%, transparent);
-}
 .footer-github-link {
   color: inherit;
   text-decoration: none;
@@ -2047,51 +1783,4 @@ body.marketing-body img {
 .footer-github-link:hover,
 .footer-github-link:focus-visible {
   color: var(--red-link);
-}
-
-/* Photo lightbox — native <dialog> */
-.zoom-dialog {
-  position: fixed;
-  inset: 0;
-  margin: auto;
-  max-width: min(92vw, 1200px);
-  max-height: 92vh;
-  padding: 0;
-  border: 1px solid var(--gold-dim);
-  background: var(--bg-sunk);
-  color: var(--text);
-  overflow: visible;
-}
-
-.zoom-dialog::backdrop {
-  background: oklch(4% 0 0 / 0.88);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
-.zoom-dialog img {
-  display: block;
-  max-width: min(92vw, 1200px);
-  max-height: 92vh;
-  width: auto;
-  height: auto;
-}
-
-.zoom-dialog-close {
-  position: absolute;
-  top: 0;
-  right: 0;
-  min-width: 44px;
-  min-height: 44px;
-  font-size: 1.5rem;
-  line-height: 1;
-  color: var(--text);
-  background: oklch(4% 0 0 / 0.6);
-  border: none;
-  cursor: pointer;
-}
-
-.zoom-dialog-close:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: -4px;
 }

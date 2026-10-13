@@ -9,7 +9,7 @@
 **Gótico Tumbado** — black canvas, gold gothic lettering, red neon accent.
 
 Near-black surfaces, gold gradient on display type, red-orange reserved for
-rules, marquee and glow. Grenze Gotisch as the signature blackletter display
+rules, marquee and glow. Pirata One as the signature blackletter display
 face; Archivo for body and UI; JetBrains Mono for tabular data.
 
 Why this direction: the band already has one. Their billing wordmark on event
@@ -119,7 +119,7 @@ whenever a token moves — do not assume.
 
 ```css
 :root {
-  --ff-display: 'Grenze Gotisch', Georgia, serif;
+  --ff-display: 'Pirata One', Georgia, serif;
   --ff-body: 'Archivo', system-ui, -apple-system, sans-serif;
   --ff-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
 
@@ -140,9 +140,11 @@ whenever a token moves — do not assume.
 
 **Typography rules:**
 
-- Grenze Gotisch: `h2`, `h3`, release titles, the MTO monogram. Weight 600–700.
-  Never body, never below 24px — blackletter loses legibility fast.
-- Grenze Gotisch carries full Spanish diacritics (á é í ó ú ñ ü ¿ ¡). Verify any
+- Pirata One: `h2`, `h3`, release titles, the MTO monogram. Weight 400 only:
+  it ships a single weight, and a declared 600/700 makes the browser faux-bold
+  it, which closes the counters. Never body, never below 24px — blackletter
+  loses legibility fast.
+- Pirata One carries full Spanish diacritics (á é í ó ú ñ ü ¿ ¡). Verify any
   replacement face does too before swapping — most free blackletter does not.
 - Archivo: body, UI labels, buttons.
 - JetBrains Mono: eyebrows (ALL CAPS, `--tracking-eyebrow`, `--red-link`),
@@ -324,10 +326,13 @@ Before any design-adjacent PR ships:
 5. `prefers-reduced-motion` toggle — no autoplay, no marquee, no scroll-trigger
 6. Recompute the contrast table for any token that moved
 7. Confirm gold gradient text still renders with `background-clip` disabled
-8. Confirm Spanish diacritics render in Grenze Gotisch at every display size
+8. Confirm Spanish diacritics render in Pirata One at every display size
 
 ## History
 
+- 2026-10-13 — Doc reconciled with the code: the display face is Pirata One
+  (OFL), swapped in `bb722cb` (single 400 weight; its condensed forms fit
+  "El sonido de Xalapa" on one line at 390px). Grenze Gotisch is retired.
 - 2026-09-09 (pm) — **Direction replaced.** Veracruz Noir retired in favour of
   Gótico Tumbado after scoping pesopluma.com, fuerzaregida.com and
   carinleon.com, then harvesting the band's own socials: their flyer billing
