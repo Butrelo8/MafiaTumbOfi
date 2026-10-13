@@ -14,7 +14,7 @@
 #   escalera <master.mkv> <prefijo>                                 AV1/HEVC/H.264 con peso y SSIM
 #
 # Variables: FORMATO escritorio|movil (escritorio), DUR 5|10|15 s (5), N cuadros del loop (24·DUR), X fundido (20),
-# W/H tamaño de H3, SEMILLA (7), SEMILLAS de Klein ("11 22 33"), MP megapíxeles de Klein (1.56), DEST carpeta (.).
+# W/H tamaño de H3, FIN end_percent del canny con cámara quieta (0.5), SEMILLA (7), SEMILLAS de Klein ("11 22 33"), MP megapíxeles de Klein (1.56), DEST carpeta (.).
 # klein/h3/rtx sólo imprimen la orden de gen.sh; CORRER=1 la lanza (ComfyUI, minutos por trabajo).
 # HUMO60=1: el humo como sub-loop propio de 60 cuadros fundido de punta a punta (montar_r7.sh / montar_nave.sh, r3 del
 # ticket 13). Por omisión el humo va en el mismo loop de N que las llamas (montar_largo.sh): "va en todas las versiones
@@ -65,7 +65,7 @@ h3)
   L=$((N + X)); L=$(( (L - 5 + 16) / 17 * 17 + 5 ))  # H3 pide 17n+5 cuadros: N del loop + X para fundir la costura
   if [[ $ctl == *.png ]]; then  # cámara quieta: canny de la placa repetido, como el anuncio de E:\ComfyUI (PLAYBOOKS.md)
     ffmpeg -v error -y -loop 1 -framerate 24 -i "$ctl" -vf scale=$W:$H:flags=lanczos -frames:v $L -c:v libx264 -crf 12 -pix_fmt yuv420p "$DEST/ctl_$pref.mp4"
-    extra=(15.steps=${PASOS:-40} 10.end_percent=0.5)
+    extra=(15.steps=${PASOS:-40} 10.end_percent=${FIN:-0.5})
   else
     ffmpeg -v error -y -i "$ctl" -vf scale=$W:$H:flags=lanczos -frames:v $L -c:v libx264 -crf 12 -pix_fmt yuv420p "$DEST/ctl_$pref.mp4"
     extra=(15.steps=${PASOS:-20})
