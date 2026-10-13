@@ -66,6 +66,12 @@ en la propuesta de abajo):
   negro, con el grano medido): `tmp/07/e4/encuadre/verticales.py` → `tmp/07/e4/v2/out/vertical_*.png` (720×1280), pares
   al mismo alto en `tmp/07/tablero/e4_vertical_*.jpg`. Con la placa de producción (Klein 4 MP) la escala ×1.36 de la
   cripta deja de ser ampliación.
+- **A/B con Google Flow, camarín → cripta (job1, Veo 3.1 Fast, 20 créditos, 2026-10-13).** Los extremos sí coinciden:
+  el cuadro 0 = la placa del camarín y el 184 = la de la cripta; los cuadros 185–191 se arrastran (escala 1.025), así
+  que se corta en 184. El oclusor **no** tapa el cambio: la tela nunca llena el cuadro (luma mínima 17.6) y la cripta
+  aparece detrás de los sacos todavía colgados, o sea un morph. Además inventa un perchero suelto con dos sacos, una luz
+  blanca con destello cian y muro más allá del ropero. No sirve como E6 final; sí como referencia de velocidad de cámara
+  y de movimiento de la tela. Tablero `tmp/07/tablero/flow_job1_ab.jpg`, veredicto `tmp/07/flow/job1/veredicto.md`.
 - **El atrio elegido todavía no deja limpia la esquina** (`tmp/07/tablero/atrio_C2_lobo_hueco.jpg`: luma media 24 en
   el hueco contra 46 en el cuadro): el poste, el muro que alumbra el sodio y el canto izquierdo del portal caen dentro.
   En la placa de producción el poste se mueve a la derecha del portal o el muro bajo la lámpara cae a negro, para que
