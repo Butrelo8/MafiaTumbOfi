@@ -53,7 +53,7 @@ nueva), H3, loops de 10 s y las transiciones del 17 sobre las placas nuevas.
 
 ## Skills sugeridas
 
-- `blender` + leer `docs/blender-notas.md` antes de tocar `blender/`.
+- `santuario-escena` + leer `docs/blender-notas.md` antes de tocar `blender/`.
 - `comfy-local` para Klein (`preset_edit`, `preset_edit_ref`).
 - `director` si hay que decidir el peso visual de la gente en el encuadre (está en `.claude/skills/director` desde el
   preset `produccion-visual`).

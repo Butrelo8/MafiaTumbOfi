@@ -83,7 +83,7 @@ es de esta sesión: es del usuario y no va en estos commits. El usuario commitea
 
 ## Skills sugeridas
 
-- `blender` (proyecto) + leer `docs/blender-notas.md` antes de tocar `blender/`.
+- `santuario-escena` (proyecto) + leer `docs/blender-notas.md` antes de tocar `blender/`.
 - `frameref` si hace falta referencia de cómo se ve una señora con rebozo rezando o un fan en una iglesia de noche.
 - `director` para decidir pose y peso visual de las figuras dentro del encuadre.
 - mpaf `matt-wayfinder` para cerrar el ticket 06 en el mapa.

@@ -84,6 +84,6 @@ FOCO_D=0.97 FOCO_MASK=foco_micro.png $PY ../cine-look/dof.py r7_micro_m.mkv disp
 
 ## Skills sugeridas
 
-- `blender` + `docs/blender-notas.md` (maqueta y vertical); `kiln-prop` si el micro necesita silueta medida contra foto.
+- `santuario-escena` + `docs/blender-notas.md` (maqueta y vertical); `kiln-prop` si el micro necesita silueta medida contra foto.
 - `comfy-local` (lo invoca el usuario) para presets; `fable-review` si el usuario pide otra pasada de Fable.
 - `matt-wayfinder` (mpaf) para cerrar el ticket del micro en `MAP.md`; `director`/`frameref` si se replantea el sujeto.

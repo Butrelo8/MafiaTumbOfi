@@ -14,7 +14,7 @@ Lista para producir sin decisiones pendientes. Llegamos cuando no queda ningún 
 - **Excepción a "plan, don't do"** (decidido 2026-10-04): los tickets de prototipo producen renders reales,
   porque aquí las decisiones se toman viéndolos. La producción completa va después de cerrar el mapa.
 - Skills por sesión: `director` (planos, notas sobre cortes), `frameref` (look de cada espacio),
-  `blender` + `docs/blender-notas.md` antes de tocar `blender/`, `matt-grilling` en los tickets de conversación.
+  `santuario-escena` + `docs/blender-notas.md` antes de tocar `blender/`, `matt-grilling` en los tickets de conversación.
 - UI (ticket 10): `frontend-design` como única skill general de diseño; `review-animations` y `animation-vocabulary`
   (Emil Kowalski, en `.claude/skills/`) para el movimiento; auditoría anti-slop con `npx -y impeccable@4.5.2 detect --json`
   sobre cada prototipo; variantes de UI en un lienzo de Claude Design (`/design`). Avance del 2026-10-10 en el ticket 10.
