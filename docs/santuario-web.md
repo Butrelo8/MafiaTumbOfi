@@ -18,10 +18,12 @@ Cómo está montado el santuario en `src/` y qué falta para cambiar los provisi
 |---|---|---|
 | `escritorio/nave.mp4`, `vertical/nave.mp4` | `entrega/*/nave.mp4` | G6; AV1 y HEVC (paso 4) |
 | `escritorio/ida-{av1,hevc,h264}.mp4`, `vertical/ida-*` | `entrega/*/ida-*` | G7 |
-| `escritorio/vuelta-av1.mp4` | `entrega/escritorio/` | G7; HEVC y H.264 (paso 4). Sin ellas, Safari sin AV1 cruza por negro |
-| `vertical/vuelta-h264.mp4` | `entrega/vertical/` | paso 2 (`vuelta-av1` ya en `entrega/`); HEVC (paso 4) |
-| `vertical/sacristia.mp4` | `entrega/vertical/sacristia.mp4` (10 s, recorte del escritorio) | copiar a `public/` junto con la ida y la vuelta verticales nuevas (paso 2 hecho; las de `public/` son las de antes) |
-| `escritorio/sacristia.webp` | último cuadro de `ida-h264` | paso 1: el loop de escritorio. Al llegar, en `santuario.ts` cambiar `quieta` por `loop: loop('escritorio', 'sacristia')` |
+| `escritorio/vuelta-av1.mp4` | `entrega/escritorio/` | HEVC y H.264 (paso 4). Sin ellas, Safari sin AV1 cruza por negro |
+| `vertical/vuelta-{av1,h264}.mp4` | `entrega/vertical/` | HEVC (paso 4) |
+| `escritorio/sacristia.mp4`, `vertical/sacristia.mp4` | `entrega/*/sacristia.mp4` (loops de 10 s; la vertical es un recorte del escritorio) | AV1 y HEVC (paso 4) |
+
+Las idas, las vueltas y la nave deben copiarse juntas desde `entrega/`: el primer cuadro de cada ida es el de la nave
+de su misma generación (MAD 8.1 escritorio / 5.2 vertical); con la nave de otra generación el corte salta (MAD ~20).
 
 Cambiar un render es reemplazar el archivo con el mismo nombre. Un códec nuevo de un archivo que ya existe se añade
 a la lista de su `transicion(...)`; un loop en varios códecs pide pasar `loop()` a la forma de `transicion()`.

@@ -54,10 +54,13 @@ describe('clavesDelViaje', () => {
     expect(clavesDelViaje(espacios, 'vertical', viaje, 2, chrome)).toEqual(['1:ida', '2:loop'])
   })
 
-  test('llegar a negro o a una imagen quieta no espera a nada', () => {
+  test('llegar a negro no espera a nada', () => {
     expect(clavesDelViaje(espacios, 'escritorio', { tipo: 'fundido' }, 3, chrome)).toEqual([])
+  })
+
+  test('en escritorio la sacristía también espera a su loop', () => {
     const viaje = planDeViaje(espacios, 'escritorio', 1, 2, false, chrome)
-    expect(clavesDelViaje(espacios, 'escritorio', viaje, 2, chrome)).toEqual(['1:ida'])
+    expect(clavesDelViaje(espacios, 'escritorio', viaje, 2, chrome)).toEqual(['1:ida', '2:loop'])
   })
 })
 

@@ -35,7 +35,7 @@ npx wrangler deploy
 ## Design rules
 
 Read [`DESIGN.md`](./DESIGN.md) before changing the page. Preserve the
-Gótico Tumbado direction: black-on-black surfaces, Grenze Gotisch for display
+Gótico Tumbado direction: black-on-black surfaces, Pirata One for display
 type only, Archivo for body/UI, JetBrains Mono for tabular data, red neon for
 links, rules and glow, and gold for display type, the MTO monogram and CTAs.
 

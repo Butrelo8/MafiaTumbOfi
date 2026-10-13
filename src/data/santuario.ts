@@ -7,8 +7,8 @@
  * navegador se queda con la primera que dice poder reproducir. Las que aún no existen no se listan.
  *
  * Provisional (2026-10-13): todo es de antes de la pila (`entrega/`). Los renders finales reemplazan
- * los archivos con el mismo nombre. Falta el loop de la sacristía de escritorio: mientras tanto, el
- * último cuadro de la ida. El de la vertical es el de 5 s del 2026-10-05.
+ * los archivos con el mismo nombre. La sacristía es el loop de 10 s en los dos formatos (la vertical es
+ * un recorte de la de escritorio).
  */
 
 export interface Fuente {
@@ -69,7 +69,7 @@ export const espacios: Espacio[] = [
       vertical: {
         loop: loop('vertical', 'nave'),
         ida: transicion('vertical', 'ida', ['av1', 'hevc', 'h264']),
-        vuelta: transicion('vertical', 'vuelta', ['h264']),
+        vuelta: transicion('vertical', 'vuelta', ['av1', 'h264']),
       },
     },
   },
@@ -77,7 +77,7 @@ export const espacios: Espacio[] = [
     id: 'musica',
     nombre: 'Música',
     fondo: {
-      escritorio: { quieta: '/video/escritorio/sacristia.webp' },
+      escritorio: { loop: loop('escritorio', 'sacristia') },
       vertical: { loop: loop('vertical', 'sacristia') },
     },
   },
