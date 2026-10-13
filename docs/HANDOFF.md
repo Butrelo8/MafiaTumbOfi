@@ -6,7 +6,8 @@
 > **Ticket 07 en producción (camarín, cripta, atrio; E1–E4): [`docs/handoffs/2026-10-13-07-produccion.md`](handoffs/2026-10-13-07-produccion.md)**
 
 > **Más reciente: [`docs/handoffs/2026-10-13-tallo-y-rosa.md`](handoffs/2026-10-13-tallo-y-rosa.md)**
-> (G5 y G6 hechos; tallo de espinas y rosa del micro a medio rehacer: falta igualar su luz a la del micro).
+> (G5 y G6 hechos). Después: tallo y rosa rehechos con la luz C, loops recongelados y **G7 hecho** (2026-10-13; ticket 06
+> bullet del tallo, ticket 17 sección G7, `entrega/LEEME.md`). Siguiente en el camino crítico: loops de la sacristía (pasos 1 y 2).
 > Anteriores: [`2026-10-11-gente-reproyeccion.md`](handoffs/2026-10-11-gente-reproyeccion.md),
 > [`2026-10-10-micro-colgado.md`](handoffs/2026-10-10-micro-colgado.md),
 > [`2026-10-05-movil-y-props.md`](handoffs/2026-10-05-movil-y-props.md).
