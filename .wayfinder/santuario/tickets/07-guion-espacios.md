@@ -113,8 +113,11 @@ en la propuesta de abajo):
     `arreglos.py` le da caída de luz desde los dos arbotantes, sólo sobre el muro (fuera el cristal del espejo, el
     ropero y la cómoda), después de Klein. Hueco 47 → A 31 / **B 26 (por omisión)** / C 24; el espejo solo aporta ~12.
   - **Troca:** fuera las letras de la salpicadera, el óvalo de la tapa y las letras de la placa (inpaint + grano medido
-    por MAD lejos del borde), antes y después de Klein. Klein a 4 MP las pintó otra vez de gotas: la pintura sale muy
-    granulada en las dos semillas.
+    por MAD lejos del borde), antes y después de Klein; ninguna semilla las volvió a escribir. La pintura sale muy
+    granulada en las dos semillas **por el prompt** (`real_atrio.txt` pide "raindrops and road dust low on the body"):
+    si el usuario la rechaza, quitar esa frase (un Klein más) o, sin GPU, tomar la carrocería del tono NR con una
+    máscara (la mezcla de `PROF` en `placa_real.py`). Alineación medida en la troca (flujo DIS sobre bordes): mediana
+    0.5 px en s3, 0.7 en s2; el poste 0.55 en s3 y 2.4 en s2.
   - **Adoquines:** el prompt pide piedras separadas con juntas oscuras y una película de agua (lectura del drone: al
     100 % se veían como CG embarrado); el usuario lo juzga en los recortes al 100 %.
   - **Esquina del atrio (opcional, meltingship 07:23):** caída de luz desde el portal sobre el muro bajo y la calle,
