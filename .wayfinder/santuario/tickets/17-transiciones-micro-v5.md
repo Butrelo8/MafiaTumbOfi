@@ -115,3 +115,16 @@ todos H.264 crf 16).
   la velocidad del smoothstep, 6t(1−t)/1.5. Cascada del 05: ida **AV1 189 KB** (vuelta 194), HEVC 375, H.264 794
   (`hd_det/ida_final_*.mp4`); antes 774 KB en H.264. Tecla 6 de `detalle_web/`. Falta la vertical con el mismo método y
   todo esto se rehace sobre las placas con la pila (06).
+
+## G7: las transiciones sobre la nave con la gente (2026-10-13)
+Todo en `tmp/g7/{esc,vert}/` (ignorado). Mismo método que lo aprobado arriba, con la placa real G4, la maqueta actual y
+el micro de G6 (tallo nuevo, luz C).
+- **Pases** (`pases.py`): `blender/transicion.py` actual (pila, gente, espiral pegada) **sin el micro**: la maqueta del 17
+  no lo tenía y el micro va como capa 2D seguida (camino 1, elegido por el usuario); con él en la profundidad, H3
+  dibujaría un segundo micro bajo la capa. Pistas del micro (`pista_micro.py`) iguales a las del 17 (u idéntica).
+- **Sólo cambia la mitad de la nave.** La profundidad y la máscara son idénticas a las del 17 desde el cuadro 334
+  (escritorio) y 328 (vertical); el corte toma la sacristía de 335/329 en adelante, así que T3r (y su detalle de
+  escritorio) se reutilizan tal cual. H3 sólo para T1: escritorio 1920×1056 ~414 s, vertical 704×1280; semilla 7;
+  prompts en `prompts/g7-transiciones/` (la nave de G6: gente, velo, rosas, copal en la bocina).
+- Escritorio: H3 inventa un altar lateral con velas a la derecha antes del pilar (cuadros 20–28); el copal sale ya con
+  llamas en la placa G4. El usuario siguió con s7. Cadenas: `tmp/g7/esc/armar.sh`, `tmp/g7/vert/armar.sh`.
