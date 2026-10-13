@@ -327,3 +327,13 @@ Disposición (`disposicion.py`, `hoja_disp_esc.png`, `hoja_disp_vert.png`, verde
     más suave. Se presentaron A (ganancia lisa del handoff), B (nivel intermedio, sin caída) y C; el usuario eligió C.
     El grano tomado del muro con paso alto metía el dibujo de los ladrillos en la rosa, y el ruido gris en BGR salpicaba
     el rojo oscuro: por eso es sintético y sólo en L*. Con `ROSA_GAN=lum` en `micro_viva_v.py` (la rosa no vira a magenta).
+  - **Cascada a la vertical y la disparidad.** `disp_g5.py` con la máscara nueva → `esc_disp_tallo.png` (0.976) y
+    `vert_disp_tallo.png` (0.60), sin la banda "cerca" de la sinusoide vieja (reproduce byte a byte las de G5 con la
+    máscara vieja). Vertical: `mapear_v.py` + 20 px arriba → `vert_mascara_tallo.png`, `vert_rosa_tallo.png`;
+    `g5/tallo_v.py` (generaliza `cupula_v.py`) pega la placa de escritorio escalada sólo dentro de la máscara nueva y borra el
+    tallo viejo del fondo de s4 (inpaint) → `vert_placa_micro_tallo.png`. Dos trampas: pegar el rectángulo entero metía el
+    fondo de escritorio en el anillo de `micro_viva_v.py` (ganancia 0.59 → 1.24, oro ×1.9); la ganancia por canal contra
+    el oro de s4 (B ×1.6) volvía magenta la rosa → ganancia media y `FACTOR=1.6`, que deja tallo y rosa en el nivel
+    absoluto de escritorio (p90 23.1 / 23.9 contra 23.5 / 24.3); el oro vertical sigue en el aprobado (p99 49.0 contra 49.8).
+  - `tmp/g6/tanda.sh` apunta a los `*_tallo` con `ROSA_GAN=lum` y reutiliza `real240.mkv` (el fondo aprobado queda
+    idéntico); la versión con el tallo viejo es `tanda_g6_tallo_viejo.sh`, salidas aprobadas en `tmp/g6/tallo_viejo/`.
