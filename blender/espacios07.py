@@ -8,6 +8,7 @@ No toca nave ni sacristía: usa los ayudantes de transicion.py y los assets de a
 Sin UI, sólo CPU (la GPU la tiene otro rol): gris en workbench, profundidad en Cycles por CPU.
     blender.exe -b --factory-startup --python espacios07.py -- <carpeta> [vestidor cripta atrio] [escritorio movil]
 """
+import json
 import math
 import os
 import sys
@@ -337,8 +338,38 @@ def render(carpeta, espacios, formatos, cam):
     sc.view_layers[0].material_override = None
 
 
+def pases_reproy(carpeta, espacio, cam, esc=(1696, 944), vert=(720, 1280)):
+    """Para la vertical por reproyección (E4, método de G3: tmp/props-06/reproyectar.py, que corre en `carpeta`):
+    z_esc.png / z_vert.png en 16 bits con la codificación fija de _profundidad (0.3–40 m) y camaras.json con la matriz
+    y el view_frame de cada cámara. Escritorio al tamaño de la placa de Klein."""
+    sc = bpy.context.scene
+    os.makedirs(carpeta, exist_ok=True)
+    sc.render.engine, sc.cycles.device, sc.cycles.samples = "CYCLES", "CPU", 16
+    sc.view_layers[0].material_override = T["_profundidad"]()
+    sc.view_settings.view_transform = "Standard"
+    s = sc.render.image_settings
+    s.file_format, s.color_mode, s.color_depth = "PNG", "BW", "16"
+    camaras = {}
+    for formato, tag, (w, h) in (("escritorio", "esc", esc), ("movil", "vert", vert)):
+        encuadrar(cam, espacio, formato)
+        sc.render.resolution_x, sc.render.resolution_y = w, h
+        sc.render.filepath = os.path.join(carpeta, f"z_{tag}.png")
+        bpy.ops.render.render(write_still=True)
+        bpy.context.view_layer.update()
+        camaras[tag] = {"w": w, "h": h, "mundo": [list(r) for r in cam.matrix_world],
+                        "marco": [list(v) for v in cam.data.view_frame(scene=sc)]}
+    json.dump(camaras, open(os.path.join(carpeta, "camaras.json"), "w"), indent=1)
+    s.color_mode, s.color_depth = "RGB", "8"
+    sc.view_layers[0].material_override = None
+    print("SALIDA reproy", espacio)
+
+
 if __name__ == "__main__" and "--" in sys.argv:
     args = sys.argv[sys.argv.index("--") + 1:]
+    if args[0] == "reproy":  # -- reproy <carpeta> <espacio> [ancho alto de la placa de escritorio]
+        esc = (int(args[3]), int(args[4])) if len(args) > 4 else (1696, 944)
+        pases_reproy(args[1], args[2], build([args[2]]), esc)
+        sys.exit(0)
     carpeta = args[0]
     esp = [a for a in args[1:] if a in ESPACIOS] or list(ESPACIOS)
     fmt = [a for a in args[1:] if a in FORMATOS] or list(FORMATOS)
