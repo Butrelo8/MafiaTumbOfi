@@ -16,11 +16,18 @@ Files (job folder `tmp/07/flow/job1/` in the MTO repo):
 
 Both frames are 1920×1080 PNG (16:9).
 
+## 0. Account (hard stop)
+
+Chrome has two Google accounts. This job runs **only** on the account `av.ivan.8` (`/u/1/` in the URL, **90
+credits**). If Flow opens on any other account (for example `bube.ncio8`, `/u/0/`, 50 credits), or the balance
+shown is anything other than 90, STOP and report. Do not switch accounts by yourself and do not continue on another
+account.
+
 ## 1. Open Flow
 
 1. Open `https://labs.google/fx/tools/flow`. If it asks you to sign in, STOP and report (the user has to sign in).
 2. Read the credit balance (top right, or in the profile/account menu). Write it as the first line of
-   `out/credits.txt`: `before: <number>`. If it is below the cost of one Fast video, STOP.
+   `out/credits.txt`: `before: <number>`. If it is not 90 (step 0), STOP.
 3. Create a **New project**.
 
 ## 2. Set up frames to video
