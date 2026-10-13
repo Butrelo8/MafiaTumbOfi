@@ -26,12 +26,12 @@ coincide con las placas r6/v5 sin dobles, y la vertical con micro también está
 
 | Camino | Qué sale en la versión 1 | Fecha |
 |---|---|---|
-| **A (recomendado)** | La nave tal como está aprobada: placa v5, micro colgado, sin gente ni ofrendas nuevas. El 06 v6 pasa a "después" | **2026-10-25**, sólo con todos los recortes de abajo; con margen, **2026-11-01** |
-| B | La nave con la gente del 06 v6, y todo lo de la nave rehecho encima | **~2026-11-15** (7–10 sesiones más) |
+| A | La nave tal como está aprobada: placa v5, micro colgado, sin gente ni ofrendas nuevas. El 06 v6 pasa a "después" | **2026-10-25**, sólo con todos los recortes de abajo; con margen, **2026-11-01** |
+| **B (elegido)** | La nave con la gente del 06 v6, y todo lo de la nave rehecho encima | **~2026-11-15** (7–10 sesiones más) |
 
-**Recomendación: A.** La gente es una mejora de una pantalla que ya funciona; no cambia la estructura, el contenido ni la
-contratación, y entra después sin tocar el código web (se reemplazan archivos de video con los mismos nombres). Esto lo
-confirma el usuario antes de empezar; todo lo que sigue supone el camino A.
+La recomendación de este documento era A. **El usuario eligió B el 2026-10-12 a las 21:25 ("despacio pero seguro"):** la
+gente entra en la versión 1 y la fecha es **~2026-11-15**. Todo lo que sigue supone el camino B; los pasos de la gente
+(G1–G7) van entre el paso 0 y el 1.
 
 ## Qué está hecho
 
@@ -64,6 +64,13 @@ sesión (tres semillas, el usuario elige, retoque), aunque el cómputo de un loo
 | # | Paso | Quién / herramienta | Esfuerzo |
 |---|---|---|---|
 | 0 | **Inventario y congelado.** Copiar los videos aprobados a una carpeta de entrega fuera de `tmp/` (los maestros sin pérdida donde existan) con nombres finales; comprobar que el loop de la nave ya no tiene el defecto de la rosa del 2026-10-10 ("still missing pieces"). | web / ffmpeg | 0.5 sesión |
+| G1 | **Confirmar con el usuario el sitio del joven.** Medido (`tmp/props-06/medir_libre.py`): sólo le quedan bancas izquierdas, filas 6–12, que en escritorio caen en el hueco del texto del 03. | conversación | 0.25 sesión |
+| G2 | **Placa de escritorio con gente.** Sobre `tmp/props-06/s44_vacia.png`, devolver la mujer del velo y el fiel de s44; Klein añade joven y texana en recortes centrados en su sitio medido, pegando sólo la caja (`pegar_zona.py`). Mover `PROPS` en `blender/transicion.py` a esos sitios y sacar la profundidad (`pases_reproy.py`, también `-- vacio`). | ComfyUI (Klein) + Blender | 1–2 sesiones |
+| G3 | **Vertical por reproyección** desde la placa nueva (`reproyectar.py`, base de huecos sin gente `s33_vacia_s7` a 704×1280, un pase de Klein, `pegar_huecos.py` sólo en los huecos). El usuario compara sujeto por sujeto al 100 % y aprueba sólo si gente, ropa y props coinciden. | Blender + ComfyUI | 1–2 sesiones |
+| G4 | **Placa real v5 de los dos formatos** (Klein 4 MP con el tono de la placa NR + foco de lente). | ComfyUI | 1 sesión |
+| G5 | **El micro encima**, re-pegado y re-retocado contra cada placa nueva (máscaras, rosa, espiral, brillo `TOPE=1.2`; cadena de `docs/handoffs/2026-10-10-micro-colgado.md`). | ComfyUI + ffmpeg | 1–2 sesiones |
+| G6 | **Loops de la nave de 10 s**, escritorio y vertical, con la cadena del 16 sobre las placas nuevas. | ComfyUI | 1 sesión, ~1 h de GPU |
+| G7 | **Transiciones nave ↔ sacristía del 17 rehechas**, escritorio (H3 a 1080p + detalle de la placa, difusión ligera al moverse) y vertical (micro seguido, foco por cuadro, obturador), con los pases de Blender de la maqueta con la pila y la gente. | Blender + ComfyUI | 2 sesiones |
 | 1 | **Loop de la sacristía, escritorio, 10 s, v5** desde la placa s11: placa real (Klein 4 MP + NR), zonas vivas, H3 nativo a 928×512, RTX ×2, velas y polvo de 240, foco de lente, LOOK y halación (cadena del 15/16). Revisar el empalme con el final de la ida aprobada; si la placa v5 se separa de lo que la ida dibujó, rehacer sólo la segunda mitad de la ida desde la placa nueva. | ComfyUI (H3, Klein) + Blender (pases) | 1–2 sesiones, ~1 h de GPU |
 | 2 | **Loop de la sacristía, vertical, 10 s, v5** con la cadena vertical del 16 (H3 a 512×928, sólo lo que se mueve, RTX ×1.375). Plan de emergencia si no da el tiempo: salir con el de 5 s del 2026-10-05, sabiendo que contradice el 16 y que no tiene el look v5. | ComfyUI | 1 sesión |
 | 3 | **Hero → nave (ticket 08) por el negro, sin render.** El hero ya termina en un fundido de 1.5 s; la nave entra desde negro con su loop, que ya trae el micro (cumple la nota del 08 y la condición de la spec del micro). Es el mismo fundido que el 05 aprobó para los saltos del menú. | web | 0.5 sesión |
@@ -74,7 +81,9 @@ sesión (tres semillas, el usuario elige, retoque), aunque el cómputo de un loo
 | 8 | **QA en teléfonos reales**: un iPhone anterior al 15 Pro (HEVC), uno reciente (AV1), un Android de gama media; modo de bajo consumo de iOS; `scripts/medir-peso.mjs` con red 4G para confirmar entrada ≤ 3 MB y gesto ≤ 1 MB; Lighthouse móvil (`cloudflare:web-perf`). | QA | 1 sesión |
 | 9 | **Merge y deploy.** `/code-review` de `dev`, merge a `main` resolviendo los arreglos que sólo están en `main`, `bun run build`, `npx wrangler deploy` (antes, las skills `cloudflare:wrangler` y `workers-best-practices`, como pide `CLAUDE.md`), prueba de humo en mafiatumbada.com y `www`. | deploy | 1 sesión |
 
-**Total del camino A: 9.5–13 sesiones.** Del 2026-10-13 al 2026-10-25 hay 13 días.
+**Total del camino B: 17–23 sesiones** (G1–G7 suman 7.25–10.25 y los pasos 0–9, 9.5–13). Del 2026-10-13 al 2026-11-15
+hay 34 días. Los pasos web (3, 5, 6, 7) no usan la GPU: pueden avanzar en paralelo con G2–G7 usando los videos de antes
+de la pila como provisionales, y al final se reemplazan los archivos con los mismos nombres.
 
 ### Cómo quedan El grupo, Contratación y Cierre
 
@@ -90,7 +99,6 @@ tapa la escena; si después el usuario lo pide, es una pieza pequeña.
 
 ## Lo que se recorta a "después"
 
-- **Ticket 06 v6**: la gente y las ofrendas en la nave, con todo lo que obliga a rehacer (camino B).
 - **Ticket 07**: camarín, cripta y atrio, con su guion, placas, loops y transiciones, y la troca del videoclip en el atrio.
 - **Hero → nave renderizado** (una transición real en vez del fundido por negro).
 - **Ticket 10, lo que queda abierto**: las cinco reglas de gusto para `DESIGN.md` y la elección entre las variantes A/B/C
@@ -126,15 +134,14 @@ tapa la escena; si después el usuario lo pide, es una pieza pequeña.
   `run_worker_first`.
 - **`dev` y `main` divergen** (124 commits contra varios hotfixes): reservar parte de la sesión 9 para el merge.
 
-## ¿Es realista el 2026-10-25?
+## Fecha
 
-**Sí, pero justo.** El camino A suma 9.5–13 sesiones en 13 días: sale el 25 sólo con una sesión al día, sin abrir rondas
-de aprobación nuevas (variantes de UI, gente, otro espacio) y con los loops de la sacristía aprobados a la primera o a la
-segunda. La fecha con margen honesto es el **2026-11-01**. Con la gente del 06 v6 dentro (camino B), la fecha es
-**~2026-11-15**.
+**Elegida: ~2026-11-15, camino B.** Son 17–23 sesiones en 34 días, con margen para que cada pieza de la gente pida dos o
+tres rondas de aprobación. El 2026-10-25 sólo era posible con el camino A (9.5–13 sesiones en 13 días, con margen hasta el
+2026-11-01); queda como referencia.
 
-Para no llegar al 25 sin nada publicado: el orden de arriba permite desplegar una versión con la nave y su UI aunque la
-sacristía no esté (pasos 0, 3–9 con la sacristía en negro como El grupo), y sumar la sacristía después con un deploy más.
+Si hiciera falta algo en vivo antes, el orden permite desplegar la versión sin gente (pasos 0, 3–9 con los videos de antes
+de la pila) y cambiar los archivos al terminar G7. No está decidido; lo decide el usuario si llega el caso.
 
 ## Qué del pipeline sirve para el portafolio
 
