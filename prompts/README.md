@@ -52,3 +52,9 @@ con `gen.sh`, `ffmpeg` y `cp` simulados.
 | `06-movil/micro_v.txt` | `micro/movil/` | `preset_edit` | 11 | `75/80.megapixels=4 75/80.upscale_method=lanczos` |
 | `06-movil/micro_v2.txt` | `micro/movil/` (`PROMPT=prompt_klein_v2.txt klein_v.sh`) | `preset_edit` | por llamada | `75/80.megapixels=4 75/80.upscale_method=lanczos` |
 | `16-loops-de-10s/h3_calmo_260.txt` | `micro/largo/` (`reconstruir_10s.sh`, `prompt_calmo.txt`) | `preset_posevideo_ff` | 7 | `12.width=928 12.height=512 12.length=260 15.steps=40 10.end_percent=0.5` |
+
+## Fuera de ComfyUI
+
+- `07-guion-espacios/flow-job1/`: prueba A/B con Google Flow (Veo, *frames to video*, Fast, una generación) de la
+  transición camarín → cripta. `prompt.txt` se pega tal cual; `STEPS.md` lo sigue un drone de navegador; `notes.md`
+  dice de qué placas salen los cuadros y la transformación a 1920×1080. Copia de trabajo y salida en `tmp/07/flow/job1/`.
