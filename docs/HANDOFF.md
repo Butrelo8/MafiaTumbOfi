@@ -144,6 +144,13 @@ iluminación de la escena, **ese 0.62 hay que recalcularlo**.
 - **Los 9 platos del candelabro están vacíos** y con el cenicero nuevo
   desaparecieron las dos `PROP_brasa` emisivas: ya no hay brasa encendida en la
   mesa.
+- **Falso positivo del hook de Bash** (`.claude/hooks/bash-guard.sh`, regla 2;
+  2026-10-13): niega cualquier orden que empiece con `python3` si `numpy`, `cv2`
+  o `PIL` aparecen en cualquier parte del texto, aunque sea dentro de un heredoc
+  que sólo edita un archivo (un `str.replace` sobre un script que usa `cv2`).
+  Mientras no se arregle: esas ediciones con la herramienta Edit. Arreglo
+  pendiente: mirar sólo las líneas `import`/`from` del código que corre
+  python3, no el texto entero.
 
 ## Cómo trabajar con este repo
 
