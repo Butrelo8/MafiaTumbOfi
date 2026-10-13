@@ -28,6 +28,9 @@ npx wrangler deploy
   pointers to every other document
 - `docs/blender-notas.md` — **read before touching `blender/`**: Blender 5.2
   quirks, measurement method and decisions already taken
+- `scripts/` — scene and loop tooling (`loop-vivo.sh`, `comparar.sh`,
+  `puerta-tanda.sh`, `esperar.sh`, `preflight.sh`); `prompts/` — H3/Klein
+  prompts per ticket
 
 ## Design rules
 
@@ -49,6 +52,17 @@ or motion that ignores `prefers-reduced-motion`.
 Use `.env.example` for the current site and build-only catalog variables. Keep
 credentials private; variables intended for the browser must be explicitly
 prefixed `PUBLIC_`.
+
+## Scene work
+
+- The scene skill is `santuario-escena`, not `blender` (that one is Mixamo → dance).
+- Python with numpy/PIL/cv2: `uv run -q --with numpy --with opencv-python-headless --with pillow python -I`
+  (the system `python3` has none of them).
+- Before launching a batch (Blender tanda or ComfyUI queue): `scripts/puerta-tanda.sh`.
+- Waiting on a job: `scripts/esperar.sh` with `run_in_background` or Monitor, never a foreground `sleep`.
+  A hook in `.claude/settings.json` denies foreground `sleep` and system python with numpy/cv2/PIL.
+- Findings go to: site-specific notes → this repo's `docs/`; general method → `~/projects/visual-lab`;
+  client or sales findings → ProyectoInvestigación, only through its own session.
 
 <!-- mpaf:animacion-blender:start -->
 Blender: for realistic human movement (Mixamo → Blender → ffmpeg), load the skill `blender`.
