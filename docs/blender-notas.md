@@ -62,6 +62,21 @@ de estación, en los dos formatos.
 mitad de las horas perdidas aquí vinieron de creer lo que parecía estar pasando
 en vez de comprobarlo. Hay una sección entera sobre eso en las notas generales (abajo).
 
+## Tandas: fijar → puerta → tanda
+
+Una tanda larga (render completo de 77–85 min) sólo se lanza con el look y las
+poses aprobados; si no, se tira entera. El flujo y la orden están en la cabecera
+de `scripts/puerta-tanda.sh`; ante un cambio tardío se rehacen sólo los tramos
+afectados (`render.py -- tramos <formato> <desde> <hasta>`).
+
+- **Un visor abierto bloquea el render.** Un PNG de destino abierto en el visor
+  de fotos de Windows hace fallar el render con `cannot save` (estaba en estas
+  notas y se perdió; volvió a salir en la sesión `64d1fcbf`, la de la tanda de
+  29 min que murió con exit −1). `puerta-tanda.sh` lo comprueba abriendo cada
+  PNG en exclusiva desde Windows.
+- **La hoja de revisión va en Cycles a pocas muestras, no en Eevee:** en Eevee
+  el oro y el cromo salen negros y el humo no se ve.
+
 
 ## Notas generales de Blender 5
 

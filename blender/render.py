@@ -3,10 +3,12 @@
 Se puede ejecutar dentro de Blender (MCP) o en segundo plano, que es lo suyo
 para una tanda larga:
 
-    "E:\\Blender\\blender.exe" -b -P "E:\\Cursor Projects\\MTO\\blender\\render.py" -- tramos movil
+    "E:\\Blender\\blender.exe" -b -P "E:\\Cursor Projects\\MTO\\blender\\render.py" -- tramos movil [desde hasta]
 
-El último argumento elige formato: `movil` (900x1600) o `escritorio`
-(1600x900). Sin argumentos no hace nada: importarlo es barato a propósito.
+El segundo argumento elige formato: `movil` (900x1600) o `escritorio`
+(1600x900). `desde hasta` acotan los tramos (índices de `tramos()`); antes de
+lanzar, `scripts/puerta-tanda.sh`. Sin argumentos no hace nada: importarlo es
+barato a propósito.
 
 PNG de 16 bits porque el siguiente paso es comprimir a AVIF, y partir de 8 bits
 hace bandas en los degradados de vela, que es lo que más ocupa esta escena.
@@ -135,7 +137,9 @@ if __name__ == "__main__":
         que, formato = argumentos[0], argumentos[1]
         espacio = construir()
         if que == "tramos":
-            hechos = tramos(formato)
+            # `-- tramos movil 2 4`: sólo los tramos 2 y 3, para rehacer lo que tocó un cambio tardío
+            acotar = [int(a) for a in argumentos[2:4]]
+            hechos = tramos(formato, None, *acotar)
         elif que == "capas":
             hechos = capas(formato, espacio=espacio)
         elif que == "relampago":
