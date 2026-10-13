@@ -54,6 +54,18 @@ en la propuesta de abajo):
   `reproyectar.py`, que imprime `fuera del cuadro`), un tablero de 2–3 encuadres para que el usuario elija; la banda de
   abajo (el hueco vertical, que el escritorio nunca vio) como extensión oscura y no con Klein; si pide contenido real,
   el método de dos imágenes del 17 (maqueta + placa aprobada como referencia, `prompts/17-transiciones-micro-v5/sac17.txt`).
+- **Verticales (E4) re-encuadradas, elegidas por el usuario (2026-10-13 05:45).** La cámara vertical ahora comparte
+  posición y rotación con la de escritorio y sólo cambia lente y shift, así que la vertical es un **recorte exacto** de
+  la placa aprobada (afín, sin Klein) más una banda abajo que la placa no vio. Nueve candidatos medidos (48–63 mm;
+  `tmp/07/e4/encuadre/medidas.txt`: gris → gris dif. 0.8–2.5, ningún hueco fuera de la banda salvo los bordes de la
+  prueba de profundidad en la reja del atrio) y tableros `tmp/07/tablero/e4_encuadre_*.jpg`. Elegidos: **vestidor
+  amplio 48 mm** (el único con el sujeto entero: espejo, arbotantes, tocador y guitarra en la silla; ×1.04, banda 24 %),
+  **cripta cerrado 63 mm** (sin banda, nada inventado; teléfono ×1.36; el frente oscuro del altar es la zona de la UI,
+  luma 7) y **atrio amplio 48 mm** (portal con reja y las calaveras rojas de la troca; ×1.04, banda 24 %). Valores en
+  `CAMARAS[...]["movil"]` de `blender/espacios07.py`. La banda es extensión oscura (media de las últimas filas que cae a
+  negro, con el grano medido): `tmp/07/e4/encuadre/verticales.py` → `tmp/07/e4/v2/out/vertical_*.png` (720×1280), pares
+  al mismo alto en `tmp/07/tablero/e4_vertical_*.jpg`. Con la placa de producción (Klein 4 MP) la escala ×1.36 de la
+  cripta deja de ser ampliación.
 - **El atrio elegido todavía no deja limpia la esquina** (`tmp/07/tablero/atrio_C2_lobo_hueco.jpg`: luma media 24 en
   el hueco contra 46 en el cuadro): el poste, el muro que alumbra el sodio y el canto izquierdo del portal caen dentro.
   En la placa de producción el poste se mueve a la derecha del portal o el muro bajo la lámpara cae a negro, para que

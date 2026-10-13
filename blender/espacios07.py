@@ -22,15 +22,18 @@ exec(open(os.path.join(RAIZ, "transicion.py"), encoding="utf-8").read(), T)
 _caja, _cil, _boveda, _barra = T["_caja"], T["_cil"], T["_boveda"], T["_barra"]
 
 X_VESTIDOR, X_CRIPTA, X_ATRIO = 80, 120, 160
-# Cámaras (posición, punto al que mira, lente, shift_y) por espacio y formato, relativas al origen del espacio.
-# Escritorio: las de las previas elegidas. Móvil: el sujeto arriba y el hueco abajo (ticket 03), lente y shift del 06.
+# Cámaras (posición, punto al que mira, lente, shift_y[, shift_x]) por espacio y formato, relativas al origen del
+# espacio. Escritorio: las de las previas elegidas. Móvil (E4, elegidas por el usuario 2026-10-13): misma posición y
+# rotación que escritorio, lente más larga y shift, así la vertical es un recorte exacto de la placa de escritorio
+# (borde de arriba 1 % dentro) más una banda abajo que la placa no vio: vestidor y atrio 48 mm (banda 24 %), cripta
+# 63 mm (sin banda). Medido en tmp/07/e4/encuadre/ (medidas.txt).
 CAMARAS = {
     "vestidor": {"escritorio": ((-2.0, -2.4, 1.55), (1.2, 2.2, 1.5), 35, 0.0),
-                 "movil": ((-1.2, -2.6, 1.55), (1.5, 2.4, 1.75), 28, -0.25)},
+                 "movil": ((-2.0, -2.4, 1.55), (1.2, 2.2, 1.5), 48, -0.1221, -0.0752)},
     "cripta": {"escritorio": ((-1.3, -1.0, 1.3), (1.0, 3.5, 1.2), 35, 0.0),
-               "movil": ((-0.6, -1.3, 1.3), (0.9, 3.3, 1.35), 28, -0.25)},
+               "movil": ((-1.3, -1.0, 1.3), (1.0, 3.5, 1.2), 63, -0.0041, 0.0212)},
     "atrio": {"escritorio": ((-5.5, -3.5, 1.4), (0.0, 9.0, 3.0), 35, 0.0),
-              "movil": ((-2.0, -4.5, 1.4), (2.8, 9.0, 3.2), 28, -0.25)},
+              "movil": ((-5.5, -3.5, 1.4), (0.0, 9.0, 3.0), 48, -0.1221, 0.0420)},
 }
 FORMATOS = {"escritorio": (1280, 720), "movil": (720, 1280)}
 # Rango de la profundidad (cerca, lejos) en m: con el 0.3–40 de la nave los cuartos chicos salen gris parejo.
@@ -310,12 +313,12 @@ def build(espacios=("vestidor", "cripta", "atrio")):
 
 
 def encuadrar(cam, espacio, formato):
-    pos, mira, lente, shift = CAMARAS[espacio][formato]
+    pos, mira, lente, shift, shift_x = (CAMARAS[espacio][formato] + (0.0,))[:5]
     x0 = ESPACIOS[espacio][1]
     p, q = Vector(pos) + Vector((x0, 0, 0)), Vector(mira) + Vector((x0, 0, 0))
     cam.location = p
     cam.rotation_euler = (q - p).to_track_quat("-Z", "Y").to_euler()
-    cam.data.lens, cam.data.shift_y = lente, shift
+    cam.data.lens, cam.data.shift_y, cam.data.shift_x = lente, shift, shift_x
     sc = bpy.context.scene
     sc.render.resolution_x, sc.render.resolution_y = FORMATOS[formato]
     sc.render.resolution_percentage = 100
