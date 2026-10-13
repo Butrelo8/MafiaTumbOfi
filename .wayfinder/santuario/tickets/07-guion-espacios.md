@@ -104,6 +104,25 @@ en la propuesta de abajo):
   el hueco contra 46 en el cuadro): el poste, el muro que alumbra el sodio y el canto izquierdo del portal caen dentro.
   En la placa de producción el poste se mueve a la derecha del portal o el muro bajo la lámpara cae a negro, para que
   el monograma y las redes queden sobre oscuro. Klein además dibujó un emblema en el costado de la troca: se quita.
+- **Placas de producción (decisión del usuario 2026-10-13 06:59: primero las placas, luego E5; middrone, 07:30).**
+  Cadena de G4/v5 en los tres espacios (`tmp/07/produccion/real07.sh pre|nr|klein|placa`): DLSS NR `--nr-color 0` →
+  Klein 4 MP (`prompts/07-guion-espacios/real_<e>.txt`, semillas 2 y 3) → `alinear_flujo.py` → `placa_real.py` con el
+  tono del NR → `arreglos.py`. Klein redibuja la geometría también en escritorio (vestidor s3: +20 px arriba, 0 abajo):
+  la fase global de `placa_real.py` no basta, el flujo deja residuo ~0 px por cuadrante. Arreglos:
+  - **Muro del vestidor:** la placa real **no** lo baja (G4: ±1–2 de luma, el tono se fija a la referencia), así que
+    `arreglos.py` le da caída de luz desde los dos arbotantes, sólo sobre el muro (fuera el cristal del espejo, el
+    ropero y la cómoda), después de Klein. Hueco 47 → A 31 / **B 26 (por omisión)** / C 24; el espejo solo aporta ~12.
+  - **Troca:** fuera las letras de la salpicadera, el óvalo de la tapa y las letras de la placa (inpaint + grano medido
+    por MAD lejos del borde), antes y después de Klein. Klein a 4 MP las pintó otra vez de gotas: la pintura sale muy
+    granulada en las dos semillas.
+  - **Adoquines:** el prompt pide piedras separadas con juntas oscuras y una película de agua (lectura del drone: al
+    100 % se veían como CG embarrado); el usuario lo juzga en los recortes al 100 %.
+  - **Esquina del atrio (opcional, meltingship 07:23):** caída de luz desde el portal sobre el muro bajo y la calle,
+    `ESQUINA=0.5|0.3` (hueco 22 → 17 / 14), sin GPU.
+  - **El NR oscurece la cripta 15 %** (cuadro 19 → 15.6, haz de luna 104 → 86); variante con el tono de la E3.
+  Tableros `tmp/07/produccion/tablero_{vestidor,cripta,atrio}.jpg` (E3 | s2 | s3, recortes al 100 %, variantes y
+  verticales con los mismos encuadres), enviados al usuario. s2 del atrio borró la montaña. **Pendiente: elección del
+  usuario**; después, E5 sobre esas placas.
 
 ## Propuesta (2026-10-13)
 Vuelve en la versión 1 a pedido del usuario. Tres opciones por espacio, cada una con dos fotogramas de referencia,
