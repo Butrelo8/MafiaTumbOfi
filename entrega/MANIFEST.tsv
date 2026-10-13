@@ -1,9 +1,10 @@
 archivo	cuadros	KB	sha256	origen
 escritorio/nave.mp4	240	556	22395873bf331190	tmp/g6/esc/nave_g6_esc_c.mp4
-escritorio/ida-av1.mp4	60	211	952a411e20fc0023	tmp/g7/esc/cod/c/ida_av1_crf40.mp4
-escritorio/ida-hevc.mp4	60	411	be66e5365d1070ca	tmp/g7/esc/cod/c/ida_hevc_crf26.mp4
-escritorio/ida-h264.mp4	60	860	5389fb9c4ba1df6f	tmp/g7/esc/cod/c/ida_h264_crf23.mp4
-escritorio/vuelta-av1.mp4	60	215	95e314a3a32f2b95	tmp/g7/esc/cod/c/vuelta_av1_crf40.mp4
+escritorio/ida-av1.mp4	60	225	4507756048f55e71	tmp/sac10/esc/cod/ida_av1_crf40.mp4
+escritorio/ida-hevc.mp4	60	438	6f05f2ed6fd9c20f	tmp/sac10/esc/cod/ida_hevc_crf26.mp4
+escritorio/ida-h264.mp4	60	923	f2a72aa50f766bdc	tmp/sac10/esc/cod/ida_h264_crf23.mp4
+escritorio/vuelta-av1.mp4	60	234	767811157f084976	tmp/sac10/esc/cod/vuelta_av1_crf40.mp4
+escritorio/sacristia.mp4	240	490	25f76e34c49dcbfb	tmp/sac10/esc/sac_esc.mp4
 vertical/nave.mp4	240	195	66960f83e0b0644f	tmp/g6/vert/nave_g6_vert.mp4
 vertical/ida-av1.mp4	60	105	706b9dab1aed6ef7	tmp/g7/vert/cod/ida_av1_crf40.mp4
 vertical/ida-hevc.mp4	60	207	b662a71d428ab0d1	tmp/g7/vert/cod/ida_hevc_crf26.mp4
@@ -12,6 +13,8 @@ vertical/vuelta-h264.mp4	60	364	677009088a9094ef	tmp/g7/vert/ida/vuelta_micro.mp
 vertical/sacristia-5s.mp4	120	150	2f11d545dcfe45af	tmp/movil-06/web/sacristia.mp4
 escritorio/grupo-ida-provisional-h264.mp4	185	3592	34495db3d0d57e00	tmp/07/e6prov/grupo-ida-provisional-h264.mp4
 placas/sacristia-esc-s11.png	1	2668	436dc8af5f324fa7	tmp/micro/trans_esc/klein/sac17_s11_00001_.png
+placas/sacristia-esc-real-s3-aplique.png	1	2408	e2fb022d2450841f	tmp/sac10/esc/real_s3_aplique.png
+placas/sacristia-esc-klein-aplique.png	1	2806	80ef181455d1ec93	tmp/sac10/esc/placa_aplique.png
 placas/nave-esc-micro.png	1	2967	756220bcce750444	tmp/micro/g5/placa_micro_tallo.png
 placas/nave-vert-micro-s4.png	1	1616	583f8a09b552a316	tmp/micro/movil/placa_micro_vb_s4_suj.png
 placas/nave-esc-s44.png	1	2772	2759f5b61d4dd5b4	tmp/props-06/klein/nave13props_p4_s44_00001_.png
@@ -39,7 +42,8 @@ placas/nave-esc-tallo-disp.png	1	474	01120ab3cc0db7e6	tmp/micro/g5/esc_disp_tall
 placas/nave-vert-tallo-disp.png	1	157	9cbe212a1597c6a2	tmp/micro/g5/vert_disp_tallo.png
 placas/nave-esc-g6-copal-real.png	1	3025	84aa0905ae83e092	tmp/g6/copal/nave_g6_esc_real_copal.png
 placas/nave-esc-g6-copal-klein.png	1	3007	949b97a696ad6e5c	tmp/g6/copal/nave_g6_esc_klein_copal.png
-maestros/esc-ida.mkv	60	32387	72b87ab46ab483b5	tmp/g7/esc/ida_c/ida_master_mezcla.mkv
+maestros/esc-ida.mkv	60	51670	5fbc7678e52c1fab	tmp/sac10/esc/ida_empalme.mkv
+maestros/esc-sacristia.mkv	240	196561	1fb2b262e020a0f8	tmp/sac10/esc/maestro_sac_esc.mkv
 maestros/vert-ida.mkv	60	13954	f497c5516eaa4209	tmp/g7/vert/ida/ida_master.mkv
 maestros/esc-nave.mkv	240	134105	6ecd8f7d909b5106	tmp/g6/esc/maestro_nave_esc.mkv
 maestros/vert-nave.mkv	240	79494	a4b7d8d4991f31f8	tmp/g6/vert/maestro_nave_vert.mkv

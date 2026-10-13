@@ -68,3 +68,23 @@ Decidido por el usuario el 2026-10-11 (cerrado a su pedido; el último montaje v
   + ~1.5 min de RTX + ~7 min de CPU.
 - Queda fuera: el parpadeo de la brasa del micro sigue con periodo de 120 (`micro_viva.py`); el micro en la vertical va
   con el 06; las transiciones con el 17.
+
+## Sacristía, escritorio (paso 1 del alcance, 2026-10-13), aprobado por el usuario
+`tmp/sac10/esc/` (ignorado); congelado en `entrega/` (`escritorio/sacristia.mp4`, maestro, placas, ida nueva).
+- **Placa real v5** como G4: DLSS NR de s11 (`video2dlssnr.exe --nr-run --nr-color 0`, acepta PNG), Klein 4 MP con el
+  prompt de v5 reescrito para la sacristía (`prompts/sac10/klein_real_sac.txt`, `klein_real.sh`, semillas 2/3; elegida
+  **s3**: el cuadro conserva su marco), `placa_real.py` con el tono del NR, sin PROF (sin foco de lente: el final de la
+  ida no lo tiene). MoGe en la sacristía no sirve: pone el cuadro (0.12) delante del muro donde cuelga (0.02).
+- **Lo que se mueve** (elegido por el usuario): el disco, polvo en la luz, latido de la lámpara, zumbido del neón. Todo en
+  `tmp/sac10/vivo_sac.py` con ciclos enteros en 240 (disco: el detalle fino gira en coordenadas de círculo y la luz baja
+  queda quieta, 6 vueltas = 36 rpm; polvo como `polvo240.py` pero en el charco cálido), así que **no hace falta H3**: en la
+  nave H3 sólo entra en llamas y humo. Segunda ronda: más polvo (180 motas, ×1.8) y más latido.
+- **Aplique de latón** (el usuario: la luz sobre el tocadiscos "sale del cuadro"): edición local de Klein
+  (`klein_aplique.sh`, `prompts/sac10/aplique.txt`, s2 centrado en el ápice del charco) pegada sólo dentro de una caja
+  ajustada al aplique (`pegar_aplique.py`, umbral 30: con 10 entraba el muro que Klein retocó y se veía la caja). La
+  lámpara de mesa late ±9 % y el aplique ±4 % con otra fase (que la lámpara no le robe al charco).
+- **Empalme ida → loop** (el usuario: "se nota"): el final de la ida (H3 + FILM sobre s11) contra la placa real: dif 5.5,
+  más detalle y negros más claros en el loop, y la cámara aún corre ~3 px por cuadro. `tmp/sac10/empalme.py` pega el
+  aplique en la mitad de la sacristía de la ida (corrimientos de cuadro a cuadro, detrás de los oclusores) y funde los
+  últimos 12 cuadros hacia los últimos del loop corridos con la cámara: el último cuadro de la ida = cuadro 0 del loop.
+  Costura del loop 0.68; ida AV1 225 KB / HEVC 438 / H.264 923, vuelta AV1 234; loop H.264 490 KB.

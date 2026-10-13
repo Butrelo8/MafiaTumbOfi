@@ -28,3 +28,8 @@ pila** (camino B: G2–G7 lo reemplazan con los mismos nombres). `maestros/` no 
 - **G7 (2026-10-13):** las idas y vueltas de los dos formatos son las del 17 rehechas sobre la nave con la gente (placa
   G4; escritorio con el copal real del loop) y el micro con el tallo nuevo; la mitad de la sacristía es la del 17
   (profundidad idéntica desde el corte). Ticket 17, sección G7; cadenas `tmp/g7/{esc,vert}/armar.sh`.
+- **Sacristía, escritorio (paso 1, 2026-10-13):** `escritorio/sacristia.mp4`, loop de 10 s sobre la placa real s3 (Klein
+  4 MP con el tono del NR de s11) con un aplique de latón bajo el cuadro (fuente del charco de luz). Se mueve: el disco, el
+  polvo en la luz, la lámpara de mesa (±9 %), el aplique (±4 %) y el neón; sin H3, ciclos enteros en 240. La ida de
+  escritorio (`ida-*`, `vuelta-av1`) es la de G7 con el aplique pegado en su mitad de la sacristía y los últimos 12 cuadros
+  fundidos al loop: su último cuadro es el cuadro 0 del loop. Cadena `tmp/sac10/esc/armar.sh` + `tmp/sac10/empalme.py`.
