@@ -368,7 +368,7 @@ def micro(oro, negro):
          _caja("micro_horquilla", -0.012, 0.012, -0.01, 0.01, 0.06, 0.11, oro),
          _caja("micro_cuerpo", -0.022, 0.022, -0.02, 0.02, 0.11, 0.20, negro),
          _cil("micro_xlr", 0, 0, 0.20, 0.27, 0.011, negro),
-         _barra("micro_rosa_tallo", (0.0, -0.024, 0.2), (0.025, -0.035, 0.09), 0.004, tallo)]  # de la espiral, por delante del cuerpo
+         _barra("micro_rosa_tallo", (0.0, -0.0145, 0.2), (0.025, -0.035, 0.09), 0.004, tallo)]  # del final de la espiral
     x, y, z = MOVIL["micro"] if _movil else MICRO
     p.append(_cil("micro_cable", 0, 0, 0.27, 14.99 - z, 0.004, negro))
     bpy.ops.mesh.primitive_uv_sphere_add(radius=0.03, location=(0.028, -0.04, 0.08))
@@ -378,9 +378,12 @@ def micro(oro, negro):
     # Un solo tallo leñoso con espinas, sin hojas, que baja en espiral alrededor del cable y acaba en la rosa; nada debajo
     # del micro (el usuario, 2026-10-10, con una
     # referencia de Gemini: la enredadera de rosa en el pie del micro). Dos vueltas y media de 0.62 a 0.2 m sobre la rejilla,
-    # a 16 mm del eje: libra el conector XLR (r 11 mm). Acaba al frente, de donde baja el tallo corto a la rosa.
-    pts = [(0.016 * math.sin(t), 0.016 * math.cos(t), 0.62 - 0.42 * t / (5 * math.pi))
-           for t in [i * 5 * math.pi / 40 for i in range(41)]]
+    # enrollada en contacto como en la placa (2026-10-13, tallo2.py): a 8 mm del eje sobre el cable (r 4 mm + tallo 3 mm)
+    # y a 14.5 mm sobre el conector XLR (r 11 mm, z 0.20–0.27), con el paso de uno a otro arriba del conector. Acaba al
+    # frente, de donde baja el tallo corto a la rosa.
+    radio = lambda z: 0.0145 + (0.008 - 0.0145) * min(max((z - 0.275) / 0.015, 0), 1)
+    pts = [(radio(z) * math.sin(t), radio(z) * math.cos(t), z)
+           for t in [i * 5 * math.pi / 80 for i in range(81)] for z in [0.62 - 0.42 * t / (5 * math.pi)]]
     cu = bpy.data.curves.new("micro_espiral", "CURVE")
     cu.dimensions, cu.bevel_depth = "3D", 0.003
     sp = cu.splines.new("POLY")
