@@ -87,3 +87,6 @@ blender/assets/candelabros-laton/
 blender/assets/*/**
 !blender/assets/*/
 !blender/assets/*/LICENSE.txt
+
+# Paso 0: maestros sin pérdida de entrega/ (grandes; checksums en entrega/MANIFEST.tsv)
+entrega/maestros/

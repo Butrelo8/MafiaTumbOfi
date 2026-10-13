@@ -1,0 +1,21 @@
+archivo	cuadros	KB	sha256	origen
+escritorio/nave.mp4	240	345	52cb492726cd53c3	tmp/micro/largo/capas240/r7_micro_10s_240.mp4
+escritorio/ida-av1.mp4	60	184	4cbcb2a51aabc2fb	tmp/micro/trans_esc/hd_det/ida_final_av1.mp4
+escritorio/ida-hevc.mp4	60	366	96d81d08931445ba	tmp/micro/trans_esc/hd_det/ida_final_hevc.mp4
+escritorio/ida-h264.mp4	60	775	a7c92d0e64d78971	tmp/micro/trans_esc/hd_det/ida_final_h264.mp4
+escritorio/vuelta-av1.mp4	60	189	b0f6807d6a32480a	tmp/micro/trans_esc/hd_det/vuelta_final_av1.mp4
+vertical/nave.mp4	240	217	d2b5ddd116c1aa81	tmp/micro/movil/nave_micro_10s.mp4
+vertical/ida-av1.mp4	60	107	19ad0e58e4a5d105	tmp/micro/trans/cod/ida_av1_crf40.mp4
+vertical/ida-hevc.mp4	60	210	2bc3f6eaaa4ab40e	tmp/micro/trans/cod/ida_hevc_crf26.mp4
+vertical/ida-h264.mp4	60	387	58096c25d6c810b5	tmp/micro/trans/ida_micro.mp4
+vertical/vuelta-h264.mp4	60	370	0f533b6243f5cdeb	tmp/micro/trans/vuelta_micro.mp4
+vertical/sacristia-5s.mp4	120	150	2f11d545dcfe45af	tmp/movil-06/web/sacristia.mp4
+placas/sacristia-esc-s11.png	1	2668	436dc8af5f324fa7	tmp/micro/trans_esc/klein/sac17_s11_00001_.png
+placas/nave-esc-micro.png	1	2974	2da91815d733cf50	tmp/micro/placa_micro_rosa.png
+placas/nave-vert-micro-s4.png	1	1616	583f8a09b552a316	tmp/micro/movil/placa_micro_vb_s4_suj.png
+placas/nave-esc-s44.png	1	2772	2759f5b61d4dd5b4	tmp/props-06/klein/nave13props_p4_s44_00001_.png
+placas/nave-esc-s44-vacia.png	1	3002	43143fb60004acd2	tmp/props-06/s44_vacia.png
+placas/nave-vert-s33-vacia.png	1	2370	a9bceae3bc8ee875	tmp/props-06/klein/s33_vacia_s7_00001_.png
+maestros/esc-ida.mkv	60	31659	484c20c8a01b439e	tmp/micro/trans_esc/hd_det/ida_master_mezcla.mkv
+maestros/vert-ida.mkv	60	14116	04d9eb04870fb38a	tmp/micro/trans/cod/ida_master.mkv
+maestros/vert-nave.mkv	240	77776	b12f7387c0a41178	tmp/micro/movil/nave_micro240_dof.mkv + halacion.sh VC=ffv1
