@@ -110,14 +110,6 @@ const releases = catalog.releases.map((release) => ({
     if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target) }
   }), { threshold: 0.1, rootMargin: '0px 0px -50px 0px' })
   document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((element) => { element.dataset.reveal = 'oculto'; observer.observe(element) })
-  // El hero sólo corre en pantalla y nunca con movimiento reducido: ahí se queda el poster.
-  const heroVideo = document.querySelector<HTMLVideoElement>('[data-hero-video]')
-  if (heroVideo && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) heroVideo.play().catch(() => {})
-      else heroVideo.pause()
-    }).observe(heroVideo)
-  }
   document.querySelectorAll('[data-plausible-event]').forEach((element) => {
     element.addEventListener('click', () => trackPlausible(element.getAttribute('data-plausible-event') ?? ''))
   })

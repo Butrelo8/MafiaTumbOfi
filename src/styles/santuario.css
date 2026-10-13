@@ -54,7 +54,7 @@ html.santuario .negro {
   transition: opacity 0.3s ease;
 }
 
-.negro.on {
+html.santuario .negro.on {
   opacity: 1;
 }
 

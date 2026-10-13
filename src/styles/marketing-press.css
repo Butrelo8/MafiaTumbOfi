@@ -721,34 +721,8 @@ body.marketing-body img {
   padding-inline-start: var(--titular-x, 0);
 }
 
-/* Móvil, nave: la capa son dos columnas a los lados y bancas desde media
-   altura. Lo libre es arriba, entre columnas (del 17 al 82 % del ancho). */
-.hero .hero-copy.hero-content {
-  margin-left: 12vw;
-  max-width: 64vw;
-}
-
 .hero .hero-title {
   margin-bottom: 1rem;
-}
-
-/* Escritorio.
-   Altar: la banca de la fiel muerde la primera letra, no la palabra.
-   Hornacinas: baja hasta las velas, en el hueco entre la caja y el vaso. */
-@media (min-aspect-ratio: 1/1) {
-  /* Nave: la capa de frente son las columnas y las bancas, y la única franja
-     libre de arriba abajo es el pasillo, del 40 al 60 % del ancho (medido su
-     alfa). A la izquierda, donde estaba, las columnas tapaban el logo y el CTA.
-     El margen va contra la ventana, no contra el contenedor. */
-  .hero .hero-copy.hero-content {
-    margin-left: calc(39vw - (100vw - var(--container)) / 2);
-    max-width: 22vw;
-  }
-
-  .hero .hero-logo-img {
-    width: 100%;
-  }
-
 }
 
 .estacion-titular h2 {
@@ -1728,21 +1702,11 @@ body.marketing-body img {
 }
 
 /* ─── Veracruz Noir — asymmetric hero + blocks ───────────── */
-/* Colocado contra la capa de frente de la nave: arriba entre columnas en
-   móvil, abajo en el pasillo en escritorio. Ver "Colocación por estación". */
+/* Layout C del ticket 03: logo, chips y la acción abajo a la izquierda; en vertical, la mitad de abajo. */
 .hero.hero--asymmetric {
-  justify-content: flex-start;
+  justify-content: flex-end;
   min-height: min(100svh, 960px);
-  padding-top: 9svh;
-  padding-bottom: var(--space-lg, 2rem);
-}
-
-@media (min-aspect-ratio: 1/1) {
-  .hero.hero--asymmetric {
-    justify-content: flex-end;
-    padding-top: 0;
-    padding-bottom: 3svh;
-  }
+  padding-bottom: max(3svh, 1.5rem);
 }
 
 .hero.hero--asymmetric .hero-deco-line {
