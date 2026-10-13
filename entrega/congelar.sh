@@ -11,12 +11,12 @@ mkdir -p escritorio vertical placas maestros
 
 # destino  origen  (orden: lo que va a la web, luego placas, luego maestros)
 LISTA="
-escritorio/nave.mp4            $T/micro/largo/capas240/r7_micro_10s_240.mp4
+escritorio/nave.mp4            $T/g6/esc/nave_g6_esc_c.mp4
 escritorio/ida-av1.mp4         $H/ida_final_av1.mp4
 escritorio/ida-hevc.mp4        $H/ida_final_hevc.mp4
 escritorio/ida-h264.mp4        $H/ida_final_h264.mp4
 escritorio/vuelta-av1.mp4      $H/vuelta_final_av1.mp4
-vertical/nave.mp4              $T/micro/movil/nave_micro_10s.mp4
+vertical/nave.mp4              $T/g6/vert/nave_g6_vert.mp4
 vertical/ida-av1.mp4           $V/cod/ida_av1_crf40.mp4
 vertical/ida-hevc.mp4          $V/cod/ida_hevc_crf26.mp4
 vertical/ida-h264.mp4          $V/ida_micro.mp4
@@ -42,18 +42,19 @@ placas/mascara-micro-vert-g5.png $T/micro/g5/vert_mascara_g5.png
 placas/mascara-rosa-vert-g5.png  $T/micro/g5/vert_rosa_g5.png
 placas/nave-esc-g5-disp.png    $T/micro/g5/esc_disp_g5.png
 placas/nave-vert-g5-disp.png   $T/micro/g5/vert_disp_g5.png
+placas/nave-esc-g6-copal-real.png  $T/g6/copal/nave_g6_esc_real_copal.png
+placas/nave-esc-g6-copal-klein.png $T/g6/copal/nave_g6_esc_klein_copal.png
 maestros/esc-ida.mkv           $H/ida_master_mezcla.mkv
 maestros/vert-ida.mkv          $V/cod/ida_master.mkv
+maestros/esc-nave.mkv          $T/g6/esc/maestro_nave_esc.mkv
+maestros/vert-nave.mkv         $T/g6/vert/maestro_nave_vert.mkv
 "
 while read -r dst src; do
   [ -n "$dst" ] || continue
   cp -p "$src" "$dst"
 done <<<"$LISTA"
 
-# El maestro del loop vertical no se guardó: es halacion.sh sobre nave_micro240_dof.mkv con VC=ffv1
-# (SSIM 0.990 contra nave.mp4, el H.264 crf 23 aprobado). El de escritorio no existe (esc240_dof.mkv se borró).
-[ -f maestros/vert-nave.mkv ] || VC="-c:v ffv1" GOP=240 $T/cine-look/halacion.sh \
-  $T/micro/movil/nave_micro240_dof.mkv maestros/vert-nave.mkv
+# G6: los maestros de los loops son halacion.sh VC=ffv1 sobre tmp/g6/<f>/dof240.mkv (tmp/g6/tanda.sh).
 
 {
   printf 'archivo\tcuadros\tKB\tsha256\torigen\n'
@@ -63,7 +64,6 @@ done <<<"$LISTA"
       -show_entries stream=nb_read_packets -of csv=p=0 "$dst" ;; esac)
     printf '%s\t%s\t%s\t%s\t%s\n' "$dst" "$n" $(( $(stat -c%s "$dst") / 1024 )) \
       "$(sha256sum "$dst" | cut -c1-16)" "${src#../}"
-  done <<<"$LISTA
-maestros/vert-nave.mkv tmp/micro/movil/nave_micro240_dof.mkv + halacion.sh VC=ffv1"
+  done <<<"$LISTA"
 } > MANIFEST.tsv
 column -t -s$'\t' MANIFEST.tsv

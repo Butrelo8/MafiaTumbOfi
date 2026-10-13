@@ -1,10 +1,10 @@
 archivo	cuadros	KB	sha256	origen
-escritorio/nave.mp4	240	345	52cb492726cd53c3	tmp/micro/largo/capas240/r7_micro_10s_240.mp4
+escritorio/nave.mp4	240	557	92b458338cd6d882	tmp/g6/esc/nave_g6_esc_c.mp4
 escritorio/ida-av1.mp4	60	184	4cbcb2a51aabc2fb	tmp/micro/trans_esc/hd_det/ida_final_av1.mp4
 escritorio/ida-hevc.mp4	60	366	96d81d08931445ba	tmp/micro/trans_esc/hd_det/ida_final_hevc.mp4
 escritorio/ida-h264.mp4	60	775	a7c92d0e64d78971	tmp/micro/trans_esc/hd_det/ida_final_h264.mp4
 escritorio/vuelta-av1.mp4	60	189	b0f6807d6a32480a	tmp/micro/trans_esc/hd_det/vuelta_final_av1.mp4
-vertical/nave.mp4	240	217	d2b5ddd116c1aa81	tmp/micro/movil/nave_micro_10s.mp4
+vertical/nave.mp4	240	194	4886f95acb89aaa7	tmp/g6/vert/nave_g6_vert.mp4
 vertical/ida-av1.mp4	60	107	19ad0e58e4a5d105	tmp/micro/trans/cod/ida_av1_crf40.mp4
 vertical/ida-hevc.mp4	60	210	2bc3f6eaaa4ab40e	tmp/micro/trans/cod/ida_hevc_crf26.mp4
 vertical/ida-h264.mp4	60	387	58096c25d6c810b5	tmp/micro/trans/ida_micro.mp4
@@ -30,6 +30,9 @@ placas/mascara-micro-vert-g5.png	1	9	405e5bfd41a7bd78	tmp/micro/g5/vert_mascara_
 placas/mascara-rosa-vert-g5.png	1	4	35dde6d9ed94ed7e	tmp/micro/g5/vert_rosa_g5.png
 placas/nave-esc-g5-disp.png	1	474	5f830b1efa7bd567	tmp/micro/g5/esc_disp_g5.png
 placas/nave-vert-g5-disp.png	1	157	8dd9c3c1fda2a55b	tmp/micro/g5/vert_disp_g5.png
+placas/nave-esc-g6-copal-real.png	1	3025	84aa0905ae83e092	tmp/g6/copal/nave_g6_esc_real_copal.png
+placas/nave-esc-g6-copal-klein.png	1	3007	949b97a696ad6e5c	tmp/g6/copal/nave_g6_esc_klein_copal.png
 maestros/esc-ida.mkv	60	31659	484c20c8a01b439e	tmp/micro/trans_esc/hd_det/ida_master_mezcla.mkv
 maestros/vert-ida.mkv	60	14116	04d9eb04870fb38a	tmp/micro/trans/cod/ida_master.mkv
-maestros/vert-nave.mkv	240	77776	b12f7387c0a41178	tmp/micro/movil/nave_micro240_dof.mkv + halacion.sh VC=ffv1
+maestros/esc-nave.mkv	240	135270	5b4cbc9412a83f24	tmp/g6/esc/maestro_nave_esc.mkv
+maestros/vert-nave.mkv	240	79520	152865ef80e775d4	tmp/g6/vert/maestro_nave_vert.mkv

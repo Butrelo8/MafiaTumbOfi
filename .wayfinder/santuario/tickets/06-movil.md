@@ -290,3 +290,25 @@ Disposición (`disposicion.py`, `hoja_disp_esc.png`, `hoja_disp_vert.png`, verde
   - Reconstruir desde `tmp/micro/`: `TOPE=1.63 ROSA=mascara_rosa.png GUIT=0.78,0.99,0.64,0.72 python movil/micro_viva_v.py
     placa_micro_rosa.png g5/mascara_micro_g5.png <viva_esc.mkv> <salida>`; vertical `GANA_ORO=1.7 TOPE=1.2
     ROSA=g5/vert_rosa_g5.png GUIT=0.37,0.49,0.36,0.51 ARRIBA=215 … g5/vert_placa_micro_g5.png g5/vert_mascara_g5.png`.
+- **G6, loops de la nave de 10 s sobre las placas G4 (2026-10-13), aprobados por el usuario** (escritorio en la versión copal, abajo). `tmp/g6/tanda.sh`
+  (cadena del 16: H3 nativo 260 cuadros, 40 pasos, semilla 7 → RTX → tmix; velas y polvo de 240 "rápido" sobre la placa de
+  Klein → `llevar.py` a la real G4 → micro de G5 → H3 en humo y llamas + LOOK → foco → halación GOP 240). Salidas
+  `tmp/g6/esc/nave_g6_esc.mp4` (502 KB; aprobado 345, costura 0.67, mediana 0.08) y `tmp/g6/vert/nave_g6_vert.mp4` (199 KB, costura
+  0.51; aprobado 0.55). Prompts `prompts/16-loops-de-10s/h3_g6_{esc,vert}.txt`. GPU: H3 ~1090 s + RTX ~90 s por formato.
+  - **Zonas nuevas por la pila** (`tmp/g6/{esc,vert}/zonas.py`): llamas halladas con `llamas_auto.py` (núcleo claro con
+    halo naranja; rechaza el oro de las estatuas y las rosas blancas) y filtradas con `elegir.py`. H3 anima en escritorio el
+    sahumador y la veladora roja de la bocina (el humo sube de la veladora hacia el altar); en la vertical el sahumador de la
+    bocina no tiene brasas en la placa: H3 anima la veladora roja y el cuenco con fuego del altar lateral derecho.
+  - Primera tanda: el cúmulo del candelero de escritorio cubría la vitrina, cuyo interior claro latía entero → el cúmulo
+    sólo en las dos filas de veladoras y las velas de la vitrina como llamas. Lo que queda de movimiento en escritorio es
+    la llama abierta del sahumador (H3) y el humo: por eso la costura es mayor que la aprobada (0.50).
+  - **Copal real (escritorio).** Con la llama abierta de H3 el usuario pidió más calma; otra semilla (11) y un prompt de
+    "llamitas bajas" dieron la misma lengua alta (H3 no obedece la altura de la llama). Sacar el sahumador de H3 y dejarlo
+    de la placa con titileo tampoco: "no es como se ve un fuego o un humo en la vida real". Lo que estaba mal era la placa:
+    Klein había puesto la columna de humo sobre la veladora roja, no sobre el sahumador. Arreglo: edición local de Klein
+    (recorte 400×400 en 960,220 → 1 MP, `tmp/g6/copal/prompt_copal.txt`, 3 semillas, elegida s3: brasas con llamitas en el
+    borde, humo que sale del cuenco, veladora sin humo; s1 brasas como de horno, s2 humo de lado como niebla) pegada sólo
+    donde cambió (`pegar_copal.py`, alineada por correlación de fase, corrimiento 0) en la real y en la de Klein
+    (A + (R' − R), para que velas240/llevar.py sigan igual). Zonas: brasas en CUMULOS (cada una titila por su lado), H3 en
+    el humo y la llama de la veladora; prompt `h3_g6_esc_c.txt`. Salida `tmp/g6/esc/nave_g6_esc_c.mp4`, 557 KB, costura
+    0.75 (el humo espeso se mueve más). Maestros ffv1 `tmp/g6/{esc,vert}/maestro_nave_*.mkv`; todo congelado en `entrega/`.
