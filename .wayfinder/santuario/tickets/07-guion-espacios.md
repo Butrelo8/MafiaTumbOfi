@@ -129,6 +129,26 @@ en la propuesta de abajo):
   la troca desde el tono NR (máscara de la maqueta de E2, `carroceria.py`); el s2 del atrio, rechazado (la puerta
   deformada). Placas finales `tmp/07/produccion/placa_<e>.png`, verticales `tmp/07/produccion/vertical/`. La
   vertical del atrio no ve la lámpara ni la neblina: lleva neblina baja sobre los adoquines (decisión del usuario).
+- **E5, loops de 10 s (smoldrone, 2026-10-13 15:00).** Zonas aprobadas por el usuario (`tmp/07/e5/tablero_final.jpg`;
+  lo azul es la zona de humo/neblina, no la placa). Prompts `prompts/07-guion-espacios/h3_<e>_{esc,movil}.txt`,
+  lanzador `tmp/07/e5/e5.sh <h3|rtx> <e> <esc|movil>`. **Sin grade por ahora (vibeship, 15:02):** los loops se montan
+  con `LOOK=` (`loop-vivo.sh montar` sin look), sin halación y sin foco, para que fuera de las zonas el cuadro sea la
+  placa y las costuras con E6 queden exactas. **Pendiente, no olvidar:** el plan de transiciones del usuario pide para
+  E5 el mismo look que los loops aprobados de nave y sacristía, así que LOOK y halación van **después**, en un solo pase
+  sobre E5 y E6 juntos, cuando exista el E6 final. Verticales: el humo con el método del 16 (`montar_mov_v.py`, sólo
+  lo que se mueve y sólo lo que aclara); RTX ×2 y luego escala.
+  **Primer loop, vestidor escritorio: falla (15:20).** H3 (928×512, 260 cuadros, 40 pasos, `end_percent=0.5`, semilla
+  7, 1013 s; `tmp/07/e5/vestidor/loop/e5_vestidor_esc_00001_.mp4`) redibuja la cómoda con **cuatro** veladoras en otras
+  posiciones desde el cuadro ~30, y las velas de los arbotantes quedan unos píxeles corridas. Montado sin look sobre la
+  placa (`crudo_esc.mkv`, sin RTX), dentro de las cajas de llamas las veladoras salen como manchas rojas sin llama y los
+  arbotantes con la vela doble. `revisar.sh` no lo ve en el video (las zonas son ~1 % del cuadro: costura 0.25, crawl
+  0.00, flicker 0.00, nitidez 0.97 con `--ref` a 1920); en el cuadro 120 con `--mask mascara_llamas_esc.png` marca las
+  cinco zonas cambiadas (dE > 10, 0.50 % del cuadro) y los recortes muestran la vela perdida. Tablero a velocidad:
+  `tmp/07/e5/vestidor/loop/revision_defecto_esc.mp4` (placa | loop). Alto sin reintentar (regla de la tanda); la
+  ruta siguiente la decide el usuario: H3 otra vez con más control (`end_percent` 1.0, "exactly three votive
+  candles", otra semilla) o titileo procedural de las llamas sobre la placa sin GPU (`velas240.py` del 16).
+  Ojo: con `--ref` a 1696 px (la placa nativa) `revisar.sh` da nitidez 0.36–0.38 aun con la placa quieta como video;
+  comparar contra la placa escalada al tamaño del clip (`vestidor/placa_vestidor_1920.png`).
 
 ## Propuesta (2026-10-13)
 Vuelve en la versión 1 a pedido del usuario. Tres opciones por espacio, cada una con dos fotogramas de referencia,
