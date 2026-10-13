@@ -27,7 +27,8 @@ PY="uv run -q --with numpy --with opencv-python-headless python -I"
 FORMATO=${FORMATO:-escritorio}; DUR=${DUR:-5}; N=${N:-$((24 * DUR))}; X=${X:-20}; DEST=${DEST:-.}
 case $FORMATO in escritorio) TAM=1920:1080 ;; movil) TAM=704:1280 ;; *) echo "FORMATO escritorio|movil"; exit 1 ;; esac
 KIT="/mnt/e/Cursor Projects/Davincy Resolve/luts/terceros/film/print/kodak_2383_constlclip.cube"
-LOOK="huesaturation=colors=g+c:saturation=-0.8,split[o][l];[l]lut3d=file='$KIT':interp=tetrahedral[g];[o][g]blend=all_mode=normal:all_opacity=0.5,curves=master='0/0.02 0.5/0.48 1/0.96',vignette=PI/5"
+# LOOK= (vacío) monta sin look: E5 del 07 va sin grade hasta el pase único sobre E5+E6 (vibeship, 2026-10-13)
+LOOK=${LOOK-"huesaturation=colors=g+c:saturation=-0.8,split[o][l];[l]lut3d=file='$KIT':interp=tetrahedral[g];[o][g]blend=all_mode=normal:all_opacity=0.5,curves=master='0/0.02 0.5/0.48 1/0.96',vignette=PI/5"}
 
 gen() {  # imprime la orden; con CORRER=1 la lanza
   printf '%q ' "$G" "$@"; echo
@@ -87,7 +88,7 @@ montar)
   # H3 trae N+X cuadros: los X del final repiten la pose de los X del principio y se funden sobre ellos.
   CAP="[x]trim=start_frame=$N:end_frame=$((N + X)),setpts=PTS-STARTPTS[t];[y]trim=end_frame=$X,setpts=PTS-STARTPTS[h];\
 [z]trim=start_frame=$X:end_frame=$N,setpts=PTS-STARTPTS[c];[t][h]blend=all_expr='A*(1-N/$X)+B*(N/$X)'[s]"
-  MASC="[2:v]format=gray,format=gbrp[ml];[3:v]format=gray,format=gbrp[mh];[pl][cap][ml]maskedmerge[m];[m][humo][mh]maskedmerge,$LOOK,format=bgr0"
+  MASC="[2:v]format=gray,format=gbrp[ml];[3:v]format=gray,format=gbrp[mh];[pl][cap][ml]maskedmerge[m];[m][humo][mh]maskedmerge,${LOOK:+$LOOK,}format=bgr0"
   if [ "${HUMO60:-}" = 1 ]; then
     [ "$N" = 120 ] || { echo "HUMO60 sólo con N=120 (dos vueltas del sub-loop de 60)"; exit 1; }
     HUMO="split[h1][h2];[h1]trim=end_frame=60,setpts=PTS-STARTPTS[ha];[h2]trim=start_frame=60:end_frame=120,setpts=PTS-STARTPTS[hb];\
