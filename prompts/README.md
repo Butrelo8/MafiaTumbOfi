@@ -58,3 +58,6 @@ con `gen.sh`, `ffmpeg` y `cp` simulados.
 - `07-guion-espacios/flow-job1/`: prueba A/B con Google Flow (Veo, *frames to video*, Fast, una generación) de la
   transición camarín → cripta. `prompt.txt` se pega tal cual; `STEPS.md` lo sigue un drone de navegador; `notes.md`
   dice de qué placas salen los cuadros y la transformación a 1920×1080. Copia de trabajo y salida en `tmp/07/flow/job1/`.
+- `07-guion-espacios/flow-job2/`: el reintento (OK del usuario 05:57) con los mismos cuadros: oclusión total a negro,
+  cámara sólo lateral, sin objetos ni luces nuevas. `STEPS.md` es para la UI nueva de Flow (agente de chat). Copia
+  de trabajo en `tmp/07/flow/job2/`; los archivos para subir en `C:\Users\black\Downloads\flow-job2\`.
