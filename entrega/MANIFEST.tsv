@@ -17,6 +17,7 @@ placas/nave-esc-s44.png	1	2772	2759f5b61d4dd5b4	tmp/props-06/klein/nave13props_p
 placas/nave-esc-s44-vacia.png	1	3002	43143fb60004acd2	tmp/props-06/s44_vacia.png
 placas/nave-vert-s33-vacia.png	1	2370	a9bceae3bc8ee875	tmp/props-06/klein/s33_vacia_s7_00001_.png
 placas/nave-esc-g2.png	1	3006	50dbb7876e508dcc	tmp/props-06/nave_g2.png
+placas/nave-vert-g3.png	1	1581	83f5da4f07e70b73	tmp/props-06/nave_g3.png
 maestros/esc-ida.mkv	60	31659	484c20c8a01b439e	tmp/micro/trans_esc/hd_det/ida_master_mezcla.mkv
 maestros/vert-ida.mkv	60	14116	04d9eb04870fb38a	tmp/micro/trans/cod/ida_master.mkv
 maestros/vert-nave.mkv	240	77776	b12f7387c0a41178	tmp/micro/movil/nave_micro240_dof.mkv + halacion.sh VC=ffv1

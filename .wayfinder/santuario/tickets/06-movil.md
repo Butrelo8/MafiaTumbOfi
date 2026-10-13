@@ -242,3 +242,15 @@ Disposición (`disposicion.py`, `hoja_disp_esc.png`, `hoja_disp_vert.png`, verde
     la banca de delante); las siluetas del joven y la texana se tocan y se separan por Otsu sobre la Z; junto a la
     texana, lo que Klein no pinta más oscuro que la base sobre el respaldo vuelve a la base.
   - Siguiente: G3, vertical por reproyección desde `nave_g2.png`.
+- **G3, vertical con gente (2026-10-13), aprobada por el usuario sujeto por sujeto: `tmp/props-06/nave_g3.png`**
+  (= `entrega/placas/nave-vert-g3.png`). **Desvío del método del alcance:** `reproyectar.py` de la placa con gente + un
+  pase global de Klein dejó al joven estirado (la Z de maqueta es una cápsula) y Klein **inventó gente** en los huecos
+  (un hombre junto a la mujer, el velo hecho hombros, dos mujeres sin velo). Lo que funcionó, la cadena "Capas" de este
+  ticket: fondo **vacío** reproyectado (`ZSUF=_vacio reproyectar.py s44_vacia.png`) + `klein_g3.sh` con `VACIA=1`
+  (prompt sin gente: las tres semillas salen vacías) + `pegar_huecos.py` → s11; luego cada figura como plano a su Z
+  (`G2=1 reproyectar_capas.py`, joven Z 10.25, texana 7.59). El usuario aprobó así la texana y el fiel. Joven ("no se
+  parece a escritorio, borroso") y mujer ("sólo un velo, sin cuerpo": el 48 % de su silueta vertical lo tapa el altavoz
+  en escritorio) → **paso nuevo** `figura_g3.py` + `klein_g3f.sh`: Klein de 2 imágenes (recorte vertical con lo que falta
+  de la silueta en gris + la figura de escritorio como referencia), pegado dentro de la silueta de maqueta ∪ capa, sólo
+  donde la escena vacía queda detrás del plano. Elegidas: mujer s22, joven s11. En la vertical la texana queda justo
+  debajo del joven (la geometría de la 4.ª y la 6.ª banca desde esa cámara); el usuario la aprobó así.
