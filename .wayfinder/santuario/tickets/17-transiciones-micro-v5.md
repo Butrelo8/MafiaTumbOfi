@@ -128,3 +128,10 @@ el micro de G6 (tallo nuevo, luz C).
   prompts en `prompts/g7-transiciones/` (la nave de G6: gente, velo, rosas, copal en la bocina).
 - Escritorio: H3 inventa un altar lateral con velas a la derecha antes del pilar (cuadros 20–28); el copal sale ya con
   llamas en la placa G4. El usuario siguió con s7. Cadenas: `tmp/g7/esc/armar.sh`, `tmp/g7/vert/armar.sh`.
+- **Copal en el arranque de escritorio.** La primera pasada salió de `nave_g4_esc.png`: el cuadro 0 traía llamas abiertas
+  en el cuenco y no el copal del loop congelado. Rehecha desde `tmp/g6/copal/nave_g6_esc_real_copal.png` (también para
+  `detalle.py`) con el prompt del humo saliendo del cuenco (`h3g7c_T1_s7`, 391 s; salidas en `ida_c/`, `cod/c/`).
+  Empalme loop → ida en el cuadro 0: diferencia media 7.1, igual que el 17 contra su loop (7.0); vertical 4.3.
+- **Aprobado por el usuario y congelado** (`entrega/`): escritorio AV1 211 KB / HEVC 411 / H.264 860, vuelta AV1 215;
+  vertical H.264 374 / AV1 105 / HEVC 207, vuelta H.264 364. Vertical con el método del 17 (sin el detalle de 1080p):
+  sigue pendiente pasarla al método de escritorio, como dice arriba.

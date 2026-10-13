@@ -5,22 +5,22 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 T=../tmp
-H=$T/micro/trans_esc/hd_det
-V=$T/micro/trans
+H=$T/g7/esc      # G7 (2026-10-13): antes $T/micro/trans_esc/hd_det (ticket 17)
+V=$T/g7/vert     # antes $T/micro/trans
 mkdir -p escritorio vertical placas maestros
 
 # destino  origen  (orden: lo que va a la web, luego placas, luego maestros)
 LISTA="
 escritorio/nave.mp4            $T/g6/esc/nave_g6_esc_c.mp4
-escritorio/ida-av1.mp4         $H/ida_final_av1.mp4
-escritorio/ida-hevc.mp4        $H/ida_final_hevc.mp4
-escritorio/ida-h264.mp4        $H/ida_final_h264.mp4
-escritorio/vuelta-av1.mp4      $H/vuelta_final_av1.mp4
+escritorio/ida-av1.mp4         $H/cod/c/ida_av1_crf40.mp4
+escritorio/ida-hevc.mp4        $H/cod/c/ida_hevc_crf26.mp4
+escritorio/ida-h264.mp4        $H/cod/c/ida_h264_crf23.mp4
+escritorio/vuelta-av1.mp4      $H/cod/c/vuelta_av1_crf40.mp4
 vertical/nave.mp4              $T/g6/vert/nave_g6_vert.mp4
 vertical/ida-av1.mp4           $V/cod/ida_av1_crf40.mp4
 vertical/ida-hevc.mp4          $V/cod/ida_hevc_crf26.mp4
-vertical/ida-h264.mp4          $V/ida_micro.mp4
-vertical/vuelta-h264.mp4       $V/vuelta_micro.mp4
+vertical/ida-h264.mp4          $V/ida/ida_micro.mp4
+vertical/vuelta-h264.mp4       $V/ida/vuelta_micro.mp4
 vertical/sacristia-5s.mp4      $T/movil-06/web/sacristia.mp4
 escritorio/grupo-ida-provisional-h264.mp4  $T/07/e6prov/grupo-ida-provisional-h264.mp4
 placas/sacristia-esc-s11.png   $T/micro/trans_esc/klein/sac17_s11_00001_.png
@@ -51,8 +51,8 @@ placas/nave-esc-tallo-disp.png      $T/micro/g5/esc_disp_tallo.png
 placas/nave-vert-tallo-disp.png     $T/micro/g5/vert_disp_tallo.png
 placas/nave-esc-g6-copal-real.png  $T/g6/copal/nave_g6_esc_real_copal.png
 placas/nave-esc-g6-copal-klein.png $T/g6/copal/nave_g6_esc_klein_copal.png
-maestros/esc-ida.mkv           $H/ida_master_mezcla.mkv
-maestros/vert-ida.mkv          $V/cod/ida_master.mkv
+maestros/esc-ida.mkv           $H/ida_c/ida_master_mezcla.mkv
+maestros/vert-ida.mkv          $V/ida/ida_master.mkv
 maestros/esc-nave.mkv          $T/g6/esc/maestro_nave_esc.mkv
 maestros/vert-nave.mkv         $T/g6/vert/maestro_nave_vert.mkv
 "
