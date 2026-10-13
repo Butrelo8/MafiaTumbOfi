@@ -52,6 +52,7 @@ con `gen.sh`, `ffmpeg` y `cp` simulados.
 | `06-movil/micro_v.txt` | `micro/movil/` | `preset_edit` | 11 | `75/80.megapixels=4 75/80.upscale_method=lanczos` |
 | `06-movil/micro_v2.txt` | `micro/movil/` (`PROMPT=prompt_klein_v2.txt klein_v.sh`) | `preset_edit` | por llamada | `75/80.megapixels=4 75/80.upscale_method=lanczos` |
 | `16-loops-de-10s/h3_calmo_260.txt` | `micro/largo/` (`reconstruir_10s.sh`, `prompt_calmo.txt`) | `preset_posevideo_ff` | 7 | `12.width=928 12.height=512 12.length=260 15.steps=40 10.end_percent=0.5` |
+| `07-guion-espacios/real_{vestidor,cripta,atrio}.txt` | `07/produccion/` (`real07.sh`; esqueleto de `mto_placa_real_s2b.json`) | `preset_edit` | 2 3 | `75/80.upscale_method=lanczos 75/80.megapixels=4` |
 
 ## Fuera de ComfyUI
 
