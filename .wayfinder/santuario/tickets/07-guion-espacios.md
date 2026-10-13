@@ -124,8 +124,11 @@ en la propuesta de abajo):
     `ESQUINA=0.5|0.3` (hueco 22 → 17 / 14), sin GPU.
   - **El NR oscurece la cripta 15 %** (cuadro 19 → 15.6, haz de luna 104 → 86); variante con el tono de la E3.
   Tableros `tmp/07/produccion/tablero_{vestidor,cripta,atrio}.jpg` (E3 | s2 | s3, recortes al 100 %, variantes y
-  verticales con los mismos encuadres), enviados al usuario. s2 del atrio borró la montaña. **Pendiente: elección del
-  usuario**; después, E5 sobre esas placas.
+  verticales con los mismos encuadres), enviados al usuario. s2 del atrio borró la montaña. **Elegido por el usuario
+  (07:40): s3 en los tres**, muro B, cripta con el tono de la E3 (sin NR), atrio con esquina 0.5 y la carrocería de
+  la troca desde el tono NR (máscara de la maqueta de E2, `carroceria.py`); el s2 del atrio, rechazado (la puerta
+  deformada). Placas finales `tmp/07/produccion/placa_<e>.png`, verticales `tmp/07/produccion/vertical/`. La
+  vertical del atrio no ve la lámpara ni la neblina: lleva neblina baja sobre los adoquines (decisión del usuario).
 
 ## Propuesta (2026-10-13)
 Vuelve en la versión 1 a pedido del usuario. Tres opciones por espacio, cada una con dos fotogramas de referencia,
