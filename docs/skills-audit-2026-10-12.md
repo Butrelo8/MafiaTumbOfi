@@ -99,8 +99,10 @@ reiniciar sesión no es un sumidero de tiempo:
 
 - La mediana es de 0.4 min hasta la primera acción. Ninguna sesión pasó de
   6 min, salvo el fork `6c621476` (medido).
-- 19 prompts arrancan desde un handoff o un "continúa", y no hubo ninguna
-  compactación (`This session is being continued`: 0; medido).
+- 8 de las 26 sesiones con prompt propio arrancan desde un handoff o un
+  "continúa" (medido sobre el primer prompt de cada sesión). No hubo ninguna
+  compactación: 0 registros `isCompactSummary` o `type:"summary"` en los 27
+  `.jsonl` (medido).
 
 Lo que sí cuesta es perder estado *dentro* del trabajo. `build()` borra las
 poses que el usuario movió, y eso "ya pasó una vez" (doc: `docs/HANDOFF.md:35`,
@@ -176,7 +178,7 @@ en tanda (de noche o en cola), en vez de render→revisar→ajustar por toma.
 | Look de cine (halación, `dof.py`, grano) | 76 | 7 | `1007097a` (20), `0ed2c9a0` (20), `ca646a3a` (16) | `tmp/cine-look/{halacion.sh,dof.py,montar_r7.sh}`, ignorados por git |
 | Klein (edición Flux) | 288 | 10 | `57ebe5be` (73), `0542fe41` (62) | `~/.claude/skills/comfy-local/scripts/gen.sh` más un `klein*.sh` por carpeta |
 | H3 (video) | 205 | 9 | `ca646a3a` (45), `a2960099` (30) | `gen.sh` más un `h3*.sh` por carpeta |
-| Encode final (x264, x265, AV1, VP9) | 96 | 15 | `ca646a3a` (16), `4bc959ab` (12) | La escalera de códecs vive solo en `tmp/micro/*/cod/ladder.sh` (doc: `docs/specs/…scope-terminado…`:77) |
+| Encode final (x264, x265, AV1, VP9) | 96 | 15 | `ca646a3a` (16), `4bc959ab` (12) | La escalera de códecs vive solo en `tmp/micro/*/cod/ladder.sh` (doc: `docs/scope-terminado-2026-10-12.md:77`) |
 | Render headless `blender.exe -b` | 50 | 8 | `57ebe5be` (13), `cc4f90b1` (9) | `scripts/build-scene.sh` |
 
 En disco hay 12 copias de `h3*.sh` en 9 carpetas, 18 de `klein*.sh` en 8 y 18 de
@@ -191,7 +193,7 @@ está escrito en `docs/handoffs/2026-10-10-micro-colgado.md:45-57`:
 | Error | Veces o sesiones | Ejemplos | Fuente |
 |---|---|---|---|
 | `sleep` en primer plano bloqueado por el arnés | 6 sesiones | `90d9750d`, `85d043ac`, `64d1fcbf` | medido; ya está prohibido en `~/.claude/CLAUDE.md` (regla 6) |
-| El MCP de Blender no conecta (puerto 9876/9877, WSL en modo *mirrored*, `0.0.0.0`) | 3 sesiones más 1 timeout; el usuario lo explicó 5 veces | `db8aab27`, `64d1fcbf`, `a2960099`, `90d9750d` | medido |
+| El MCP de Blender no conecta (puerto 9876/9877, WSL en modo *mirrored*, `0.0.0.0`) | 3 sesiones más 1 timeout; el usuario lo explicó 3 veces | `db8aab27`, `64d1fcbf`, `a2960099`, `90d9750d` | medido |
 | Filtergraph de ffmpeg roto (alturas que no casan en `hstack`, etiquetas de más) | 4 | `a2960099`, `57ebe5be` ×2, `272c7e29` | medido |
 | `numpy` o `PIL` ausentes en el `python3` del sistema | 3 sesiones; se usó `uv run --with …` 88 veces | `cc4f90b1`, `a2960099`, `0542fe41` | medido |
 | H3 `SamplerCustomAdvanced shape … is invalid` | 2 | `272c7e29`, `1007097a` (se reintentó a 928×512) | medido; la causa exacta (dimensiones o número de cuadros) no está verificada |
@@ -204,13 +206,13 @@ está escrito en `docs/handoffs/2026-10-10-micro-colgado.md:45-57`:
 
 | Instrucción | Sesiones | Ejemplos |
 |---|---|---|
-| "Haz el handoff con matt-handoff y ponlo dentro del repo" | 10 | `ba6882d0` (×2), `18a906bb`, `6c621476`, `10602c56`. En `10602c56` Claude contesta "como ya pediste la vez pasada" |
-| "Commit de todo, también lo de otros agentes" | 10 | `4bc959ab`, `0542fe41`, `85d043ac`, `cc4f90b1` (×2) |
+| "Haz el handoff con matt-handoff y ponlo dentro del repo" | pedido explícito en 3 (`ba6882d0`, `18a906bb`, `6c621476`); la skill `matt-handoff` o `handoff` se cargó en 7 | En `10602c56` Claude contesta "como ya pediste la vez pasada" sobre guardarlo en el repo |
+| "Commit de todo, también lo de otros agentes u otra sesión" | commit pedido en 5 sesiones; "todo, incluso lo de otros" en 3 | `4bc959ab`, `0542fe41`, `85d043ac`; commit simple en `a603460c` y `cc4f90b1` (×2) |
 | "Anota quirks, hallazgos y técnicas" (en ProyectoInvestigación, visual-lab o ComfyUI) | 6 | `ba6882d0` (×2), `a2960099`, `85d043ac`, `0542fe41`, `1007097a` |
-| "Ya moví cosas, guarda posiciones" | 6 | `64d1fcbf` (×4), `10602c56`, `18a906bb`, `ba6882d0` |
+| "Ya moví cosas, guarda posiciones" | 5 | `64d1fcbf` (×4), `6c621476`, `10602c56`, `18a906bb`, `ba6882d0` |
 | "¿Cómo va?" (preguntar por el avance de un render largo) | 4 sesiones, 7 veces | `cc4f90b1` (×4) |
 | "Verifica con screenshots o recorre la página" | 3 | `cc4f90b1`, `10602c56`, `ba6882d0` |
-| "Blender ya está en 0.0.0.0 / mirrored" | 2 sesiones, 5 veces | `64d1fcbf` (×4), `a2960099` |
+| "Blender ya está en 0.0.0.0 / mirrored" | 2 sesiones, 3 veces | `64d1fcbf` (×2), `a2960099` |
 
 Las notas se escriben en tres repos: ProyectoInvestigación (38 escrituras en 6
 sesiones), visual-lab (31 en 4) y los `docs/` de MTO. Además, `blender-notas.md`
@@ -300,7 +302,7 @@ usuario: lo que un script puede comprobar va en código, no en un prompt.
   - 4.43 h de repeticiones en 11 trabajos. De eso, 2.77 h son dos renders
     completos en `cc4f90b1`.
   - 29 min perdidos en `64d1fcbf` (exit −1).
-  - "Guardar posiciones" repetido en 6 sesiones.
+  - "Guardar posiciones" repetido en 5 sesiones.
   - `hide_render` en 39 llamadas de 12 sesiones.
   - Doc: `docs/HANDOFF.md:35`, `docs/handoffs/2026-10-05-movil-y-props.md:68`.
 - **Esfuerzo:** 3–4 h (opinión).
@@ -342,7 +344,7 @@ usuario: lo que un script puede comprobar va en código, no en un prompt.
 - **Evidencia (medido):**
   - 2.17 h en esperas que bloquean, en 21 sesiones.
   - `sleep` bloqueado en 6 sesiones.
-  - Fallos de conexión de Blender en 3 sesiones, explicados por el usuario 5
+  - Fallos de conexión de Blender en 3 sesiones, explicados por el usuario 3
     veces.
   - `numpy` ausente en 3 sesiones; 3 salidas de ComfyUI ausentes.
   - Doc: el cuelgue en "Model Initializing" pasó 4 veces
@@ -384,7 +386,9 @@ usuario: lo que un script puede comprobar va en código, no en un prompt.
   Lleva también una lista de lo que se commitea, incluidos los cambios de otros
   agentes cuando el usuario lo autoriza en esa sesión.
 - **Evidencia (medido):**
-  - Handoff pedido en 10 sesiones; commit de todo en 10; anotar hallazgos en 6.
+  - Handoff pedido explícitamente en 3 sesiones y escrito con la skill en 7;
+    commit pedido en 5 (en 3, "todo, incluso lo de otros"); anotar hallazgos
+    en 6.
   - Escrituras repartidas: ProyectoInvestigación 38 en 6 sesiones, visual-lab
     31 en 4.
 - **Esfuerzo:** 1 h (opinión).
