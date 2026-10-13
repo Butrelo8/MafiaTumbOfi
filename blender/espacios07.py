@@ -33,7 +33,6 @@ CAMARAS = {
               "movil": ((-2.0, -4.5, 1.4), (2.8, 9.0, 3.2), 28, -0.25)},
 }
 FORMATOS = {"escritorio": (1280, 720), "movil": (720, 1280)}
-SOPORTE = os.environ.get("SOPORTE", "atril")  # de la guitarra del vestidor: atril | gancho (se elige en E3)
 # Rango de la profundidad (cerca, lejos) en m: con el 0.3–40 de la nave los cuartos chicos salen gris parejo.
 PROFUNDIDAD = {"vestidor": (0.3, 10.0), "cripta": (0.3, 14.0), "atrio": (0.5, 40.0)}
 
@@ -121,22 +120,19 @@ def vestidor(m):
         _caja(f"tocador_cajon_{z}", 0.18, 1.62, 2.27, 2.3, z, z + 0.24, n)
     for k, x in enumerate((0.55, 0.9, 1.25)):
         _cil(f"veladora_v{k}", x, 2.62, 0.89, 1.0, 0.035, m["roja"])
-    # la reliquia: la guitarra de Diego. Recargada en el tocador quedaba en una postura imposible (el usuario, E3):
-    # va en un atril de piso entre el tocador y el rincón, o colgada de un gancho entre el espejo y el ropero.
-    # El asset mira a -Y con giro 0.
-    if SOPORTE == "atril":
-        P, giro, incl = (2.15, 2.55, 0.10), math.radians(-35), math.radians(-15)
-        h = 0.74  # altura del yugo: el cuello a esa altura con la guitarra inclinada 15° hacia atrás
-        cuello_y = h * math.tan(-incl)
-        T["_grupo"]("atril", P[:2] + (0,), giro, [
-            _barra("atril_pata_izq", (-0.2, -0.2, 0.01), (-0.06, 0.02, 0.11), 0.01, n),
-            _barra("atril_pata_der", (0.2, -0.2, 0.01), (0.06, 0.02, 0.11), 0.01, n),
-            _barra("atril_cuna", (-0.16, -0.05, 0.1), (0.16, -0.05, 0.1), 0.012, n),
-            _barra("atril_poste", (0, cuello_y + 0.12, 0.0), (0, cuello_y + 0.05, h), 0.012, n),
-            _barra("atril_yugo", (-0.05, cuello_y + 0.05, h), (0.05, cuello_y + 0.05, h), 0.01, n)])
-    else:  # gancho en el muro del fondo, la guitarra colgada del clavijero, de frente al cuarto
-        P, giro, incl = (2.33, 2.86, 0.97), 0.0, 0.0
-        _barra("gancho_guitarra", (2.33, 2.95, 1.96), (2.33, 2.85, 1.96), 0.01, n)
+    # la reliquia: la guitarra de Diego en una silla de madera junto al tocador, el cuerpo en el asiento y el cuello en el
+    # respaldo. Elegida por el usuario en E3 entre cinco soportes (recargada en el tocador quedaba en una postura
+    # imposible; atril, gancho, ropero y estuche, descartados). El asset mira a -Y con giro 0; la inclinación (eje X)
+    # lleva la punta hacia +Y local.
+    sx, sy = 2.1, 2.45
+    _caja("silla_asiento", sx - 0.21, sx + 0.21, sy - 0.21, sy + 0.21, 0.42, 0.46, mad)
+    for dx in (-0.18, 0.18):
+        for dy in (-0.18, 0.18):
+            _caja(f"silla_pata_{dx}_{dy}", sx + dx - 0.02, sx + dx + 0.02, sy + dy - 0.02, sy + dy + 0.02, 0,
+                  0.42 if dy < 0 else 0.98, mad)
+    _caja("silla_travesano", sx - 0.2, sx + 0.2, sy + 0.16, sy + 0.2, 0.88, 0.98, mad)
+    _caja("silla_respaldo", sx - 0.2, sx + 0.2, sy + 0.17, sy + 0.19, 0.6, 0.66, mad)
+    P, giro, incl = (sx, sy - 0.09, 0.46), 0.0, -math.atan2(0.26, 0.44)  # toca el travesaño a 0.44 m del asiento
     for pieza, mat in zip(A["guitarra"](bpy.context.collection, P, largo=0.98, giro=giro, inclinacion=incl,
                                         nombre="PROP_guitarra"), (m["madera_clara"], oro)):
         pieza.data.materials.clear()

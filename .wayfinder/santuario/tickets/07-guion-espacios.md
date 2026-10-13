@@ -36,9 +36,12 @@ en la propuesta de abajo):
   `blender/espacios07.py` (`tmp/07/tablero/tablero_e3.jpg`, el hueco medido en luma media): el usuario eligió
   **cripta s22** (hueco 10.5, el haz cae entero sobre el teléfono), **atrio s22** (esquina 22.5, la más oscura) y
   **vestidor s11** (hueco 42.5), éste con una corrección: la guitarra recargada en el tocador queda en una postura
-  imposible. Se prueban dos soportes en la maqueta (`SOPORTE=atril|gancho`): un atril de piso entre el tocador y el
-  rincón, o colgada de un gancho entre el espejo y el ropero, con la misma semilla. El muro blanco del vestidor todavía
-  aclara el hueco: lo baja la placa real (Klein 4 MP + tono NR).
+  imposible. Con la misma semilla se probaron cinco soportes en la maqueta: atril de piso y gancho en el muro
+  (descartados: el gancho quedó sobre el clavijero y la guitarra parecía recargada) y luego silla, dentro del ropero y
+  estuche abierto (`tmp/07/tablero/tablero_guitarra2.jpg`). **El usuario eligió la silla**: una silla de madera junto
+  al tocador, el cuerpo en el asiento de tule y el cuello en el respaldo, a la luz de las velas. Placa:
+  `tmp/07/e3/out/e3_vestidor_silla_s11_00001_.png`; prompt `prompts/07-guion-espacios/e3_vestidor_silla.txt`. El muro
+  blanco del vestidor todavía aclara el hueco (luma media 47): lo baja la placa real (Klein 4 MP + tono NR).
 - **El atrio elegido todavía no deja limpia la esquina** (`tmp/07/tablero/atrio_C2_lobo_hueco.jpg`: luma media 24 en
   el hueco contra 46 en el cuadro): el poste, el muro que alumbra el sodio y el canto izquierdo del portal caen dentro.
   En la placa de producción el poste se mueve a la derecha del portal o el muro bajo la lámpara cae a negro, para que
