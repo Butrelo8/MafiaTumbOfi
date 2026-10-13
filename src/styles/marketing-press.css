@@ -721,18 +721,6 @@ body.marketing-body img {
   padding-inline-start: var(--titular-x, 0);
 }
 
-/* Colocación por estación, a ojo sobre capturas a 1440x900 y 500x844. Cada
-   formato tiene su propia capa y lo que tapa cae en otro sitio.
-   Móvil, hornacinas: por encima de la mesa; abajo el cinturón se comía "po". */
-.group-section .estacion-titular {
-  --titular-bajo: 26svh;
-}
-
-/* Móvil, reliquia: el candelero sube por el borde izquierdo y se comía "¿Ti". */
-.booking-section .estacion-titular {
-  --titular-x: 12vw;
-}
-
 /* Móvil, nave: la capa son dos columnas a los lados y bancas desde media
    altura. Lo libre es arriba, entre columnas (del 17 al 82 % del ancho). */
 .hero .hero-copy.hero-content {
@@ -748,30 +736,6 @@ body.marketing-body img {
    Altar: la banca de la fiel muerde la primera letra, no la palabra.
    Hornacinas: baja hasta las velas, en el hueco entre la caja y el vaso. */
 @media (min-aspect-ratio: 1/1) {
-  .bio-section .estacion-titular {
-    --titular-x: 12.5vw;
-  }
-
-  .group-section .estacion-titular {
-    --titular-x: 20vw;
-    --titular-bajo: 8svh;
-  }
-
-  .booking-section .estacion-titular {
-    --titular-x: 0;
-  }
-
-  /* Sonido: el tallo del cirio (x 403-453 a 1440) muerde el lado derecho de
-     la "a" final; más a la izquierda se comía la letra entera. */
-  .music-section .estacion-titular {
-    --titular-x: 7.4vw;
-  }
-
-  /* Retirada: la cabeza de la fiel se comía el primer trazo de la M. */
-  .footer-bar .estacion-titular {
-    --titular-x: 6vw;
-  }
-
   /* Nave: la capa de frente son las columnas y las bancas, y la única franja
      libre de arriba abajo es el pasillo, del 40 al 60 % del ancho (medido su
      alfa). A la izquierda, donde estaba, las columnas tapaban el logo y el CTA.
@@ -805,23 +769,6 @@ body.marketing-body img {
   z-index: 3;
   background: var(--bg-raised);
   padding-block: var(--space-section);
-}
-
-/* Pop-in: capasEstacion escribe data-cerca. Se oculta sólo con "0", no por
-   defecto, para que sin JS se lea todo. */
-[data-estacion] > .container {
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-[data-estacion][data-cerca="0"] > .container {
-  opacity: 0;
-  transform: translateY(24px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [data-estacion] > .container {
-    transition: none;
-  }
 }
 
 .divider {

@@ -1,0 +1,48 @@
+---
+/**
+ * El santuario detrás de las secciones (ticket 09): un video por loop, ida y vuelta de cada formato.
+ * Cada `<source>` lleva `data-src`, no `src`: el script elige el formato y el códec, baja ese archivo
+ * por `fetch` y lo pone como `blob:` (ticket 05). Sin JS no se monta y la página se lee de corrido.
+ */
+import '../styles/santuario.css'
+import { espacios, type Formato } from '../data/santuario'
+
+const formatos: Formato[] = ['escritorio', 'vertical']
+const piezas = ['loop', 'ida', 'vuelta'] as const
+---
+
+<!-- Antes de pintar las secciones: con JS van apiladas, una por pantalla. -->
+<script is:inline>document.documentElement.classList.add('santuario')</script>
+
+<div class="escena" aria-hidden="true">
+  {formatos.map((formato) => espacios.map((espacio, indice) => {
+    const fondo = espacio.fondo[formato]
+    return (
+      <>
+        {piezas.map((pieza) => fondo[pieza] && (
+          <video data-formato={formato} data-clave={`${indice}:${pieza}`} muted playsinline loop={pieza === 'loop'} preload="none">
+            {fondo[pieza].map((fuente) => <source data-src={fuente.src} type={fuente.type} />)}
+          </video>
+        ))}
+        {fondo.quieta && <img data-formato={formato} data-clave={`${indice}:loop`} data-src={fondo.quieta} alt="" />}
+      </>
+    )
+  }))}
+</div>
+
+<div class="negro" data-negro aria-hidden="true"></div>
+
+<nav class="indicador" aria-label="Secciones">
+  {espacios.map((espacio, indice) => (
+    <a href={`#${espacio.id}`} data-ir={indice}>
+      <span aria-hidden="true">{String(indice + 1).padStart(2, '0')}</span>
+      <span class="sr-only">{espacio.nombre}</span>
+      <span class="indicador-carga" aria-hidden="true"></span>
+    </a>
+  ))}
+</nav>
+
+<script>
+  import { montarSantuario } from '../lib/montarSantuario'
+  montarSantuario()
+</script>

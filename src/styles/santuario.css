@@ -1,0 +1,167 @@
+/* El santuario (ticket 09): con JS (`html.santuario`, ver Santuario.astro) cada sección ocupa la
+   pantalla sobre la escena y un gesto pasa a la siguiente. Sin JS, la página se lee de corrido. */
+
+html.santuario,
+html.santuario body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.santuario .marketing-main {
+  padding-top: 0;
+}
+
+.escena,
+.negro,
+.indicador {
+  display: none;
+}
+
+html.santuario .escena {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: #000;
+  pointer-events: none;
+}
+
+.escena > video,
+.escena > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.15s linear; /* la mezcla loop ↔ transición (ticket 11) */
+}
+
+.escena > .on {
+  opacity: 1;
+}
+
+/* Saltos del menú, hero ↔ nave y las secciones sobre negro: fundido de 0.3 + 0.3 s (ticket 05). */
+html.santuario .negro {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.negro.on {
+  opacity: 1;
+}
+
+html.santuario .seccion {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  margin: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.44s ease, visibility 0s linear 0.44s;
+}
+
+html.santuario .seccion.activa {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.44s ease;
+}
+
+html.santuario .seccion:focus {
+  outline: none;
+}
+
+/* Indicador de sección: un número por espacio. La línea roja bajo el número se llena mientras el
+   gesto espera su archivo (placeholder del aviso de carga, ticket 05). */
+html.santuario .indicador {
+  display: grid;
+  position: fixed;
+  z-index: 90;
+  right: clamp(0.5rem, 2vw, 2rem);
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.indicador a {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  font-family: var(--ff-mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-shadow: 0 0 12px #000;
+  transition: color 0.2s ease;
+}
+
+.indicador a:hover,
+.indicador a[aria-current='true'] {
+  color: var(--text);
+}
+
+.indicador a[aria-current='true']::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  width: 8px;
+  height: 2px;
+  background: var(--red);
+}
+
+.indicador a:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
+.indicador-carga {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 9px;
+  height: 2px;
+  background: oklch(95% 0.008 85 / 0.18);
+  opacity: 0;
+}
+
+.indicador-carga::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red-glow);
+  transform: scaleX(var(--carga, 0));
+  transform-origin: left;
+  transition: transform 0.2s linear;
+}
+
+.indicador a[data-cargando] .indicador-carga {
+  opacity: 1;
+}
+
+/* Vertical: el contenido vive en la mitad o los dos tercios de abajo (ticket 03); el indicador sube. */
+@media (max-aspect-ratio: 1/1) {
+  html.santuario .indicador {
+    top: calc(clamp(60px, 10vh, 80px) + 0.5rem);
+    translate: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .escena > video,
+  .escena > img,
+  html.santuario .negro,
+  html.santuario .seccion,
+  html.santuario .seccion.activa,
+  .indicador-carga::after {
+    transition: none;
+  }
+}

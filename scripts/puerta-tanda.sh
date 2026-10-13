@@ -62,8 +62,6 @@ EOF
   # 4. Disco: un pase en PNG de 16 bits ocupó 933 MB (docs/HANDOFF.md).
   libre=$(df -BG --output=avail "$RAIZ" | tail -1 | tr -dc 0-9)
   [ "$libre" -ge "${MIN_GB:-5}" ] && bien "disco: $libre GB libres" || mal "disco: $libre GB libres (< ${MIN_GB:-5})"
-  # El peso de la web que hay hoy (no el de la tanda nueva: ése se mide tras build-scene.sh).
-  "$RAIZ/scripts/check-budget.sh" | sed 's/^/      /' || mal "check-budget.sh: el sitio ya pasa del techo"
 
   echo
   echo "Tanda (segundo plano):"
