@@ -1,11 +1,37 @@
 # 07 — Guion de camarín, cripta y atrio
-Type: grilling · Status: open · Blocks: 10 · Blocked by: 02, 03 · Assignee: —
+Type: grilling · Status: closed · Blocks: 10 · Blocked by: 02, 03 · Assignee: —
 
 ## Question
 Con la skill `director`: por espacio restante, qué muestra, su reliquia, su luz y su referencia
 (`frameref`), y su transición (qué oclusor; dónde va el único "atravesar un umbral" y el "empujar hacia un
 retrato que se abre"). Incluye decidir el atrio (¿la calle con la troca?) y cómo entran los retratos de
 El grupo.
+
+## Answer
+Decidido por el usuario el 2026-10-13, en una pasada sobre los tableros de `tmp/07/tablero/` (detalle de cada opción
+en la propuesta de abajo):
+
+| Espacio | Elegido | Reliquia | Luz | Referencias |
+|---|---|---|---|---|
+| Camarín (El grupo, E) | **B · El vestidor**: ropero abierto con la ropa de escenario colgada como ornamentos, texana, espejo grande de marco dorado, tocador con tres veladoras | La guitarra de Diego recargada en el tocador | Dos arbotantes de 2200 K y las veladoras | `silence 007`, `jessejames 015` |
+| Cripta (Contratación, D) | **B · La línea directa**: altar de piedra bajo la bóveda de tezontle | Teléfono de disco de oro (excepción aceptada: no es un instrumento) | Un haz frío de luna por la reja de la clave, con polvo; dos veladoras | `silence 002`, `jessejames 008` |
+| Atrio (Cierre, D esquina) | **C · La fachada desde la calle**, con la troca: sí | La troca: **pickup negra estilo Lobo**, doble cabina, cromo, calaveras verticales rojas, sin emblemas | Luz cálida del portal abierto, sodio, calaveras, neblina | `sicario 034`, `sicario 015` |
+
+- **Transiciones, plan 1.** Sacristía → camarín: empujar hacia el cuadro que cuelga sobre el tocadiscos en s11, que se
+  abre como puerta (vuelta: se cierra). Camarín → cripta: oclusor con la puerta del ropero y bajar la escalera.
+  Cripta → atrio: el único umbral, subir y salir por el portal a la neblina, el mismo portal que el atrio ve desde la
+  calle. Ninguna toca placas de la nave ni de la sacristía.
+- **Retratos de El grupo:** HTML en el hueco de E, uno a la vez; la escena del vestidor no cambia por integrante.
+- **La troca la eligió Claude a pedido del usuario** ("que se vea más real, saca alguna que se vea con la estética"):
+  tres variantes sobre una maqueta con proporciones de pickup real (`blockout.py › troca2`, 5.9 × 2.0 × 2.0 m,
+  estacionada junto a la banqueta, vista de tres cuartos por detrás), `tmp/07/tablero/tablero_troca.jpg`. La negra
+  porque mantiene el negro sobre negro, el cromo toma el oro del sodio y las calaveras son el rojo de la paleta; la
+  blanca es lo más claro del cuadro y le quita el ojo al portal; la gris estilo Raptor repite la firma de calaveras de
+  Ford y se lee fría. Placa elegida: `tmp/07/tablero/atrio_C2_lobo_elegida.png` (semilla 22).
+- **Para la producción** (cuando el espacio entre a la cola): las previas son de una semilla y sirven de dirección,
+  no de placa. Corregir el muro verde menta del vestidor a cal/almagre en el prompt; modelar la guitarra y el
+  teléfono en Blender con su silueta real (lección del 12); la troca con un asset o la maqueta `troca2` mejorada,
+  nunca la caja del primer tablero. Prompts: `prompts/07-guion-espacios/`.
 
 ## Propuesta (2026-10-13)
 Vuelve en la versión 1 a pedido del usuario. Tres opciones por espacio, cada una con dos fotogramas de referencia,

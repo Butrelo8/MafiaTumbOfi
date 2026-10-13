@@ -56,6 +56,10 @@ Lista para producir sin decisiones pendientes. Llegamos cuando no queda ningún 
   en el [06](tickets/06-movil.md) (v5, 222 KB); las transiciones con el micro van en el [17](tickets/17-transiciones-micro-v5.md).
 - [16 Loops de 10 s en todo el santuario](tickets/16-loops-de-10s.md): 10 s en todos los loops; vertical con H3 a
   512×928 tomando sólo lo que se mueve; velas y polvo de 240 al mismo tempo sin repetirse; 354 / 262 KB por 10 s.
+- [07 Guion de camarín, cripta y atrio](tickets/07-guion-espacios.md): camarín = el vestidor (ropa de escenario,
+  espejo, guitarra); cripta = teléfono de oro bajo un haz de luna; atrio = la fachada desde la calle con una troca
+  negra estilo Lobo. Transiciones: el cuadro de s11 se abre al camarín, oclusor del ropero a la cripta, y el único
+  umbral es salir por el portal a la neblina. Retratos de El grupo en HTML, uno a la vez.
 
 ## Not yet specified
 
@@ -63,9 +67,6 @@ Lista para producir sin decisiones pendientes. Llegamos cuando no queda ningún 
   la señora con rebozo, los nardos, la texana con rosario y el joven de gorra nunca se corrieron. Todo lo hecho después
   (v5, micro, loops de 10 s y las transiciones del 17, en los dos formatos) está sobre placas y profundidad de antes de
   la pila: hacerla rehace placas, loops y transiciones. El usuario la pidió ahora (2026-10-11), stills antes de H3.
-- **Atrio con la troca del videoclip.** Propuesto, sin aprobar; se decide al guionizar los espacios.
-- **Los retratos de El grupo en el camarín**: entran como HTML encima, uno a la vez (ticket 03); queda si la toma
-  "empuja hacia un retrato que se abre" (handoff) o no.
 - **El texto y el neón M⚡T** compuestos sobre la escena (nunca generados): dónde aparecen.
 - **Pendientes heredados** que pueden tocar la especificación: el escudo de la selección en la camiseta del
   hero, el permiso de los directores de los videos y el test roto `capasEstacion.test.ts` (puede morir con la
