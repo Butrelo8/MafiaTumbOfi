@@ -32,6 +32,10 @@ en la propuesta de abajo):
   no de placa. Corregir el muro verde menta del vestidor a cal/almagre en el prompt; modelar la guitarra y el
   teléfono en Blender con su silueta real (lección del 12); la troca con un asset o la maqueta `troca2` mejorada,
   nunca la caja del primer tablero. Prompts: `prompts/07-guion-espacios/`.
+- **El atrio elegido todavía no deja limpia la esquina** (`tmp/07/tablero/atrio_C2_lobo_hueco.jpg`: luma media 24 en
+  el hueco contra 46 en el cuadro): el poste, el muro que alumbra el sodio y el canto izquierdo del portal caen dentro.
+  En la placa de producción el poste se mueve a la derecha del portal o el muro bajo la lámpara cae a negro, para que
+  el monograma y las redes queden sobre oscuro. Klein además dibujó un emblema en el costado de la troca: se quita.
 
 ## Propuesta (2026-10-13)
 Vuelve en la versión 1 a pedido del usuario. Tres opciones por espacio, cada una con dos fotogramas de referencia,
