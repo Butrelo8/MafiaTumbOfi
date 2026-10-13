@@ -268,7 +268,7 @@ def atrio(m):
     if os.path.exists(ruta):  # E2
         tr = {}
         exec(open(ruta, encoding="utf-8").read(), tr)
-        tr["troca"](m, (3.4, 6.2, 0), giro=math.radians(-90))
+        tr["troca"](m, (3.4, 5.95, 0), giro=math.radians(-90))  # pegada a la banqueta (y 7.0)
     _mover(_nuevos(antes), X_ATRIO)
 
 
