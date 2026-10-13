@@ -34,6 +34,14 @@ placas/nave-esc-g4-real.png    $T/props-06/nave_g4_esc.png
 placas/nave-vert-g4-real.png   $T/props-06/nave_g4_vert.png
 placas/nave-esc-g4-disp.png    $T/props-06/nave_g4_esc_disp.png
 placas/nave-vert-g4-disp.png   $T/props-06/nave_g4_vert_disp.png
+placas/nave-esc-g5-micro.png   $T/micro/g5/esc_g5.png
+placas/nave-vert-g5-micro.png  $T/micro/g5/vert_g5_up20.png
+placas/micro-vert-g5.png       $T/micro/g5/vert_placa_micro_g5.png
+placas/mascara-micro-esc-g5.png  $T/micro/g5/mascara_micro_g5.png
+placas/mascara-micro-vert-g5.png $T/micro/g5/vert_mascara_g5.png
+placas/mascara-rosa-vert-g5.png  $T/micro/g5/vert_rosa_g5.png
+placas/nave-esc-g5-disp.png    $T/micro/g5/esc_disp_g5.png
+placas/nave-vert-g5-disp.png   $T/micro/g5/vert_disp_g5.png
 maestros/esc-ida.mkv           $H/ida_master_mezcla.mkv
 maestros/vert-ida.mkv          $V/cod/ida_master.mkv
 "

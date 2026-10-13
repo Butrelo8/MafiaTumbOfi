@@ -22,6 +22,14 @@ placas/nave-esc-g4-real.png	1	3025	ef351da5cbe01fde	tmp/props-06/nave_g4_esc.png
 placas/nave-vert-g4-real.png	1	1653	a3cec97c77e92581	tmp/props-06/nave_g4_vert.png
 placas/nave-esc-g4-disp.png	1	164	de977a4ea2aec072	tmp/props-06/nave_g4_esc_disp.png
 placas/nave-vert-g4-disp.png	1	73	e1f3490b7a739ff9	tmp/props-06/nave_g4_vert_disp.png
+placas/nave-esc-g5-micro.png	1	3528	2052dd87a3449588	tmp/micro/g5/esc_g5.png
+placas/nave-vert-g5-micro.png	1	1769	2315a44610d66d93	tmp/micro/g5/vert_g5_up20.png
+placas/micro-vert-g5.png	1	1615	71dedcdada42430c	tmp/micro/g5/vert_placa_micro_g5.png
+placas/mascara-micro-esc-g5.png	1	14	6df8376aa8b2bd69	tmp/micro/g5/mascara_micro_g5.png
+placas/mascara-micro-vert-g5.png	1	9	405e5bfd41a7bd78	tmp/micro/g5/vert_mascara_g5.png
+placas/mascara-rosa-vert-g5.png	1	4	35dde6d9ed94ed7e	tmp/micro/g5/vert_rosa_g5.png
+placas/nave-esc-g5-disp.png	1	474	5f830b1efa7bd567	tmp/micro/g5/esc_disp_g5.png
+placas/nave-vert-g5-disp.png	1	157	8dd9c3c1fda2a55b	tmp/micro/g5/vert_disp_g5.png
 maestros/esc-ida.mkv	60	31659	484c20c8a01b439e	tmp/micro/trans_esc/hd_det/ida_master_mezcla.mkv
 maestros/vert-ida.mkv	60	14116	04d9eb04870fb38a	tmp/micro/trans/cod/ida_master.mkv
 maestros/vert-nave.mkv	240	77776	b12f7387c0a41178	tmp/micro/movil/nave_micro240_dof.mkv + halacion.sh VC=ffv1

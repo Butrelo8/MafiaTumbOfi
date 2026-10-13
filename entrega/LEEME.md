@@ -14,3 +14,6 @@ pila** (camino B: G2–G7 lo reemplazan con los mismos nombres). `maestros/` no 
   la rosa: escritorio L* media 15.2, |ΔL| contra la placa 2.0 constante (ningún cuadro abre huecos); vertical entera en
   todos los cuadros, más oscura (L* 5.6) por el grado y el foco, no por huecos. Para G5: la rosa vertical queda bastante
   más oscura que la de escritorio.
+- **G5 (2026-10-13):** los trozos que faltaban eran de la cabeza del micro, no de la rosa: la máscara cortaba la cúpula
+  bajo la rosa en los dos formatos. Arreglado en `placas/*-g5*` (ticket 06, bullet G5); los loops de aquí siguen con el
+  corte hasta que G6 los rehaga.

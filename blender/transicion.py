@@ -32,7 +32,9 @@ N_LOOP = 141          # MiniMax pide 17n+5; los 20 de más funden la costura del
 # Móvil (ticket 06): cámara vertical propia, misma trayectoria. Con la de escritorio en 9:16 el contrabajo, el Cristo y
 # la lámpara quedan fuera; aquí arrancan más a la derecha y el shift sube el sujeto (hueco abajo, ticket 03).
 MOVIL = {"lente": 28, "shift_y": -0.25, "nave_x": 0.8, "sac_fin": 45.4,  # 45.4: el neón en u ≤ 0.84, dentro de 19.5:9
-         "micro": (0.609, 3.8, 1.62)}  # u 0.35, v 0.24: mitad de arriba, sobre el retablo, sin tapar la guitarra
+         "micro": (0.609, 3.8, 1.669)}  # u 0.35, v 0.24: mitad de arriba, sobre el retablo, sin tapar la guitarra
+# z 1.62 → 1.669 (G5, 2026-10-13): la pila subió la veladora roja y el micro pegado la tocaba; el usuario eligió subirlo
+# 20 px en la placa → centro de la cabeza pegada en y 281 (de 1280) = rejilla de la maqueta (0.13 m en 73 px)
 # Micrófono colgado (docs/specs/2026-10-10-micro-colgado-design.md): centro de la rejilla, a 1.8 m de la cámara y a la
 # altura de la boca. Escritorio en u 0.575: a 0.55 tocaba el halo de la cruz y el borde del panel de texto (Fable).
 MICRO = (0.138, 3.8, 1.62)

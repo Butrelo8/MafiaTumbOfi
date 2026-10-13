@@ -269,3 +269,24 @@ Disposición (`disposicion.py`, `hoja_disp_esc.png`, `hoja_disp_vert.png`, verde
     desviación Lab de la de escritorio, en la cara del altavoz + franja del cuello + la guitarra de s33 dilatada (sobresale
     del altavoz por la izquierda). `nave_g3.png` es ya esa versión (la anterior, `nave_g3_v0.png`). El logo del altavoz
     vertical se pierde.
+- **G5, el micro sobre las placas G4 (2026-10-13), aprobado por el usuario.** Todo en `tmp/micro/g5/` (copias en
+  `entrega/placas/*-g5*`). Compuesto con `micro_viva_v.py` sobre mkv de 3 cuadros de las placas nuevas.
+  - **Cúpula de la cabeza** (el usuario: "pieces off near the rose, the mic"; probablemente también el "still missing
+    pieces" del 2026-10-10): la máscara cortaba la parte de arriba de la cabeza bajo la rosa (hombro izquierdo por
+    `corte[320:376, :975]` de `ajustar_mascara.py`, muesca derecha por la diferencia contra la placa) y dejaba una franja
+    de fondo viejo a la izquierda (x 944–949). La placa sí tiene la cúpula entera. `cupula.py`: elipse ajustada al borde
+    de oro (centro 991, 397, semiejes 41 × 42) y fuera la franja → `mascara_micro_g5.png`. Vertical: Klein s4 había pintado
+    fondo ahí (le llegó el trasplante con la muesca), así que `cupula_v.py` toma esos píxeles de la placa de escritorio
+    escalada como `trasplantar.py` (0.598, −342, 38), con ganancia por canal contra el oro de s4; la máscara nueva sale de
+    `mapear_v.py` (reproduce `mascara_trasplante.png` byte a byte con la máscara vieja).
+  - **Brillo** (elegido por el usuario: el nivel aprobado, no la razón): la guitarra nueva es más oscura y con `TOPE=1.2`
+    el oro quedaba 28 % más oscuro (34 contra 46). Escritorio `TOPE=1.63` → oro L p99 46.3 = aprobado (1.69× la guitarra);
+    vertical `GANA_ORO=1.7` → 51.4 (aprobado 52.2). Medido antes del LOOK y la halación, igual en los dos lados.
+  - **Altura vertical** (elegida: +20 px): la pila subió la veladora roja y el micro la tocaba. Placa, máscara y rosa
+    corridas 20 px arriba (`vert_placa_micro_g5.png`, `vert_mascara_g5.png`, `vert_rosa_g5.png`, `ARRIBA=215`);
+    maqueta `MOVIL["micro"]` z 1.62 → 1.669 (centro de la rejilla en y 281, medido con `medir.py`).
+  - **Disparidad con el micro** (`disp_g5.py`, valores de las cadenas aprobadas, G4 está en la escala de v5): escritorio
+    0.976 → `esc_disp_g5.png`; vertical 0.60 → `vert_disp_g5.png` (la guitarra vertical está ahora en 0.50).
+  - Reconstruir desde `tmp/micro/`: `TOPE=1.63 ROSA=mascara_rosa.png GUIT=0.78,0.99,0.64,0.72 python movil/micro_viva_v.py
+    placa_micro_rosa.png g5/mascara_micro_g5.png <viva_esc.mkv> <salida>`; vertical `GANA_ORO=1.7 TOPE=1.2
+    ROSA=g5/vert_rosa_g5.png GUIT=0.37,0.49,0.36,0.51 ARRIBA=215 … g5/vert_placa_micro_g5.png g5/vert_mascara_g5.png`.
