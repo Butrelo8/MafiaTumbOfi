@@ -1,0 +1,25 @@
+name: rive
+type: skill
+version: 1.0.0
+description: >-
+  Anima personajes y UI interactiva con Rive (.riv + state machines) vía `rive-mcp` (sin editor ni plan) o
+  el MCP oficial `rive` (editor de escritorio abierto). Cuándo Rive vs Blender, flujo probado PNG → .riv
+  rigueado con riv_rig_character, trampas, precios y licencias.
+tags:
+  - animation
+  - rive
+  - web-design
+  - mcp
+  - character
+inputs:
+  - name: personaje
+    required: false
+    default: ''
+    description: PNG/SVG del personaje o descripción de la animación interactiva.
+outputs:
+  - name: riv
+    description: Archivo .riv con state machine, más un GIF de preview
+dependsOn: []
+execution:
+  mode: instruction
+riskLevel: low
