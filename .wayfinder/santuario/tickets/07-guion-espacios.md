@@ -232,6 +232,24 @@ en la propuesta de abajo):
   cuadro que se abre como puerta); los dos con copia en `Downloads\flow-job{3,4}\`, 20 créditos cada uno, orden job3 y luego
   job4, saldo esperado 50 → 30. Cuadros extremos y números del empalme en `job{3,4}/frames_check.txt` (fuera de las zonas
   vivas el cuadro 0 del loop es la placa: 0.00 % de píxeles > 8; dentro, 3–31 %); variantes y riesgos en `notes.md`.
+- **LOOK + halación sobre E5 y el E6 provisional (seethingdrone, 2026-10-14; decisiones de vibeship).** Hecho antes del
+  E6 final, así que el pase tiene que ser determinista por cuadro. El LOOK aprobado no lo es: `vignette` difumina
+  (dither) por omisión con estado que pasa de un cuadro a otro (el mismo cuadro sale distinto según su posición: ±1
+  nivel en ~70 % de los píxeles; `tmp/07/look/determinismo/`). **Cadena para E5, E6 y el E6 final:** `ffmpeg -vf
+  "format=gbrp,$LOOK,format=bgr0" -c:v ffv1` y luego `VC="-c:v ffv1" scripts/loop-vivo/halacion.sh` con sus valores por
+  omisión (HAL 0.8, MIST 0.45), donde `$LOOK` es el de `loop-vivo.sh` con **`vignette=PI/5:dither=0`**, puesto sólo en
+  `tmp/07/look/armar.sh` (el valor por omisión de `loop-vivo.sh` no se toca: rehacer la nave o la sacristía no cambia).
+  Queda ~0.5 de luma más oscuro que la nave y la sacristía (el dither sumaba [0,1)); se acepta. Verticales: vestidor y
+  cripta = escritorio con look recortado con `reencuadre_e5.py` (marcos `c_vestidor_amplio` y `c_cripta_cerrado`, byte
+  a byte iguales a los finales sin look), como la sacristía; **el atrio es la única vertical con grade propio** (su
+  neblina baja sólo existe en la vertical). job2 no tenía maestro 1920 sin pérdida: `look/fuentes/job2_rtx_1920.mkv` es
+  la salida RTX ×1.5 en FFV1, la misma fuente que usó job3. Maestros FFV1 en `tmp/07/look/maestros/` (6 loops,
+  `grupo_ida_job2.mkv`, `contratacion_ida_job3.mkv`). Costuras: la cola de job3 (f184–203) es **idéntica byte a byte**
+  a los cuadros 0–19 del atrio con look (20/20) y su cuadro 0 = la placa de la cripta con el mismo pase (0.000). job2
+  sigue sin `COSTURA` (cola contra la cripta 8.4 → 6.2) y empieza en el camarín anterior a las placas de producción;
+  eso lo arregla el E6 final. revisar, costura de los loops: 0.01–0.04, cripta móvil 0.11 (≤ 1.00; parpadeo 0.33 sobre
+  7 % estático: el halo de las velas llena el recorte cerrado). job2 ahora llega a negro (14 cuadros ≥ 90 %, antes
+  86 % como máximo). Números completos: `tmp/07/look/veredicto.md`. Pendiente: la escalera de códecs, `entrega/` y la web.
 
 ## Propuesta (2026-10-13)
 Vuelve en la versión 1 a pedido del usuario. Tres opciones por espacio, cada una con dos fotogramas de referencia,
