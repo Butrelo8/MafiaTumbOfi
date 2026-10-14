@@ -1,6 +1,6 @@
 // Lógica sin DOM del santuario (ticket 09): qué fuente se baja, en qué orden y cómo se cruza de un
 // espacio a otro. `montarSantuario.ts` la conecta con la página.
-import type { Espacio, Formato, Fuente } from '../data/santuario'
+import type { Espacio, Fondo, Formato, Fuente } from '../data/santuario'
 
 /** `canPlayType` del navegador: '' no, 'maybe' o 'probably' sí. */
 export type PuedeReproducir = (tipo: string) => string
@@ -16,6 +16,22 @@ export type Viaje =
 
 export function elegirFuente(fuentes: Fuente[] | undefined, puede: PuedeReproducir): Fuente | null {
   return fuentes?.find((fuente) => puede(fuente.type) !== '') ?? null
+}
+
+/**
+ * Sin más de 1920 px físicos de ancho (`screen.width × devicePixelRatio`), fuera el peldaño de 2560: no se vería y
+ * pesa un tercio más. Con pantalla grande se queda todo y `elegirFuente` toma el de 2560 si su códec sirve.
+ */
+export function paraPantalla(espacios: Espacio[], pantallaGrande: boolean): Espacio[] {
+  if (pantallaGrande) return espacios
+  const sinGrandes = (fondo: Fondo): Fondo => {
+    const quitar = (fuentes?: Fuente[]) => fuentes?.filter((fuente) => !fuente.grande)
+    return { ...fondo, loop: quitar(fondo.loop), ida: quitar(fondo.ida), vuelta: quitar(fondo.vuelta) }
+  }
+  return espacios.map((espacio) => ({
+    ...espacio,
+    fondo: { escritorio: sinGrandes(espacio.fondo.escritorio), vertical: sinGrandes(espacio.fondo.vertical) },
+  }))
 }
 
 export function fuenteDe(

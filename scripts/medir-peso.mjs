@@ -21,6 +21,8 @@ const TECHO = { entrada: 3 * MB, gesto: 1 * MB }
 const PERFILES = {
   movil: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 3 },
   escritorio: { viewport: { width: 1440, height: 900 } },
+  // más de 1920 px físicos: el peldaño de 2560 (paraPantalla)
+  'escritorio 2560': { viewport: { width: 2560, height: 1440 } },
 }
 
 const navegador = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] })

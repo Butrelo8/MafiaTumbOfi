@@ -1,6 +1,9 @@
 import { describe, expect, test } from 'bun:test'
-import { espacios } from '../data/santuario'
-import { clavesDelViaje, colaDePrecarga, ejeDelGesto, elegirFuente, planDeViaje } from './santuario'
+import { espacios as todos } from '../data/santuario'
+import { clavesDelViaje, colaDePrecarga, ejeDelGesto, elegirFuente, paraPantalla, planDeViaje } from './santuario'
+
+// Una pantalla de hasta 1920 px físicos, la de casi todo lo de abajo; el peldaño de 2560 va aparte.
+const espacios = paraPantalla(todos, false)
 
 // Navegadores de prueba: Chrome con AV1, Safari de iPhone anterior al 15 Pro (HEVC y H.264), y uno
 // que sólo entiende H.264.
@@ -27,6 +30,25 @@ describe('elegirFuente', () => {
   test('sin ninguna reproducible devuelve null', () => {
     expect(elegirFuente(espacios[1].fondo.escritorio.vuelta, safariViejo)).toBeNull()
     expect(elegirFuente(undefined, chrome)).toBeNull()
+  })
+})
+
+describe('paraPantalla', () => {
+  const grande = paraPantalla(todos, true)
+
+  test('con más de 1920 px físicos, AV1 y HEVC salen del peldaño de 2560; el H.264 se queda en 1920', () => {
+    const loop = grande[3].fondo.escritorio.loop
+    expect(elegirFuente(loop, chrome)?.src).toBe('/video/escritorio-2560/vestidor-av1.mp4')
+    expect(elegirFuente(loop, safariViejo)?.src).toBe('/video/escritorio-2560/vestidor-hevc.mp4')
+    expect(elegirFuente(loop, soloH264)?.src).toBe('/video/escritorio/vestidor.mp4')
+    expect(elegirFuente(grande[4].fondo.escritorio.ida, chrome)?.src).toBe('/video/escritorio-2560/contratacion-ida-av1.mp4')
+  })
+
+  test('hasta 1920 px, y en vertical siempre, nada de 2560', () => {
+    expect(elegirFuente(espacios[3].fondo.escritorio.loop, chrome)?.src).toBe('/video/escritorio/vestidor-av1.mp4')
+    expect(elegirFuente(grande[3].fondo.vertical.loop, chrome)?.src).toBe('/video/vertical/vestidor-av1.mp4')
+    const fuentes = espacios.flatMap((e) => Object.values(e.fondo).flatMap((f) => [f.loop, f.ida, f.vuelta].flat()))
+    expect(fuentes.some((f) => f?.grande)).toBe(false)
   })
 })
 

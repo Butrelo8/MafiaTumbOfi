@@ -14,6 +14,8 @@
 export interface Fuente {
   src: string
   type: string
+  /** Peldaño de 2560×1440: sólo para pantallas de más de 1920 px físicos (`paraPantalla`). */
+  grande?: boolean
 }
 
 export interface Fondo {
@@ -40,20 +42,32 @@ const tipo = {
   vertical: { av1: 'av01.0.05M.08', hevc: 'hvc1.1.6.L93.90', h264: 'avc1.64001F' },
 }
 
-// En un loop el H.264 se llama como el espacio (`nave.mp4`) y los demás códecs lo llevan detrás
-// (`vestidor-av1.mp4`); las transiciones siempre llevan el códec en el nombre (`ida-av1.mp4`), como en `entrega/`.
-function loop(formato: Formato, nombre: string, codecs: Array<'av1' | 'hevc' | 'h264'> = ['h264']): Fuente[] {
-  return codecs.map((codec) => ({
-    src: `/video/${formato}/${nombre}${codec === 'h264' ? '' : `-${codec}`}.mp4`,
-    type: `video/mp4; codecs="${tipo[formato][codec]}"`,
+// Peldaño de 2560×1440 de escritorio (2026-10-14, docs/2026-10-14-resolucion-1440.md): Lanczos desde los maestros,
+// AV1 y HEVC de cada pieza (`scripts/escalera-2560.sh`), delante de las de 1920. Nivel 5.0 (AV1 12, HEVC 150).
+const tipoGrande = { av1: 'av01.0.12M.08', hevc: 'hvc1.1.6.L150.90' }
+function grande(formato: Formato, nombre: string): Fuente[] {
+  if (formato !== 'escritorio') return []
+  return (['av1', 'hevc'] as const).map((codec) => ({
+    src: `/video/escritorio-2560/${nombre}-${codec}.mp4`,
+    type: `video/mp4; codecs="${tipoGrande[codec]}"`,
+    grande: true,
   }))
 }
 
+// En un loop el H.264 se llama como el espacio (`nave.mp4`) y los demás códecs lo llevan detrás
+// (`vestidor-av1.mp4`); las transiciones siempre llevan el códec en el nombre (`ida-av1.mp4`), como en `entrega/`.
+function loop(formato: Formato, nombre: string, codecs: Array<'av1' | 'hevc' | 'h264'> = ['h264']): Fuente[] {
+  return grande(formato, nombre).concat(codecs.map((codec) => ({
+    src: `/video/${formato}/${nombre}${codec === 'h264' ? '' : `-${codec}`}.mp4`,
+    type: `video/mp4; codecs="${tipo[formato][codec]}"`,
+  })))
+}
+
 function transicion(formato: Formato, nombre: string, codecs: Array<'av1' | 'hevc' | 'h264'>): Fuente[] {
-  return codecs.map((codec) => ({
+  return grande(formato, nombre).concat(codecs.map((codec) => ({
     src: `/video/${formato}/${nombre}-${codec}.mp4`,
     type: `video/mp4; codecs="${tipo[formato][codec]}"`,
-  }))
+  })))
 }
 
 const negro: Record<Formato, Fondo> = { escritorio: {}, vertical: {} }

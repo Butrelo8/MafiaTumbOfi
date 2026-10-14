@@ -2,8 +2,8 @@
 // de 0.15 s y la costura de 20 cuadros, cola de precarga por `fetch` → `blob:` (ticket 05), espera con
 // aviso si el gesto llega antes que el archivo, fundido a negro para lo demás y corte directo con
 // movimiento reducido. Portado de los prototipos `tmp/transicion-4/web/` y `tmp/movil-06/web/`.
-import { espacios, type Formato } from '../data/santuario'
-import { type Clave, clavesDelViaje, colaDePrecarga, ejeDelGesto, fuenteDe, planDeViaje } from './santuario'
+import { espacios as todos, type Formato } from '../data/santuario'
+import { type Clave, clavesDelViaje, colaDePrecarga, ejeDelGesto, fuenteDe, paraPantalla, planDeViaje } from './santuario'
 
 const MEZCLA = 160 // ms: la transición entra sobre el loop durante el arranque lento del travelling
 const COSTURA = 20 / 24 // la ida y la vuelta ya traen los cuadros 0-19 crudos del loop
@@ -25,6 +25,8 @@ function panelQueScrollea(objetivo: EventTarget | null, dy: number): boolean {
 }
 
 export function montarSantuario() {
+  // El peldaño de 2560 sólo con más de 1920 px físicos de ancho; se decide una vez, al montar.
+  const espacios = paraPantalla(todos, screen.width * devicePixelRatio > 1920)
   const raiz = document.documentElement
   // Escritorio o vertical, como el hero. Girar el teléfono o cambiar la ventana de proporción cambia el
   // juego de videos: en el acto si no hay viaje, o al terminar el que esté en curso.
