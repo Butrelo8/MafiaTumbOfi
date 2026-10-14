@@ -1,6 +1,7 @@
 ---
 import MarketingLayout from '../layouts/MarketingLayout.astro'
 import Santuario from '../components/Santuario.astro'
+import Intro from '../components/Intro.astro'
 import Eyebrow from '../components/Eyebrow.astro'
 import { members } from '../data/members'
 import { bandSocialUrls } from '../data/socials'
@@ -35,6 +36,7 @@ const flechas = { anterior: 'M15 5l-7 7 7 7', siguiente: 'M9 5l7 7-7 7' }
 ---
 
 <MarketingLayout title={title} description={description} canonicalUrl={canonicalUrl} hasHero={true}>
+  <Intro />
   <Santuario />
 
   <section class="seccion hero hero--asymmetric" id="inicio" aria-labelledby="hero-heading">

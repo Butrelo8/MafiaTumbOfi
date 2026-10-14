@@ -114,6 +114,9 @@ export function montarSantuario() {
   // El hero (ticket 08) trae su propio video en la sección, por streaming y sin precarga: corre sólo
   // mientras se ve y nunca con movimiento reducido (se queda el póster). Entra y sale por negro.
   const heroVideo = document.querySelector<HTMLVideoElement>('[data-hero-video]')
+  document.addEventListener('santuario:intro-fin', () => {
+    if (espacios[actual].hero && !ocupado) encenderFondo(actual)
+  })
 
   function apagarFondo(indice: number) {
     if (espacios[indice].hero) return heroVideo?.pause()
@@ -124,7 +127,8 @@ export function montarSantuario() {
 
   function encenderFondo(indice: number) {
     if (espacios[indice].hero) {
-      if (!quieto) heroVideo?.play().catch(() => {})
+      // Con la intro encima no corre: animar sobre un video que se reproduce le cuesta cuadros (Intro.astro).
+      if (!quieto && !raiz.classList.contains('intro')) heroVideo?.play().catch(() => {})
       return
     }
     const fondo = capa(`${indice}:loop`)
