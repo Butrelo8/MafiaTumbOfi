@@ -40,6 +40,17 @@ pila** (camino B: G2–G7 lo reemplazan con los mismos nombres). `maestros/` no 
       cola son los cuadros 0–19 del atrio con look, byte a byte en el maestro). **Vuelta: no exacta.** Termina en la
       placa de la cripta (0.000), no en los cuadros 0–19 del loop; al seguir en el cuadro 20 el salto es de media 0.80
       (3.4 % de píxeles > 8, sólo en velas y polvo).
+    - **Atrio v4 (2026-10-14, usuario 01:54: "las gotas de la placa se quedan quietas"):** Klein había horneado gotas
+      en los vidrios de la camioneta; en el loop su std temporal era 0.42, la de la placa quieta, mientras las de
+      `vidrio_e5.py` resbalaban encima. `tmp/07/e5/charcos/quitar_gotas.py` alisa los cuatro vidrios (mediana 5 +
+      bilateral ×2, máscara `vidrios.png` recortada al alféizar y sin la llanta) y `armar_atrio_v4.sh` rehace el loop
+      con los mismos parámetros: fuera de los vidrios cambia ≤ 1 nivel; textura quieta en el vidrio (|DoG| > 3 de la
+      media temporal) 28.3 → 17.1 %, gotas procedurales iguales. La cola de job3 (f172–203) se rehízo con
+      `montar_fix.py` sobre el loop v4 (f0–171 byte a byte iguales; los cuadros RTX se re-extraen de
+      `rtx/job3_rtx_00001_.mp4`, que reproduce la cola vieja 32/32). Regrade sólo de atrio y job3: `armar.sh atrio`;
+      escalera `LUGARES=atrio SOLO=contratacion escalera07.sh`. revisar: atrio esc costura 0.03, nitidez 0.95; movil
+      0.04; job3 cola = loop 20/20. Queda: el triángulo inferior izquierdo del vidrio delantero está fuera de
+      `vidrios.png` (ni gotas que se muevan ni limpieza).
     - `escritorio/musica-{ida,vuelta}-*.mp4`, sacristía → camarín = Flow job4 (cuadro inventado, OK del usuario), 204
       cuadros. **Mixto, y no se vuelve a graduar entero:** f0–66 son `job4_fix.mkv` tal cual, porque su cabeza ya
       lleva el look (su `start.png` es el cuadro 0 del maestro graduado de la sacristía, 0.000 contra
