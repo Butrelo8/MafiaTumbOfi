@@ -100,6 +100,14 @@ en la propuesta de abajo):
   - la geografía del plan 1 (la puerta del ropero y bajar la escalera);
   - los extremos exactos con los loops de E5 de camarín y cripta, incluidos sus 20 cuadros crudos;
   - su vertical con las cámaras de E4.
+- **Cripta → atrio provisional = Flow job3, arreglado (OK del usuario y nombre de vibeship, 2026-10-13).** Está en
+  `entrega/escritorio/contratacion-ida-provisional-h264.mp4`: 204 cuadros, H.264 crf 23, 1920 con el paso RTX ×1.5.
+  Flow sí llega a negro (28 cuadros ≥ 90 %, f116–143) y la cola no se arrastra. Lo que estaba mal era el teléfono:
+  pierde el disco desde ~f24 (correlación del detalle con la placa 0.73 → −0.01 en f68). Se volvió a pegar el de la
+  placa sobre un seguimiento afín de su silueta dorada (Lab b*), con desenfoque de movimiento corto y nitidez igualada
+  (0.82–0.98). Cuadro 0 = placa de la cripta; la cola = loop del atrio 228–239 fundido y 0–19 crudos (`COSTURA` exacta).
+  **No arreglado:** la escalera y la piedra del movimiento (f60–120) son de Flow y no tienen placa; el teléfono pegado
+  es plano, no gira con la cámara. Veredicto y números: `tmp/07/flow/job3/fix/veredicto.md`.
 - **El atrio elegido todavía no deja limpia la esquina** (`tmp/07/tablero/atrio_C2_lobo_hueco.jpg`: luma media 24 en
   el hueco contra 46 en el cuadro): el poste, el muro que alumbra el sodio y el canto izquierdo del portal caen dentro.
   En la placa de producción el poste se mueve a la derecha del portal o el muro bajo la lámpara cae a negro, para que
@@ -219,6 +227,11 @@ en la propuesta de abajo):
   - **Final (17:55): `tmp/07/e5/final/{vestidor,cripta,atrio}_{esc,movil}.mkv`** (240 cuadros, ffv1, sin grade;
     `MANIFIESTO.tsv`). Pendiente: el pase de LOOK + halación sobre E5 y E6 juntos, la escalera de códecs y llevarlos a
     `entrega/` y a la web; el E6 final termina en la placa v3 del atrio.
+- **Flow, trabajos listos (copingdrone, 2026-10-13 18:35; sin créditos gastados).** `tmp/07/flow/job3` = cripta → atrio
+  (arco oscuro y escalones a la derecha como oclusor, termina en la placa v3) y `job4` = sacristía → camarín (empujar al
+  cuadro que se abre como puerta); los dos con copia en `Downloads\flow-job{3,4}\`, 20 créditos cada uno, orden job3 y luego
+  job4, saldo esperado 50 → 30. Cuadros extremos y números del empalme en `job{3,4}/frames_check.txt` (fuera de las zonas
+  vivas el cuadro 0 del loop es la placa: 0.00 % de píxeles > 8; dentro, 3–31 %); variantes y riesgos en `notes.md`.
 
 ## Propuesta (2026-10-13)
 Vuelve en la versión 1 a pedido del usuario. Tres opciones por espacio, cada una con dos fotogramas de referencia,
