@@ -64,8 +64,11 @@ corte() {  # <horizontal|vertical> <ancho> <alto> <salida>
     # la última toma se apaga a negro: punto del loop y salida hacia la capilla
     local fin=""
     (( i == ${#TOMAS[@]} - 1 )) && fin=",fade=t=out:st=$(python3 -c "print($dur - 1.5)"):d=1.5"
+    # 23.976 → 24 por retime (setpts), no fps=24: tras el -ss, fps=24 rellenaba el hueco hasta t=0 repitiendo el
+    # primer cuadro, y cuatro tomas abrían con un cuadro congelado (2026-10-14, "the hero looks lagged").
     ffmpeg -v error -y -ss "$ini" -t "$dur" -i "$src" -an \
-      -vf "$(recorte "$f" "$cx" "$1"),$bal,scale=$2:$3:flags=lanczos,fps=24,format=gbrp,$LOOK$fin,format=yuv420p" \
+      -vf "$(recorte "$f" "$cx" "$1"),$bal,scale=$2:$3:flags=lanczos,setpts=N/24/TB,format=gbrp,$LOOK$fin,format=yuv420p" \
+      -r 24 \
       -c:v libx264 -crf 12 -preset fast "$TMP/$1-$i.mp4"
     echo "file '$1-$i.mp4'" >> "$lista"
     i=$((i + 1))

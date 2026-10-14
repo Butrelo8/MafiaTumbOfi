@@ -195,41 +195,72 @@ body.marketing-body img {
   outline-offset: 4px;
 }
 
-.hero-logo-img {
-  display: block;
-  width: min(320px, 55vw);
-  height: auto;
-  object-fit: contain;
+/* The shimmer is the logo twice, each copy with the static filter of one keyframe, crossfading by opacity.
+   Animating `filter` itself re-blurred four drop-shadows every frame and cost the hero video about half its
+   frames (rVFC in Chromium, 2026-10-14); opacity runs on the compositor. plus-lighter inside the isolated
+   title adds the two copies, so the crossfade has no dip and each keyframe equals the old filter. The <img>
+   stays for layout and its alt text, transparent. */
+.hero .hero-title {
+  position: relative;
+  width: fit-content;
+  isolation: isolate;
+}
+
+.hero-title::before,
+.hero-title::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/icon/mafiatumbada.webp') 0 0 / 100% 100% no-repeat;
+  pointer-events: none;
   opacity: 0.97;
+  will-change: opacity;
+  animation: logo-shimmer-hero 4s ease-in-out infinite;
+}
+
+.hero-title::before {
   filter:
     drop-shadow(0 0 10px var(--gold))
     drop-shadow(0 0 30px color-mix(in oklch, var(--gold) 50%, transparent))
     drop-shadow(0 0 60px color-mix(in oklch, var(--red-glow) 55%, transparent))
     drop-shadow(0 4px 12px rgba(0, 0, 0, 0.95));
-  animation: logo-shimmer-hero 4s ease-in-out infinite;
+}
+
+.hero-title::after {
+  filter:
+    drop-shadow(0 0 14px var(--gold-peak))
+    drop-shadow(0 0 40px color-mix(in oklch, var(--gold-peak) 60%, transparent))
+    drop-shadow(0 0 70px color-mix(in oklch, var(--red-glow) 65%, transparent))
+    drop-shadow(0 4px 12px rgba(0, 0, 0, 0.95));
+  mix-blend-mode: plus-lighter;
+  animation-delay: -2s; /* half a period out of phase: the two opacities always add up to 0.97 */
+}
+
+.hero-logo-img {
+  display: block;
+  width: min(320px, 55vw);
+  height: auto;
+  object-fit: contain;
+  opacity: 0;
 }
 
 @keyframes logo-shimmer-hero {
   0%,
   100% {
-    filter:
-      drop-shadow(0 0 10px var(--gold))
-      drop-shadow(0 0 30px color-mix(in oklch, var(--gold) 50%, transparent))
-      drop-shadow(0 0 60px color-mix(in oklch, var(--red-glow) 55%, transparent))
-      drop-shadow(0 4px 12px rgba(0, 0, 0, 0.95));
+    opacity: 0.97;
   }
   50% {
-    filter:
-      drop-shadow(0 0 14px var(--gold-peak))
-      drop-shadow(0 0 40px color-mix(in oklch, var(--gold-peak) 60%, transparent))
-      drop-shadow(0 0 70px color-mix(in oklch, var(--red-glow) 65%, transparent))
-      drop-shadow(0 4px 12px rgba(0, 0, 0, 0.95));
+    opacity: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-logo-img {
+  .hero-title::before {
     animation: none;
+  }
+
+  .hero-title::after {
+    display: none;
   }
 }
 
