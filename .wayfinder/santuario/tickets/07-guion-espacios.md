@@ -108,16 +108,16 @@ en la propuesta de abajo):
   (0.82–0.98). Cuadro 0 = placa de la cripta; la cola = loop del atrio 228–239 fundido y 0–19 crudos (`COSTURA` exacta).
   **No arreglado:** la escalera y la piedra del movimiento (f60–120) son de Flow y no tienen placa; el teléfono pegado
   es plano, no gira con la cámara. Veredicto y números: `tmp/07/flow/job3/fix/veredicto.md`.
-- **Sacristía → camarín = Flow job4, montado y pendiente del usuario (2026-10-14).** Flow no empuja hacia el cuadro
+- **Sacristía → camarín = Flow job4, montado; el usuario lo queda como provisional con el cuadro inventado (2026-10-14).** Flow no empuja hacia el cuadro
   del tocadiscos: inventa un **segundo** cuadro (una mujer de rojo con una vela) que entra girando por la izquierda,
   hace de puerta y del negro (20 cuadros ≥ 90 %, f67–86) y se queda a la izquierda del camarín hasta ~f158. Se
   sostiene en cada lado del negro (correlación del detalle entre cuadros 0.52–0.88) pero al salir de cuadro
-  (f118–~135) la cara se borra y la vela se vuelve un brillo; entre los dos lados está redibujado dentro del negro. Sin
+  (f118–~135) la cara se borra y la vela se vuelve un brillo; entre los dos lados parece redibujado dentro del negro (cara ≈14 % y ≈19 % del lienzo, leído a ojo; el ECC no engancha). Sin
   neón ni luces inventadas en el camarín (0 píxeles en f67–191). La cámara sigue empujando en el corte (escala 0.987 en
   f172, 1.007 en f191), así que la cola funde también la geometría hacia la placa (hueco del fundido 3.4–3.8 contra
   3.8–7.8 sin alinear). Cuadro 0 = cuadro 0 del loop de la sacristía; la cola = loop del vestidor 228–239 fundido y
   0–19 crudos (diferencia máxima 0). Máster FFV1, vista previa y lado a lado en `tmp/07/flow/job4/fix/`; veredicto y
-  números en su `veredicto.md`. Nada en `entrega/` hasta que el usuario decida si se queda el cuadro inventado.
+  números en su `veredicto.md`. Nada en `entrega/` todavía: nombre y codificación, de vibeship.
 - **El atrio elegido todavía no deja limpia la esquina** (`tmp/07/tablero/atrio_C2_lobo_hueco.jpg`: luma media 24 en
   el hueco contra 46 en el cuadro): el poste, el muro que alumbra el sodio y el canto izquierdo del portal caen dentro.
   En la placa de producción el poste se mueve a la derecha del portal o el muro bajo la lámpara cae a negro, para que
