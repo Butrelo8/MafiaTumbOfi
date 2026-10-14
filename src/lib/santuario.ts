@@ -64,7 +64,8 @@ export function clavesDelViaje(
  * Orden de precarga (ticket 05): lo inmediato es el loop de donde se entra, la ida y el loop del
  * siguiente y la vuelta al anterior; al tenerlo, la cascada baja los dos viajes siguientes en el sentido
  * de la marcha (transición y loop de llegada), no el sitio entero: con datos del teléfono el sitio
- * completo pasa de los 3 MB y crece con cada espacio. Se rellena al llegar a cada espacio.
+ * completo pasa de los 3 MB y crece con cada espacio. Se rellena al llegar a cada espacio. Al final, el
+ * viaje al espacio de atrás: quien entra por un `#ancla` y vuelve no espera.
  */
 export function colaDePrecarga(
   espacios: Espacio[],
@@ -80,13 +81,13 @@ export function colaDePrecarga(
     `${actual + 1}:loop`,
     `${actual - 1}:vuelta`,
   ] as Clave[]).filter(existe)
-  const cascada = [1, 2]
-    .flatMap((paso) => {
-      const desde = actual + sentido * (paso - 1)
-      const hasta = actual + sentido * paso
-      return [sentido > 0 ? `${desde}:ida` : `${hasta}:vuelta`, `${hasta}:loop`] as Clave[]
-    })
-    .filter((clave) => existe(clave) && !inmediato.includes(clave))
+  const viaje = (desde: number, hasta: number): Clave[] =>
+    [hasta > desde ? `${desde}:ida` : `${hasta}:vuelta`, `${hasta}:loop`]
+  const cascada = [
+    ...viaje(actual, actual + sentido),
+    ...viaje(actual + sentido, actual + 2 * sentido),
+    ...viaje(actual, actual - sentido),
+  ].filter((clave) => existe(clave) && !inmediato.includes(clave))
   return { inmediato, cascada }
 }
 

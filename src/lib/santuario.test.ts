@@ -91,7 +91,17 @@ describe('colaDePrecarga', () => {
   test('desde la sacristía: su loop y la vuelta a la nave primero', () => {
     const cola = colaDePrecarga(espacios, 'vertical', 2, chrome)
     expect(cola.inmediato).toEqual(['2:loop', '3:loop', '1:vuelta'])
-    expect(cola.cascada).toEqual(['4:loop'])
+    expect(cola.cascada).toEqual(['4:loop', '1:loop'])
+  })
+
+  test('entrar por #cierre y volver: el viaje de vuelta ya está en la cola', () => {
+    const cola = colaDePrecarga(espacios, 'escritorio', 5, chrome)
+    const viaje = planDeViaje(espacios, 'escritorio', 5, 4, false, chrome)
+    expect(viaje).toEqual({ tipo: 'transicion', clave: '4:vuelta' })
+    for (const clave of clavesDelViaje(espacios, 'escritorio', viaje, 4, chrome)) {
+      expect([...cola.inmediato, ...cola.cascada]).toContain(clave)
+    }
+    expect(cola.cascada.at(-1)).toBe('4:loop')
   })
 
   test('la cascada baja sólo los dos viajes siguientes en el sentido de la marcha', () => {
