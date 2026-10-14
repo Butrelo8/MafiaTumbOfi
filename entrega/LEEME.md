@@ -28,7 +28,7 @@ pila** (camino B: G2–G7 lo reemplazan con los mismos nombres). `maestros/` no 
     (Cierre). `<lugar>.mp4` es H.264 (como `nave.mp4`) y `<lugar>-hevc.mp4` y `<lugar>-av1.mp4` son los otros
     peldaños. Las verticales del vestidor y la cripta son un recorte del escritorio con look, como la sacristía; la del
     atrio lleva grade propio (su neblina baja sólo existe en la vertical). Maestros: `maestros/{esc,vert}-<lugar>.mkv`.
-  - **PROVISIONAL — las dos idas son Google Flow (Veo 3.1 Fast), sólo escritorio (Flow no da 9:16; la vertical cruza
+  - **PROVISIONAL — las tres idas son Google Flow (Veo 3.1 Fast), sólo escritorio (Flow no da 9:16; la vertical cruza
     por negro).** `vuelta` = `ida` al revés, AV1/HEVC/H.264.
     - `escritorio/grupo-{ida,vuelta}-*.mp4`, camarín → cripta = Flow job2, 185 cuadros, 1920 desde la salida RTX
       ×1.5. **Sin `COSTURA` en ninguno de los dos sentidos:** la ida termina en la cripta según Flow (contra el cuadro
@@ -40,7 +40,15 @@ pila** (camino B: G2–G7 lo reemplazan con los mismos nombres). `maestros/` no 
       cola son los cuadros 0–19 del atrio con look, byte a byte en el maestro). **Vuelta: no exacta.** Termina en la
       placa de la cripta (0.000), no en los cuadros 0–19 del loop; al seguir en el cuadro 20 el salto es de media 0.80
       (3.4 % de píxeles > 8, sólo en velas y polvo).
-    - Maestros: `maestros/esc-{grupo,contratacion}-ida.mkv`. Las anteriores `*-ida-provisional-h264.mp4` (sin look)
+    - `escritorio/musica-{ida,vuelta}-*.mp4`, sacristía → camarín = Flow job4 (cuadro inventado, OK del usuario), 204
+      cuadros. **Mixto, y no se vuelve a graduar entero:** f0–66 son `job4_fix.mkv` tal cual, porque su cabeza ya
+      lleva el look (su `start.png` es el cuadro 0 del maestro graduado de la sacristía, 0.000 contra
+      `tmp/sac10/esc/maestro_sac_esc.mkv`); f67–203 pasan por la cadena de `armar.sh` (dither=0). El cambio queda
+      oculto en el corte a negro de Flow en f67. Graduar el clip completo graduaría dos veces la cabeza (media 7.4
+      contra la sacristía). **Ida: `COSTURA` exacta** (cola f184–203 = cuadros 0–19 del loop del vestidor, 20/20 byte
+      a byte). **Vuelta: no exacta.** Empieza en el cuadro 19 del vestidor y termina en el cuadro 0 de la sacristía
+      (0.000); al seguir en el cuadro 20 el salto es de media 0.68 (0.14 % de píxeles > 8).
+    - Maestros: `maestros/esc-{grupo,contratacion,musica}-ida.mkv`. Las anteriores `*-ida-provisional-h264.mp4` (sin look)
       se retiraron.
 - **G7 (2026-10-13):** las idas y vueltas de los dos formatos son las del 17 rehechas sobre la nave con la gente (placa
   G4; escritorio con el copal real del loop) y el micro con el tallo nuevo; la mitad de la sacristía es la del 17

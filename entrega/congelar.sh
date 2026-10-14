@@ -57,6 +57,12 @@ escritorio/contratacion-ida-h264.mp4    $L/cod/provisional/contratacion_ida_h264
 escritorio/contratacion-vuelta-av1.mp4  $L/cod/provisional/contratacion_vuelta_av1.mp4
 escritorio/contratacion-vuelta-hevc.mp4 $L/cod/provisional/contratacion_vuelta_hevc.mp4
 escritorio/contratacion-vuelta-h264.mp4 $L/cod/provisional/contratacion_vuelta_h264.mp4
+escritorio/musica-ida-av1.mp4           $L/cod/provisional/musica_ida_av1.mp4
+escritorio/musica-ida-hevc.mp4          $L/cod/provisional/musica_ida_hevc.mp4
+escritorio/musica-ida-h264.mp4          $L/cod/provisional/musica_ida_h264.mp4
+escritorio/musica-vuelta-av1.mp4        $L/cod/provisional/musica_vuelta_av1.mp4
+escritorio/musica-vuelta-hevc.mp4       $L/cod/provisional/musica_vuelta_hevc.mp4
+escritorio/musica-vuelta-h264.mp4       $L/cod/provisional/musica_vuelta_h264.mp4
 placas/sacristia-esc-s11.png   $T/micro/trans_esc/klein/sac17_s11_00001_.png
 placas/sacristia-esc-real-s3-aplique.png   $S/real_s3_aplique.png
 placas/sacristia-esc-klein-aplique.png     $S/placa_aplique.png
@@ -101,6 +107,7 @@ maestros/vert-cripta.mkv       $L/maestros/cripta_movil.mkv
 maestros/vert-atrio.mkv        $L/maestros/atrio_movil.mkv
 maestros/esc-grupo-ida.mkv     $L/maestros/grupo_ida_job2.mkv
 maestros/esc-contratacion-ida.mkv  $L/maestros/contratacion_ida_job3.mkv
+maestros/esc-musica-ida.mkv    $L/maestros/musica_ida_job4.mkv
 "
 while read -r dst src; do
   [ -n "$dst" ] || continue

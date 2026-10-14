@@ -117,7 +117,11 @@ en la propuesta de abajo):
   f172, 1.007 en f191), así que la cola funde también la geometría hacia la placa (hueco del fundido 3.4–3.8 contra
   3.8–7.8 sin alinear). Cuadro 0 = cuadro 0 del loop de la sacristía; la cola = loop del vestidor 228–239 fundido y
   0–19 crudos (diferencia máxima 0). Máster FFV1, vista previa y lado a lado en `tmp/07/flow/job4/fix/`; veredicto y
-  números en su `veredicto.md`. Nada en `entrega/` todavía: nombre y codificación, de vibeship.
+  números en su `veredicto.md`.
+  **Congelado en `entrega/escritorio/musica-{ida,vuelta}-*.mp4` (2026-10-14)** con el cambio en f67 (vibeship, 01:08):
+  f0–66 = `job4_fix.mkv` tal cual (su cabeza ya está graduada: `start.png` es el cuadro 0 del maestro graduado de la
+  sacristía, 0.000), f67–203 = cadena de `armar.sh`; el cambio queda oculto en el corte a negro de Flow. Un re-grade
+  nunca debe correr sobre el clip entero (graduaría dos veces la cabeza). Ida con `COSTURA` exacta; vuelta no (salto 0.68 al cuadro 20).
 - **El atrio elegido todavía no deja limpia la esquina** (`tmp/07/tablero/atrio_C2_lobo_hueco.jpg`: luma media 24 en
   el hueco contra 46 en el cuadro): el poste, el muro que alumbra el sodio y el canto izquierdo del portal caen dentro.
   En la placa de producción el poste se mueve a la derecha del portal o el muro bajo la lámpara cae a negro, para que
