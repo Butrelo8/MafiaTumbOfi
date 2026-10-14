@@ -17,6 +17,13 @@ describe('elegirFuente', () => {
     expect(elegirFuente(ida, soloH264)?.src).toBe('/video/escritorio/ida-h264.mp4')
   })
 
+  test('un loop en varios códecs: el H.264 se llama como el espacio', () => {
+    const loop = espacios[3].fondo.vertical.loop
+    expect(elegirFuente(loop, chrome)?.src).toBe('/video/vertical/vestidor-av1.mp4')
+    expect(elegirFuente(loop, safariViejo)?.src).toBe('/video/vertical/vestidor-hevc.mp4')
+    expect(elegirFuente(loop, soloH264)?.src).toBe('/video/vertical/vestidor.mp4')
+  })
+
   test('sin ninguna reproducible devuelve null', () => {
     expect(elegirFuente(espacios[1].fondo.escritorio.vuelta, safariViejo)).toBeNull()
     expect(elegirFuente(undefined, chrome)).toBeNull()
@@ -39,6 +46,16 @@ describe('planDeViaje', () => {
     expect(planDeViaje(espacios, 'vertical', 2, 3, false, chrome)).toEqual({ tipo: 'fundido' })
   })
 
+  test('camarín, cripta y atrio (07): idas de escritorio salvo el grupo, que cruza por negro', () => {
+    expect(planDeViaje(espacios, 'escritorio', 2, 3, false, chrome)).toEqual({ tipo: 'transicion', clave: '2:ida' })
+    expect(planDeViaje(espacios, 'escritorio', 3, 2, false, chrome)).toEqual({ tipo: 'transicion', clave: '2:vuelta' })
+    expect(planDeViaje(espacios, 'escritorio', 3, 4, false, chrome)).toEqual({ tipo: 'fundido' })
+    expect(planDeViaje(espacios, 'escritorio', 4, 3, false, chrome)).toEqual({ tipo: 'fundido' })
+    expect(planDeViaje(espacios, 'escritorio', 4, 5, false, chrome)).toEqual({ tipo: 'transicion', clave: '4:ida' })
+    expect(planDeViaje(espacios, 'escritorio', 5, 4, false, chrome)).toEqual({ tipo: 'transicion', clave: '4:vuelta' })
+    expect(planDeViaje(espacios, 'vertical', 4, 5, false, chrome)).toEqual({ tipo: 'fundido' })
+  })
+
   test('una vuelta sin códec que sirva cruza por negro en vez de cortar', () => {
     expect(planDeViaje(espacios, 'escritorio', 2, 1, false, safariViejo)).toEqual({ tipo: 'fundido' })
   })
@@ -55,7 +72,7 @@ describe('clavesDelViaje', () => {
   })
 
   test('llegar a negro no espera a nada', () => {
-    expect(clavesDelViaje(espacios, 'escritorio', { tipo: 'fundido' }, 3, chrome)).toEqual([])
+    expect(clavesDelViaje(espacios, 'escritorio', { tipo: 'fundido' }, 0, chrome)).toEqual([])
   })
 
   test('en escritorio la sacristía también espera a su loop', () => {
@@ -68,13 +85,13 @@ describe('colaDePrecarga', () => {
   test('desde el hero lo inmediato es sólo el loop de la nave', () => {
     const cola = colaDePrecarga(espacios, 'vertical', 0, chrome)
     expect(cola.inmediato).toEqual(['1:loop'])
-    expect(cola.cascada).toEqual(['1:ida', '1:vuelta', '2:loop'])
+    expect(cola.cascada).toEqual(['1:ida', '1:vuelta', '2:loop', '3:loop', '4:loop', '5:loop'])
   })
 
   test('desde la sacristía: su loop y la vuelta a la nave primero', () => {
     const cola = colaDePrecarga(espacios, 'vertical', 2, chrome)
-    expect(cola.inmediato).toEqual(['2:loop', '1:vuelta'])
-    expect(cola.cascada).toEqual(['1:loop', '1:ida'])
+    expect(cola.inmediato).toEqual(['2:loop', '3:loop', '1:vuelta'])
+    expect(cola.cascada).toEqual(['1:loop', '1:ida', '4:loop', '5:loop'])
   })
 
   test('lo que el navegador no puede reproducir no se baja', () => {

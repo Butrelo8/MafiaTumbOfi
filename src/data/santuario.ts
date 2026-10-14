@@ -8,7 +8,7 @@
  *
  * Provisional (2026-10-13): todo es de antes de la pila (`entrega/`). Los renders finales reemplazan
  * los archivos con el mismo nombre. La sacristía es el loop de 10 s en los dos formatos (la vertical es
- * un recorte de la de escritorio).
+ * un recorte de la de escritorio). Camarín, cripta y atrio: loops del 07 con look; sus idas, de Flow.
  */
 
 export interface Fuente {
@@ -40,10 +40,13 @@ const tipo = {
   vertical: { av1: 'av01.0.05M.08', hevc: 'hvc1.1.6.L93.90', h264: 'avc1.64001F' },
 }
 
-// Los loops sólo existen en H.264 y se llaman como el espacio (`nave.mp4`); las transiciones llevan el
-// códec en el nombre (`ida-av1.mp4`), como en `entrega/`.
-function loop(formato: Formato, nombre: string): Fuente[] {
-  return [{ src: `/video/${formato}/${nombre}.mp4`, type: `video/mp4; codecs="${tipo[formato].h264}"` }]
+// En un loop el H.264 se llama como el espacio (`nave.mp4`) y los demás códecs lo llevan detrás
+// (`vestidor-av1.mp4`); las transiciones siempre llevan el códec en el nombre (`ida-av1.mp4`), como en `entrega/`.
+function loop(formato: Formato, nombre: string, codecs: Array<'av1' | 'hevc' | 'h264'> = ['h264']): Fuente[] {
+  return codecs.map((codec) => ({
+    src: `/video/${formato}/${nombre}${codec === 'h264' ? '' : `-${codec}`}.mp4`,
+    type: `video/mp4; codecs="${tipo[formato][codec]}"`,
+  }))
 }
 
 function transicion(formato: Formato, nombre: string, codecs: Array<'av1' | 'hevc' | 'h264'>): Fuente[] {
@@ -54,6 +57,7 @@ function transicion(formato: Formato, nombre: string, codecs: Array<'av1' | 'hev
 }
 
 const negro: Record<Formato, Fondo> = { escritorio: {}, vertical: {} }
+const todos: Array<'av1' | 'hevc' | 'h264'> = ['av1', 'hevc', 'h264']
 
 export const espacios: Espacio[] = [
   { id: 'inicio', nombre: 'Inicio', hero: true, fondo: negro },
@@ -77,12 +81,43 @@ export const espacios: Espacio[] = [
     id: 'musica',
     nombre: 'Música',
     fondo: {
-      escritorio: { loop: loop('escritorio', 'sacristia') },
+      escritorio: {
+        loop: loop('escritorio', 'sacristia'),
+        ida: transicion('escritorio', 'musica-ida', todos),
+        vuelta: transicion('escritorio', 'musica-vuelta', todos),
+      },
       vertical: { loop: loop('vertical', 'sacristia') },
     },
   },
-  // Camarín, cripta y atrio (ticket 07): sobre negro hasta que lleguen sus loops.
-  { id: 'grupo', nombre: 'El grupo', fondo: negro },
-  { id: 'contratacion', nombre: 'Contratación', fondo: negro },
-  { id: 'cierre', nombre: 'Cierre', fondo: negro },
+  // Camarín, cripta y atrio (ticket 07). Las idas son de Flow, sólo de escritorio; la vertical cruza por
+  // negro. El grupo no lleva ida ni vuelta: la de Flow no cae en ningún cuadro del loop de la cripta
+  // (mejor media 3.1, contra 0.75 de la vuelta nave/sacristía) y la vuelta termina en otro camarín (27).
+  {
+    id: 'grupo',
+    nombre: 'El grupo',
+    fondo: {
+      escritorio: { loop: loop('escritorio', 'vestidor', todos) },
+      vertical: { loop: loop('vertical', 'vestidor', todos) },
+    },
+  },
+  {
+    id: 'contratacion',
+    nombre: 'Contratación',
+    fondo: {
+      escritorio: {
+        loop: loop('escritorio', 'cripta', todos),
+        ida: transicion('escritorio', 'contratacion-ida', todos),
+        vuelta: transicion('escritorio', 'contratacion-vuelta', todos),
+      },
+      vertical: { loop: loop('vertical', 'cripta', todos) },
+    },
+  },
+  {
+    id: 'cierre',
+    nombre: 'Cierre',
+    fondo: {
+      escritorio: { loop: loop('escritorio', 'atrio', todos) },
+      vertical: { loop: loop('vertical', 'atrio', todos) },
+    },
+  },
 ]
