@@ -206,6 +206,11 @@ en la propuesta de abajo):
     - **Gotas en los vidrios** (`vidrio_e5.py`, máscara `vidrios.png`): 45 que resbalan con rastro (cruzan su vidrio un
       número entero de veces por loop y se apagan junto a los bordes) y 140 que caen y se apagan; especular cálido.
     - revisar: escritorio costura 0.49 / crawl 0.12 / nitidez 1.01; vertical 0.42 / 0.10 / 0.98 (el crawl es la lluvia).
+    - **"Muy calma" (usuario 18:07: "look off, need realism calmer and subtler"; eligió entre actual | calma | muy
+      calma, `calma_variantes_esc.mp4`):** lluvia 350 + 20 rayas, más lenta y corta (`KESC=0.4`, lluvia fina),
+      `BRILLO=0.09 HERVOR=150 IMPACTOS=8 ONDA=0.7 TEMBLOR=0.3`; vidrio 12 que resbalan despacio (`KMAX=1`) y 35 que
+      caen, `VBR=0.4` (valores en `armar_atrio.sh`). Movimiento por cuadro contra la v3 anterior: charco 34 %, suelo
+      14 %, vidrio 8 %, cuadro 7 %. revisar: costura 0.03 / 0.04, crawl 0.01, nitidez 0.98 / 0.96.
   - **Verticales = recorte del escritorio (usuario 17:05: "¿coinciden?")**, como la sacristía (`tmp/sac10/vert2`):
     `tmp/07/e5/reencuadre_e5.py` compone la afín de `verticales.py` (marco.json) con 1696 → 1920 y rehace la banda por
     cuadro con el grano fijo (con semilla por cuadro la banda hervía: crawl 0.07–0.14). Contra las placas verticales
