@@ -5,6 +5,7 @@
 
 > **Ticket 07 en producción (camarín, cripta, atrio; E1–E4): [`docs/handoffs/2026-10-13-07-produccion.md`](handoffs/2026-10-13-07-produccion.md)**
 > **Ticket 07, E5 (loops de 10 s; E4 rehecho, E6 provisional de Flow): [`docs/handoffs/2026-10-13-07-e5-loops.md`](handoffs/2026-10-13-07-e5-loops.md)**
+> **Ticket 07, E6 camarín → cripta con FastH3 local (candidato 1080p + guitarra): [`docs/handoffs/2026-10-14-07-fasth3-camarin-cripta.md`](handoffs/2026-10-14-07-fasth3-camarin-cripta.md)**
 
 > **Más reciente: [`docs/handoffs/2026-10-13-tallo-y-rosa.md`](handoffs/2026-10-13-tallo-y-rosa.md)**
 > (G5 y G6 hechos). Después: tallo y rosa rehechos con la luz C, loops recongelados y **G7 hecho** (2026-10-13; ticket 06

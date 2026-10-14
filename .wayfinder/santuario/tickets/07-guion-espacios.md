@@ -264,6 +264,28 @@ en la propuesta de abajo):
   eso lo arregla el E6 final. revisar, costura de los loops: 0.01–0.04, cripta móvil 0.11 (≤ 1.00; parpadeo 0.33 sobre
   7 % estático: el halo de las velas llena el recorte cerrado). job2 ahora llega a negro (14 cuadros ≥ 90 %, antes
   86 % como máximo). Números completos: `tmp/07/look/veredicto.md`. Pendiente: la escalera de códecs, `entrega/` y la web.
+- **Camarín → cripta con FastH3 local, primer + último cuadro (apedrone, 2026-10-14; OK del usuario 03:27).** Extremos =
+  cuadro 0 de los loops E5 graduados; 192 cuadros, 8 pasos. En 12 GB cabe **1440×832** (376 s); 1920×1088 y 1600×928 dan
+  OOM. Elegida `tmp/07/fasth3/clips/f1440_A_puerta_s2.mkv`: la puerta del ropero se cierra, negro y la cámara baja hacia
+  la bóveda (geografía del plan 1). Contra job2 con los mismos extremos: inicio 1.8 vs **27.2**, fin 1.6 vs 2.2, cola
+  contra la cripta 0–19 4.25 vs 6.18, negro 29 cuadros (f73–101) vs 14, morph 0 en los dos, novel 3.5 % vs 6.9 %.
+  **Falta:** el negro dura ~1.2 s (pedido ~5–6 cuadros), la bóveda se ilumina de más al bajar (f119–133) y los extremos
+  quedan blandos a 1440 (0.46–0.52 × placa). No es el E6 final del ticket (sin oclusor de máscara ni `maskedmerge`) y aún
+  sin `COSTURA`. A/B a velocidad `tmp/07/fasth3/ab/ab_job2_vs_fasth3_s2.mp4`, enviado al usuario; grade, RTX, `COSTURA`,
+  escalera y `public/` sólo con su OK. **Licencia:** la de MiniMax H3 prohíbe usar las salidas para público de EE. UU.,
+  UE, Reino Unido o Corea del Sur sin permiso escrito; el público de MTO es México, pero si la web apunta también a EE. UU.
+  hay que pedirlo antes de publicar. Veredicto y números: `tmp/07/fasth3/veredicto.md`.
+  **Textura en movimiento (usuario: «pixelea la textura al moverse, pero es mejor transición»).** A 1440 el modelo
+  redibuja yeso y piedra con poco detalle mientras la cámara se mueve; no es el códec ni VSA (la atención densa da lo
+  mismo). Arreglo: **1920×1088 nativo, 107 cuadros (383 s, sin OOM) + FILM ×2** (plan de memoria de las 06:22): detalle en
+  movimiento 0.96 / 0.85 × placa contra 0.46 / 0.34, extremos 1.6 / 1.7 con nitidez 0.95 / 0.91, morph 0, novel 0.7 %.
+  El negro de 51 cuadros se acelera ×2–3 en lo oscuro → 24 cuadros (`tmp/07/fasth3/clips/f1080_film2_rampa.mkv`,
+  186 cuadros). Cola contra la cripta nueva (06:29) 0–19: 4.79; la cabeza deriva 3.1 del loop también a 1080, así que
+  la `COSTURA` tiene que fundirla. A/B enviados: `tmp/07/fasth3/ab/{textura_1440_vs_1080_1a1,ab_job2_vs_fasth3_1080}.mp4`.
+  **Guitarra (usuario: «la parte de arriba se deforma al pasar»).** El modelo redibuja el clavijero en movimiento. Se
+  pega la guitarra de la placa con seguimiento afín del cuerpo, ganancia de luz, desenfoque de 180° y, mientras pasa la
+  puerta, cortada en su canto (`tmp/07/fasth3/guitarra.py`): mástil y clavijero contra la placa NCC 0.77 → 0.99 (mín.
+  0.45 → 0.98); sólo cambian f0–61. Clip vigente: `tmp/07/fasth3/clips/f1080_rampa_guitarra.mkv`.
 
 ## Propuesta (2026-10-13)
 Vuelve en la versión 1 a pedido del usuario. Tres opciones por espacio, cada una con dos fotogramas de referencia,
