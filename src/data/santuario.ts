@@ -80,7 +80,7 @@ export const espacios: Espacio[] = [
     nombre: 'Quiénes somos',
     fondo: {
       escritorio: {
-        loop: loop('escritorio', 'nave'),
+        loop: loop('escritorio', 'nave', todos),
         ida: transicion('escritorio', 'ida', ['av1', 'hevc', 'h264']),
         vuelta: transicion('escritorio', 'vuelta', ['av1']),
       },

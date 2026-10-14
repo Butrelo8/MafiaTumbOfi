@@ -14,7 +14,9 @@ mkdir -p escritorio vertical placas maestros
 
 # destino  origen  (orden: lo que va a la web, luego placas, luego maestros)
 LISTA="
-escritorio/nave.mp4            $T/g6/esc/nave_g6_esc_c.mp4
+escritorio/nave.mp4            $L/cod/nave_esc_h264.mp4
+escritorio/nave-hevc.mp4       $L/cod/nave_esc_hevc.mp4
+escritorio/nave-av1.mp4        $L/cod/nave_esc_av1.mp4
 escritorio/ida-av1.mp4         $S/cod/ida_av1_crf40.mp4
 escritorio/ida-hevc.mp4        $S/cod/ida_hevc_crf26.mp4
 escritorio/ida-h264.mp4        $S/cod/ida_h264_crf23.mp4
@@ -97,7 +99,7 @@ maestros/esc-ida.mkv           $S/ida_empalme.mkv
 maestros/esc-sacristia.mkv     $S/maestro_sac_esc.mkv
 maestros/vert-ida.mkv          $R/ida_master.mkv
 maestros/vert-sacristia.mkv    $R/maestro_sac_vert.mkv
-maestros/esc-nave.mkv          $T/g6/esc/maestro_nave_esc.mkv
+maestros/esc-nave.mkv          $T/g6/esc/maestro_nave_esc_v5.mkv
 maestros/vert-nave.mkv         $T/g6/vert/maestro_nave_vert.mkv
 maestros/esc-vestidor.mkv      $L/maestros/vestidor_esc.mkv
 maestros/esc-cripta.mkv        $L/maestros/cripta_esc.mkv
@@ -115,6 +117,8 @@ while read -r dst src; do
 done <<<"$LISTA"
 
 # G6: los maestros de los loops son halacion.sh VC=ffv1 sobre tmp/g6/<f>/dof240.mkv (tmp/g6/tanda.sh).
+# Nave de escritorio (2026-10-14): maestro_nave_esc_v5.mkv, el montaje rehecho con micro/largo/montar_largo.sh arreglado
+# (el polvo repetía un cuadro de cada tres y el humo saltaba al cerrar); sus AV1/HEVC/H.264 salen de tmp/07/look/escalera07.sh.
 
 {
   printf 'archivo\tcuadros\tKB\tsha256\torigen\n'

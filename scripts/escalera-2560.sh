@@ -13,9 +13,12 @@ ESC="scale=2560:1440:flags=lanczos"
 LOOPS="nave sacristia vestidor cripta atrio"
 IDAS="ida musica-ida contratacion-ida"
 
-enc() {  # enc <entrada> <salida sin códec> <gop> [filtro previo]
+# Loops en AV1 con enable-tf=0 (vibeship, 2026-10-14): con un solo cuadro clave por loop el cuadro clave filtrado en el
+# tiempo devolvía de golpe el grano fino que los P del final ya habían borrado (el polvo del haz de la cripta saltaba hasta
+# 5.1 niveles en f239 → f0); sin ese filtro, 3.2, +1.5 % de peso (docs/2026-10-14-07-loops-v5.md). Transiciones igual.
+enc() {  # enc <entrada> <salida sin códec> <gop> [filtro previo] [svtav1-params]
   local vf="${4:+$4,}$ESC"
-  ffmpeg -nostdin -v error -y -i "$1" -vf "$vf" -c:v libsvtav1 -preset 4 -crf 40 -pix_fmt yuv420p -g "$3" -an \
+  ffmpeg -nostdin -v error -y -i "$1" -vf "$vf" -c:v libsvtav1 -preset 4 -crf 40 ${5:+-svtav1-params $5} -pix_fmt yuv420p -g "$3" -an \
     -movflags +faststart "$2-av1.mp4" 2>/dev/null
   ffmpeg -nostdin -v error -y -i "$1" -vf "$vf" -c:v libx265 -preset slow -crf 26 -tag:v hvc1 -x265-params log-level=error \
     -pix_fmt yuv420p -g "$3" -an -movflags +faststart "$2-hevc.mp4"
@@ -41,7 +44,7 @@ empalme() {  # empalme <ida> → ruta del maestro con la cola del loop (FFV1 yuv
 [ $# -gt 0 ] || set -- $LOOPS $IDAS
 for n in "$@"; do
   case " $LOOPS " in
-    *" $n "*) enc "$M/esc-$n.mkv" "$OUT/$n" 240 ;;
+    *" $n "*) enc "$M/esc-$n.mkv" "$OUT/$n" 240 "" enable-tf=0 ;;
     *) m=$(empalme "$n")
        enc "$m" "$OUT/$n" 60
        enc "$m" "$OUT/${n/ida/vuelta}" 60 reverse ;;
