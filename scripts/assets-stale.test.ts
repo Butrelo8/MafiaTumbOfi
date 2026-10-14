@@ -154,7 +154,28 @@ describe('docs/assets/map.tsv', () => {
   test('passes the same validation', () => {
     const r = run(REAL_MAP, 'id-que-no-existe');
     // exit 1 for "unknown argument" is fine; any validation failure says so on stderr first.
-    expect(r.err).not.toMatch(/columnas|duplicado|inválid|dangling|colgante/);
+    expect(r.err).not.toMatch(/columnas|duplicado|inválid|colgante|vacía/);
     expect(r.err).toContain('id-que-no-existe');
+  });
+
+  // The incident that motivated the map: a transition pointed at the atrio plate v3 instead of v5.
+  test('a new atrio plate reaches its loops, the cripta→atrio transitions and what is served, not the vestidor', () => {
+    const r = run(REAL_MAP, 'atrio-placa');
+    expect(r.code).toBe(0);
+    const got = ids(r.out);
+    for (const id of ['loop-atrio-esc', 'loop-atrio-movil', 'contratacion-ida-job3', 'contratacion-ida-fasth3-s3', 'entrega-atrio-esc', 'entrega-contratacion-ida'])
+      expect(got).toContain(id);
+    expect(got.filter((i) => /vestidor|cripta-esc|nave/.test(i))).toEqual([]);
+  });
+
+  test('a changed vestidor loop reaches both camarín transitions (graded f0 ends)', () => {
+    const got = ids(run(REAL_MAP, 'loop-vestidor-esc').out);
+    for (const id of ['grupo-ida-fasth3', 'musica-ida-job4', 'entrega-vestidor-esc']) expect(got).toContain(id);
+  });
+
+  test('transition-fasth3@1 lists every FastH3 take', () => {
+    expect(ids(run(REAL_MAP, 'transition-fasth3@1').out)).toEqual(
+      expect.arrayContaining(['grupo-ida-fasth3', 'contratacion-ida-fasth3-s1', 'contratacion-ida-fasth3-s3']),
+    );
   });
 });

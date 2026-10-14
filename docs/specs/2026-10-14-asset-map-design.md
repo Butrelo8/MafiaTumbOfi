@@ -25,7 +25,7 @@ Archivo: `docs/assets/map.tsv`, UTF-8, primera línea = cabecera, líneas que em
 | 4 | `path` | ruta relativa a la raíz del repo **principal** (`tmp/07/...` vive en el checkout `MTO/`, no en un worktree). Glob permitido para familias (`entrega/escritorio/grupo-ida-*.mp4`). `-` si no existe archivo |
 | 5 | `version` | `v5`, `s5`, `g6`… o `unconfirmed` |
 | 6 | `built_from` | `;`-separado, cada token `id@version` (o `id`). Sólo ids que existen como fila. Vacío (`-`) = fuente original |
-| 7 | `recipe` | `nombre@versión` (nombres de visual-lab: `transition-fasth3@1`, `mask-sam3-seeded@1`) o `unversioned` |
+| 7 | `recipe` | `nombre@versión` (nombres de visual-lab: `transition-fasth3@1`, `mask-sam3-seeded@1`); método conocido pero sin versionar = `nombre@unversioned` (consultable); método desconocido = `unversioned` a secas (no consultable) |
 | 8 | `settings` | modelo, semilla, resolución, cuadros, interpolador. Texto corto; `unconfirmed` si no consta |
 | 9 | `status` | `approved YYYY-MM-DD` · `candidate` · `superseded` |
 | 10 | `evidence` | ruta al veredicto/ticket/informe que prueba el status. `-` sólo si `candidate` |

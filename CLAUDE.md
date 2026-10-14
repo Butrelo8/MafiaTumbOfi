@@ -28,6 +28,7 @@ npx wrangler deploy
   pointers to every other document
 - `docs/blender-notas.md` — **read before touching `blender/`**: Blender 5.2
   quirks, measurement method and decisions already taken
+- `docs/assets/map.tsv` — what every visual piece is built from (plates, loops, transitions, masks, entrega); `scripts/assets-stale.sh <id|recipe@version>` lists what goes stale downstream. Update it when a piece is redone or approved
 - `scripts/` — scene and loop tooling (`loop-vivo.sh`, `comparar.sh`,
   `puerta-tanda.sh`, `esperar.sh`, `preflight.sh`); `prompts/` — H3/Klein
   prompts per ticket
