@@ -91,8 +91,10 @@ export function montarSantuario() {
     return bajada
   }
 
+  let sentido: 1 | -1 = 1 // el del último viaje: la cascada baja lo que viene en esa dirección
+
   async function precargar(desde: number) {
-    const { inmediato, cascada } = colaDePrecarga(espacios, formato, desde, puede)
+    const { inmediato, cascada } = colaDePrecarga(espacios, formato, desde, puede, sentido)
     await Promise.all(inmediato.map(bajar))
     raiz.dataset.precarga = 'cascada'
     for (const clave of cascada) await bajar(clave)
@@ -214,6 +216,8 @@ export function montarSantuario() {
 
     actual = hasta
     activar(hasta, true)
+    sentido = hasta > desde ? 1 : -1
+    precargar(hasta)
     await espera(viaje.tipo === 'corte' ? 0 : INERCIA)
     if (formatoPendiente) cambiarFormato(formatoPendiente)
     ocupado = false

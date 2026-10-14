@@ -40,6 +40,8 @@ maestros ffv1) y la vuelta termina en otro camarín (27). Ese cambio cruza por n
 - Formato por `(min-aspect-ratio: 1/1)`, como el hero. Si la pantalla cambia de proporción (girar el teléfono,
   cambiar la ventana), el juego de videos cambia en el acto, o al terminar el viaje en curso, y se precarga el nuevo.
 - Fundido a negro: 0.3 s de bajada + 0.3 s de subida (los 0.6 s del 05).
+- Precarga (2026-10-14): lo inmediato del 05 y, detrás, sólo los dos viajes siguientes en el sentido de la marcha;
+  se rellena al llegar a cada espacio. Bajar el sitio entero pasaba de los 3 MB a 390 (3.21 MB con los loops del 07).
 - Hero ↔ nave, grupo ↔ contratación, toda la vertical a partir de la sacristía y los saltos de más de una sección
   cruzan por negro; en escritorio nave ↔ sacristía ↔ grupo y contratación ↔ cierre reproducen ida o vuelta. El gesto durante un viaje se ignora; un `#ancla` pedido a medio viaje se cumple al llegar.
 - Música en E con discos y videos (01/24 con el feed de YouTube de hoy), como resolvió el 03.

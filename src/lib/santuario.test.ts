@@ -85,13 +85,19 @@ describe('colaDePrecarga', () => {
   test('desde el hero lo inmediato es sólo el loop de la nave', () => {
     const cola = colaDePrecarga(espacios, 'vertical', 0, chrome)
     expect(cola.inmediato).toEqual(['1:loop'])
-    expect(cola.cascada).toEqual(['1:ida', '1:vuelta', '2:loop', '3:loop', '4:loop', '5:loop'])
+    expect(cola.cascada).toEqual(['1:ida', '2:loop'])
   })
 
   test('desde la sacristía: su loop y la vuelta a la nave primero', () => {
     const cola = colaDePrecarga(espacios, 'vertical', 2, chrome)
     expect(cola.inmediato).toEqual(['2:loop', '3:loop', '1:vuelta'])
-    expect(cola.cascada).toEqual(['1:loop', '1:ida', '4:loop', '5:loop'])
+    expect(cola.cascada).toEqual(['4:loop'])
+  })
+
+  test('la cascada baja sólo los dos viajes siguientes en el sentido de la marcha', () => {
+    const cola = colaDePrecarga(espacios, 'escritorio', 4, chrome, -1)
+    expect(cola.inmediato).toEqual(['4:loop', '4:ida', '5:loop'])
+    expect(cola.cascada).toEqual(['3:loop', '2:vuelta', '2:loop'])
   })
 
   test('lo que el navegador no puede reproducir no se baja', () => {
