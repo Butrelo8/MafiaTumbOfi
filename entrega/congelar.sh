@@ -27,6 +27,7 @@ vertical/vuelta-av1.mp4        $R/cod/vuelta_av1_crf40.mp4
 vertical/vuelta-h264.mp4       $R/cod/vuelta_h264_crf23.mp4
 vertical/sacristia.mp4         $R/sac_vert.mp4
 escritorio/grupo-ida-provisional-h264.mp4  $T/07/e6prov/grupo-ida-provisional-h264.mp4
+escritorio/contratacion-ida-provisional-h264.mp4  $T/07/flow/job3/fix/contratacion-ida-provisional-h264.mp4
 placas/sacristia-esc-s11.png   $T/micro/trans_esc/klein/sac17_s11_00001_.png
 placas/sacristia-esc-real-s3-aplique.png   $S/real_s3_aplique.png
 placas/sacristia-esc-klein-aplique.png     $S/placa_aplique.png

@@ -25,6 +25,13 @@ pila** (camino B: G2–G7 lo reemplazan con los mismos nombres). `maestros/` no 
   Sus extremos son las placas aprobadas del camarín y de la cripta. **Todavía no está en la web**: «El grupo» y
   «Contratación» siguen en negro y la ida no trae los 20 cuadros crudos del loop. El final se hace con H3 y oclusor de
   máscara y reemplaza este archivo (ticket 07).
+- **PROVISIONAL — cripta → atrio (2026-10-13):** `escritorio/contratacion-ida-provisional-h264.mp4` es Google Flow
+  job3 (Veo 3.1 Fast): 204 cuadros (8.5 s), sin audio, 1280×720 llevado a 1920×1080 con el paso RTX de los loops (×1.5).
+  El cuadro 0 es la placa de la cripta y se funde en Flow en 10 cuadros. El teléfono es el de la placa, pegado sobre su
+  propio seguimiento (cuadros 0–79), porque Flow le borra el disco. Flow 172–183 se funde en los cuadros 228–239 del
+  loop del atrio y la cola son los cuadros 0–19 crudos de ese loop (`COSTURA` exacta). Pasa por negro (f116–143).
+  Va antes del LOOK y de la halación; **todavía no está en la web**. Maestro y números:
+  `tmp/07/flow/job3/fix/` (`job3_fix.mkv`, `veredicto.md`).
 - **G7 (2026-10-13):** las idas y vueltas de los dos formatos son las del 17 rehechas sobre la nave con la gente (placa
   G4; escritorio con el copal real del loop) y el micro con el tallo nuevo; la mitad de la sacristía es la del 17
   (profundidad idéntica desde el corte). Ticket 17, sección G7; cadenas `tmp/g7/{esc,vert}/armar.sh`.
