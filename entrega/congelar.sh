@@ -9,6 +9,7 @@ H=$T/g7/esc      # G7 (2026-10-13): antes $T/micro/trans_esc/hd_det (ticket 17)
 S=$T/sac10/esc   # paso 1: loop de la sacristía; la ida de escritorio lleva su empalme y el aplique (empalme.py)
 V=$T/g7/vert     # antes $T/micro/trans
 R=$T/sac10/vert2 # paso 2: sacristía vertical = recorte 9:16 del escritorio; la ida vertical lleva esa sacristía
+L=$T/07/look     # 07: E5 y E6 provisional con LOOK + halación (armar.sh) y su escalera (escalera07.sh)
 mkdir -p escritorio vertical placas maestros
 
 # destino  origen  (orden: lo que va a la web, luego placas, luego maestros)
@@ -26,8 +27,36 @@ vertical/ida-h264.mp4          $R/cod/ida_h264_crf23.mp4
 vertical/vuelta-av1.mp4        $R/cod/vuelta_av1_crf40.mp4
 vertical/vuelta-h264.mp4       $R/cod/vuelta_h264_crf23.mp4
 vertical/sacristia.mp4         $R/sac_vert.mp4
-escritorio/grupo-ida-provisional-h264.mp4  $T/07/e6prov/grupo-ida-provisional-h264.mp4
-escritorio/contratacion-ida-provisional-h264.mp4  $T/07/flow/job3/fix/contratacion-ida-provisional-h264.mp4
+escritorio/vestidor.mp4        $L/cod/vestidor_esc_h264.mp4
+escritorio/vestidor-hevc.mp4   $L/cod/vestidor_esc_hevc.mp4
+escritorio/vestidor-av1.mp4    $L/cod/vestidor_esc_av1.mp4
+escritorio/cripta.mp4          $L/cod/cripta_esc_h264.mp4
+escritorio/cripta-hevc.mp4     $L/cod/cripta_esc_hevc.mp4
+escritorio/cripta-av1.mp4      $L/cod/cripta_esc_av1.mp4
+escritorio/atrio.mp4           $L/cod/atrio_esc_h264.mp4
+escritorio/atrio-hevc.mp4      $L/cod/atrio_esc_hevc.mp4
+escritorio/atrio-av1.mp4       $L/cod/atrio_esc_av1.mp4
+vertical/vestidor.mp4          $L/cod/vestidor_movil_h264.mp4
+vertical/vestidor-hevc.mp4     $L/cod/vestidor_movil_hevc.mp4
+vertical/vestidor-av1.mp4      $L/cod/vestidor_movil_av1.mp4
+vertical/cripta.mp4            $L/cod/cripta_movil_h264.mp4
+vertical/cripta-hevc.mp4       $L/cod/cripta_movil_hevc.mp4
+vertical/cripta-av1.mp4        $L/cod/cripta_movil_av1.mp4
+vertical/atrio.mp4             $L/cod/atrio_movil_h264.mp4
+vertical/atrio-hevc.mp4        $L/cod/atrio_movil_hevc.mp4
+vertical/atrio-av1.mp4         $L/cod/atrio_movil_av1.mp4
+escritorio/grupo-ida-av1.mp4          $L/cod/provisional/grupo_ida_av1.mp4
+escritorio/grupo-ida-hevc.mp4         $L/cod/provisional/grupo_ida_hevc.mp4
+escritorio/grupo-ida-h264.mp4         $L/cod/provisional/grupo_ida_h264.mp4
+escritorio/grupo-vuelta-av1.mp4       $L/cod/provisional/grupo_vuelta_av1.mp4
+escritorio/grupo-vuelta-hevc.mp4      $L/cod/provisional/grupo_vuelta_hevc.mp4
+escritorio/grupo-vuelta-h264.mp4      $L/cod/provisional/grupo_vuelta_h264.mp4
+escritorio/contratacion-ida-av1.mp4     $L/cod/provisional/contratacion_ida_av1.mp4
+escritorio/contratacion-ida-hevc.mp4    $L/cod/provisional/contratacion_ida_hevc.mp4
+escritorio/contratacion-ida-h264.mp4    $L/cod/provisional/contratacion_ida_h264.mp4
+escritorio/contratacion-vuelta-av1.mp4  $L/cod/provisional/contratacion_vuelta_av1.mp4
+escritorio/contratacion-vuelta-hevc.mp4 $L/cod/provisional/contratacion_vuelta_hevc.mp4
+escritorio/contratacion-vuelta-h264.mp4 $L/cod/provisional/contratacion_vuelta_h264.mp4
 placas/sacristia-esc-s11.png   $T/micro/trans_esc/klein/sac17_s11_00001_.png
 placas/sacristia-esc-real-s3-aplique.png   $S/real_s3_aplique.png
 placas/sacristia-esc-klein-aplique.png     $S/placa_aplique.png
@@ -64,6 +93,14 @@ maestros/vert-ida.mkv          $R/ida_master.mkv
 maestros/vert-sacristia.mkv    $R/maestro_sac_vert.mkv
 maestros/esc-nave.mkv          $T/g6/esc/maestro_nave_esc.mkv
 maestros/vert-nave.mkv         $T/g6/vert/maestro_nave_vert.mkv
+maestros/esc-vestidor.mkv      $L/maestros/vestidor_esc.mkv
+maestros/esc-cripta.mkv        $L/maestros/cripta_esc.mkv
+maestros/esc-atrio.mkv         $L/maestros/atrio_esc.mkv
+maestros/vert-vestidor.mkv     $L/maestros/vestidor_movil.mkv
+maestros/vert-cripta.mkv       $L/maestros/cripta_movil.mkv
+maestros/vert-atrio.mkv        $L/maestros/atrio_movil.mkv
+maestros/esc-grupo-ida.mkv     $L/maestros/grupo_ida_job2.mkv
+maestros/esc-contratacion-ida.mkv  $L/maestros/contratacion_ida_job3.mkv
 "
 while read -r dst src; do
   [ -n "$dst" ] || continue

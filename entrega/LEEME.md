@@ -1,7 +1,7 @@
 # entrega/ — lo aprobado, congelado fuera de `tmp/` (paso 0, 2026-10-13)
 
 `congelar.sh` copia desde `tmp/` y escribe `MANIFEST.tsv` (cuadros, KB, sha256 corto, origen). Todo es de **antes de la
-pila** (camino B: G2–G7 lo reemplazan con los mismos nombres). `maestros/` no se versiona (121 MB, ffv1).
+pila** (camino B: G2–G7 lo reemplazan con los mismos nombres). `maestros/` no se versiona (1.7 GB desde el 07, ffv1).
 
 - **Nombres:** los de los prototipos web (`nave`, `ida`, `vuelta`, `sacristia`) + códec. `vuelta` = `ida` al revés.
 - **Maestros sin pérdida:** ida de escritorio (`ida_master_mezcla.mkv`; el AV1 de la vuelta es su reverso, SSIM igual
@@ -20,18 +20,28 @@ pila** (camino B: G2–G7 lo reemplazan con los mismos nombres). `maestros/` no 
 - **Tallo y rosa (2026-10-13, después de G6):** los dos loops se rehicieron con el tallo de espinas enrollado en el cable
   y la luz C (igualada al micro de oro): `placas/nave-esc-micro.png` es ya `g5/placa_micro_tallo.png`, con sus máscaras,
   la vertical y las disparidades en `placas/*-tallo*`. Mismo fondo y mismo H3 que G6; costura igual (0.75 / 0.51).
-- **PROVISIONAL — E6, camarín → cripta (2026-10-13):** `escritorio/grupo-ida-provisional-h264.mp4` es Google Flow
-  job2 (Veo 3.1 Fast): cuadros 0–184, sin audio, 1280×720 llevado a 1920×1080 con el paso RTX de los loops (×1.5).
-  Sus extremos son las placas aprobadas del camarín y de la cripta. **Todavía no está en la web**: «El grupo» y
-  «Contratación» siguen en negro y la ida no trae los 20 cuadros crudos del loop. El final se hace con H3 y oclusor de
-  máscara y reemplaza este archivo (ticket 07).
-- **PROVISIONAL — cripta → atrio (2026-10-13):** `escritorio/contratacion-ida-provisional-h264.mp4` es Google Flow
-  job3 (Veo 3.1 Fast): 204 cuadros (8.5 s), sin audio, 1280×720 llevado a 1920×1080 con el paso RTX de los loops (×1.5).
-  El cuadro 0 es la placa de la cripta y se funde en Flow en 10 cuadros. El teléfono es el de la placa, pegado sobre su
-  propio seguimiento (cuadros 0–79), porque Flow le borra el disco. Flow 172–183 se funde en los cuadros 228–239 del
-  loop del atrio y la cola son los cuadros 0–19 crudos de ese loop (`COSTURA` exacta). Pasa por negro (f116–143).
-  Va antes del LOOK y de la halación; **todavía no está en la web**. Maestro y números:
-  `tmp/07/flow/job3/fix/` (`job3_fix.mkv`, `veredicto.md`).
+- **E5 y E6 provisional con LOOK + halación (07, 2026-10-14; OK del usuario 00:35).** Todo pasó por el mismo LOOK y
+  la misma halación que la nave y la sacristía, con **`vignette=PI/5:dither=0`**, porque el dither por omisión no es
+  determinista por cuadro (`tmp/07/look/armar.sh`, `veredicto.md`; queda ~0.5 de luma más oscuro). Escalera
+  `tmp/07/look/escalera07.sh`: H.264 crf 23, HEVC crf 26, AV1 crf 40; GOP 240 en los loops y 60 en las transiciones.
+  - **Loops (10 s, 240 cuadros), escritorio y vertical:** `vestidor` (El grupo), `cripta` (Contratación), `atrio`
+    (Cierre). `<lugar>.mp4` es H.264 (como `nave.mp4`) y `<lugar>-hevc.mp4` y `<lugar>-av1.mp4` son los otros
+    peldaños. Las verticales del vestidor y la cripta son un recorte del escritorio con look, como la sacristía; la del
+    atrio lleva grade propio (su neblina baja sólo existe en la vertical). Maestros: `maestros/{esc,vert}-<lugar>.mkv`.
+  - **PROVISIONAL — las dos idas son Google Flow (Veo 3.1 Fast), sólo escritorio (Flow no da 9:16; la vertical cruza
+    por negro).** `vuelta` = `ida` al revés, AV1/HEVC/H.264.
+    - `escritorio/grupo-{ida,vuelta}-*.mp4`, camarín → cripta = Flow job2, 185 cuadros, 1920 desde la salida RTX
+      ×1.5. **Sin `COSTURA` en ninguno de los dos sentidos:** la ida termina en la cripta según Flow (contra el cuadro
+      20 del loop: media 3.7, 12 % de píxeles > 8) y la vuelta en el camarín de antes de las placas de producción
+      (contra el cuadro 20 del loop del vestidor: media 27.5, 54 %). No se inventa costura: en la web este cambio
+      cruza por negro hasta que el E6 final (H3 con oclusor de máscara) reemplace estos archivos con el mismo nombre.
+    - `escritorio/contratacion-{ida,vuelta}-*.mp4`, cripta → atrio = Flow job3 con el teléfono arreglado
+      (`tmp/07/flow/job3/fix/veredicto.md`), 204 cuadros, pasa por negro (f106–147). **Ida: `COSTURA` exacta** (la
+      cola son los cuadros 0–19 del atrio con look, byte a byte en el maestro). **Vuelta: no exacta.** Termina en la
+      placa de la cripta (0.000), no en los cuadros 0–19 del loop; al seguir en el cuadro 20 el salto es de media 0.80
+      (3.4 % de píxeles > 8, sólo en velas y polvo).
+    - Maestros: `maestros/esc-{grupo,contratacion}-ida.mkv`. Las anteriores `*-ida-provisional-h264.mp4` (sin look)
+      se retiraron.
 - **G7 (2026-10-13):** las idas y vueltas de los dos formatos son las del 17 rehechas sobre la nave con la gente (placa
   G4; escritorio con el copal real del loop) y el micro con el tallo nuevo; la mitad de la sacristía es la del 17
   (profundidad idéntica desde el corte). Ticket 17, sección G7; cadenas `tmp/g7/{esc,vert}/armar.sh`.
