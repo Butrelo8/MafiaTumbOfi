@@ -5,6 +5,12 @@
 Mafia Tumbada is one static Astro page. The build output in `dist/` is served
 by Cloudflare Workers Static Assets.
 
+**Fresh start (branch `fresh-start`, 2026-11-03):** the old scroll-driven 3D
+santuario was removed; `src/` is a placeholder. The front end is being redone
+from scratch with Blender (see `docs/brief-camion.md`). The old build lives on
+`dev` (`f7e1cc6`) and `main`; findings are kept in `research/` (index:
+`research/README.md`).
+
 ## Commands
 
 ```bash
@@ -16,37 +22,21 @@ npx wrangler deploy
 
 ## Structure
 
-- `src/pages/index.astro` — page entry point
-- `src/components/` — page components
-- `src/data/` — catalog, member, and social data
-- `src/styles/` — global and marketing styles
-- `public/` — static media, favicon, robots, and redirects
-- `wrangler.jsonc` — Cloudflare Workers Static Assets configuration
-- `DESIGN.md` — visual-system source of truth
-- `blender/` — scene and look scripts for the scroll-driven 3D santuario
-- `docs/HANDOFF.md` — **start here**: current state, what is blocked, and
-  pointers to every other document
-- `docs/blender-notas.md` — **read before touching `blender/`**: Blender 5.2
-  quirks, measurement method and decisions already taken
-- `docs/assets/map.tsv` — what every visual piece is built from (plates, loops, transitions, masks, entrega); `scripts/assets-stale.sh <id|recipe@version>` lists what goes stale downstream. Update it when a piece is redone or approved
-- `scripts/` — scene and loop tooling (`loop-vivo.sh`, `comparar.sh`,
-  `puerta-tanda.sh`, `esperar.sh`, `preflight.sh`); `prompts/` — H3/Klein
-  prompts per ticket
+- `src/pages/index.astro` — placeholder page; `src/lib/publicSiteUrl.ts` (+ test) builds its canonical URL
+- `public/` — band photos, music covers, favicon, `robots.txt`, `_redirects` (the old hero videos are gone)
+- `wrangler.jsonc`, `worker.js` — Cloudflare Workers Static Assets configuration (the `/video/*` worker route is now dead)
+- `research/` — everything kept from the old build; **start at `research/README.md`**. Read
+  `research/blender-notas.md` before touching Blender
+- `docs/brief-camion.md` — the two candidate directions for the new front end and the open questions
+- `blender/assets/` — third-party models and textures (untracked, large); tracked there: only licenses
+- `scripts/` — `esperar.sh`, `preflight.sh`, `medir-peso.mjs`
 
 ## Design rules
 
-Read [`DESIGN.md`](./DESIGN.md) before changing the page. Preserve the
-Gótico Tumbado direction: black-on-black surfaces, Pirata One for display
-type only, Archivo for body/UI, JetBrains Mono for tabular data, red neon for
-links, rules and glow, and gold for display type, the MTO monogram and CTAs.
-
-Cormorant Garamond, Inter and the coastal turquoise belong to the retired
-Veracruz Noir direction — do not reintroduce them.
-
-Keep the asymmetric editorial layout, responsive spacing, WCAG AA contrast,
-visible focus states, Spanish-first labels, 44px touch targets, and
-reduced-motion support. Do not add centered stock-hero layouts, gold body text,
-or motion that ignores `prefers-reduced-motion`.
+None are current. The prior direction (Gótico Tumbado: black-on-black, Pirata One, gold, red neon) is in
+`research/DESIGN.md` as history, not as rules. Cormorant Garamond, Inter and the coastal turquoise belong to the
+older Veracruz Noir direction. Until the owner picks the look, keep WCAG AA contrast, visible focus states,
+Spanish-first labels, 44px touch targets and `prefers-reduced-motion` support.
 
 ## Environment
 
@@ -56,10 +46,9 @@ prefixed `PUBLIC_`.
 
 ## Scene work
 
-- The scene skill is `santuario-escena`, not `blender` (that one is Mixamo → dance).
 - Python with numpy/PIL/cv2: `uv run -q --with numpy --with opencv-python-headless --with pillow python -I`
   (the system `python3` has none of them).
-- Before launching a batch (Blender tanda or ComfyUI queue): `scripts/puerta-tanda.sh`.
+- Environment check before a batch: `scripts/preflight.sh`.
 - Waiting on a job: `scripts/esperar.sh` with `run_in_background` or Monitor, never a foreground `sleep`.
   A hook in `.claude/settings.json` denies foreground `sleep` and system python with numpy/cv2/PIL.
 - Findings go to: site-specific notes → this repo's `docs/`; general method → `~/projects/visual-lab`;

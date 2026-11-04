@@ -23,11 +23,6 @@ there. Spotify credentials stay server-side and are never `PUBLIC_` vars.
 
 ## Design
 
-[`DESIGN.md`](./DESIGN.md) is the source of truth for the visual system.
-
-Keep the Veracruz Noir direction: black-on-black surfaces, Cormorant Garamond
-for headlines only, Inter for body/UI, JetBrains Mono for tabular data,
-turquoise for links and focus, and gold for signature labels and CTAs. Preserve
-the asymmetric editorial layout, responsive spacing, WCAG AA contrast, visible
-focus states, Spanish-first labels, 44px touch targets, and reduced-motion
-support.
+The front end is being redone from scratch; `src/` holds a placeholder page.
+What the old build found is indexed in [`research/README.md`](./research/README.md);
+the next direction is in [`docs/brief-camion.md`](./docs/brief-camion.md).

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PreToolUse de Bash: frena dos errores que se re-aprendían pese a estar escritos (docs/skills-audit-2026-10-12.md, propuesta 7).
+# PreToolUse de Bash: frena dos errores que se re-aprendían pese a estar escritos (research/skills-audit-2026-10-12.md, propuesta 7).
 # 1. `sleep` en primer plano (bucles until/while que bloquean el hilo esperando un trabajo: 2.17 h en 21 sesiones).
 # 2. python/python3 del sistema con numpy, cv2 o PIL (no están instalados: 3 sesiones).
 entrada=$(cat)
