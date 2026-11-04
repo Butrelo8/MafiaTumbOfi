@@ -60,6 +60,13 @@ Paths written inside these files point to the old layout (`docs/`, `blender/*.py
 
 `catalog.json` (release catalog snapshot), `members.ts` (band members), `socials.ts` (official social URLs).
 
+## entrega/ (record of the frozen deliverables; the masters themselves are left untracked in `entrega/maestros/`)
+
+| File | What it is |
+|---|---|
+| `entrega/LEEME.md` | What each frozen file was (names, codecs, ladder, seams, provisional Flow transitions) as of 2026-10-14. |
+| `entrega/MANIFEST.tsv` | Frames, KB and short sha256 per delivered file, plus origin. Checksums for the lossless masters. |
+
 ## lighthouse/
 
 `www.mafiatumbada.com_2026-04-28_10-35-21.report.{html,json}` — Lighthouse on the live site, 2026-04-28: performance 36, accessibility 96, best practices 96, SEO 100. Force-added (the `.gitignore` ignores `*.report.*`).
