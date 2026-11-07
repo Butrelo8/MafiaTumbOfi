@@ -1,11 +1,14 @@
 // Workers Static Assets ignora Range: contesta 200 con el archivo entero. iOS Safari pide
 // bytes=0-1 antes de reproducir un <video> y sin 206 se niega; el hero queda en opacity 0
 // (se revela con `loadeddata`) y la portada se ve vacía. El rango se resuelve aquí.
-// Solo corre para /video/* (run_worker_first en wrangler.jsonc); el resto lo sirven los assets.
+// Solo corre para /video/* y /wa/* (toques de WhatsApp, wa.js) (run_worker_first en wrangler.jsonc); el resto lo sirven los assets.
 // ponytail: carga el archivo completo en memoria. El hero pesa 10 MB contra un límite de 128 MB;
 // si entra un video grande, pasarlo a R2.
+import { wa } from './wa.js'
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
+    if (new URL(request.url).pathname.startsWith('/wa/')) return wa(request, env, ctx)
     // El Range NO se le pasa a ASSETS: con él devuelve un cuerpo vacío en cache MISS.
     // Se pide el archivo entero y el rango se recorta aquí.
     const headersIn = new Headers(request.headers)
