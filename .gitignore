@@ -90,3 +90,5 @@ blender/assets/*/**
 
 # Paso 0: maestros sin pérdida de entrega/ (grandes; checksums en entrega/MANIFEST.tsv)
 entrega/maestros/
+
+blender/render/

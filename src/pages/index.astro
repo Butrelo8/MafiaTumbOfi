@@ -1,29 +1,195 @@
 ---
+import '@fontsource/pirata-one/400.css'
+import '@fontsource/archivo/400.css'
+import '@fontsource/archivo/600.css'
 import { homeCanonical } from '../lib/publicSiteUrl'
+import { members } from '../../research/contenido/members'
+import { bandSocialUrls } from '../../research/contenido/socials'
+import catalog from '../../research/contenido/catalog.json'
+import cfg from '../lib/escena.json'
 
 const canonical = homeCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)
+const releases = catalog.releases.slice(0, 4)
+// one tab per camera stop; the label is the plain section name (stop ids live in escena.json)
+const secciones = [
+  { id: 'inicio', parada: 'alta', label: 'Inicio' },
+  { id: 'musica', parada: 'cabina', label: 'Música' },
+  { id: 'grupo', parada: 'lado', label: 'El grupo' },
+  { id: 'contratacion', parada: 'cenit', label: 'Contratación' },
+]
+const presets = Object.entries(cfg.presets).map(([id, p]) => ({ id, nombre: p.nombre }))
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang="es" data-modo="poster" data-preset="noche">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Mafia Tumbada</title>
-    <meta name="description" content="Mafia Tumbada. Sitio nuevo en camino." />
+    <meta name="description" content="Mafia Tumbada: música, el grupo y contratación por WhatsApp." />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
-    <style>
-      html, body { margin: 0; height: 100%; background: #000; color: #e8e8e8; }
-      body { display: grid; place-items: center; font-family: system-ui, sans-serif; }
-      h1 { font-size: clamp(2rem, 8vw, 4rem); margin: 0; text-align: center; }
-      p { margin: 0.5rem 0 0; text-align: center; opacity: 0.7; }
+    <link rel="preload" href="/escena/escena.glb" as="fetch" crossorigin />
+    <style is:global>
+      :root {
+        --bg: #000;
+        --text: oklch(95% 0.008 85);
+        --text-muted: oklch(82% 0.008 85);
+        --gold: oklch(78% 0.15 85);
+        --gold-peak: oklch(88% 0.14 88);
+        --gold-shadow: oklch(50% 0.10 78);
+        --red: oklch(62% 0.22 30);
+        --veil: rgb(0 0 0 / 0.62);
+        --focus-ring: oklch(78% 0.15 85 / 0.9);
+        --pad: clamp(16px, 3vw, 40px);
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); overflow: hidden; }
+      body { font: 400 1rem/1.5 Archivo, system-ui, sans-serif; }
+      a { color: inherit; }
+      :focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
+
+      .fondo, #escena, #loop { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      #escena { opacity: 0; transition: opacity 0.8s ease; }
+      #loop { display: none; }
+      [data-modo='vivo'] #escena { opacity: 1; }
+      [data-modo='video'] #loop { display: block; }
+
+      header { position: fixed; top: 0; inset-inline: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: var(--pad); }
+      .marca {
+        font: 400 clamp(1.9rem, 5vw, 2.8rem)/1 'Pirata One', serif; margin: 0; color: var(--gold);
+        background-image: linear-gradient(168deg, var(--gold-shadow) 0%, var(--gold-peak) 38%, oklch(72% 0.15 82) 62%, oklch(48% 0.09 76) 100%);
+        -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.8));
+      }
+      .hora { display: flex; border: 1px solid oklch(50% 0.10 78 / 0.7); border-radius: 999px; background: var(--veil); }
+      .hora button { min-height: 44px; min-width: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: none; color: var(--text-muted); font: 600 0.875rem Archivo, sans-serif; cursor: pointer; }
+      .hora button[aria-pressed='true'] { color: var(--bg); background: var(--gold); }
+
+      .panel { position: fixed; left: var(--pad); bottom: calc(var(--pad) + 64px); max-width: min(30rem, calc(100vw - 2 * var(--pad))); padding: 18px 20px; background: var(--veil); border-left: 3px solid var(--red); }
+      .panel[hidden] { display: none; }
+      .panel h2 { font: 400 clamp(1.8rem, 4vw, 2.4rem)/1.05 'Pirata One', serif; margin: 0 0 10px; color: var(--gold); }
+      .panel ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+      .panel li span { color: var(--text-muted); }
+      .panel a { display: inline-flex; align-items: center; min-height: 44px; }
+      .redes { display: flex !important; flex-wrap: wrap; gap: 0 18px !important; }
+      .whatsapp { padding: 0 18px; margin-top: 6px; background: var(--gold); color: var(--bg); font-weight: 600; text-decoration: none; border-radius: 4px; }
+
+      nav { position: fixed; bottom: 0; inset-inline: 0; padding: 0 var(--pad) var(--pad); }
+      [role='tablist'] { display: flex; gap: 4px; overflow-x: auto; }
+      [role='tab'] { flex: 0 0 auto; min-height: 44px; padding: 0 14px; border: 0; border-bottom: 2px solid transparent; background: var(--veil); color: var(--text-muted); font: 600 0.95rem Archivo, sans-serif; cursor: pointer; }
+      [role='tab'][aria-selected='true'] { color: var(--text); border-bottom-color: var(--gold); }
+      @media (max-width: 480px) { [role='tab'] { padding: 0 10px; font-size: 0.875rem; } }
     </style>
   </head>
   <body>
+    <picture>
+      <source media="(orientation: portrait)" srcset="/escena/poster-720x1280.jpg" />
+      <img class="fondo" src="/escena/poster-1600x900.jpg" alt="" fetchpriority="high" />
+    </picture>
+    <canvas id="escena" aria-hidden="true"></canvas>
+    <video id="loop" muted loop playsinline preload="none" aria-hidden="true"></video>
+
+    <header>
+      <h1 class="marca">Mafia Tumbada</h1>
+      <div class="hora" role="group" aria-label="Hora del día">
+        {presets.map((p, i) => <button type="button" data-preset={p.id} aria-pressed={i === 0 ? 'true' : 'false'}>{p.nombre}</button>)}
+      </div>
+    </header>
+
     <main>
-      <h1>Mafia Tumbada</h1>
-      <p>Sitio nuevo en camino.</p>
+      <section class="panel" id="panel-inicio" role="tabpanel" aria-labelledby="tab-inicio">
+        <h2>Escúchanos</h2>
+        <ul class="redes">
+          <li><a href={bandSocialUrls.spotify}>Spotify</a></li>
+          <li><a href={bandSocialUrls.youtube}>YouTube</a></li>
+          <li><a href={bandSocialUrls.appleMusic}>Apple Music</a></li>
+          <li><a href={bandSocialUrls.instagram}>Instagram</a></li>
+          <li><a href={bandSocialUrls.tiktok}>TikTok</a></li>
+        </ul>
+      </section>
+      <section class="panel" id="panel-musica" role="tabpanel" aria-labelledby="tab-musica" hidden>
+        <h2>Música</h2>
+        <ul>{releases.map((r) => <li><a href={r.href}>{r.title}</a> <span>· {r.subtitle}</span></li>)}</ul>
+      </section>
+      <section class="panel" id="panel-grupo" role="tabpanel" aria-labelledby="tab-grupo" hidden>
+        <h2>El grupo</h2>
+        <ul>{members.map((m) => <li>{m.name} <span>· {m.role}</span></li>)}</ul>
+      </section>
+      <section class="panel" id="panel-contratacion" role="tabpanel" aria-labelledby="tab-contratacion" hidden>
+        <h2>Contratación</h2>
+        <a class="whatsapp" href={bandSocialUrls.whatsapp}>Escribir por WhatsApp</a>
+      </section>
     </main>
+
+    <nav aria-label="Secciones">
+      <div role="tablist" aria-label="Secciones">
+        {secciones.map((s, i) => (
+          <button type="button" role="tab" id={`tab-${s.id}`} aria-controls={`panel-${s.id}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-parada={s.parada} data-id={s.id}>{s.label}</button>
+        ))}
+      </div>
+    </nav>
+
+    <script>
+      import type { Escena } from '../scripts/escena'
+      const html = document.documentElement
+      const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches
+      const tabs = [...document.querySelectorAll<HTMLButtonElement>('[role="tab"]')]
+      const horas = [...document.querySelectorAll<HTMLButtonElement>('.hora button')]
+      let esc: Escena | undefined
+
+      function seleccionar(tab: HTMLButtonElement, foco = false) {
+        for (const t of tabs) {
+          const on = t === tab
+          t.setAttribute('aria-selected', String(on))
+          t.tabIndex = on ? 0 : -1
+          document.getElementById(t.getAttribute('aria-controls')!)!.hidden = !on
+        }
+        if (foco) tab.focus()
+        esc?.ir(tab.dataset.parada!)
+        history.replaceState(null, '', `#${tab.dataset.id}`)
+      }
+      tabs.forEach((t, i) => {
+        t.addEventListener('click', () => seleccionar(t))
+        t.addEventListener('keydown', (e) => {
+          const n = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key]
+          if (n === undefined) return
+          e.preventDefault()
+          seleccionar(tabs[(n + tabs.length) % tabs.length], true)
+        })
+      })
+      const inicial = tabs.find((t) => `#${t.dataset.id}` === location.hash) ?? tabs[0]
+      seleccionar(inicial)
+
+      horas.forEach((b) => b.addEventListener('click', () => {
+        horas.forEach((x) => x.setAttribute('aria-pressed', String(x === b)))
+        html.dataset.preset = b.dataset.preset
+        esc?.preset(b.dataset.preset as 'noche')
+      }))
+
+      function video() {
+        const v = document.getElementById('loop') as HTMLVideoElement
+        const vertical = matchMedia('(orientation: portrait)').matches
+        v.src = vertical ? '/escena/loop-720x1280.mp4' : '/escena/loop-1600x900.mp4'
+        html.dataset.modo = 'video'
+        v.play().catch(() => (html.dataset.modo = 'poster'))
+      }
+
+      const gl = (() => { try { return !!document.createElement('canvas').getContext('webgl2') } catch { return false } })()
+      if (!gl) {
+        if (!reducido) video()
+      } else {
+        import('../scripts/escena').then(async ({ iniciar }) => {
+          esc = await iniciar(document.getElementById('escena') as HTMLCanvasElement, { reducido, preset: 'noche', parada: inicial.dataset.parada! })
+          ;(window as any).__escena = esc
+          requestAnimationFrame(() => (html.dataset.modo = 'vivo'))
+          // slow device: after 3 s, a median frame over 50 ms swaps the live scene for the rendered loop
+          if (!reducido && !new URLSearchParams(location.search).has('sinrespaldo')) setTimeout(() => {
+            const f = [...esc!.frameTimes].slice(-90).sort((a, b) => a - b)
+            if (f[f.length >> 1] > 50) { esc!.parar(); video() }
+          }, 3000)
+        }).catch(() => { if (!reducido) video() })
+      }
+    </script>
   </body>
 </html>
