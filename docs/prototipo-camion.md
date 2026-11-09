@@ -22,7 +22,7 @@ two presets of one scene; the Cycles loop is rendered in **night**.
 
 ## Run
 ```bash
-bun install && bun dev --port 3108 --host 0.0.0.0        # http://thiccpc-wsl:3108 on the tailnet (3100 is taken by another project)
+scripts/prototipo.sh        # one command: ext4 mirror, install, build, preview on http://thiccpc-wsl:3109 (3100 is taken by another project)
 # rebuild the scene / loop:
 /mnt/e/Blender/blender.exe -b --factory-startup --python "$(wslpath -w blender/escena.py)" -- glb
 scripts/render-loop.sh 64 720x1280 && scripts/render-loop.sh 32 1600x900   # ~12 s/frame each (RTX 4070 Ti)
@@ -45,9 +45,9 @@ Mac WebKit, iPhone size       OK from WebKit's side (mothership pass, results ~/
 revisar web 390/1440          all pass (overflow 0, tap<44 0, contrast 0, cls 0.000/0.001, reduced-motion 0 animations)
 slop-check src                1 FAIL menu-button-not-plain = false positive (role="tab" buttons carry aria-controls; labels are plain words)
 refs-check references.md      PASS (6 sections);  check-matrix DESIGN.md 0 errors;  bun test 10/10
-revisar --loop 720x1280       seam 1.49 <= 3.04 pass, strobe 0 pass, crawl 0.42 FAIL, flicker 2.30 FAIL (static 7 %)  [pre-lens-fix render]
+revisar --loop 720x1280       seam 1.50 <= 3.05 pass, strobe 0 pass, crawl 0.20 pass, flicker 2.27 FAIL (accepted, see below)  [lens-fix render; eagle.sh]
 revisar --loop 1600x900       seam 1.44 <= 2.29 pass, strobe 0 pass, crawl 0.49 FAIL, flicker 1.97 FAIL (static 8 %)
-loop files                    loop-720x1280.mp4 975 KB, loop-1600x900.mp4 1.61 MB, posters 32 / 46 KB (fallback only, not on the live path)
+loop files                    loop-720x1280.mp4 980 KB, loop-1600x900.mp4 1.61 MB, posters 32 / 46 KB (fallback only, not on the live path)
 ```
 **Loop crawl/flicker: accepted (mothership decision 11-09, for the owner's look).** The FAILs come from the pole lights sweeping over the
 truck every 2.5 s: the sky's per-pixel temporal std is 0.00 (no render noise), the truck region's mean swings 5.3 (mean 15). revisar counts
