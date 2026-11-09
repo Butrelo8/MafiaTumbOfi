@@ -1,0 +1,37 @@
+{
+  "url": "http://localhost:3109/",
+  "gl": "angle-gl",
+  "shots": [
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/390-noche-inicio.jpg",
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/390-noche-musica.jpg",
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/390-noche-grupo.jpg",
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/390-noche-contratacion.jpg",
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/390-atardecer-inicio.jpg",
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/390-atardecer-musica.jpg",
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/390-atardecer-grupo.jpg",
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/390-atardecer-contratacion.jpg",
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/1440-noche-inicio.jpg",
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/1440-noche-musica.jpg",
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/1440-noche-grupo.jpg",
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/1440-noche-contratacion.jpg",
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/1440-atardecer-inicio.jpg",
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/1440-atardecer-musica.jpg",
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/1440-atardecer-grupo.jpg",
+    "E:\\Cursor Projects\\MTO-goblindrone\\docs\\prototipo-camion\\capturas/1440-atardecer-contratacion.jpg"
+  ],
+  "frames": {
+    "390@cpu4": {
+      "n": 599,
+      "p50": 6.1,
+      "p95": 6.2,
+      "fallback_would_fire": false
+    },
+    "1440@cpu1": {
+      "n": 599,
+      "p50": 6.1,
+      "p95": 6.2,
+      "fallback_would_fire": false
+    }
+  },
+  "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Ti (0x00002782) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+}
