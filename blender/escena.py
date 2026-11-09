@@ -177,13 +177,14 @@ def camion():
     for o in meshes:
         me = o.data
         old = list(me.materials)
+        old_idx = [p.material_index for p in me.polygons]  # materials.clear() resets the polygons' indices
         me.materials.clear()
         orden = list(mats.values()) + [faros, calav]
         for m in orden:
             me.materials.append(m)
         uv = me.uv_layers.active.data if me.uv_layers else None
         for p in me.polygons:
-            om = old[p.material_index] if p.material_index < len(old) else None
+            om = old[old_idx[p.index]] if old_idx[p.index] < len(old) else None
             if om and om.name.startswith("Headlights"):
                 p.material_index = orden.index(faros); continue
             if om and om.name.startswith("BrakeLight"):

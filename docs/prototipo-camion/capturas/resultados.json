@@ -22,14 +22,18 @@
   "frames": {
     "390@cpu4": {
       "n": 599,
-      "p50": 6.1,
-      "p95": 6.2,
+      "frame_p50": 6.1,
+      "frame_p95": 6.2,
+      "render_p50": 2.1,
+      "render_p95": 4.9,
       "fallback_would_fire": false
     },
     "1440@cpu1": {
       "n": 599,
-      "p50": 6.1,
-      "p95": 6.2,
+      "frame_p50": 6.1,
+      "frame_p95": 6.1,
+      "render_p50": 0.4,
+      "render_p95": 0.7,
       "fallback_would_fire": false
     }
   },

@@ -53,11 +53,12 @@ for (const w of [390, 1440]) {
   await page.click('.hora button[data-preset="noche"]')
   await page.click('#tab-inicio')
   await page.waitForTimeout(1000)
-  await page.evaluate(() => (window.__escena.frameTimes.length = 0))
+  await page.evaluate(() => (window.__escena.frameTimes.length = window.__escena.renderMs.length = 0))
   await page.waitForTimeout(5000)
-  const ft = await page.evaluate(() => [...window.__escena.frameTimes])
-  const s = ft.slice(1).sort((a, b) => a - b), q = (p) => +s[Math.min(s.length - 1, Math.floor(p * s.length))].toFixed(1)
-  res.frames[`${w}@cpu${rate}`] = { n: s.length, p50: q(0.5), p95: q(0.95), fallback_would_fire: q(0.5) > 50 }
+  const [ft, rm] = await page.evaluate(() => [[...window.__escena.frameTimes], [...window.__escena.renderMs]])
+  const pct = (a) => { const s = a.slice(1).sort((x, y) => x - y); return (p) => +s[Math.min(s.length - 1, Math.floor(p * s.length))].toFixed(1) }
+  const f = pct(ft), r = pct(rm)
+  res.frames[`${w}@cpu${rate}`] = { n: ft.length - 1, frame_p50: f(0.5), frame_p95: f(0.95), render_p50: r(0.5), render_p95: r(0.95), fallback_would_fire: f(0.5) > 50 }
   await ctx.close()
 }
 

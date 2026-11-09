@@ -30,25 +30,32 @@ scripts/encode-loop.sh 720x1280 22 && scripts/encode-loop.sh 1600x900 22
 ```
 On `/mnt/e` a cold `bun run build` takes 6.5 min and the dev server takes minutes to answer. A mirror on ext4 builds in 1.6 s.
 
-## Numbers (2026-11-09, production build via `astro preview`)
+## Numbers (2026-11-09, production build, `scripts/prototipo.sh`)
 ```
-weight at 390 (live path)     1.00 MB  scripts/medir-peso.mjs   | 1.05 MB revisar weight-390   (budget 3 MB)
-frame time 390 CPU x4         p50 6.1 ms  p95 6.2 ms   Windows Chrome headless, ANGLE D3D11 RTX 4070 Ti (dev build earlier: p95 36.4)
-frame time 1440               p50 6.1 ms  p95 6.2 ms   same backend; slow-device fallback did not fire
+weight at 390, live path      1.61 MB  sum of every file the page loads (Playwright response bodies)       budget 3 MB
+                              (medir-peso 0.85-1.00 MB and revisar 1.05 MB stop at network idle before the HDR/textures finish: undercount)
+render cost 390 CPU x4        renderer.render() p50 2.1 ms  p95 4.9 ms   Windows Chrome headless, ANGLE D3D11 RTX 4070 Ti
+render cost 1440              p50 0.4 ms  p95 0.7 ms                     same backend
+frame interval 390 / 1440     p95 6.2 / 6.1 ms = the display's rAF cadence (~164 Hz), a ceiling, not a cost
+                              (an earlier 36.4 ms p95 ran while Cycles was rendering on the same GPU)
+Mac WebKit, iPhone size       OK from WebKit's side (mothership pass, results ~/cc-out/mto-camion-webkit/results.json on the Mac):
+                              modo=vivo on Apple GPU, 0/6 blank shots, frame p95 36 ms (headless WebKit paces at ~33 ms),
+                              keyboard tabs OK, no WebGL -> poster + .mp4 loop; reduced motion cuts (the 100 ms two-shot check
+                              could not resolve it: one screenshot takes ~135 ms)
 revisar web 390/1440          all pass (overflow 0, tap<44 0, contrast 0, cls 0.000/0.001, reduced-motion 0 animations)
 slop-check src                1 FAIL menu-button-not-plain = false positive (role="tab" buttons carry aria-controls; labels are plain words)
-refs-check references.md      5/5 PASS (6 sections)
-revisar --loop 720x1280       seam 1.49 <= 3.04 pass, strobe 0 pass, crawl 0.42 FAIL, flicker 2.30 FAIL (static 7 %)
+refs-check references.md      PASS (6 sections);  check-matrix DESIGN.md 0 errors;  bun test 10/10
+revisar --loop 720x1280       seam 1.49 <= 3.04 pass, strobe 0 pass, crawl 0.42 FAIL, flicker 2.30 FAIL (static 7 %)  [pre-lens-fix render]
 revisar --loop 1600x900       seam 1.44 <= 2.29 pass, strobe 0 pass, crawl 0.49 FAIL, flicker 1.97 FAIL (static 8 %)
 loop files                    loop-720x1280.mp4 975 KB, loop-1600x900.mp4 1.61 MB, posters 32 / 46 KB (fallback only, not on the live path)
 ```
-The loop FAILs are the pole lights sweeping over the truck, not render noise. Per-region temporal std over the 240 frames:
-the sky's per-pixel std is 0.00, while the truck body's region mean swings 5.3 (mean 15) every 2.5 s, when a pole passes.
-revisar counts the stationary truck as "static", so that designed light sweep reads as flicker and crawl.
-Making the loop pass means dimmer poles plus more fill light (a re-render, about 1 h per size). Not done.
+**Loop crawl/flicker: accepted (mothership decision 11-09, for the owner's look).** The FAILs come from the pole lights sweeping over the
+truck every 2.5 s: the sky's per-pixel temporal std is 0.00 (no render noise), the truck region's mean swings 5.3 (mean 15). revisar counts
+the stationary truck as "static". The sweep reads as driving at night, so it stays; no light linking.
 
-A frame time on a desktop RTX with CPU throttling is not a phone. The real-phone number comes from the Mac WebKit pass
-(`docs/queue/2026-11-09-mto-camion-mac-webkit.md`, not run: it needs a Mac drone, and this drone may not spawn one).
+**Lens bug (fixed 11-09).** `materials.clear()` reset the polygons' material indices, so headlight and brake-light faces lost their
+emissive materials. Fixed in `blender/escena.py`; the GLB is re-exported. The vertical loop is re-rendered with the fix.
+**The 16:9 loop (`loop-1600x900.mp4`, `poster-1600x900.jpg`) still carries the bug** (dark lenses); it stays until the owner has seen the look.
 
 ## Shots
 `docs/prototipo-camion/capturas/`: `{390,1440}-{noche,atardecer}-{inicio,musica,grupo,contratacion}.jpg` (16),

@@ -19,6 +19,7 @@ export interface Escena {
   ir(id: string): void
   preset(p: Preset): Promise<void>
   frameTimes: number[]
+  renderMs: number[] // CPU time of renderer.render(), the cost (frameTimes is capped by the display's rAF cadence)
   parar(): void
 }
 
@@ -157,6 +158,7 @@ export async function iniciar(canvas: HTMLCanvasElement, opts: { reducido: boole
   resize()
 
   const frameTimes: number[] = []
+  const renderMs: number[] = []
   let last = performance.now(), recorrido = 0
   const speed = opts.reducido ? 0 : SPEED
   const radio = 0.474 // wheel radius printed by blender/escena.py (RADIO)
@@ -173,14 +175,17 @@ export async function iniciar(canvas: HTMLCanvasElement, opts: { reducido: boole
     const k = t0 < 0 ? 1 : Math.min((now - t0) / (MOVE_S * 1000), 1)
     if (k >= 1) { desde = hacia; t0 = -1 }
     pose(desde, hacia, k)
+    const r0 = performance.now()
     renderer.render(scene, cam)
+    renderMs.push(performance.now() - r0)
+    if (renderMs.length > 600) renderMs.shift()
   }
   renderer.setAnimationLoop(frame)
   document.addEventListener('visibilitychange', () => {
     renderer.setAnimationLoop(document.hidden ? null : (n) => frame(n))
     last = performance.now()
   })
-  return { ir, preset, frameTimes, parar: () => renderer.setAnimationLoop(null) }
+  return { ir, preset, frameTimes, renderMs, parar: () => renderer.setAnimationLoop(null) }
 }
 
 function charcoTex() {
