@@ -25,7 +25,8 @@ const PERFILES = {
   'escritorio 2560': { viewport: { width: 2560, height: 1440 } },
 }
 
-const navegador = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] })
+// WebGL by software so a WebGL page takes its live path (bytes don't depend on the GPU).
+const navegador = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] })
 let falla = false
 for (const [nombre, perfil] of Object.entries(PERFILES)) {
   const pagina = await (await navegador.newContext(perfil)).newPage()

@@ -13,7 +13,8 @@
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@fontsource/pirata-one": "^5.3.0",
     "@sentry/browser": "^11.6.0",
-    "astro": "^6.1.10"
+    "astro": "^6.1.10",
+    "three": "0.181.0"
   },
   "devDependencies": {
     "@astrojs/tailwind": "^5.1.0",

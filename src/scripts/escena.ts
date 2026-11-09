@@ -86,7 +86,7 @@ export async function iniciar(canvas: HTMLCanvasElement, opts: { reducido: boole
 
   // truck lights
   const faros = [-0.62, 0.62].map((dx) => {
-    const s = new SpotLight(0xffffff, 0, 70, 0.5, 0.55, 1.2)
+    const s = new SpotLight(0xffffff, 0, 70, 0.42, 0.6, 1.2)
     s.position.set(M.carril_x + dx, 0.85, -M.largo_camion / 2 - 0.05)
     s.target.position.set(M.carril_x + dx * 3, 0, -M.largo_camion / 2 - 25)
     scene.add(s, s.target)
@@ -110,16 +110,16 @@ export async function iniciar(canvas: HTMLCanvasElement, opts: { reducido: boole
     scene.background = h
     scene.environment = pmrem.fromEquirectangular(h).texture
     scene.backgroundIntensity = P.cielo_intensidad
-    scene.environmentIntensity = P.cielo_intensidad * 2
+    scene.environmentIntensity = P.cielo_intensidad * 1.5
     scene.fog = new FogExp2(P.niebla.color, P.niebla.densidad)
     renderer.toneMappingExposure = P.exposicion
-    faros.forEach((s) => { s.color.set(P.faros.color); s.intensity = P.faros.intensidad * 6; s.distance = P.faros.alcance })
+    faros.forEach((s) => { s.color.set(P.faros.color); s.intensity = P.faros.intensidad * 1.4; s.distance = P.faros.alcance })
     calaveras.color.set(P.calaveras.color); calaveras.intensity = P.calaveras.intensidad
     luna.color.set(P.luna.color); luna.intensity = P.luna.intensidad * 3
     luna.position.set(...(P.luna.dir as [number, number, number])).multiplyScalar(50)
-    postes.forEach((s) => { s.color.set(P.postes.color); s.intensity = P.postes.intensidad * 220 })
+    postes.forEach((s) => { s.color.set(P.postes.color); s.intensity = P.postes.intensidad * 90 })
     lamparas.forEach((m) => (m.emissiveIntensity = P.postes.encendidos ? 6 : 0))
-    matCharco.color.set(P.postes.color).multiplyScalar(P.postes.intensidad * 0.35)
+    matCharco.color.set(P.postes.color).multiplyScalar(P.postes.intensidad * 0.16)
   }
   await preset(opts.preset)
 
