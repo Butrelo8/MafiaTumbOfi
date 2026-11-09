@@ -38,7 +38,6 @@ const presets = Object.entries(cfg.presets).map(([id, p]) => ({ id, nombre: p.no
         --gold: oklch(78% 0.15 85);
         --gold-peak: oklch(88% 0.14 88);
         --gold-shadow: oklch(50% 0.10 78);
-        --red: oklch(62% 0.22 30);
         --veil: rgb(0 0 0 / 0.62);
         --focus-ring: oklch(78% 0.15 85 / 0.9);
         --pad: clamp(16px, 3vw, 40px);
@@ -66,7 +65,7 @@ const presets = Object.entries(cfg.presets).map(([id, p]) => ({ id, nombre: p.no
       .hora button { min-height: 44px; min-width: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: none; color: var(--text-muted); font: 600 0.875rem Archivo, sans-serif; cursor: pointer; }
       .hora button[aria-pressed='true'] { color: var(--bg); background: var(--gold); }
 
-      .panel { position: fixed; left: var(--pad); bottom: calc(var(--pad) + 64px); max-width: min(30rem, calc(100vw - 2 * var(--pad))); padding: 18px 20px; background: var(--veil); border-left: 3px solid var(--red); }
+      .panel { position: fixed; left: var(--pad); bottom: calc(var(--pad) + 64px); max-width: min(30rem, calc(100vw - 2 * var(--pad))); padding: 18px 20px; background: var(--veil); }
       .panel[hidden] { display: none; }
       .panel h2 { font: 400 clamp(1.8rem, 4vw, 2.4rem)/1.05 'Pirata One', serif; margin: 0 0 10px; color: var(--gold); }
       .panel ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }

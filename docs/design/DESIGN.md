@@ -18,7 +18,7 @@
   --text: oklch(95% 0.008 85);        /* research/DESIGN.md --text */
   --text-muted: oklch(82% 0.008 85);  /* research/DESIGN.md --text-muted */
   --gold: oklch(78% 0.15 85);         /* identity: band's flyer wordmark (research/DESIGN.md) */
-  --red: oklch(62% 0.22 30);          /* stage neon; panel rule only */
+  --red: oklch(62% 0.22 30);          /* stage neon: in the scene only (tail lights, reflectors), not in the UI */
   --veil: rgb(0 0 0 / 0.62);          /* references.md › labels: lowest veil that keeps 4.5:1 on the brightest frame */
 }
 ```
@@ -36,7 +36,7 @@ Full-bleed scene (canvas, poster or loop behind). Header: wordmark left, time-of
 Depth comes from the 3D scene only. Text sits on `--veil`; the wordmark has a 2px drop-shadow for legibility over the sky.
 
 ## Shapes
-Panel: square, 3px red left rule. Tabs: square. Time switch and WhatsApp button: pill / 4px radius.
+Panel: square, no edge stripe (slop tell 9). Tabs: square. Time switch and WhatsApp button: pill / 4px radius.
 
 ## Components
 | Component | Source |
