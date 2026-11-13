@@ -5,6 +5,9 @@ Run headless from WSL (Blender on Windows):
   /mnt/e/Blender/blender.exe -b --factory-startup --python "$(wslpath -w blender/escena.py)" -- glb
   ... -- still <preset> <stop> <w> <h> <out.png> [samples]
   ... -- loop  <preset> <stop> <w> <h> <out_dir> [samples] [first] [last]
+  ... -- hoja  <out_dir> [samples]     frame 0 of every stop, night, both formats (the sheet to approve before a batch)
+  ... -- lote  <out_dir> [samples]     the batch: every stop's loop, night, both formats, scene built once
+  ... -- transicion <out_dir> <w> <h> [samples] [first] [last] [step]   the cab -> outside move (blender/transicion.py)
 The world moves -Y (Blender) by `recorrido_loop` metres per loop; everything periodic divides it, so frame N == frame 0.
 """
 import bpy, json, math, os, sys
@@ -118,101 +121,157 @@ def tex_mat(name, stem, tile_dim=1.0, oscurecer=1.0, tinte=(1, 1, 1)):
 
 # ---------------------------------------------------------------- truck
 
-# Atlas swatches of the Quaternius pickup (measured, see SWATCH print) -> our materials.
-SWATCHES = [((0.31, 0.54, 0.67), "pintura"), ((1.0, 1.0, 1.0), "pintura"), ((0.68, 0.68, 0.68), "cromo"),
-            ((0.48, 0.48, 0.48), "cromo"), ((0.35, 0.35, 0.35), "vidrio"), ((0.27, 0.27, 0.27), "goma"),
-            ((0.16, 0.16, 0.16), "goma"), ((0.12, 0.12, 0.12), "goma"), ((0.35, 0.29, 0.24), "goma")]
+G63 = os.path.join(ASSETS, "g63-6x6", "modelo", "scene.gltf")  # Brabus G63 6x6, CC-BY (see g63-6x6/modelo/license.txt)
+# The model's materials (flat colours, no textures) -> ours. Unlisted ones keep the model's own material.
+REPINTAR = {"Body_Col": "pintura", "Second_Body_Col": "pintura_satin", "extra_details_carcoal": "plastico",
+            "Color_001": "rin", "Color_006": "cromo", "Color_009": "plastico", "tire": "goma", "Material__438": "plastico",
+            "Material__445": "cromo", "Material__452": "cromo", "Material__507": "cromo", "Material__526": "vidrio",
+            "Material__470": "mica", "Material__544": "calaveras", "Material__463": "piel_roja", "Material__464": "piel_vino",
+            "Material__469": "amortiguador", "Color_A16": "piel_vino"}
 
 
-def clasificar(rgb):
-    return min(SWATCHES, key=lambda sw: sum((a - b_) ** 2 for a, b_ in zip(sw[0], rgb)))[1]
+def islas(me):
+    """Connected pieces of a mesh: a list of polygon-index lists."""
+    por_vert = [[] for _ in me.vertices]
+    for p in me.polygons:
+        for v in p.vertices:
+            por_vert[v].append(p.index)
+    visto, out = bytearray(len(me.polygons)), []
+    for p0 in range(len(me.polygons)):
+        if visto[p0]:
+            continue
+        visto[p0] = 1
+        pila, isla = [p0], []
+        while pila:
+            i = pila.pop()
+            isla.append(i)
+            for v in me.polygons[i].vertices:
+                for j in por_vert[v]:
+                    if not visto[j]:
+                        visto[j] = 1
+                        pila.append(j)
+        out.append(isla)
+    return out
+
+
+def separar_ruedas(meshes):
+    """The model merges its parts by material. Pull out every piece that lies inside a tyre's cylinder: one object per wheel."""
+    import bmesh
+    llantas = [o for o in meshes if o.data.materials[0].name == "goma"]
+    vs = [v.co for o in llantas for v in o.data.vertices]
+    radio = (max(v.z for v in vs) - min(v.z for v in vs)) / 2
+    ys = sorted(v.y for v in vs)
+    cortes = [(ys[i] + ys[i + 1]) / 2 for i in range(len(ys) - 1) if ys[i + 1] - ys[i] > 0.05]  # gaps between the axles
+    cx = MUNDO["carril_x"]
+    centros = []
+    for lado in (-1, 1):
+        for k in range(len(cortes) + 1):
+            g = [v for v in vs if (v.x - cx) * lado > 0 and (k == 0 or v.y > cortes[k - 1]) and (k == len(cortes) or v.y < cortes[k])]
+            centros.append(Vector(((min(v.x for v in g) + max(v.x for v in g)) / 2, (min(v.y for v in g) + max(v.y for v in g)) / 2, radio)))
+    partes = [[] for _ in centros]
+    for o in meshes:
+        me = o.data
+        if not me.polygons or min(v.co.z for v in me.vertices) > 2 * radio:
+            continue
+        de = {}
+        for isla in islas(me):
+            idx = {v for i in isla for v in me.polygons[i].vertices}
+            for k, c in enumerate(centros):
+                if all(abs(me.vertices[v].co.x - c.x) < 0.3 and (me.vertices[v].co.y - c.y) ** 2 + (me.vertices[v].co.z - c.z) ** 2 < (radio * 1.03) ** 2 for v in idx):
+                    for i in isla:
+                        de[i] = k
+                    break
+        if not de:
+            continue
+        for k in set(de.values()):
+            bm = bmesh.new()
+            bm.from_mesh(me)
+            bm.faces.ensure_lookup_table()
+            bmesh.ops.delete(bm, geom=[f for f in bm.faces if de.get(f.index) != k], context="FACES")
+            m2 = bpy.data.meshes.new(f"rueda{k}_{o.name}")
+            bm.to_mesh(m2)
+            bm.free()
+            for m in me.materials:
+                m2.materials.append(m)
+            partes[k].append(m2)
+        bm = bmesh.new()
+        bm.from_mesh(me)
+        bm.faces.ensure_lookup_table()
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.index in de], context="FACES")
+        bm.to_mesh(me)
+        bm.free()
+    ruedas = []
+    for k, (c, ms) in enumerate(zip(centros, partes)):
+        obs = []
+        for m2 in ms:
+            m2.transform(Matrix.Translation(-c))
+            ob = bpy.data.objects.new(f"rueda{k}", m2)
+            ob.location = c
+            bpy.context.scene.collection.objects.link(ob)
+            obs.append(ob)
+        bpy.ops.object.select_all(action="DESELECT")
+        for ob in obs:
+            ob.select_set(True)
+        bpy.context.view_layer.objects.active = obs[0]
+        bpy.ops.object.join()
+        ruedas.append(obs[0])
+    return ruedas, radio
 
 
 def camion():
-    bpy.ops.import_scene.gltf(filepath=os.path.join(ASSETS, "pickup-quaternius.glb"))
+    bpy.ops.import_scene.gltf(filepath=G63)
     imported = list(bpy.context.selected_objects)
-    meshes = [o for o in imported if o.type == "MESH"]
+    meshes = [o for o in imported if o.type == "MESH" and o.data.polygons]
     for o in meshes:  # bake the importer's hierarchy into the mesh data
         mw = o.matrix_world.copy()
         o.parent = None
         o.data.transform(mw)
         o.matrix_world = Matrix.Identity(4)
     for o in imported:
-        if o.type != "MESH":
+        if o not in meshes:
             bpy.data.objects.remove(o)
-    body = next(o for o in meshes if o.name.startswith("Pickup"))
-
-    def centro_mat(nombre):
-        idx = next(i for i, m in enumerate(body.data.materials) if m and m.name.startswith(nombre))
-        ps = [p.center for p in body.data.polygons if p.material_index == idx]
-        return sum(ps, Vector()) / len(ps)
-    fwd = centro_mat("Headlights") - centro_mat("BrakeLight")
-    ang = math.atan2(fwd.x, fwd.y)  # rotate so forward -> +Y
-    R = Matrix.Rotation(ang, 4, "Z")
-    pts = [R @ v.co for o in meshes for v in o.data.vertices]
+    pts = [v.co for o in meshes for v in o.data.vertices]
     lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
     hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
     f = MUNDO["largo_camion"] / (hi.y - lo.y)
     c = (lo + hi) / 2
-    M = Matrix.Translation((MUNDO["carril_x"], 0, 0)) @ Matrix.Scale(0.82, 4, (1, 0, 0)) @ Matrix.Scale(f, 4) @ Matrix.Translation((-c.x, -c.y, -lo.z)) @ R
-    for o in meshes:
-        o.data.transform(M)
-
-    # repaint: classify each atlas face by its swatch colour
-    atlas_m = next(m for m in body.data.materials if m.name.startswith("Atlas"))
-    tex = next(n for n in atlas_m.node_tree.nodes if n.type == "TEX_IMAGE").image
-    W, H = tex.size
-    px = list(tex.pixels)
+    # the model's nose points -Y: turn it to +Y, scale to the real length, stand it on the road in its lane
+    M = Matrix.Translation((MUNDO["carril_x"], 0, 0)) @ Matrix.Rotation(math.pi, 4, "Z") @ Matrix.Scale(f, 4) @ Matrix.Translation((-c.x, -c.y, -lo.z))
+    pre = CFG["presets"]["noche"]
     mats = {
-        "pintura": mat("pintura", (0.012, 0.012, 0.014), 0.32, metal=0.2, coat=1.0),
+        "pintura": mat("pintura", (0.012, 0.012, 0.014), 0.3, metal=0.2, coat=1.0),
+        "pintura_satin": mat("pintura_satin", (0.014, 0.014, 0.016), 0.45, metal=0.2, coat=0.3),
+        "plastico": mat("plastico", (0.02, 0.02, 0.021), 0.6),
+        "rin": mat("rin", (0.03, 0.03, 0.032), 0.25, metal=1.0),
         "cromo": mat("cromo", (0.92, 0.92, 0.93), 0.12, metal=1.0),
         "goma": mat("goma", (0.018, 0.018, 0.018), 0.85),
-        "vidrio": mat("vidrio", (0.01, 0.012, 0.015), 0.03, coat=1.0),
-        "ambar": mat("ambar", (0.9, 0.45, 0.05), 0.3, emit=(1.0, 0.45, 0.05), estr=1.5),
+        "piel_roja": mat("piel_roja", lin("#7a0f12"), 0.45),
+        "piel_vino": mat("piel_vino", lin("#3d0709"), 0.5),
+        "amortiguador": mat("amortiguador", lin("#b8860b"), 0.4, metal=0.6),
+        "calaveras": mat("calaveras", (0.6, 0.02, 0.01), 0.3, emit=lin(pre["calaveras"]["color"]), estr=4.0),
+        "faros": mat("faros", (1, 0.95, 0.85), 0.2, emit=(1.0, 0.9, 0.72), estr=6.0),
     }
-    faros = mat("faros", (1, 0.95, 0.85), 0.2, emit=(1.0, 0.9, 0.72), estr=6.0)
-    pre = CFG["presets"]["noche"]
-    calav = mat("calaveras", (0.6, 0.02, 0.01), 0.3, emit=lin(pre["calaveras"]["color"]), estr=4.0)
-    cuenta, hist = {}, {}
+    for nombre, tinte, rough in (("vidrio", (0.75, 0.8, 0.82), 0.0), ("mica", (1, 1, 1), 0.05)):
+        m = mat(nombre, tinte, rough)  # lightly tinted glass: the cast has to be seen through it
+        m.node_tree.nodes["Principled BSDF"].inputs["Transmission Weight"].default_value = 1.0
+        mats[nombre] = m
     for o in meshes:
-        me = o.data
-        old = list(me.materials)
-        old_idx = [p.material_index for p in me.polygons]  # materials.clear() resets the polygons' indices
-        me.materials.clear()
-        orden = list(mats.values()) + [faros, calav]
-        for m in orden:
-            me.materials.append(m)
-        uv = me.uv_layers.active.data if me.uv_layers else None
-        for p in me.polygons:
-            om = old[old_idx[p.index]] if old_idx[p.index] < len(old) else None
-            if om and om.name.startswith("Headlights"):
-                p.material_index = orden.index(faros); continue
-            if om and om.name.startswith("BrakeLight"):
-                p.material_index = orden.index(calav); continue
-            u = sum((uv[i].uv for i in p.loop_indices), Vector((0, 0))) / len(p.loop_indices)
-            x = min(W - 1, max(0, int(u.x % 1 * W))); y = min(H - 1, max(0, int(u.y % 1 * H)))
-            k = (y * W + x) * 4
-            cls = clasificar(px[k:k + 3])
-            cuenta[cls] = cuenta.get(cls, 0) + 1
-            q = (o.name[:5], cls) + tuple(round(c, 2) for c in px[k:k + 3])
-            hist[q] = hist.get(q, 0) + 1
-            p.material_index = orden.index(mats[cls])
-    print("CLASES", cuenta)
-    for q, n in sorted(hist.items(), key=lambda kv: -kv[1])[:30]:
-        print("SWATCH", q, n)
+        o.data.transform(M)
+        viejo = o.data.materials[0].name.split(".")[0]
+        if viejo == "Light_Col":  # one material for every lamp: the ones on the nose are the headlights
+            o.data.materials[0] = mats["faros"]
+            o.data.materials.append(mats["cromo"])
+            for p in o.data.polygons:
+                p.material_index = 0 if p.center.y > MUNDO["largo_camion"] / 2 - 0.5 and p.center.z < 1.5 else 1
+        elif viejo in REPINTAR:
+            o.data.materials[0] = mats[REPINTAR[viejo]]
+    ruedas, radio = separar_ruedas(meshes)
     camion_e = bpy.data.objects.new("camion", None)
     bpy.context.scene.collection.objects.link(camion_e)
-    ruedas = []
-    for o in meshes:
-        if "Wheel" in o.name:
-            bpy.ops.object.select_all(action="DESELECT")
-            o.select_set(True)
-            bpy.context.view_layer.objects.active = o
-            bpy.ops.object.origin_set(type="ORIGIN_GEOMETRY", center="BOUNDS")
-            ruedas.append(o)
+    for o in [*meshes, *ruedas]:
         o.parent = camion_e
-    radio = max(o.dimensions.z for o in ruedas) / 2
-    print("RADIO", radio, "DIM", body.dimensions[:])
+    body = max(meshes, key=lambda o: len(o.data.polygons))
+    print("RADIO", radio, "RUEDAS", [(round(r.location.x, 2), round(r.location.y, 2)) for r in ruedas])
     return camion_e, body, ruedas, radio
 
 
@@ -335,7 +394,7 @@ def mundo_render(s, preset):
     so = bpy.data.objects.new("luna", sol)
     so.rotation_euler = (-b(P["luna"]["dir"])).to_track_quat("-Z", "Y").to_euler()
     sc.collection.objects.link(so)
-    for lado in (-0.62, 0.62):
+    for lado in (-0.78, 0.78):
         sp = bpy.data.lights.new(f"faro_{lado}", "SPOT")
         sp.energy = W_FARO * P["faros"]["intensidad"]
         sp.color = lin(P["faros"]["color"])
@@ -343,7 +402,7 @@ def mundo_render(s, preset):
         sp.spot_blend = 0.5
         sp.shadow_soft_size = 0.08
         o = bpy.data.objects.new(f"faro_{lado}", sp)
-        o.location = (MUNDO["carril_x"] + lado, MUNDO["largo_camion"] / 2 + 0.05, 0.85)
+        o.location = (MUNDO["carril_x"] + lado, MUNDO["largo_camion"] / 2 + 0.05, 1.15)
         o.rotation_euler = Vector((0, 1, -0.06)).to_track_quat("-Z", "Y").to_euler()
         o.parent = s["camion"]
         sc.collection.objects.link(o)
@@ -351,7 +410,7 @@ def mundo_render(s, preset):
     cl.energy = W_CALAVERA * P["calaveras"]["intensidad"]
     cl.color = lin(P["calaveras"]["color"])
     co = bpy.data.objects.new("calaveras", cl)
-    co.location = (MUNDO["carril_x"], -MUNDO["largo_camion"] / 2 - 0.3, 0.9)
+    co.location = (MUNDO["carril_x"], -MUNDO["largo_camion"] / 2 - 0.3, 1.0)
     sc.collection.objects.link(co)
     # world HDRI
     w = bpy.data.worlds.new("cielo")
@@ -445,11 +504,51 @@ def motor(samples, preset):
     sc.render.image_settings.color_depth = "8"
 
 
+FORMATOS = ((720, 1280), (1600, 900))  # vertical first: it is the phone's entry
+
+
+def tanda(s, modo, out, samples):
+    """hoja: frame 0 of every stop in both formats, for approval. lote: the whole loop of every stop, built once.
+    Output: <out>/<nn>-<stop>-noche-<WxH>/f_0000.png ... (hoja: <out>/<nn>-<stop>-noche-<WxH>.png)."""
+    sc = bpy.context.scene
+    mundo_render(s, "noche")
+    motor(samples, "noche")
+    for w, h in FORMATOS:
+        for i, st in enumerate(CFG["paradas"]):
+            camara(st["id"], w, h)
+            nombre = f"{i + 1:02d}-{st['id']}-noche-{w}x{h}"
+            if modo == "hoja":
+                sc.frame_set(0)
+                sc.render.filepath = os.path.join(out, nombre + ".png")
+                bpy.ops.render.render(write_still=True)
+            else:
+                sc.frame_start, sc.frame_end = 0, NFR - 1
+                sc.render.filepath = os.path.join(out, nombre, "f_####")
+                bpy.ops.render.render(animation=True)
+            print("TOMA", nombre)
+
+
 def main():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else ["glb"]
     s = build()
     if argv[0] == "glb":
         exportar_glb(s)
+        return
+    if argv[0] in ("hoja", "lote"):
+        tanda(s, argv[0], argv[1], int(argv[2]) if len(argv) > 2 else (16 if argv[0] == "hoja" else 64))
+        return
+    if argv[0] == "transicion":  # the inside -> outside move; frames to <out_dir>/f_####.png
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import transicion
+        mundo_render(s, "noche")
+        motor(int(argv[4]) if len(argv) > 4 else 16, "noche")
+        transicion.preparar(s, int(argv[2]), int(argv[3]), islas)
+        sc = bpy.context.scene
+        sc.frame_start = int(argv[5]) if len(argv) > 5 else 0
+        sc.frame_end = int(argv[6]) if len(argv) > 6 else transicion.NFR - 1
+        sc.frame_step = int(argv[7]) if len(argv) > 7 else 1
+        sc.render.filepath = os.path.join(argv[1], "f_####")
+        bpy.ops.render.render(animation=True)
         return
     preset, parada, w, h, out = argv[1], argv[2], int(argv[3]), int(argv[4]), argv[5]
     samples = int(argv[6]) if len(argv) > 6 else 64
