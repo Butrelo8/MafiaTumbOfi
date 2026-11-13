@@ -15,9 +15,10 @@
 ```css
 :root {
   --bg: #000;                       /* the logo's black faces (public/icon/mafiatumbada.webp) */
-  --ink: oklch(95% 0.008 85);       /* warm white, directions.md › A */
-  --muted: oklch(80% 0.01 85);      /* secondary text; over the scene it sits on --veil: not verified (no tool measures text over images) */
-  --gold: oklch(80% 0.13 82);       /* the logo's bronze-gold bevel, lifted for 11.1:1 on #000 (tweak bar) */
+  --ink: oklch(95% 0.008 85);       /* #f1eee9, warm white, directions.md › A */
+  --muted: oklch(80% 0.01 85);      /* #c1bdb7, secondary text; over the scene it sits on --veil: not verified (no tool measures text over images) */
+  --gold: oklch(80% 0.13 82);       /* #e7b551, the logo's bronze-gold bevel, lifted for 11.1:1 on #000 (tweak bar) */
+  --cap: oklch(17% 0.01 85);        /* #110f0a, the cap of a plain Tecla (Boton.astro) */
   --gold-deep: oklch(62% 0.11 70);  /* scrollbar only */
   --veil: rgb(0 0 0 / 0.62);        /* references.md › contacto: veil under text over the rendered scene */
   --line: oklch(100% 0 0 / 0.14);   /* section rules, cover borders, thumbnail placeholder */
@@ -31,7 +32,17 @@
   has no italic file, so the slant is the browser's synthetic oblique, exactly as in the picked prototype.
   Alternative offered on the tweak bar and not picked: Reddit Sans Condensed 900 (references.md › hero, urielurbina).
 - Text: **Saira** 400/600. Self-hosted with `@fontsource` (latin subsets only).
-- Sizes: name `clamp(64px, 13vw, 200px)`, section heads `clamp(44px, 7vw, 96px)`, body 17px/1.55.
+
+| Role | Face | Size / leading | Where |
+|---|---|---|---|
+| Name | Saira Condensed 800 caps | clamp(64px, 13vw, 200px) · 64 · 187 / 0.9 | hero name |
+| Section head | Saira Condensed 800 caps | clamp(44px, 7vw, 96px) · 44 · 96 / 0.9 | Música, Videos, La banda, Contratación |
+| Card head | Saira Condensed 800 caps | 32 · 26 / 0.9 and 1 | member names, small display |
+| Lead | Saira 400 | 18 · 20 · 22 / 1.55 | hero line, contact line |
+| Body | Saira 400 | 17 / 1.55 | paragraphs |
+| Small | Saira 400 | 15 / 1.55 | release subtitles, roles |
+| Title | Saira 600 | 17 / 1.55 | release titles, header links |
+| Control | Saira 600 | 16 / 1 · 14 / 1 for the quiet toggle | Tecla labels |
 
 ## Layout
 Fixed header (logo, three section links from 900 px, Contratar). Hero 100svh, name bottom-left over a veil gradient.
@@ -57,7 +68,8 @@ Square everywhere: buttons, covers, panel. No pill (owner: only if picked over 2
 | Contact panel on veil over the scene | references.md › contacto (MTO veil note) |
 | `Boton.astro` (Tecla): a square cap on a 4 px dark-gold lip; press sinks the cap 3 px onto the lip in 80 ms; trailing chevron nudges 4 px on hover and focus (hover only under `(hover: hover)`) | references.md › botones (todoist two-layer lip, nothing.tech chevron). Authored, not from a ficha: the 4 px nudge, the translateY press, the 250 ms icon reaction. Owner's pick from stills, 2026-11-12 |
 | `Boton.astro` as the loop toggle (a `<button>`, no `href`): icon + label, ring while buffering | references.md › iconos (rafadesign sound toggle; its `aria-pressed` half is not borrowed: the label swap names the state) |
-| `Icono.astro`: play and pause paths with the same eight points, so MorphSVG mixes them | references.md › iconos (GSAP row). Crafted morph inside 250 ms: 60 ms shrink to .88, the morph while the scale overshoots with `back.out(2.4)`, settle. Library gap: no measured icon morph exists, unproven |
+| `Boton.astro` `discreto` (the loop toggle): a quiet Tecla for utility controls: 2 px lip, veil cap, 14 px label, 46 px tall | references.md › botones (same Tecla source); authored: the quieter hierarchy, so the toggle does not read as a second CTA under the header's Contratar |
+| `Icono.astro`: play and pause paths with the same eight points, so MorphSVG mixes them | references.md › iconos (GSAP row). Crafted morph inside 250 ms: 60 ms shrink to .88, 90 ms closing the two bars into one block (the designed middle shape), 100 ms from the block into the other glyph while the scale overshoots with `back.out(2.4)`, settle. Library gap: no measured icon morph exists, unproven |
 | Motion tokens: `--dur-press` 80 ms, `--dur-state` 250 ms, `--dur-fill` 500 ms, `--ease-out` | references.md › estados (boleto-perforado timing family; bands 40-80, 150-250, 350-500) |
 
 ## Motion
@@ -80,7 +92,7 @@ transfer, over the 150 KB cap, `web/site-reading-fichas/landonorris-com/speed-39
 ## States matrix
 | Component | default | hover | focus-visible | pressed / selected | disabled | loading | empty | error | **domain** | a11y |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Boton (plain) | dark cap, ink text, gold-deep edge and lip | cap lightens, chevron nudges 4 px (hover devices only) | 3px gold ring, chevron nudged | cap sinks 3 px onto the lip | n/a: links only | n/a: off-site links open another app and this page stays alive, so a busy state would stick | n/a: always has a label | n/a: static link | n/a: not date-bound | link text names the action |
+| Boton (plain) | dark cap, ink text, gold-deep edge and lip | cap lightens (an overlay fading in, opacity only), chevron nudges 4 px (hover devices only) | 3px gold ring, chevron nudged | cap sinks 3 px onto the lip | n/a: links only | n/a: off-site links open another app and this page stays alive, so a busy state would stick | n/a: always has a label | n/a: static link | n/a: not date-bound | link text names the action |
 | Boton (filled) | gold cap, black text, gold-deep lip | cap lightens, chevron nudges | 3px gold ring | cap sinks 3 px | n/a: links only | n/a: as above | n/a: always has a label | n/a: static link | n/a: not date-bound | link text names the action; Escuchar names its destination |
 | Release card | cover + title + type | title turns gold | 3px gold ring + gold title | n/a: link | n/a: links only | lazy image, `--line` border holds the box | n/a: 9 fixed releases | n/a: no remote data | n/a: no dates shown (no tour dates) | cover `alt=""`, title is the name |
 | Video card | thumb + play + title | title turns gold | 3px gold ring | n/a: link | n/a: links only | lazy, `--line` fill holds 16:9 | n/a: 5 fixed videos | a missing YouTube thumb leaves the `--line` box and the title | live video first | thumb `alt=""`, icon hidden |

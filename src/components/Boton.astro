@@ -2,6 +2,7 @@
 // Tecla (owner's pick 2026-11-12): a square cap on a 4 px lip, like a dash key. The press sinks the cap onto the lip, the
 // chevron nudges on hover. Sources: references.md › botones (todoist two-layer button, nothing.tech chevron); the 4 px nudge,
 // the translateY press and the 250 ms icon reaction are authored. With `href` it is a link; without, the loop toggle button.
+// `discreto` is the quiet variant for utility controls (the loop toggle): a 2 px lip, a veil cap, a 14 px label.
 import Icono from './Icono.astro'
 import type { Forma } from '../lib/formas'
 
@@ -13,12 +14,13 @@ interface Props {
   flecha?: boolean
   clase?: string
   oculto?: boolean
+  discreto?: boolean
 }
-const { href, lleno = false, icono, id, flecha = true, clase, oculto = false } = Astro.props
+const { href, lleno = false, icono, id, flecha = true, clase, oculto = false, discreto = false } = Astro.props
 const Etiqueta = href ? 'a' : 'button'
 ---
 
-<Etiqueta class:list={['boton', { lleno }, clase]} href={href} id={id} type={href ? undefined : 'button'} hidden={oculto}>
+<Etiqueta class:list={['boton', { lleno, discreto }, clase]} href={href} id={id} type={href ? undefined : 'button'} hidden={oculto}>
   <span class="tapa">
     {icono && <Icono nombre={icono} />}
     {!href && <span class="anillo" aria-hidden="true" hidden />}
@@ -31,6 +33,7 @@ const Etiqueta = href ? 'a' : 'button'
 
 <style>
   .boton {
+    --hunde: 3px;
     position: relative;
     display: inline-flex;
     padding: 0 0 4px;
@@ -40,6 +43,10 @@ const Etiqueta = href ? 'a' : 'button'
     text-decoration: none;
     font: 600 16px/1 Saira, sans-serif;
     cursor: pointer;
+  }
+  /* a scoped display must not beat the UA [hidden] rule (the toggle hides on a failed source, and until JS runs) */
+  .boton[hidden] {
+    display: none;
   }
   /* the lip: fixed under the cap, so only the cap moves */
   .boton::after {
@@ -56,19 +63,48 @@ const Etiqueta = href ? 'a' : 'button'
     gap: 10px;
     min-height: 48px;
     padding: 0 22px;
-    background: oklch(17% 0.01 85);
+    background: var(--cap);
     box-shadow: inset 0 0 0 1px var(--gold-deep);
-    transition:
-      transform var(--dur-press) linear,
-      background-color var(--dur-state);
+    transition: transform var(--dur-press) linear;
+  }
+  /* the hover lighten is an overlay that fades in: only opacity animates */
+  .tapa::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: oklch(30% 0.014 85);
+    opacity: 0;
+    transition: opacity var(--dur-state);
   }
   .lleno .tapa {
     background: var(--gold);
     color: #000;
     box-shadow: none;
   }
+  .lleno .tapa::before {
+    background: oklch(86% 0.12 82);
+  }
+  .discreto {
+    --hunde: 2px;
+    padding-bottom: 2px;
+    font-size: 14px;
+  }
+  .discreto::after {
+    inset: 2px 0 0;
+  }
+  .discreto .tapa {
+    min-height: 44px;
+    padding: 0 14px;
+    background: var(--veil);
+    color: var(--muted);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+  .discreto .tapa::before {
+    background: oklch(100% 0 0 / 0.1);
+  }
   .boton:active .tapa {
-    transform: translateY(3px);
+    transform: translateY(var(--hunde));
   }
   .boton :global(.icono) {
     width: 18px;
@@ -108,15 +144,15 @@ const Etiqueta = href ? 'a' : 'button'
   }
   @keyframes confirma {
     40% {
-      transform: translateY(3px);
+      transform: translateY(var(--hunde));
     }
   }
   @media (hover: hover) {
-    .boton:hover .tapa {
-      background: oklch(24% 0.012 85);
+    .boton:hover .tapa::before {
+      opacity: 1;
     }
-    .lleno:hover .tapa {
-      background: oklch(86% 0.12 82);
+    .discreto:hover .tapa {
+      color: var(--ink);
     }
     .boton:hover .flecha {
       transform: translateX(4px);
@@ -130,6 +166,7 @@ const Etiqueta = href ? 'a' : 'button'
   }
   @media (prefers-reduced-motion: reduce) {
     .tapa,
+    .tapa::before,
     .flecha,
     .boton :global(.icono) {
       transition: none;

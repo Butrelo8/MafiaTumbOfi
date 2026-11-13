@@ -5,7 +5,7 @@
 import gsap from 'gsap'
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin'
 import { etiqueta, icono, inicial, siguiente, type Evento } from '../lib/estadoBoton'
-import { FORMAS } from '../lib/formas'
+import { BLOQUE, FORMAS } from '../lib/formas'
 
 gsap.registerPlugin(MorphSVGPlugin)
 
@@ -22,8 +22,9 @@ let forma: 'play' | 'pausa' = e.pausado ? 'play' : 'pausa'
 let visible = true
 trazo.setAttribute('d', FORMAS[forma])
 
-// 250 ms in all: 60 ms anticipation (shrink to .88), then the morph while the scale overshoots 1 and settles. The overshoot
-// is on the scale, not on the points: an overshoot on the points opens a wedge between the two halves of the play shape.
+// 250 ms in all: 60 ms anticipation (shrink to .88); 90 ms closing the two bars into one block (or opening it back); 100 ms
+// from the block to the other glyph while the scale overshoots 1 and settles. The overshoot is on the scale, not on the points
+// (an overshoot on the points opened a wedge between the two halves of the play shape).
 function morfar(a: 'play' | 'pausa') {
   gsap.killTweensOf(trazo)
   if (quieto.matches) {
@@ -34,8 +35,9 @@ function morfar(a: 'play' | 'pausa') {
   gsap
     .timeline()
     .to(trazo, { scale: 0.88, svgOrigin: '12 12', duration: 0.06, ease: 'power1.in' })
-    .to(trazo, { morphSVG: FORMAS[a], duration: 0.19, ease: 'power3.out' })
-    .to(trazo, { scale: 1, svgOrigin: '12 12', duration: 0.19, ease: 'back.out(2.4)' }, '<')
+    .to(trazo, { morphSVG: BLOQUE, duration: 0.09, ease: 'power2.in' })
+    .to(trazo, { morphSVG: FORMAS[a], duration: 0.1, ease: 'power3.out' })
+    .to(trazo, { scale: 1, svgOrigin: '12 12', duration: 0.1, ease: 'back.out(2.4)' }, '<')
 }
 
 function pintar() {

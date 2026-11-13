@@ -50,6 +50,7 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
         --ink: oklch(95% 0.008 85);
         --muted: oklch(80% 0.01 85);
         --gold: oklch(80% 0.13 82);
+        --cap: oklch(17% 0.01 85);
         --gold-deep: oklch(62% 0.11 70);
         --veil: rgb(0 0 0 / 0.62);
         --line: oklch(100% 0 0 / 0.14);
@@ -98,7 +99,7 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
             <Boton href="#contacto">Contratar</Boton>
           </div>
         </div>
-        <div class="pausa"><Boton id="pausa" icono="pausa" oculto>Pausar video</Boton></div>
+        <div class="pausa"><Boton id="pausa" icono="pausa" oculto discreto>Pausar video</Boton></div>
       </section>
 
       <section class="s" id="musica" aria-labelledby="h-musica">
