@@ -55,17 +55,36 @@ Square everywhere: buttons, covers, panel. No pill (owner: only if picked over 2
 | Video thumbnails at hqdefault 480 px, link out, no embedded player | references.md › video (dfm rendition sizing; SPEC §3) |
 | Member cards (photo, name, role, Instagram) | content: `research/contenido/members.ts`. The cab camera stops (kage row) are not built yet |
 | Contact panel on veil over the scene | references.md › contacto (MTO veil note) |
-| `Boton.astro`: square, gold edge, fill wipes up 500 ms cubic-bezier(.65,0,.35,1), press dips 2 px in 90 ms | references.md › botones (rafadesign wipe, boleto press). Working version: the buttons-icons pair chain replaces this file |
-| `Icono.astro`: static play glyph | working version; morphing icons come from the pair chain (botones Rive row, unproven) |
+| `Boton.astro` (Tecla): a square cap on a 4 px dark-gold lip; press sinks the cap 3 px onto the lip in 80 ms; trailing chevron nudges 4 px on hover and focus (hover only under `(hover: hover)`) | references.md › botones (todoist two-layer lip, nothing.tech chevron). Authored, not from a ficha: the 4 px nudge, the translateY press, the 250 ms icon reaction. Owner's pick from stills, 2026-11-12 |
+| `Boton.astro` as the loop toggle (a `<button>`, no `href`): icon + label, ring while buffering | references.md › iconos (rafadesign sound toggle; its `aria-pressed` half is not borrowed: the label swap names the state) |
+| `Icono.astro`: play and pause paths with the same eight points, so MorphSVG mixes them | references.md › iconos (GSAP row). Crafted morph inside 250 ms: 60 ms shrink to .88, the morph while the scale overshoots with `back.out(2.4)`, settle. Library gap: no measured icon morph exists, unproven |
+| Motion tokens: `--dur-press` 80 ms, `--dur-state` 250 ms, `--dur-fill` 500 ms, `--ease-out` | references.md › estados (boleto-perforado timing family; bands 40-80, 150-250, 350-500) |
+
+## Motion
+One language for every button and icon: 80 ms press, 250 ms state change and icon morph, one easing `--ease-out`. Only `transform`
+and `opacity` animate, with one exception: MorphSVG animates the path's `d` from JS on a 24 px SVG (cheap to paint; `revisar`
+cannot see it, so it is judged from a frame strip). Under `prefers-reduced-motion` nothing loops (the loading ring is a
+static glyph, "Cargando video" is a visible label), the icon swaps in one frame, and the first frame after a click equals the settled one.
+
+## Scene version needs
+The final MTO is a scroll-driven 3D scene with band models in the truck and social buttons on the render. Every button here has a
+scene twin (Tecla: a key on the cab dash; the cap and lip are an extrusion, the press is a translation).
+- The DOM twin stays a focusable `a` or `button` with the same accessible name, kept in sync with the prop.
+- DOM focus is mirrored onto the prop as a visible ring or glow.
+- The projected hit area is at least 44 px at 390.
+- Each state maps to an animation clip or a material parameter (rest, hover, press, loading, done).
+- Reduced-motion parity: the prop swaps state with no loop and no intermediate pose.
+Open lab question for that phase, unproven: Rive for detailed icon morphs or as a texture on a prop (its web runtime is a 199 KB
+transfer, over the 150 KB cap, `web/site-reading-fichas/landonorris-com/speed-390-throttled.json`).
 
 ## States matrix
 | Component | default | hover | focus-visible | pressed / selected | disabled | loading | empty | error | **domain** | a11y |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Boton (line) | gold edge, ink text | gold wipes up, black text | same wipe + 3px gold ring | dips 2 px | n/a: links only | n/a: static link | n/a: always has a label | n/a: static link | n/a: not date-bound | link text names the action |
-| Boton (filled) | gold fill, black text | n/a: already filled, cursor only | 3px gold ring | dips 2 px | n/a: links only | n/a: static link | n/a: always has a label | n/a: static link | n/a: not date-bound | link text names the action |
+| Boton (plain) | dark cap, ink text, gold-deep edge and lip | cap lightens, chevron nudges 4 px (hover devices only) | 3px gold ring, chevron nudged | cap sinks 3 px onto the lip | n/a: links only | n/a: off-site links open another app and this page stays alive, so a busy state would stick | n/a: always has a label | n/a: static link | n/a: not date-bound | link text names the action |
+| Boton (filled) | gold cap, black text, gold-deep lip | cap lightens, chevron nudges | 3px gold ring | cap sinks 3 px | n/a: links only | n/a: as above | n/a: always has a label | n/a: static link | n/a: not date-bound | link text names the action; Escuchar names its destination |
 | Release card | cover + title + type | title turns gold | 3px gold ring + gold title | n/a: link | n/a: links only | lazy image, `--line` border holds the box | n/a: 9 fixed releases | n/a: no remote data | n/a: no dates shown (no tour dates) | cover `alt=""`, title is the name |
 | Video card | thumb + play + title | title turns gold | 3px gold ring | n/a: link | n/a: links only | lazy, `--line` fill holds 16:9 | n/a: 5 fixed videos | a missing YouTube thumb leaves the `--line` box and the title | live video first | thumb `alt=""`, icon hidden |
-| Loop toggle | "Pausar video" | ink text | 3px gold ring | `aria-pressed=true`, "Reproducir video" | n/a: always usable | n/a: the poster covers loading | n/a: one fixed loop | play() rejected: poster stays | reduced motion: starts paused | real `<button>`, hidden until JS runs |
+| Loop toggle | pause icon, "Pausar video" | cap lightens | 3px gold ring | cap sinks 3 px; the label and icon swap to "Reproducir video" (no `aria-pressed`) | n/a: always usable | ring and "Cargando video" while the video is buffering; ring static under reduced motion | n/a: one fixed loop | `play()` refused: back to "Reproducir video"; source fails: toggle hidden, poster stays | after a tap starts the video the cap taps once (done); reduced motion: starts paused | real `<button>`, hidden until JS runs; the label carries the state |
 | Hero media | poster | n/a: not interactive | n/a: `aria-hidden` | n/a: not interactive | n/a: not interactive | poster until the loop plays, 0.4 s fade | n/a: poster always ships | no video: poster | reduced motion: poster | `aria-hidden`, `alt=""` |
 
 ## Do's and Don'ts

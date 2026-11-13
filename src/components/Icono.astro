@@ -1,12 +1,12 @@
 ---
-// Working icons (DESIGN.md › Components). The buttons-icons pair chain replaces this file with morphing icons;
-// keep the props (nombre, clase) so Boton.astro and the page don't change.
+// Iconos de DESIGN.md › Components. play y pausa comparten estructura de puntos (src/lib/formas.ts) para que el interruptor
+// del loop los transforme con GSAP MorphSVG (src/scripts/loop.ts). Siempre decorativos: el nombre lo da la etiqueta.
+import { FORMAS, type Forma } from '../lib/formas'
 interface Props {
-  nombre: 'play'
+  nombre: Forma
   clase?: string
 }
 const { nombre, clase } = Astro.props
-const trazos = { play: 'M6 4l14 8-14 8z' }
 ---
 
-<svg class:list={['icono', clase]} viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d={trazos[nombre]} /></svg>
+<svg class:list={['icono', clase]} viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d={FORMAS[nombre]} /></svg>

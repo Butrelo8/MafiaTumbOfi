@@ -54,6 +54,11 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
         --veil: rgb(0 0 0 / 0.62);
         --line: oklch(100% 0 0 / 0.14);
         --gutter: clamp(16px, 4vw, 64px);
+        /* one motion language for every button and icon (DESIGN.md › Motion); inside the 40-80, 150-250, 350-500 ms bands */
+        --dur-press: 80ms;
+        --dur-state: 250ms;
+        --dur-fill: 500ms;
+        --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
       }
       * { box-sizing: border-box; margin: 0; }
       html { scroll-behavior: smooth; }
@@ -89,11 +94,11 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
           <h1 id="h-inicio">La Mafia <span>Tumbada</span></h1>
           <p>Corridos tumbados desde Xalapa, Veracruz.</p>
           <div class="acciones">
-            <Boton href={releases[0].href} lleno icono="play">Escuchar</Boton>
+            <Boton href={releases[0].href} lleno icono="play">Escuchar en Spotify</Boton>
             <Boton href="#contacto">Contratar</Boton>
           </div>
         </div>
-        <button class="pausa" type="button" id="pausa" aria-pressed="false" hidden>Pausar video</button>
+        <div class="pausa"><Boton id="pausa" icono="pausa" oculto>Pausar video</Boton></div>
       </section>
 
       <section class="s" id="musica" aria-labelledby="h-musica">
@@ -110,7 +115,7 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
           ))}
         </ul>
         <div class="plat margen">
-          {plataformas.map((p) => <Boton href={p.h}>{p.n}</Boton>)}
+          {plataformas.map((p) => <Boton href={p.h} flecha={false}>{p.n}</Boton>)}
         </div>
       </section>
 
@@ -157,31 +162,7 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
     </footer>
 
     <script>
-      // Loop plays only while visible and never under reduced motion; the poster (= loop frame 0) stays otherwise
-      // (references.md › hero arraisballet + landonorris; contacto teamusa toggle, placed on the hero it controls).
-      const v = document.getElementById('loop') as HTMLVideoElement
-      const pausa = document.getElementById('pausa') as HTMLButtonElement
-      const quieto = matchMedia('(prefers-reduced-motion: reduce)')
-      let pausado = quieto.matches
-      const tocar = () => (pausado ? v.pause() : v.play().then(() => v.classList.add('on')).catch(() => {}))
-      let visible = true
-      new IntersectionObserver(([e]) => {
-        visible = e.isIntersecting
-        visible ? tocar() : v.pause()
-      }).observe(v)
-      pausa.hidden = false
-      const pintar = () => {
-        pausa.setAttribute('aria-pressed', String(pausado))
-        pausa.textContent = pausado ? 'Reproducir video' : 'Pausar video'
-      }
-      pausa.addEventListener('click', () => {
-        pausado = !pausado
-        if (!pausado) v.preload = 'auto'
-        pintar()
-        if (visible) tocar()
-      })
-      if (!pausado) v.preload = 'auto'
-      pintar()
+      import '../scripts/loop'
 
       const barra = document.querySelector('.barra') as HTMLElement
       const marcar = () => barra.classList.toggle('solida', scrollY > 8)
@@ -213,8 +194,7 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
       .hero h1 span { display: block; }
       .hero p { font-size: clamp(18px, 1.6vw, 22px); margin: 14px 0 22px; max-width: 30ch; color: var(--muted); }
       .acciones { display: flex; gap: 12px; flex-wrap: wrap; }
-      .pausa { position: absolute; right: var(--gutter); bottom: clamp(32px, 7vh, 80px); min-height: 44px; padding: 0 14px; border: 1px solid var(--line); background: var(--veil); color: var(--muted); font: 600 14px Saira, sans-serif; cursor: pointer; }
-      .pausa:hover { color: var(--ink); }
+      .pausa { position: absolute; right: var(--gutter); bottom: clamp(32px, 7vh, 80px); }
       @media (max-width: 700px) { .pausa { top: 76px; bottom: auto; } }
 
       .s { padding-block: clamp(64px, 10vw, 140px); border-top: 1px solid var(--line); }

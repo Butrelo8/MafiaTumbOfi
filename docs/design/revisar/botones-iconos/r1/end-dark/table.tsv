@@ -1,0 +1,16 @@
+check	value	threshold	result	where
+fixed-over-text-390	0 covered	0	pass	no fixed element covers text
+motion-frames	0 animations held	evidence	info	motion-0.png, motion-mid.png, motion-end.png
+motion-spec	1 animations, 0 off spec	props transform/opacity/translate/scale/rotate; bands 40-80,150-250,350-500 ms	pass	none
+motion-scope	CSS transitions/animations and element.animate() only		info	rAF/JS-driven animations (framer layout, springs) are not seen: use recordVideo
+overflow-390	0 elements, scrollWidth 390	0, <= 390	pass	none [theme dark scroll end=4917/4917]
+tap-390	0 targets	0 under 44 px	pass	none
+contrast-390	0 elements	0	pass	none
+cls-390	0.000	<= 0.1	pass	layout-shift sum without recent input
+weight-390	1.64 MB	<= 3 MB	pass	encoded bytes until idle, cache off
+fixed-over-text-1440	0 covered	0	pass	no fixed element covers text
+overflow-1440	0 elements, scrollWidth 1440	0, <= 1440	pass	none [theme dark scroll end=3598/3598]
+contrast-1440	0 elements	0	pass	none
+glyphs	0 of 94 chars missing	0	pass	every char is in its font
+cls-1440	0.025	<= 0.1	pass	layout-shift sum without recent input
+motion	0 infinite animations, 0 videos playing	0 with reduced motion	pass	prefers-reduced-motion: reduce at 390

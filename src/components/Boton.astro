@@ -1,70 +1,144 @@
 ---
-// Working button: square, gold edge; the fill wipes up from the bottom like a dash light coming on, the press dips 2 px
-// (references.md › botones: rafadesign wipe, boleto press). The buttons-icons pair chain replaces this file; keep the
-// props (href, lleno, icono) so the page doesn't change.
+// Tecla (owner's pick 2026-11-12): a square cap on a 4 px lip, like a dash key. The press sinks the cap onto the lip, the
+// chevron nudges on hover. Sources: references.md › botones (todoist two-layer button, nothing.tech chevron); the 4 px nudge,
+// the translateY press and the 250 ms icon reaction are authored. With `href` it is a link; without, the loop toggle button.
 import Icono from './Icono.astro'
+import type { Forma } from '../lib/formas'
 
 interface Props {
-  href: string
+  href?: string
   lleno?: boolean
-  icono?: 'play'
+  icono?: Forma
   id?: string
+  flecha?: boolean
+  clase?: string
+  oculto?: boolean
 }
-const { href, lleno = false, icono, id } = Astro.props
+const { href, lleno = false, icono, id, flecha = true, clase, oculto = false } = Astro.props
+const Etiqueta = href ? 'a' : 'button'
 ---
 
-<a class:list={['boton', { lleno }]} href={href} id={id}>
-  {icono && <Icono nombre={icono} />}
-  <slot />
-</a>
+<Etiqueta class:list={['boton', { lleno }, clase]} href={href} id={id} type={href ? undefined : 'button'} hidden={oculto}>
+  <span class="tapa">
+    {icono && <Icono nombre={icono} />}
+    {!href && <span class="anillo" aria-hidden="true" hidden />}
+    <span class="et"><slot /></span>
+    {flecha && href && (
+      <svg class="flecha" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7" /></svg>
+    )}
+  </span>
+</Etiqueta>
 
 <style>
   .boton {
     position: relative;
     display: inline-flex;
+    padding: 0 0 4px;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    text-decoration: none;
+    font: 600 16px/1 Saira, sans-serif;
+    cursor: pointer;
+  }
+  /* the lip: fixed under the cap, so only the cap moves */
+  .boton::after {
+    content: '';
+    position: absolute;
+    inset: 4px 0 0;
+    background: var(--gold-deep);
+  }
+  .tapa {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
     align-items: center;
     gap: 10px;
     min-height: 48px;
     padding: 0 22px;
-    border: 2px solid var(--gold);
-    color: var(--ink);
-    text-decoration: none;
-    font: 600 16px/1 Saira, sans-serif;
-    overflow: hidden;
-    isolation: isolate;
-    transition: transform 90ms, color 500ms cubic-bezier(0.65, 0, 0.35, 1);
+    background: oklch(17% 0.01 85);
+    box-shadow: inset 0 0 0 1px var(--gold-deep);
+    transition:
+      transform var(--dur-press) linear,
+      background-color var(--dur-state);
   }
-  .boton::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
+  .lleno .tapa {
     background: var(--gold);
-    transform: scaleY(0);
-    transform-origin: bottom;
-    transition: transform 500ms cubic-bezier(0.65, 0, 0.35, 1);
+    color: #000;
+    box-shadow: none;
   }
-  .boton:hover::before,
-  .boton:focus-visible::before,
-  .lleno::before {
-    transform: scaleY(1);
-  }
-  .boton:hover,
-  .boton:focus-visible,
-  .lleno {
-    color: var(--bg);
-  }
-  .boton:active {
-    transform: translateY(2px);
+  .boton:active .tapa {
+    transform: translateY(3px);
   }
   .boton :global(.icono) {
     width: 18px;
     height: 18px;
+    flex: none;
+    transition: transform var(--dur-state) var(--ease-out);
+  }
+  .flecha {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    transition: transform var(--dur-state) var(--ease-out);
+  }
+  .anillo {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    border: 2.5px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: gira 900ms linear infinite;
+  }
+  .anillo[hidden] {
+    display: none;
+  }
+  @keyframes gira {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+  /* the loop toggle, once the video starts after a tap: the cap taps itself once */
+  .boton:global(.hecho) .tapa {
+    animation: confirma var(--dur-state) var(--ease-out);
+  }
+  @keyframes confirma {
+    40% {
+      transform: translateY(3px);
+    }
+  }
+  @media (hover: hover) {
+    .boton:hover .tapa {
+      background: oklch(24% 0.012 85);
+    }
+    .lleno:hover .tapa {
+      background: oklch(86% 0.12 82);
+    }
+    .boton:hover .flecha {
+      transform: translateX(4px);
+    }
+    .boton:hover :global(.icono) {
+      transform: translateX(2px);
+    }
+  }
+  .boton:focus-visible .flecha {
+    transform: translateX(4px);
   }
   @media (prefers-reduced-motion: reduce) {
-    .boton,
-    .boton::before {
+    .tapa,
+    .flecha,
+    .boton :global(.icono) {
       transition: none;
+    }
+    .anillo {
+      animation: none;
+    }
+    .boton:global(.hecho) .tapa {
+      animation: none;
     }
   }
 </style>

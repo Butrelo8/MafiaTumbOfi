@@ -3,7 +3,9 @@
 Run `mto-buttons-icons`, ticket `docs/queue/2026-11-12-mto-buttons-icons-pair.md` (mothership). Branch `cc/auradrone`.
 Design doc: `docs/design/DESIGN.md`. Tokens: the `:root` block in `src/pages/index.astro` (no tokens.css yet).
 References (gate passed, sections botones, iconos, estados): `docs/design/references.md` › "Buttons and icons pair run".
-Dev server: not started yet (ports 3100 and 3119 belong to other trees; this worktree gets its own port, URL goes here) (the site has no database, so there is no scratch DB to protect; it runs from this worktree).
+Servers (the site has no database, so there is no scratch DB to protect; ports 3100 and 3119 belong to other trees):
+dev `http://thiccpc-wsl:3122/` (astro dev, this worktree, started 23:18), built page `http://thiccpc-wsl:3123/` (python static
+server on `dist/`, the target of every revisar run), owner stills `http://thiccpc-wsl:3121/docs/design/botones/index.html`.
 
 ## Ticket
 Buttons and icons that read as crafted, not stock. Every button has idle, hover, press, focus, loading and done where a real
@@ -99,6 +101,10 @@ Also: `slop-check` REVIEW `js-intersection-reveal` at `index.astro:168` is the l
 Light and dark: the page has one dark theme, so the light/dark item is recorded n/a (single theme), not PASS. The wipe back
 down is 350 ms (token `--dur-fill-out`), faster than the 500 ms in. The rafadesign `aria-pressed` half is not borrowed.
 Authored, not from a ficha: the 4 px chevron nudge, the 250 ms icon reaction, Boleto's half-circle notches, the translateY press.
+
+## Owner's pick (AskUserQuestion, 2026-11-12 ~23:12)
+Button form: **A: Tecla** (the stills labelled the forms A Tecla, B Boleto, C Marco). Platform buttons: **boxes** (not text links).
+So Tecla is built, Boleto and Marco stay in `docs/design/botones/` as history, the stamp and the notches are not built.
 
 ## Rounds
 (gate answer, R1, R2, R3 table go below)
