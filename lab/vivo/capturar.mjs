@@ -17,7 +17,7 @@ for (const f of fl.split(",")) {
 }
 await page.goto(base);
 await page.waitForFunction(() => window.__vivo?.listo, null, { timeout: 120000, polling: 500 }); console.error("listo", page.url());
-for (let i = 0; i < 120; i++) { await page.mouse.wheel(0, 60); await page.waitForTimeout(16); }
+for (let i = 0; i < 120; i++) { await page.evaluate(() => scrollBy(0, 60)); await page.waitForTimeout(16); }  // mouse.wheel hangs on a busy WebGL loop
 await page.waitForTimeout(1000);
 const S = await page.evaluate(() => window.__vivo);
 const pct = (a, p) => [...a].sort((x, y) => x - y)[Math.floor(p * (a.length - 1))];
