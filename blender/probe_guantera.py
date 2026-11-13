@@ -12,6 +12,9 @@ leaning skin (y lo.y), 9 cm in front of the dash at the hinge (y hi.y): a second
 cabin at the walls and the centre, z between the hole's bottom and 1 cm under the hinge (the open door hangs above that); the
 box's first hit (material u_hueco; the open door hangs in front on purpose) must lie no more than 1 cm in front of hi.y.
 
+Fourth check ("asoma"): no vertex of the door copies may stand above the liner's top face inside its footprint (the liner sat 2-10
+mm off the skin's mid plane, the skin bulges, and a door edge showed through as a dark sliver on the left in guantera2-borde).
+
   /mnt/e/Blender/blender.exe -b --factory-startup --python-exit-code 1 --python "$(wslpath -w blender/probe_guantera.py)" -- \
     "$(wslpath -w /mnt/e/Cursor\ Projects/MTO/blender/escena.py)" "$(wslpath -w tmp/utileria)" 1 ninguno 1280x720 "$(wslpath -w blender/utileria.py)"
 """
@@ -48,4 +51,17 @@ for x in (hlo.x + 0.002, (hlo.x + hhi.x) / 2, hhi.x - 0.002):
                 break
             o = loc + Vector((0, 0.0005, 0))
 print("PROBE sale", round(sale, 4), "tope 0.01", "FAIL" if sale > 0.01 else "PASS")
-sys.exit(1 if fondo > TOPE or falta > EPS or sale > 0.01 else 0)
+# Fourth check: no door vertex may stand above the liner's top face inside its footprint. The skin is not flat, so with the liner
+# 2-10 mm off the skin's mid plane a door edge poked through on the left: a thin dark sliver in guantera2-borde (05:35 handoff).
+liner = next(o for o in c["objs"] if o.type == "MESH" and any(ms.material and ms.material.name == "u_guantera_int" for ms in o.material_slots))
+inv, sy = liner.matrix_world.inverted(), liner.scale.y
+asoma = -1.0
+for o in c["objs"]:
+    if o.type != "MESH" or any(ms.material and ms.material.name.startswith("u_") for ms in o.material_slots):
+        continue  # door copies only (the truck's own materials)
+    for v in o.data.vertices:
+        l = inv @ (o.matrix_world @ v.co)
+        if abs(l.x) <= 1 and abs(l.z) <= 1:
+            asoma = max(asoma, (l.y - 1) * sy)
+print("PROBE asoma", round(asoma, 4), "tope 0", "FAIL" if asoma > 0 else "PASS")
+sys.exit(1 if fondo > TOPE or falta > EPS or sale > 0.01 or asoma > 0 else 0)

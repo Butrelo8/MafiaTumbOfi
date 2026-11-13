@@ -1271,8 +1271,12 @@ def cortar_guantera():
     lean = math.atan2(hi.y - lo.y, h)
     nrm = Vector((0, math.cos(lean), math.sin(lean)))  # the skin's inside
     medio = Vector(((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, (lo.z + hi.z) / 2))
-    liner = caja((w - 0.01, 0.008, math.hypot(hi.y - lo.y, h) - 0.01), medio + nrm * 0.006, mat("u_guantera_int", (0.03, 0.028, 0.026), 0.8),
-                 rot=(lean, 0, 0), parent=False)
+    # the skin bulges up to ~2 cm off that plane, so a fixed 2-10 mm slab let a door edge poke through (a dark sliver on the left,
+    # probe_guantera.py "asoma"): the liner runs from 2 mm off the plane to 2 mm above the door's highest vertex
+    tope = max(0.010, max((v - medio).dot(nrm) for v in todos) + 0.002)
+    print("CORTE liner tope", round(tope, 4))
+    liner = caja((w - 0.01, tope - 0.002, math.hypot(hi.y - lo.y, h) - 0.01), medio + nrm * (0.002 + tope) / 2,
+                 mat("u_guantera_int", (0.03, 0.028, 0.026), 0.8), rot=(lean, 0, 0), parent=False)
     bpy.context.view_layer.update()
     liner.matrix_world = giro @ liner.matrix_world
     # the dark inner box, open towards the cabin, its rim on the cut edges. Sized from the hole, not the door: the door is the
@@ -1295,7 +1299,7 @@ def cortar_guantera():
     luz("POINT", (cx, yb + 0.1, hi.z - 0.03), 2.0, (1.0, 0.8, 0.55), parent=False)
     luz("AREA", (cx - 0.1, yb - 0.45, hi.z + 0.2), 6.0, (1.0, 0.85, 0.65), mira=(cx, yb - 0.1, lo.z), size=0.2, parent=False)
     n = giro.to_3x3() @ nrm  # the door's inside, now facing up
-    centro = giro @ (medio + nrm * 0.010)
+    centro = giro @ (medio + nrm * tope)
     print("CORTE centro", centro)
     CORTE.update(objs=puertas + list(GRUPO), centro=centro, n=n, lo=lo, hi=hi, hueco_lo=hlo, hueco_hi=hhi,
                  caja_lo=Vector((cx - bw / 2 - t / 2, yb, cz - bh / 2 - t / 2)), caja_hi=Vector((cx + bw / 2 + t / 2, yb + prof, cz + bh / 2 + t / 2)))

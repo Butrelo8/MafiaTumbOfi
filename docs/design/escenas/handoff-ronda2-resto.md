@@ -14,9 +14,9 @@ screen faces into `tmp/utileria/`.
   not said this set is final, and may still swap pieces from `calcas3-arte.jpg` / `calcas3-arte-2.jpg`. Once it is final, record it in
   `DESIGN.md` › Components. The IG/YT/TT glyph slots stay grey until the owner downloads the official files. The build packs the art
   in one atlas (references.md row, kiln-utility-box).
-- **Glovebox liner sliver.** In `guantera2-borde`, a thin dark sliver on the left, where a door-mesh edge pokes through the liner.
-  Probable fix: offset the liner a few mm more along `nrm`, or trim the door copy's side-wall faces. Check it with `probe_guantera.py`
-  (all three checks pass now) and a re-render.
+- **Glovebox liner sliver: fixed (05:37, npcdrone).** The skin bulges up to 2.1 cm off its mid plane; the liner sat 2-10 mm off it,
+  so a door vertex stood 1.08 cm above the liner (`probe_guantera.py` check 4 "asoma": 0.0108 FAIL before, -0.002 PASS after). The
+  liner now runs from 2 mm off the plane to 2 mm above the door's highest vertex (2.1 cm thick) and the junk sits on its top.
 - **Live vs clips: the fps question is open.** `lab/vivo` has not been measured on a real GPU. Whether the site runs the scene live
   or ships Cycles clips depends on that number (see "Live port" below).
 
