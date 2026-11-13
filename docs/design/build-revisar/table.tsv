@@ -7,7 +7,7 @@ overflow-390	0 elements, scrollWidth 390	0, <= 390	pass	none
 tap-390	0 targets	0 under 44 px	pass	none
 contrast-390	0 elements	0	pass	none
 cls-390	0.000	<= 0.1	pass	layout-shift sum without recent input
-weight-390	1.49 MB	<= 3 MB	pass	encoded bytes until idle, cache off
+weight-390	1.55 MB	<= 3 MB	pass	encoded bytes until idle, cache off
 fixed-over-text-1440	0 covered	0	pass	no fixed element covers text
 overflow-1440	0 elements, scrollWidth 1440	0, <= 1440	pass	none
 contrast-1440	0 elements	0	pass	none

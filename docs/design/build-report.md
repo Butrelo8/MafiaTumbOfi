@@ -37,3 +37,15 @@ bg-measure measures text over images. States matrix: `check-matrix.py` 0 errors;
 
 Mac WebKit pass brief: `docs/queue/2026-11-12-mto-a-carretera-mac-webkit.md`. The `mac-webkit-pass` skill isn't
 installed in this environment, so the brief copies the shape of the 11-09 truck brief.
+
+## Mac WebKit fixes (2026-11-12, after the first pass said NO)
+- The focus ring on the release cards was clipped by the strip. The cause: `ul[role='list'] { padding: 0 }` outranked
+  `.tira`, so the strip had no gutter and the focused card sat at x = 0. That rule is now `:where(...)`. The strip
+  gets 8 px of top padding and `scroll-padding-inline: var(--gutter)`, so the 3 px ring plus its 3 px offset shows whole.
+- The header was transparent over the hero at scrollY 693 (390). Past 8 px of scroll it is now solid `--bg` with a
+  `--line` rule, switched without a transition (revisar's motion-spec fails a `background-color` transition).
+- Before and after shots are in `docs/design/webkit-fixes/` (`antes-*`, `despues-*`).
+```
+revisar.sh web  exit 0, 0 FAIL · 390: overflow 0, tap 0, contrast 0, CLS 0.000, weight 1.55 MB · 1440: CLS 0.016
+slop-check.py src  0 FAIL
+```

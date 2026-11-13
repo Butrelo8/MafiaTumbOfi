@@ -182,6 +182,11 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
       })
       if (!pausado) v.preload = 'auto'
       pintar()
+
+      const barra = document.querySelector('.barra') as HTMLElement
+      const marcar = () => barra.classList.toggle('solida', scrollY > 8)
+      addEventListener('scroll', marcar, { passive: true })
+      marcar()
     </script>
 
     <style>
@@ -190,6 +195,8 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
       .margen { padding-inline: var(--gutter); }
 
       .barra { position: fixed; inset: 0 0 auto; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px var(--gutter); background: linear-gradient(rgb(0 0 0 / 0.8), transparent); }
+      /* past the top the header is solid, so the hero's copy and buttons never show through it (Mac WebKit pass) */
+      .barra.solida { background: var(--bg); box-shadow: 0 1px 0 var(--line); }
       .logo { display: inline-flex; min-height: 44px; align-items: center; }
       .logo img { height: 44px; width: auto; }
       .barra nav { display: flex; gap: 4px; }
@@ -212,9 +219,9 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
 
       .s { padding-block: clamp(64px, 10vw, 140px); border-top: 1px solid var(--line); }
       h2 { font-size: clamp(44px, 7vw, 96px); margin-bottom: 28px; }
-      ul[role='list'] { list-style: none; padding: 0; }
+      :where(ul[role='list']) { list-style: none; padding: 0; }
 
-      .tira { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 var(--gutter) 16px; scrollbar-color: var(--gold-deep) transparent; }
+      .tira { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter); padding: 8px var(--gutter) 16px; scrollbar-color: var(--gold-deep) transparent; }
       .tira li { flex: 0 0 clamp(210px, 22vw, 280px); scroll-snap-align: start; }
       .lanz { display: block; text-decoration: none; }
       .lanz img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--line); }
