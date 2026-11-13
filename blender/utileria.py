@@ -872,6 +872,56 @@ def caja2_b_esc2():
     return VISTA_ESC2()
 
 
+# ---- plate after the current Veracruz design (owner 03:30): face from blender/placa_veracruz.py, seen from the scene-6 camera
+# (escenas-plan: ahead of the truck, low, travelling backwards, 32 mm, headlights toward the camera)
+@opcion("placa3")
+def placa3():
+    FILL_PLACA()
+    p = Vector((CX, DEFENSA.y + 0.016, 0.72))
+    rect_redondo(0.302, 0.152, 0.015, p, mat("u_placa_alu", (0.75, 0.75, 0.74), 0.35, 1.0))
+    m = img_mat("u_placa_vz", os.path.join(PANTALLAS, "placa-veracruz.png"), emit=0.15, rough=0.35)
+    nt = m.node_tree
+    nt.links.new(nt.nodes["Image Texture"].outputs["Alpha"], nt.nodes["Principled BSDF"].inputs["Alpha"])
+    plano(0.300, 0.150, p + Vector((0, 0.0022, 0)), m, rot=ROT_P)
+    return ((CX + 0.25, DEFENSA.y + 3.5, 0.78), (CX, DEFENSA.y, 0.86), 32)
+
+
+# ---- stickers mixed (owner's pick 3): A/B/C styles across the four, different ages, so they read as collected over time.
+# §2 rules kept by calca(): the glyph area stays upright and outside any wear.
+def gastado(nombre, color, f=0.5):
+    """Sun-faded vinyl: colour pulled towards a dusty grey, rougher."""
+    return mat(nombre, tuple(c * (1 - f) + g * f for c, g in zip(color, (0.62, 0.6, 0.57))), 0.75)
+
+
+def rayones(loc, w, h, n=7):
+    """Scuffs across the left two thirds (never over the glyph area on the right)."""
+    sucio = mat("u_rayon", (0.05, 0.045, 0.04), 0.9)
+    for i in range(n):
+        x = loc.x - w * 0.45 + (i * 0.37 % 1) * w * 0.55
+        z = loc.z - h * 0.4 + (i * 0.61 % 1) * h * 0.8
+        plano(0.012 + 0.03 * (i % 3) / 2, 0.0025, Vector((x, loc.y - 0.0045, z)), sucio, rot=(math.pi / 2, 0.4 * (i % 2 - 0.5), 0))
+
+
+@opcion("calcas2")
+def calcas2():
+    relleno((CX + 1.2, PORTON.y - 4.0, 1.3), (CX, PORTON.y, 1.15), 120)
+    """IG die-cut with a fat white border (A, oldest: faded), Spotify round badge (C), YouTube bumper strip (B, scuffed),
+    TikTok die-cut (A, newest)."""
+    def en(x, z):  # the tailgate has relief: sit each sticker on the surface hit at its own spot (round 2, first still)
+        h = rayo((x, PORTON.y - 1.0, z), (0, 1, 0))
+        return Vector((x, (h.y if h else PORTON.y) - 0.004, z))
+    bl = mat("u_vinil_blanco", (0.95, 0.95, 0.93), 0.3)
+    calca("SÍGUENOS", "EN INSTAGRAM", en(CX - 0.42, 1.27), 0.12, gastado("u_rosa_viejo", (0.9, 0.12, 0.35), 0.55),
+          gastado("u_blanco_viejo", (0.95, 0.95, 0.93), 0.3), gastado("u_borde_viejo", (0.95, 0.95, 0.93), 0.3))
+    calca("ESCÚCHANOS", "SPOTIFY", en(CX + 0.45, 1.25), 0.0, mat("u_badge_verde", (0.1, 0.55, 0.25), 0.3), bl, bl, h=0.2, forma="redonda")
+    yt = en(CX + 0.2, 1.08)
+    calca("MÍRANOS", "EN YOUTUBE", yt, -0.04, mat("u_rojo", (0.75, 0.04, 0.03), 0.3), bl, mat("u_borde_oro", (0.5, 0.38, 0.15), 0.4),
+          w=0.42, h=0.11, font="bahnschrift.ttf")
+    rayones(yt, 0.42, 0.11)
+    calca("ANDAMOS", "EN TIKTOK", en(CX - 0.4, 1.08), -0.15, NEGRO, bl, bl)
+    return VISTA_CALCAS()
+
+
 # ---- glovebox C: the door cut out of the G63 mesh. Destructive for the dash: these options must stay last in the file.
 CORTE = {}
 CORTE_BOX = ((1.95, 2.35), (1.15, 1.30), (1.15, 1.38))
@@ -891,15 +941,25 @@ def cortar_guantera():
     puertas, todos = [], []
     for o in [o for o in CAM.children_recursive if o.type == "MESH"]:
         mw = o.matrix_world
+        # door: faces centred in the box. The dash also loses any face with a corner in the box: a dash face centred outside but
+        # spanning the opening stayed standing in the hole as the owner's "weird triangle" (03:30)
+        vs = o.data.vertices
         idx = [f.index for f in o.data.polygons if dentro(mw @ f.center)]
+        roza = {f.index for f in o.data.polygons if any(dentro(mw @ vs[v].co) for v in f.vertices)}
         if not idx:
             continue
         o.data = o.data.copy()  # single user
         sel = set(idx)
+        # the door keeps only the front skin: the box also catches the bin's side walls (0.2 m deep), which rode up with the
+        # door as a stray triangle (owner, 03:30)
+        m3 = mw.to_3x3()
+        piel = {i for i in idx if abs((m3 @ o.data.polygons[i].normal).normalized().y) > 0.6 and (mw @ o.data.polygons[i].center).y < GUANTERA.y + 0.04}
+        print("CORTE piel", o.name, len(piel), "de", len(idx))
         puerta = o.copy()
         puerta.data = o.data.copy()
         sc.collection.objects.link(puerta)
-        for ob, quitar in ((o, lambda i: i in sel), (puerta, lambda i: i not in sel)):
+        print("CORTE roza", o.name, len(roza - sel), "caras extra del tablero")
+        for ob, quitar in ((o, lambda i: i in sel or i in roza), (puerta, lambda i: i not in piel)):
             bm = bmesh.new()
             bm.from_mesh(ob.data)
             bm.faces.ensure_lookup_table()
@@ -914,7 +974,10 @@ def cortar_guantera():
     lo = Vector((min(v.x for v in todos), min(v.y for v in todos), min(v.z for v in todos)))
     hi = Vector((max(v.x for v in todos), max(v.y for v in todos), max(v.z for v in todos)))
     print("CORTE bbox", lo, hi)
-    piv = Vector(((lo.x + hi.x) / 2, min(v.y for v in todos if v.z < lo.z + 0.01), lo.z))
+    # hinge on the front skin's lower edge: the cut runs 0.2 m deep and its lowest verts are at the back (y≈1.3), so a pivot
+    # taken from them swings the skin out as a wedge and leaves anything placed off the pivot inside the box
+    piv = Vector(((lo.x + hi.x) / 2, GUANTERA.y, lo.z))
+    print("CORTE piv", piv, "fondo-bajo", min(v.y for v in todos if v.z < lo.z + 0.01))
     giro = Matrix.Translation(piv) @ Matrix.Rotation(GIRO, 4, "X") @ Matrix.Translation(-piv)
     bpy.context.view_layer.update()
     for pt in puertas:
@@ -923,8 +986,7 @@ def cortar_guantera():
         pt.matrix_world = giro @ mw
     w, h = hi.x - lo.x, hi.z - lo.z
     # inner liner of the door (the cut skin has no inside), turned with it
-    # the cut faces run 0.2 m deep (round-2 first still), so the liner hangs off the hinge line, not off the deepest face
-    liner = caja((w - 0.01, 0.008, h - 0.01), (piv.x, piv.y + 0.03, lo.z + h / 2), mat("u_guantera_int", (0.03, 0.028, 0.026), 0.8), parent=False)
+    liner = caja((w - 0.01, 0.008, h - 0.01), (piv.x, piv.y + 0.012, lo.z + h / 2), mat("u_guantera_int", (0.03, 0.028, 0.026), 0.8), parent=False)
     bpy.context.view_layer.update()
     liner.matrix_world = giro @ liner.matrix_world
     # the dark inner box, open towards the cabin, its rim on the cut edges
@@ -939,7 +1001,8 @@ def cortar_guantera():
     luz("POINT", (cx, yb + 0.1, hi.z - 0.03), 2.0, (1.0, 0.8, 0.55), parent=False)
     luz("AREA", (cx - 0.1, yb - 0.45, hi.z + 0.2), 6.0, (1.0, 0.85, 0.65), mira=(cx, yb - 0.1, lo.z), size=0.2, parent=False)
     n = giro.to_3x3() @ Vector((0, 1, 0))  # the door's inside, now facing up
-    centro = giro @ Vector((piv.x, piv.y + 0.034, lo.z + h / 2))
+    centro = giro @ Vector((piv.x, piv.y + 0.016, lo.z + h / 2))
+    print("CORTE centro", centro)
     CORTE.update(objs=puertas + list(GRUPO), centro=centro, n=n, lo=lo, hi=hi)
     for pt in puertas:
         GRUPO.append(pt)
