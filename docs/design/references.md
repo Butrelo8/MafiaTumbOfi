@@ -132,7 +132,7 @@ lived-in, at the close-up (`VISTA_CAJA`) and scene-2 (`VISTA_ESC2`) cameras. Bui
 the round-1/2 boxes become shaped fundas and a real ATA case, and the decals are our own sticker art, only the band pieces with no
 platform glyph (the §2 brand rules stay on the tailgate). At ESC2 (about 2 px/cm) only silhouettes and colour blocks read; materials
 and decals are judged from the close-up. O = page opened; S = seen only in search results.
-Gate: `refs-check.py <this section> --sections caja3`.
+Gate: `refs-check.py <this section> --sections caja3`. **Not verified:** no photo was opened; every real-world row is S (search results only), and the search for corridos tumbados bands with gear in a pickup bed found no photo.
 
 | section | library entry | borrow | cost |
 |---|---|---|---|
