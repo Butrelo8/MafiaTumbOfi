@@ -941,25 +941,22 @@ def cortar_guantera():
     puertas, todos = [], []
     for o in [o for o in CAM.children_recursive if o.type == "MESH"]:
         mw = o.matrix_world
-        # door: faces centred in the box. The dash also loses any face with a corner in the box: a dash face centred outside but
-        # spanning the opening stayed standing in the hole as the owner's "weird triangle" (03:30)
-        vs = o.data.vertices
-        idx = [f.index for f in o.data.polygons if dentro(mw @ f.center)]
-        roza = {f.index for f in o.data.polygons if any(dentro(mw @ vs[v].co) for v in f.vertices)}
+        idx = [f.index for f in o.data.polygons if dentro(mw @ f.center)]  # door: faces centred in the box
         if not idx:
             continue
         o.data = o.data.copy()  # single user
         sel = set(idx)
         # the door keeps only the front skin: the box also catches the bin's side walls (0.2 m deep), which rode up with the
-        # door as a stray triangle (owner, 03:30)
-        m3 = mw.to_3x3()
-        piel = {i for i in idx if abs((m3 @ o.data.polygons[i].normal).normalized().y) > 0.6 and (mw @ o.data.polygons[i].center).y < GUANTERA.y + 0.04}
+        # door as a stray triangle (owner, 03:30). The bin's sloped floor (front top edge to back bottom corner, |n.y| ≈ 0.60) passed
+        # a normal test and a centre test; ray-cast 04:10 hit it on the door copy. So every vertex must sit on the front skin
+        m3, vs = mw.to_3x3(), o.data.vertices
+        piel = {i for i in idx if abs((m3 @ o.data.polygons[i].normal).normalized().y) > 0.6
+                and all((mw @ vs[v].co).y < GUANTERA.y + 0.04 for v in o.data.polygons[i].vertices)}
         print("CORTE piel", o.name, len(piel), "de", len(idx))
         puerta = o.copy()
         puerta.data = o.data.copy()
         sc.collection.objects.link(puerta)
-        print("CORTE roza", o.name, len(roza - sel), "caras extra del tablero")
-        for ob, quitar in ((o, lambda i: i in sel or i in roza), (puerta, lambda i: i not in piel)):
+        for ob, quitar in ((o, lambda i: i in sel), (puerta, lambda i: i not in piel)):
             bm = bmesh.new()
             bm.from_mesh(ob.data)
             bm.faces.ensure_lookup_table()

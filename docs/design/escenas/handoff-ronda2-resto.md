@@ -31,12 +31,14 @@ kc 0.4): **f0 0.441, f96 0.858, f191 0.745**, all three above round 1; side-by-s
 and the heads retopo.
 
 ## Known limits of round 2
-- **Glovebox triangle: fix written, not rendered.** The owner saw "a weird triangle" (03:30). It is not the door's side walls:
-  front-skin-only on the door (`piel`) left it in place. Taking only whole faces shrank the cut to a 5 cm slit. Current
-  hypothesis, in `cortar_guantera()` but never rendered: a dash face centred outside the box spans the opening, so the dash now
-  also loses every face with a corner in the box (`roza`). The run for it never started, because its wait loop
-  `until ! pgrep -f "blender.exe -b"` matched its own command line. Next: run `guantera2-borde,guantera2-c` and check that the
-  larger hole is still covered by the inner box. The current `guantera2-c.jpg` still shows the triangle.
+- **Glovebox triangle: fixed (04:20, nerddrone).** The owner's "weird triangle" (03:30) was the bin's sloped floor riding up on
+  the door copy: it runs from the front skin's top edge to the back-bottom corner (y 1.3465), with |n.y| ≈ 0.60, so it passed
+  the `piel` normal test. A ray-cast from the `guantera2-borde` camera found it. The `roza` dash hypothesis was wrong and is
+  reverted. `piel` now also needs every vertex within 4 cm of the dash face. Regression probe: `blender/probe_guantera.py`
+  (a38984e: 0.112 m, FAIL; now: 0.0007 m, PASS). Side effect: the door is now only the front skin, 11.6 cm tall, and the inner
+  box spans z 1.279–1.395, while the dash hole still reaches down to z 1.194. In `guantera2-borde.png` this shows as a
+  dark band between the shelf lip and the door. It is not fixed (fix: size the inner box from the removed dash faces, not
+  from the door).
 - **Glovebox junk: fixed (03:18).** The cause was the pivot. It was taken from the lowest verts, which are the back of the
   0.2 m-deep cut (y 1.3465). It now sits on the front skin at `GUANTERA.y` (1.234). One side wall of the shell sticks up beside the
   door; it is kept, because bin-style gloveboxes have walls.
