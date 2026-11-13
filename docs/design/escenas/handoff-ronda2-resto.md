@@ -7,6 +7,19 @@ Round 2 of the prop stills is done for the four props the mothership asked to re
 caja2-a-esc2,caja2-b,caja2-b-esc2,guantera2-borde,guantera2-c`. Run `blender/pantalla_tablero.py` first; it writes the
 screen faces into `tmp/utileria/`.
 
+## What's left (05:35, yappingdrone, at the mothership's stop)
+- **Stickers: the owner's set as of 05:30**, rendered as `calcas3-mix` and `calcas3-mix-esc2`. From A: a-instagram (strawberry),
+  a-spotify (holo badge) and a-estrella, whose MT star now reads MÍRANOS / EN YOUTUBE instead of TUMBADO. From B: b-youtube (gold
+  strawberry), b-tiktok (black round), b-loteria (EL SOMBRERO card) and b-pura, the gold chrome lettering PURA MT. The owner has
+  not said this set is final, and may still swap pieces from `calcas3-arte.jpg` / `calcas3-arte-2.jpg`. Once it is final, record it in
+  `DESIGN.md` › Components. The IG/YT/TT glyph slots stay grey until the owner downloads the official files. The build packs the art
+  in one atlas (references.md row, kiln-utility-box).
+- **Glovebox liner sliver.** In `guantera2-borde`, a thin dark sliver on the left, where a door-mesh edge pokes through the liner.
+  Probable fix: offset the liner a few mm more along `nrm`, or trim the door copy's side-wall faces. Check it with `probe_guantera.py`
+  (all three checks pass now) and a re-render.
+- **Live vs clips: the fps question is open.** `lab/vivo` has not been measured on a real GPU. Whether the site runs the scene live
+  or ships Cycles clips depends on that number (see "Live port" below).
+
 ## Next: stickers, a real design pass (mothership brief, verbatim, 03:40)
 `calcas2` exists: four styles, IG faded, YouTube scuffed, each sticker on the tailgate surface ray-cast at its own spot. The owner
 judged it not real enough. The brief:
@@ -37,7 +50,33 @@ labelled as a slot**. The owner must download the Meta Instagram glyph, the bran
 | b-youtube | gloss die-cut | gold strawberry, MÍRANOS / EN YOUTUBE |
 | b-tiktok | matte paper round, the newest | gold sombrero on black, ANDAMOS |
 
-**Next: the Blender half (not started).** Add it to `utileria.py` **above** the glovebox block, which is destructive and must stay last:
+### Sticker pass: state at 05:25 (yappingdrone): owner picked a mix
+Owner 05:15: a mix of A and B; PURA MT or PURA MAFIA TUMBADA instead of PURO VERACRUZ (the band is from Xalapa); fix the T.
+Done: `calcas3-mix` / `calcas3-mix-esc2` (A: a-instagram, a-spotify, a-estrella; B: b-youtube, b-tiktok, b-loteria, b-pura =
+PURA MT, owner 05:30; the star a-estrella now says MÍRANOS / EN YOUTUBE under the MT instead of TUMBADO, owner 05:30). The T: `letras()` drew the text already shifted by alto·incl, then the slant moved the top row right by
+incl·h, so the last letter's top (the T's bar) ran past the mask and was clipped flat; all 16 pieces re-rendered. The star moved off
+the red lamp glow at the gate's centre. Open: the owner may swap pieces from the two sheets.
+
+Done, steps 1-5 below, with these departures from the brief (each one seen in a still first):
+- **Art: 16 pieces.** Owner 04:38 on `calcas3-arte.jpg`: "those are good, use more variations like that". `calcas_arte.py` adds 8
+  band stickers with no platform glyph (`glifo: null`). A: PUTIFRESA lettering, MT holo starburst, lotería card EL CASETE, MAFIA
+  TUMBADA ribbon. B: PURO VERACRUZ gold chrome letter-cut, MT shield, card EL SOMBRERO, VER oval. The first eight are byte-identical
+  (md5 checked). Sheets: `calcas3-arte.jpg` (first eight) and `calcas3-arte-2.jpg` (new); references.md has a `user:` row for them.
+- **Drape.** The gate is not flat: 8-9 mm steps at z 1.22 and 1.05. Each sticker's grid is ray-cast per vertex onto the paint. Rays
+  that slip through seams and hit the cab 1.1 m behind are floored 12 mm under the median. A max filter plus a blur over 1.5 cm
+  makes the sticker tent over a step (at most 12-19 mm off) instead of diving into it. Before this, stickers looked sliced and a dark square sat on b-instagram.
+- **Curl.** The brief's 5 cm fold rolled ~190° and hid lettering. Now 2.5 cm by default and 3.5 cm on the oldest. The corner is the
+  one farthest from the slot, and a check raises if the slot falls inside the curl. Grid cells ≤ 4 mm, not 24×24.
+- **Lights** (`luces3`): a camera-side fill, plus a 25 W, 0.5 m light at the camera's mirror point across the gate normal, only where that point is
+  above the road (close-up yes, ESC2 no). At 120 W and 1.2 m the mirror light washed every sticker. Chrome roughness is 0.25: at 0.12 the letters mirrored the night and read black.
+- **Not verified:** how the stickers look is judged from the stills only; revisar measured the contact page, not the renders.
+- **Slots.** `ranuras_libres()` samples each slot (clear space, 2× the glyph) against the alpha of every later sticker and raises
+  on overlap. It passes for A (6 stickers) and B (8). Grey slots carry an IG/YT/TT label; Spotify uses its official icon.
+- Stills: `calcas3-a`, `-a-esc2`, `-b`, `-b-esc2` on the contact page, with both art sheets. slop-check exit 0; revisar web exit 0 at 390 and 1440.
+Run: `uv run -q --with numpy --with pillow python -I blender/calcas_arte.py`, then `utileria.py` with
+`calcas3-a,calcas3-a-esc2,calcas3-b,calcas3-b-esc2` (about 20 s each after the 30 s scene build).
+
+**The Blender half (done 05:08, see the state above; the brief as it was):** Add it to `utileria.py` **above** the glovebox block, which is destructive and must stay last:
 1. `calca3(id, x, z, rot, orden=0)`: a grid of 24×24 in XY, sized from `calcas3.json`, `rot=(pi/2, rot, 0)` like `plano`, sitting
    0.6 mm + `orden`×0.3 mm off the surface hit by `rayo` (as `en()` in `calcas2`). Curl one corner (bottom-left, away from the glyph):
    for a vertex whose distance past a fold line 5 cm from the corner is d > 0, lift it along local +Z by R(1 − cos(d/R)) and pull it
@@ -75,11 +114,16 @@ and the heads retopo.
   the `piel` normal test. A ray-cast from the `guantera2-borde` camera found it. The `roza` dash hypothesis was wrong and is
   reverted. `piel` now also needs every vertex within 4 cm of the dash face. Regression probe: `blender/probe_guantera.py`
   (a38984e: 0.112 m, FAIL; now: 0.0007 m, PASS). Side effect: the door is now only the front skin, 11.6 cm tall, and the inner
-  box spans z 1.279–1.395, while the dash hole still reaches down to z 1.194. **The incoming check fails: the inner box
-  no longer covers the whole hole.** In `guantera2-borde` this shows as a dark band between the shelf lip and the door. Whether
-  it is see-through has not been checked. Fix: size the inner box from the removed dash faces, under its own `CORTE` keys.
-  `CORTE["lo"/"hi"]` must stay the door's bbox, because `probe_guantera.py` reads `hi.y` as the door's depth. The contact
-  page jpgs `guantera2-*.jpg` are the fixed renders.
+  box spanned z 1.279–1.395 while the dash hole reached down to z 1.194. **Fixed 05:05 (yappingdrone).** The inner box is
+  sized from every vertex of the removed faces (`CORTE["hueco_*"]`, box extents in `CORTE["caja_*"]`; `lo`/`hi` stay the door).
+  `probe_guantera.py` now also checks the cover in x and z: falta 0.082 m FAIL before, -0.003 m PASS after. That uncovered a second fault.
+  The door liner was a vertical box on a skin that leans ~37°, so once the door opened it stood off the door at an angle, and the two
+  door meshes showed through the gap (found by ray-casting the `guantera2-borde` camera). The liner now lies on the skin's plane,
+  and the junk anchor (`centro`, `n`) follows it. Third fault, same fix: the lowered box started at the top of the leaning skin
+  (y 1.147), so below the hinge it stood 9 cm into the cabin (a second ledge under the open door). Below the hinge it now starts at
+  the dash face (`hi.y`), and its side walls follow the skin's lean. Probe `sale`: 0.088 m FAIL with the old box, 0.0 PASS now.
+  Left: a thin dark sliver where a door-mesh edge pokes through the liner on the
+  left, in the empty-door still. The contact page jpgs `guantera2-*.jpg` are these renders.
 - **Glovebox junk: fixed (03:18).** The cause was the pivot. It was taken from the lowest verts, which are the back of the
   0.2 m-deep cut (y 1.3465). It now sits on the front skin at `GUANTERA.y` (1.234). One side wall of the shell sticks up beside the
   door; it is kept, because bin-style gloveboxes have walls.

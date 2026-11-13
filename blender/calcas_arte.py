@@ -47,20 +47,22 @@ def pegar(img, m, color, borde=0, extr=0):
     img.paste(color, (0, 0), m)
 
 
-def letras(img, texto, cx, cy, alto, color, peso="Black", incl=0.18, borde=0, ancho=None):
+def letras(img, texto, cx, cy, alto, color, peso="Black", incl=0.18, borde=0, ancho=None, extr=0):
     """Caps in Saira Condensed, slanted like the logo (DESIGN.md › Type), fitted to `ancho` px if given."""
     fn = f(peso, alto)
     l, t, r, b = fn.getbbox(texto)
     if ancho and r - l > ancho:
         fn = f(peso, int(alto * ancho / (r - l)))
         l, t, r, b = fn.getbbox(texto)
-    w, h = r - l + int(alto * incl) + 8, b - t + 8
+    h = b - t + 8
+    w = r - l + int(incl * h) + 8  # the slant moves the top row right by incl·h: drawn at the left edge, the last letter's top
+    # (the T's bar) is no longer clipped (owner 05:15: "the T on the stickers is not rendered properly")
     m = Image.new("L", (w, h), 0)
-    ImageDraw.Draw(m).text((4 - l + int(alto * incl), 4 - t), texto, font=fn, fill=255)
+    ImageDraw.Draw(m).text((4 - l, 4 - t), texto, font=fn, fill=255)
     m = m.transform(m.size, Image.AFFINE, (1, incl, -incl * h, 0, 1, 0), Image.BICUBIC)
     full = Image.new("L", img.size, 0)
     full.paste(m, (int(cx - w / 2), int(cy - h / 2)))
-    pegar(img, full, color, borde)
+    pegar(img, full, color, borde, extr)
 
 
 def fresa(img, cx, cy, r, borde, extr, cuerpo=ROSA, hoja=LIMA, semilla=LIMON):
@@ -303,10 +305,148 @@ def b_tiktok():
     return img, dict(ranura(img, *g), mm=GLIFO_MM * 0.6), "mate"
 
 
+# ---------------------------------------------------------------- the larger set (owner 04:38 on calcas3-arte.jpg: "those are
+# good, use more variations like that"). Band stickers with no platform glyph (glifo None): no slot, no brand files. Same rows of
+# references.md › Stickers, design pass: A = bold-pop, B = troca (Mercado Libre listings, the slaps decay article), finishes as before.
+def estrella(cx, cy, r0, r1, n=16):
+    return [(cx + math.cos(i * math.pi / n - math.pi / 2) * (r0 if i % 2 == 0 else r1),
+             cy + math.sin(i * math.pi / n - math.pi / 2) * (r0 if i % 2 == 0 else r1)) for i in range(2 * n)]
+
+
+def carta(img, num, nombre, fondo, papel, tinta, dibujo):
+    """Lotería-style card (our own cards, our own subjects): paper with a white margin, ink frame, number top-left, the picture,
+    the name in a box at the bottom."""
+    W, H = img.size
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle((0, 0, W - 1, H - 1), 6 * PX, fill=WHITE)
+    d.rounded_rectangle((4 * PX, 4 * PX, W - 4 * PX, H - 4 * PX), 4 * PX, fill=papel, outline=tinta, width=2 * PX)
+    d.rectangle((9 * PX, 9 * PX, W - 9 * PX, H * 0.78), fill=fondo, outline=tinta, width=PX)
+    dibujo(W / 2, H * 0.45)
+    d = ImageDraw.Draw(img)
+    letras(img, num, 18 * PX, 19 * PX, int(H * 0.11), papel, borde=PX * 2, incl=0)
+    d.rectangle((9 * PX, H * 0.81, W - 9 * PX, H - 9 * PX), fill=papel, outline=tinta, width=PX)
+    letras(img, nombre, W / 2, (H * 0.81 + H - 9 * PX) / 2, int(H * 0.1), tinta, incl=0.1, ancho=W * 0.74)
+
+
+def a_putifresa():
+    """A5 lettering-only die-cut, gloss: PUTIFRESA in fat pink with the bold-pop outline and extrusion, a small strawberry on the end."""
+    img = lienzo(320, 120)
+    W, H = img.size
+    letras(img, "PUTIFRESA", W * 0.4, H * 0.56, int(H * 0.62), ROSA, borde=12, ancho=W * 0.72, extr=14)
+    fresa(img, W * 0.9, H * 0.42, H * 0.25, 10, 12)
+    img, pad = troquel(img, 6)
+    return img, None, "brillo"
+
+
+def a_estrella():
+    """A6 holographic starburst, die-cut: MT on a pink disc, MÍRANOS / EN YOUTUBE under it (owner 05:30: the MT TUMBADO one
+    carries the YouTube call instead), the silver star field for the thin-film shader."""
+    img = lienzo(170, 170)
+    W = img.size[0]
+    pegar(img, mascara(img.size, lambda d: d.polygon(estrella(W / 2, W / 2, W * 0.49, W * 0.38), fill=255)), (225, 225, 230, 255), 10)
+    pegar(img, mascara(img.size, lambda d: d.ellipse((W * 0.22, W * 0.22, W * 0.78, W * 0.78), fill=255)), ROSA, 9, 10)
+    letras(img, "MT", W * 0.5, W * 0.43, int(W * 0.3), LIMON, borde=10)
+    letras(img, "MÍRANOS", W * 0.5, W * 0.635, int(W * 0.085), INK, ancho=W * 0.36)
+    letras(img, "EN YOUTUBE", W * 0.5, W * 0.715, int(W * 0.055), INK, peso="Bold", ancho=W * 0.27)
+    img, pad = troquel(img, 5)
+    return img, None, "holo"
+
+
+def a_loteria():
+    """A7 matte paper lotería card: EL CASETE, number 7, pink cassette on turquoise; light wear."""
+    img = lienzo(110, 160)
+    carta(img, "7", "EL CASETE", TURQ, CREMA, INK, lambda cx, cy: casete(img, cx, cy, img.size[0] * 0.62, 8, 10, cuerpo=ROSA, etiqueta=CREMA))
+    img = gastar(img, sol=0.1, rayones=4, semilla=11)
+    return img, None, "mate"
+
+
+def a_mafia():
+    """A8 die-cut gloss ribbon banner: MAFIA TUMBADA in lemon on turquoise, the folded tails behind."""
+    img = lienzo(340, 110)
+    W, H = img.size
+    oscuro = (12, 120, 140, 255)
+    colas = lambda d: [d.polygon(p, fill=255) for p in (
+        [(W * 0.02, H * 0.38), (W * 0.16, H * 0.38), (W * 0.16, H * 0.86), (W * 0.02, H * 0.86), (W * 0.07, H * 0.62)],
+        [(W * 0.98, H * 0.38), (W * 0.84, H * 0.38), (W * 0.84, H * 0.86), (W * 0.98, H * 0.86), (W * 0.93, H * 0.62)])]
+    pegar(img, mascara(img.size, colas), oscuro, 8, 10)
+    pegar(img, mascara(img.size, lambda d: d.polygon([(W * 0.1, H * 0.16), (W * 0.9, H * 0.16), (W * 0.9, H * 0.72), (W * 0.1, H * 0.72)], fill=255)), TURQ, 9, 12)
+    letras(img, "MAFIA TUMBADA", W * 0.5, H * 0.44, int(H * 0.36), LIMON, borde=9, ancho=W * 0.72)
+    img, pad = troquel(img, 6)
+    return img, None, "brillo"
+
+
+def b_pura():
+    """B5 gold chrome letter-cut, the tailgate lettering: PURA MT with a swoosh under it, no background (owner 05:15: the band is
+    from Xalapa, so "pura mt o pura mafiatumbada" instead of PURO VERACRUZ; 05:30: PURA MT)."""
+    img = lienzo(330, 130)
+    W, H = img.size
+    letras(img, "PURA MT", W * 0.5, H * 0.45, int(H * 0.66), GOLD, ancho=W * 0.82)
+    m = np.asarray(mascara(img.size, lambda d: d.chord((W * 0.06, H * 0.62, W * 0.98, H * 1.02), 15, 165, fill=255)))
+    m2 = np.asarray(mascara(img.size, lambda d: d.chord((W * 0.06, H * 0.56, W * 0.98, H * 0.95), 15, 165, fill=255)))
+    img.paste(GOLD, (0, 0), Image.fromarray(((m > 0) & (m2 == 0)).astype(np.uint8) * 255))
+    return img, None, "cromo"
+
+
+def b_escudo():
+    """B6 die-cut gloss shield, black with a gold rope border, MT and a TUMBADOS ribbon; sun-faded."""
+    img = lienzo(150, 180)
+    W, H = img.size
+    forma = lambda k: [(W * (0.5 + (x - 0.5) * k), H * (0.5 + (y - 0.5) * k)) for x, y in
+                       ((0.06, 0.06), (0.94, 0.06), (0.94, 0.5), (0.8, 0.78), (0.5, 0.96), (0.2, 0.78), (0.06, 0.5))]
+    d = ImageDraw.Draw(img)
+    d.polygon(forma(1), fill=CAP)
+    d.line(forma(0.86) + forma(0.86)[:1], fill=GOLD, width=3 * PX)
+    for x, y in forma(0.86):  # rope knots at the corners
+        d.ellipse((x - 2.5 * PX, y - 2.5 * PX, x + 2.5 * PX, y + 2.5 * PX), fill=GOLD)
+    letras(img, "MT", W * 0.5, H * 0.36, int(H * 0.3), GOLD, ancho=W * 0.6)
+    d.polygon([(W * 0.08, H * 0.58), (W * 0.92, H * 0.58), (W * 0.86, H * 0.69), (W * 0.92, H * 0.8), (W * 0.08, H * 0.8), (W * 0.14, H * 0.69)], fill=GOLD)
+    letras(img, "TUMBADOS", W * 0.5, H * 0.69, int(H * 0.1), CAP, ancho=W * 0.6)
+    img, pad = troquel(img, 5)
+    img = gastar(img, sol=0.25, rayones=8, semilla=13)
+    return img, None, "brillo"
+
+
+def b_loteria():
+    """B7 matte paper lotería card, black and gold: EL SOMBRERO, number 12; faded, chipped."""
+    img = lienzo(110, 160)
+    carta(img, "12", "EL SOMBRERO", CAP, CREMA, CAP, lambda cx, cy: sombrero(img, cx, cy + 6 * PX, img.size[0] * 0.36, 6, 0, ala=GOLD, banda=CREMA))
+    img = gastar(img, sol=0.35, rasgado=5, rayones=10, semilla=17)
+    return img, None, "mate"
+
+
+def b_ver():
+    """B8 classic oval country-code bumper sticker, gold on black: VER, the band name under it; the oldest after B1."""
+    img = lienzo(220, 140)
+    W, H = img.size
+    d = ImageDraw.Draw(img)
+    d.ellipse((0, 0, W - 1, H - 1), fill=WHITE)
+    d.ellipse((10, 10, W - 11, H - 11), fill=CAP)
+    d.ellipse((22, 22, W - 23, H - 23), outline=GOLD, width=10)
+    letras(img, "VER", W * 0.5, H * 0.44, int(H * 0.46), GOLD, incl=0.0, ancho=W * 0.5)
+    letras(img, "MAFIA TUMBADA", W * 0.5, H * 0.72, int(H * 0.1), GOLD, peso="Bold", incl=0.0, ancho=W * 0.42)
+    img = gastar(img, sol=0.4, rasgado=4, rayones=14, semilla=19)
+    return img, None, "brillo"
+
+
+PRIMERAS = (a_instagram, a_spotify, a_youtube, a_tiktok, b_instagram, b_spotify, b_youtube, b_tiktok)
+NUEVAS = (a_putifresa, a_estrella, a_loteria, a_mafia, b_pura, b_escudo, b_loteria, b_ver)
+
+
+def hoja(nombres, archivo):
+    """Contact sheet of the art (overview only): A in the left column, B in the right."""
+    filas = math.ceil(len(nombres) / 2)
+    h = Image.new("RGBA", (2 * 1400, filas * 820), (40, 40, 44, 255))
+    for i, n in enumerate(nombres):
+        im = Image.open(os.path.join(OUT, n + ".png"))
+        im.thumbnail((1300, 760))
+        h.alpha_composite(im, ((i // filas) * 1400 + 50, (i % filas) * 820 + 30))
+    h.convert("RGB").resize((1400, filas * 410)).save(os.path.join(OUT, archivo), quality=85)
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     meta = {}
-    for fn in (a_instagram, a_spotify, a_youtube, a_tiktok, b_instagram, b_spotify, b_youtube, b_tiktok):
+    for fn in PRIMERAS + NUEVAS:
         nombre = fn.__name__.replace("_", "-")
         img, glifo, acabado = fn()
         img.save(os.path.join(OUT, nombre + ".png"))
@@ -314,9 +454,5 @@ if __name__ == "__main__":
         meta[nombre] = {"w": img.size[0] / PX / 1000, "h": img.size[1] / PX / 1000, "acabado": acabado, "glifo": glifo}
         print(nombre, img.size, acabado)
     json.dump(meta, open(os.path.join(OUT, "calcas3.json"), "w"), indent=1)
-    hoja = Image.new("RGBA", (2 * 1400, 4 * 820), (40, 40, 44, 255))  # contact sheet of the art (overview only)
-    for i, n in enumerate(meta):
-        im = Image.open(os.path.join(OUT, n + ".png"))
-        im.thumbnail((1300, 760))
-        hoja.alpha_composite(im, ((i // 4) * 1400 + 50, (i % 4) * 820 + 30))
-    hoja.convert("RGB").resize((1400, 1640)).save(os.path.join(OUT, "hoja-arte.jpg"), quality=85)
+    hoja([fn.__name__.replace("_", "-") for fn in PRIMERAS], "hoja-arte.jpg")
+    hoja([fn.__name__.replace("_", "-") for fn in NUEVAS], "hoja-arte-2.jpg")

@@ -922,6 +922,286 @@ def calcas2():
     return VISTA_CALCAS()
 
 
+# ---- stickers, design pass (calcas3): art from blender/calcas_arte.py (run it first), references.md › Stickers, design pass.
+# Each sticker is a grid draped on the tailgate (the gate has 1 cm steps between its bands, z 1.22 and 1.05), one corner curled,
+# its own material per finish, and the platform glyph on its own upright quad 1 mm in front. Cells ≤ 4 mm (the handoff's 24×24
+# is 1.5 cm on the big ones, too coarse for a 1.5 cm curl radius).
+import json
+import numpy as np
+CALCAS3 = os.path.join(PANTALLAS, "calcas3")
+META3 = json.load(open(os.path.join(CALCAS3, "calcas3.json"), encoding="utf8")) if os.path.exists(os.path.join(CALCAS3, "calcas3.json")) else {}
+ALFA3 = {}
+SLOT3 = {"instagram": "IG", "youtube": "YT", "tiktok": "TT"}  # grey slots: the owner downloads the official glyphs (mothership 04:25)
+
+
+def alfa3(id):
+    if id not in ALFA3:
+        im = bpy.data.images.load(os.path.join(CALCAS3, id + ".png"), check_existing=True)
+        a = np.empty(len(im.pixels), np.float32)
+        im.pixels.foreach_get(a)
+        ALFA3[id] = a.reshape(im.size[1], im.size[0], 4)[..., 3]  # row 0 = bottom = v 0
+    return ALFA3[id]
+
+
+def pared3(x, z):
+    """Tailgate surface y at (x, z): the first hit along +y that is not a sticker."""
+    o = Vector((x, PORTON.y - 1.0, z))
+    for _ in range(12):
+        hit, loc, n, i, ob, m = sc.ray_cast(dg, o, Vector((0, 1, 0)))
+        if not hit:
+            return None
+        if not ob.name.startswith("c3_"):
+            return loc.y
+        o = loc + Vector((0, 0.0001, 0))
+    return None
+
+
+def mat3(id, acabado):
+    """Image → Base Color, alpha → Alpha, the raised-edge normal map (Non-Color, tangent space), the finish; the backing (white,
+    rough) on the back faces, so the curl shows the underside."""
+    m = bpy.data.materials.new("c3_" + id)
+    m.use_nodes = True
+    nt = m.node_tree
+    b = nt.nodes["Principled BSDF"]
+    tx = nt.nodes.new("ShaderNodeTexImage")
+    tx.image = bpy.data.images.load(os.path.join(CALCAS3, id + ".png"), check_existing=True)
+    tx.extension = "CLIP"
+    nt.links.new(tx.outputs["Color"], b.inputs["Base Color"])
+    nt.links.new(tx.outputs["Alpha"], b.inputs["Alpha"])
+    tn = nt.nodes.new("ShaderNodeTexImage")
+    tn.image = bpy.data.images.load(os.path.join(CALCAS3, id + "-n.png"), check_existing=True)
+    tn.image.colorspace_settings.name = "Non-Color"
+    nm = nt.nodes.new("ShaderNodeNormalMap")
+    nt.links.new(tn.outputs["Color"], nm.inputs["Color"])
+    nt.links.new(nm.outputs["Normal"], b.inputs["Normal"])
+    if acabado == "brillo":
+        b.inputs["Coat Weight"].default_value, b.inputs["Coat Roughness"].default_value = 1.0, 0.05
+        b.inputs["Roughness"].default_value = 0.35
+        nt.links.new(nm.outputs["Normal"], b.inputs["Coat Normal"])
+    elif acabado == "mate":
+        b.inputs["Roughness"].default_value = 0.85
+    elif acabado == "holo":
+        b.inputs["Metallic"].default_value, b.inputs["Roughness"].default_value = 0.6, 0.2
+        nz = nt.nodes.new("ShaderNodeTexNoise")
+        nz.inputs["Scale"].default_value = 6.0
+        mr = nt.nodes.new("ShaderNodeMapRange")
+        mr.inputs["To Min"].default_value, mr.inputs["To Max"].default_value = 250.0, 750.0
+        nt.links.new(nz.outputs["Fac"], mr.inputs["Value"])
+        nt.links.new(mr.outputs["Result"], b.inputs["Thin Film Thickness"])
+        b.inputs["Thin Film IOR"].default_value = 1.33
+    elif acabado == "cromo":
+        b.inputs["Metallic"].default_value, b.inputs["Roughness"].default_value = 1.0, 0.25  # 0.12 mirrored the night: black letters
+    back = nt.nodes.new("ShaderNodeBsdfPrincipled")
+    back.inputs["Base Color"].default_value = (0.9, 0.9, 0.88, 1)
+    back.inputs["Roughness"].default_value = 0.6
+    nt.links.new(tx.outputs["Alpha"], back.inputs["Alpha"])
+    geo = nt.nodes.new("ShaderNodeNewGeometry")
+    mx = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(geo.outputs["Backfacing"], mx.inputs["Fac"])
+    nt.links.new(b.outputs["BSDF"], mx.inputs[1])
+    nt.links.new(back.outputs["BSDF"], mx.inputs[2])
+    out = nt.nodes["Material Output"]
+    nt.links.new(mx.outputs["Shader"], out.inputs["Surface"])
+    return m
+
+
+ESQ = {"bi": (-1, -1), "bd": (1, -1), "si": (-1, 1), "sd": (1, 1)}
+
+
+def calca3(id, x, z, rot, orden=0, rizo="auto", largo=0.025, R=0.015):
+    """One sticker at (CX + x, z), turned `rot` in its plane, 0.6 mm + orden × 0.3 mm off the tailgate surface under each vertex.
+    rizo: the curled corner ("bi" bottom-left … "sd", "auto" = the corner farthest from the glyph slot, None = flat). The fold
+    sits `largo` in from the sticker's own edge along the corner's diagonal; past it a vertex rolls on radius R:
+    lift R(1 − cos(d/R)), pulled back d − R·sin(d/R). The handoff's 5 cm rolled ~190° and hid lettering at the close-up
+    (SÍ of SÍGUENOS, the MT of the oval): 2.5 cm by default (~95°), 3.5 cm on the oldest pieces."""
+    me = META3[id]
+    w, h, gl = me["w"], me["h"], me["glifo"]
+    nx, ny = max(24, math.ceil(w / 0.004)), max(24, math.ceil(h / 0.004))
+    bpy.ops.mesh.primitive_grid_add(x_subdivisions=nx, y_subdivisions=ny, size=1, location=(CX + x, PORTON.y, z), rotation=(math.pi / 2, rot, 0))
+    o = bpy.context.object
+    o.name, o["c3"] = "c3_" + id, id
+    for v in o.data.vertices:
+        v.co.x *= w
+        v.co.y *= h
+    bpy.context.view_layer.update()
+    mw, off = o.matrix_world.copy(), 0.0006 + orden * 0.0003
+    a = alfa3(id)
+    H, W = a.shape
+    if rizo == "auto":
+        rizo = "bi"
+        if gl:
+            g = Vector(((gl["u"] - 0.5) * w, (gl["v"] - 0.5) * h))
+            rizo = max(ESQ, key=lambda k: ((Vector((ESQ[k][0] * w / 2, ESQ[k][1] * h / 2)) - g).length, k == "bi"))
+    if rizo:
+        dr = Vector((ESQ[rizo][0] * w, ESQ[rizo][1] * h)).normalized()
+        fil, col = np.nonzero(a[::4, ::4] > 0.1)
+        borde = max(((c * 4 / W - 0.5) * w) * dr.x + ((f * 4 / H - 0.5) * h) * dr.y for f, c in zip(fil, col))
+        pliegue = borde - largo
+        if gl:  # the slot (clear space, 2× the glyph) must stay flat
+            k = gl["mm"] / 1000
+            g = Vector(((gl["u"] - 0.5) * w, (gl["v"] - 0.5) * h))
+            if max((g + Vector((sx * k, sy * k))).dot(dr) for sx in (-1, 1) for sy in (-1, 1)) > pliegue:
+                raise RuntimeError(f"calca3 {id}: glyph slot inside the curl ({rizo})")
+    vs = o.data.vertices
+    zs = np.empty(len(vs))
+    for k, v in enumerate(vs):
+        p = mw @ Vector((v.co.x, v.co.y, 0))
+        y = pared3(p.x, p.z)
+        zs[k] = PORTON.y - ((PORTON.y if y is None else y) - off)  # local +Z = world −y (towards the camera)
+    # stiff over the body lines: following every vertex into the gate's 8 mm steps (z 1.22, 1.05) sliced the stickers that cross
+    # them. A max over ~1.5 cm, then a box blur of the same size, never below the paint: the sticker tents over a step
+    cx_, cy_ = np.array([v.co.x for v in vs]), np.array([v.co.y for v in vs])
+    ux, uy = np.unique(cx_.round(6)), np.unique(cy_.round(6))
+    ii, jj = np.searchsorted(ux, cx_.round(6)), np.searchsorted(uy, cy_.round(6))
+    # rays that slip through seams and holes of the gate mesh hit the cab ~1.1 m behind: floor them 12 mm under the median (the
+    # gate's own steps are 8-9 mm), or the sticker dives there (the dark square on b-instagram, the band across a-loteria)
+    piso = float(np.median(zs)) - 0.012
+    G = np.zeros((len(uy), len(ux)))
+    G[jj, ii] = np.maximum(zs, piso)
+    r = math.ceil(0.015 / (w / (len(ux) - 1)))
+    P = np.pad(G, r, mode="edge")
+    M = np.max([P[r + a:r + a + G.shape[0], r + b:r + b + G.shape[1]] for a in range(-r, r + 1) for b in range(-r, r + 1)], axis=0)
+    P = np.pad(M, r, mode="edge")
+    T3 = np.maximum(np.mean([P[r + a:r + a + G.shape[0], r + b:r + b + G.shape[1]] for a in range(-r, r + 1) for b in range(-r, r + 1)], axis=0), G)
+    print("CALCA3", id, "pozos", int((zs < piso).sum()), "tienda max mm", round(float((T3 - G).max()) * 1000, 1))
+    for k, v in enumerate(vs):
+        v.co.z = T3[jj[k], ii[k]]
+        if rizo:
+            d = Vector((v.co.x, v.co.y)).dot(dr) - pliegue
+            if d > 0:
+                ang = d / R
+                v.co.z += R * (1 - math.cos(ang))
+                v.co.x -= dr.x * (d - R * math.sin(ang))
+                v.co.y -= dr.y * (d - R * math.sin(ang))
+    o.data.materials.append(mat3(id, me["acabado"]))
+    bpy.ops.object.shade_smooth()
+    _fin(o, None, None)
+    plat = id.split("-", 1)[1]
+    if gl:  # the glyph on its own upright quad, 1 mm in front of the sticker at the slot
+        bpy.context.view_layer.update()
+        k = gl["mm"] / 1000
+        gx, gy = (gl["u"] - 0.5) * w, (gl["v"] - 0.5) * h
+        z0 = T3[np.searchsorted(uy, gy).clip(0, len(uy) - 1), np.searchsorted(ux, gx).clip(0, len(ux) - 1)]
+        c = o.matrix_world @ Vector((gx, gy, z0)) - Vector((0, 0.001, 0))  # on the sticker's own surface at the slot
+        if plat == "spotify":
+            mi = img_mat("c3_spotify_icono", os.path.join(CALCAS3, "spotify-icon.png"), rough=0.35)
+            nt = mi.node_tree
+            nt.links.new(nt.nodes["Image Texture"].outputs["Alpha"], nt.nodes["Principled BSDF"].inputs["Alpha"])
+            plano(k, k, c, mi)
+        else:
+            plano(k, k, c, mat("c3_ranura", (0.5, 0.5, 0.5), 0.5))
+            texto(SLOT3[plat], k * 0.38, c + Vector((0, -0.0004, 0)), mat("c3_ranura_txt", (0.12, 0.12, 0.12), 0.6))
+    return o
+
+
+def ranuras_libres(calcas):
+    """No sticker may cover a glyph slot of one laid before it (clear space, 2× the glyph): 9×9 samples of each slot square
+    against the alpha of every later sticker, in its flat local frame. Raises (the run fails under --python-exit-code 1)."""
+    bpy.context.view_layer.update()
+    for i, a in enumerate(calcas):
+        gl = META3[a["c3"]]["glifo"]
+        if not gl:
+            continue
+        ma, wa, ha, k = a.matrix_world, META3[a["c3"]]["w"], META3[a["c3"]]["h"], gl["mm"] / 1000
+        g = Vector(((gl["u"] - 0.5) * wa, (gl["v"] - 0.5) * ha))
+        for b in calcas[i + 1:]:
+            mb, wb, hb = b.matrix_world.inverted(), META3[b["c3"]]["w"], META3[b["c3"]]["h"]
+            al = alfa3(b["c3"])
+            for sx in np.linspace(-k, k, 9):
+                for sy in np.linspace(-k, k, 9):
+                    p = ma @ Vector((g.x + sx, g.y + sy, 0))
+                    q = mb @ p
+                    u, v = q.x / wb + 0.5, q.y / hb + 0.5
+                    if 0 <= u < 1 and 0 <= v < 1 and al[int(v * al.shape[0]), int(u * al.shape[1])] > 0.1:
+                        raise RuntimeError(f"calcas3: {b.name} covers the glyph slot of {a.name}")
+    print("CALCAS3 ranuras libres", [o.name for o in calcas])
+
+
+def luces3(pos):
+    """Camera-side fill aimed at the tailgate, plus (where the mirror point is above the road) a soft light at the camera's mirror
+    position across the tailgate normal, so gloss and holo send a highlight to the lens. Neither is seen by the camera."""
+    S = Vector((CX, PORTON.y, 1.22))
+    P = Vector(pos)
+    luz("AREA", P + (S - P).normalized() * 0.6 + Vector((0.5, 0, 0.3)), 60 * ((S - P).length / 2.4) ** 2, (1.0, 0.92, 0.8), mira=S, size=1.0, parent=False)
+    v = P - S
+    r = Vector((-v.x, v.y, -v.z))  # mirror across the normal (0, −1, 0): 2(v·n)n − v
+    L = S + r
+    if L.z > 0.4:
+        luz("AREA", L, 25 * (r.length / 2.4) ** 2, (1.0, 0.92, 0.8), mira=S, size=0.5, parent=False)  # 120 W, 1.2 m washed every sticker
+    for o in GRUPO:
+        if o.type == "LIGHT":
+            o.visible_camera = False
+
+
+def calcas3_a():
+    """A "puesto de merch": six separate pieces spread across the gate, bold-pop colour, newish; no overlaps."""
+    cs = [calca3("a-instagram", -0.38, 1.31, 0.10), calca3("a-estrella", 0.25, 1.33, -0.12), calca3("a-spotify", 0.45, 1.32, -0.06),
+          calca3("a-tiktok", -0.34, 1.10, 0.0, rizo=None), calca3("a-loteria", -0.07, 1.13, 0.12, largo=0.02),
+          calca3("a-youtube", 0.27, 1.12, -0.04)]
+    ranuras_libres(cs)
+
+
+def calcas3_b():
+    """B "troca": black and gold, the stack in the upper-left (b-instagram under b-youtube, which overlaps its torn end; b-spotify
+    and b-tiktok partly over the strip), loose singles on the right and the gold chrome PURA MT lettering low right."""
+    cs = [calca3("b-instagram", -0.36, 1.33, -0.05, orden=0, rizo="si", largo=0.035), calca3("b-ver", -0.36, 1.08, -0.10, orden=1, rizo="bd", largo=0.035),
+          calca3("b-youtube", -0.47, 1.21, 0.12, orden=2), calca3("b-spotify", -0.22, 1.215, -0.08, orden=3),
+          calca3("b-tiktok", -0.12, 1.10, 0.15, orden=4, largo=0.015), calca3("b-loteria", 0.24, 1.32, -0.12, rizo="sd"),
+          calca3("b-escudo", 0.43, 1.31, 0.08), calca3("b-pura", 0.28, 1.12, 0.0, rizo=None)]
+    ranuras_libres(cs)
+
+
+@opcion("calcas3-a")
+def op_calcas3_a():
+    calcas3_a()
+    luces3(VISTA_CALCAS()[0])
+    return VISTA_CALCAS()
+
+
+@opcion("calcas3-a-esc2")
+def op_calcas3_a_esc2():
+    calcas3_a()
+    luces3(VISTA_ESC2()[0])
+    return VISTA_ESC2()
+
+
+@opcion("calcas3-b")
+def op_calcas3_b():
+    calcas3_b()
+    luces3(VISTA_CALCAS()[0])
+    return VISTA_CALCAS()
+
+
+@opcion("calcas3-b-esc2")
+def op_calcas3_b_esc2():
+    calcas3_b()
+    luces3(VISTA_ESC2()[0])
+    return VISTA_ESC2()
+
+
+def calcas3_mix():
+    """Owner's pick (05:15): a mix of A and B, collected over time. A: the strawberry (IG), the holo badge (Spotify), the MT holo
+    star; B: the gold strawberry (YouTube), the black round (TikTok), the card EL SOMBRERO, the PURA MT lettering."""
+    cs = [calca3("a-instagram", -0.38, 1.31, 0.10), calca3("b-youtube", 0.24, 1.30, -0.08), calca3("b-tiktok", -0.42, 1.10, 0.15),
+          calca3("a-estrella", -0.08, 1.14, 0.12), calca3("b-pura", 0.30, 1.12, 0.0, rizo=None),
+          calca3("a-spotify", 0.46, 1.33, -0.06, orden=1), calca3("b-loteria", -0.25, 1.12, -0.10, orden=1, largo=0.02)]
+    ranuras_libres(cs)
+
+
+@opcion("calcas3-mix")
+def op_calcas3_mix():
+    calcas3_mix()
+    luces3(VISTA_CALCAS()[0])
+    return VISTA_CALCAS()
+
+
+@opcion("calcas3-mix-esc2")
+def op_calcas3_mix_esc2():
+    calcas3_mix()
+    luces3(VISTA_ESC2()[0])
+    return VISTA_ESC2()
+
+
 # ---- glovebox C: the door cut out of the G63 mesh. Destructive for the dash: these options must stay last in the file.
 CORTE = {}
 CORTE_BOX = ((1.95, 2.35), (1.15, 1.30), (1.15, 1.38))
@@ -953,6 +1233,7 @@ def cortar_guantera():
         piel = {i for i in idx if abs((m3 @ o.data.polygons[i].normal).normalized().y) > 0.6
                 and all((mw @ vs[v].co).y < GUANTERA.y + 0.04 for v in o.data.polygons[i].vertices)}
         print("CORTE piel", o.name, len(piel), "de", len(idx))
+        cortes += [mw @ vs[v].co for i in idx for v in o.data.polygons[i].vertices]  # the hole left in the dash
         puerta = o.copy()
         puerta.data = o.data.copy()
         sc.collection.objects.link(puerta)
@@ -971,6 +1252,9 @@ def cortar_guantera():
     lo = Vector((min(v.x for v in todos), min(v.y for v in todos), min(v.z for v in todos)))
     hi = Vector((max(v.x for v in todos), max(v.y for v in todos), max(v.z for v in todos)))
     print("CORTE bbox", lo, hi)
+    hlo = Vector((min(v.x for v in cortes), min(v.y for v in cortes), min(v.z for v in cortes)))
+    hhi = Vector((max(v.x for v in cortes), max(v.y for v in cortes), max(v.z for v in cortes)))
+    print("CORTE hueco", hlo, hhi)
     # hinge on the front skin's lower edge: the cut runs 0.2 m deep and its lowest verts are at the back (y≈1.3), so a pivot
     # taken from them swings the skin out as a wedge and leaves anything placed off the pivot inside the box
     piv = Vector(((lo.x + hi.x) / 2, GUANTERA.y, lo.z))
@@ -1079,7 +1363,3 @@ for nombre, f in OPC.items():
     for o in FIGURAS:
         o.hide_render = False
     print("TOMA", nombre, round(time.time() - t1, 1), "s")
-        cortes += [mw @ vs[v].co for i in idx for v in o.data.polygons[i].vertices]  # the hole left in the dash
-    hlo = Vector((min(v.x for v in cortes), min(v.y for v in cortes), min(v.z for v in cortes)))
-    hhi = Vector((max(v.x for v in cortes), max(v.y for v in cortes), max(v.z for v in cortes)))
-    print("CORTE hueco", hlo, hhi)
