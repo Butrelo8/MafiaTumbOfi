@@ -3,7 +3,7 @@
 Run `mto-buttons-icons`, ticket `docs/queue/2026-11-12-mto-buttons-icons-pair.md` (mothership). Branch `cc/auradrone`.
 Design doc: `docs/design/DESIGN.md`. Tokens: the `:root` block in `src/pages/index.astro` (no tokens.css yet).
 References (gate passed, sections botones, iconos, estados): `docs/design/references.md` › "Buttons and icons pair run".
-Dev server: not started yet (the site has no database, so there is no scratch DB to protect; it runs from this worktree).
+Dev server: not started yet (ports 3100 and 3119 belong to other trees; this worktree gets its own port, URL goes here) (the site has no database, so there is no scratch DB to protect; it runs from this worktree).
 
 ## Ticket
 Buttons and icons that read as crafted, not stock. Every button has idle, hover, press, focus, loading and done where a real
@@ -25,7 +25,7 @@ alexander-oliva.com and eptosuno.com are anti-references.
 1. **Tecla**: a square gold cap on a 4 px dark-gold lip, like a dash key; press sinks the cap onto the lip; trailing chevron
    nudges on hover. Sources: todoist two-layer button, nothing.tech chevron.
 2. **Boleto**: a stub with half-circle notches on both side edges; press dips and acts on release; done lands a stamp.
-   Sources: boleto-perforado (Box Office, Design Lounge ticket). The band sells tickets-to-a-show feelings; the form says "contratación".
+   Sources: boleto-perforado (Box Office, Design Lounge ticket).
 3. **Marco**: a square 2 px gold outline, uppercase, no fill at rest; the fill wipes up from the bottom (the working
    button, refined: chevron, focus ring inside the box, loading and done). Sources: teenage.engineering outline, rafadesign wipe.
 
@@ -43,8 +43,7 @@ icons swap without a morph and the first frame after a click equals the settled 
 | icon | where | morph | tool |
 |---|---|---|---|
 | play to pause | loop toggle `#pausa` | A to B, 250 ms, with the label | GSAP MorphSVG |
-| play to equalizer bars | Escuchar while the link is pending | A to B | GSAP MorphSVG |
-| arrow to check | none on links (no fake done); kept for the toggle's done | A to B | GSAP MorphSVG |
+| loading ring to pause (buffering ends) | loop toggle | A to B, part of the 4-state machine below | Rive |
 | loading ring, pause, play (4 states, interruptible) | loop toggle | detailed | Rive state machine, lazy, weight-gated |
 Rule: if the Rive runtime plus file adds more than 150 KB at 390 over the 1.55 MB baseline, or the WebKit pass fails, every icon
 goes to GSAP and the report says so. GSAP and MorphSVG come from npm, self-hosted, loaded only on pages that need them.
@@ -61,16 +60,15 @@ States per component (domain = real event that drives it):
 | component | idle | hover | press | focus-visible | loading | done |
 |---|---|---|---|---|---|---|
 | Boton (link, in page) | yes | yes | yes | yes | n/a: an anchor jump is instant | n/a: no result to confirm |
-| Boton (link, off-site: Escuchar, platforms, WhatsApp) | yes | yes | yes | yes | after press, until the page hides; icon morphs, `aria-busy`; reset on `pageshow` | n/a: leaving the page is not a success to print |
+| Boton (link, off-site: Escuchar, platforms, WhatsApp) | yes | yes | yes | yes | n/a: nothing loads on this page, and on iPhone the native app opens with this page still alive, so a busy state would stick | n/a: leaving the page is not a success to print |
 | Loop toggle | yes | yes | yes | yes | while the video is buffering (`waiting`), real | playing (`playing`), icon and label change |
 | Empty / error / disabled | n/a: static links with fixed labels; the toggle is hidden until JS runs and `play()` rejection leaves it on "Reproducir video" |
 
 ## Copy deck (Spanish, nothing new on the page except the toggle's loading label)
 Escuchar, Contratar, Escribir por WhatsApp, Spotify, Apple Music, YouTube, "Pausar video", "Reproducir video", and new:
-"Cargando video" (toggle while buffering; `aria-busy`, no visible spinner text beyond the icon). Off-site pending state keeps
-the label (no width change, so no layout shift); the icon and `aria-busy` carry it.
+"Cargando video" (toggle while buffering; `aria-busy`, no visible spinner text beyond the icon). Off-site links show no pending state.
 
-## Checks planned (before each round, 390 and 1440, light/dark n/a: the site is dark only)
+## Checks planned (before each round, 390 and 1440, `--theme light` and `--theme dark` both run and both contrast rows recorded, each state via `--state`)
 `revisar.sh` web with `--motion 40-80,150-250,350-500` and `--reduce`; `slop-check.py src`; `refs-check.py`; `check-matrix.py`;
 `tokens.mjs` and `conform.mjs`; bun test; Mac WebKit pass at iPhone size before the owner looks.
 
