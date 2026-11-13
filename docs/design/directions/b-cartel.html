@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mafia Tumbada · B Cartel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,500..900&family=Archivo:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* B — Cartel. Two inks on poster stock: black + the logo's gold, printed on uncoated paper (Anna Dawson: tour posters → colour overlays). */
+:root{--paper:oklch(96% .008 90);--ink:#000;--gold:oklch(78% .14 82);--gold-ink:oklch(52% .1 70);--rule:#000}
+*{box-sizing:border-box;margin:0}
+body{background:var(--paper);color:var(--ink);font:400 17px/1.55 Archivo,system-ui,sans-serif}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px;box-shadow:0 0 0 6px var(--gold)}
+.skip{position:absolute;left:-999px}.skip:focus{left:16px;top:16px;background:var(--ink);color:var(--paper);padding:12px;z-index:9}
+.disp{font-family:Anybody,sans-serif;font-weight:900;text-transform:uppercase;line-height:.86}
+.wrap{padding:0 clamp(16px,4vw,56px)}
+/* buttons: black slab, gold ink rolls up (rafadesign wipe); press dips, acts on release (boleto) */
+.btn{position:relative;display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:0 24px;background:var(--ink);color:var(--paper);text-decoration:none;font:800 18px/1 Anybody,sans-serif;font-stretch:120%;text-transform:uppercase;overflow:hidden;isolation:isolate;transition:transform 90ms}
+.btn::before{content:"";position:absolute;inset:0;background:var(--gold);transform:scaleY(0);transform-origin:bottom;transition:transform 500ms cubic-bezier(.65,0,.35,1);z-index:-1}
+.btn:hover::before,.btn:focus-visible::before{transform:scaleY(1)}
+.btn:hover,.btn:focus-visible{color:var(--ink)}
+.btn:active{transform:translateY(3px)}
+.btn.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 3px var(--ink)}
+/* top rule */
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px clamp(16px,4vw,56px);border-bottom:3px solid var(--rule)}
+header nav{display:flex;gap:2px;flex-wrap:wrap}
+header nav a{min-height:44px;display:inline-flex;align-items:center;padding:0 10px;font:800 15px/1 Anybody,sans-serif;font-stretch:110%;text-transform:uppercase;text-decoration:none}
+header img{height:44px;width:auto}
+@media(max-width:600px){header nav a:not(.k){display:none}}
+/* hero poster */
+.poster{display:grid;gap:0;border-bottom:3px solid var(--rule)}
+@media(min-width:900px){.poster{grid-template-columns:1.15fr 1fr}}
+.poster .type{padding:clamp(20px,4vw,56px);display:flex;flex-direction:column;justify-content:space-between;gap:28px}
+.poster h1{font-size:clamp(76px,11.5vw,184px);font-stretch:62%}
+.poster h1 .w{display:block;font-stretch:150%;font-size:.52em;letter-spacing:-.01em}
+.poster .where{font:800 clamp(22px,2.4vw,34px)/1 Anybody,sans-serif;font-stretch:130%;text-transform:uppercase;border-top:3px solid var(--rule);border-bottom:3px solid var(--rule);padding:12px 0}
+.poster .acts{display:flex;gap:12px;flex-wrap:wrap}
+.photo{position:relative;min-height:420px;background:var(--gold);overflow:hidden;border-left:3px solid var(--rule)}
+.photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) brightness(1.7) contrast(1.5);mix-blend-mode:multiply}
+@media(max-width:899px){.photo{border-left:0;border-top:3px solid var(--rule);min-height:360px}}
+/* sections */
+section.s{padding:clamp(56px,8vw,112px) 0;border-bottom:3px solid var(--rule)}
+h2{font-size:clamp(56px,9vw,132px);font-stretch:62%;margin-bottom:28px}
+/* música: printed grid; cover turns to its back on hover/focus (tarjeta-merch swap) */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:3px;background:var(--ink);border:3px solid var(--ink)}
+@media(min-width:900px){.grid{grid-template-columns:repeat(3,1fr)}}
+.rel{position:relative;display:block;aspect-ratio:1;background:var(--paper);text-decoration:none;overflow:hidden}
+.rel img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity 300ms ease-in-out}
+.rel .back{position:absolute;inset:0;padding:16px;display:flex;flex-direction:column;justify-content:flex-end;background:var(--gold)}
+.rel b{font:900 clamp(26px,3vw,44px)/.9 Anybody,sans-serif;font-stretch:70%;text-transform:uppercase}
+.rel:hover img,.rel:focus-visible img{opacity:0}
+.plat{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+/* videos: a line-up, set like the acts on a cartel */
+.lineup{list-style:none;padding:0;border-top:3px solid var(--rule)}
+.lineup a{display:grid;grid-template-columns:96px 1fr;gap:16px;align-items:center;padding:14px 0;border-bottom:3px solid var(--rule);text-decoration:none}
+.lineup img{width:96px;aspect-ratio:16/9;object-fit:cover;filter:grayscale(1) contrast(1.2)}
+.lineup span{font:900 clamp(26px,4.2vw,58px)/.95 Anybody,sans-serif;font-stretch:75%;text-transform:uppercase}
+.lineup li:first-child a{grid-template-columns:1fr}
+.lineup li:first-child img{width:100%;max-height:520px;filter:none}
+.lineup a:hover span,.lineup a:focus-visible span{color:var(--gold-ink)}
+@media(min-width:900px){.lineup a{grid-template-columns:200px 1fr}.lineup img{width:200px}}
+/* integrantes: the credits block */
+.credits{display:grid;gap:28px}
+@media(min-width:900px){.credits{grid-template-columns:repeat(3,1fr)}}
+.m img{width:100%;aspect-ratio:4/5;object-fit:cover;filter:grayscale(1) contrast(1.25);background:var(--gold);mix-blend-mode:multiply}
+.m .ph{background:var(--gold)}
+.m h3{font:900 clamp(38px,4vw,56px)/.9 Anybody,sans-serif;font-stretch:65%;text-transform:uppercase;margin-top:12px}
+.m p{font-weight:600}.m a{display:inline-flex;min-height:44px;align-items:center}
+/* contacto: ticket stub with a perforated edge (boleto-perforado) */
+.ticket{display:grid;background:var(--gold);color:var(--ink);mask:radial-gradient(circle 9px at 0 50%,#0000 98%,#000) 0 0/51% 28px repeat-y,radial-gradient(circle 9px at 100% 50%,#0000 98%,#000) 100% 0/51% 28px repeat-y}
+@media(min-width:900px){.ticket{grid-template-columns:1fr auto}}
+.ticket .main{padding:clamp(24px,4vw,48px)}
+.ticket .stub{padding:clamp(24px,4vw,48px);border-top:3px dashed var(--ink);display:flex;align-items:center}
+@media(min-width:900px){.ticket .stub{border-top:0;border-left:3px dashed var(--ink)}}
+.ticket p{font-size:20px;max-width:34ch;margin-top:8px}
+footer{padding:24px clamp(16px,4vw,56px);display:flex;gap:18px;flex-wrap:wrap;font-weight:600}
+footer a{min-height:44px;display:inline-flex;align-items:center}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#musica">Saltar al contenido</a>
+<header>
+  <img src="/public/icon/mafiatumbada.webp" alt="Mafia Tumbada" width="790" height="507">
+  <nav aria-label="Secciones"><a href="#musica">Música</a><a href="#video">Videos</a><a href="#integrantes">La banda</a><a class="k" href="#contacto">Contratar</a></nav>
+</header>
+<main>
+<section class="poster" id="hero">
+  <div class="type">
+    <h1 class="disp">La Mafia <span class="w">Tumbada</span></h1>
+    <p class="where">Corridos tumbados desde Xalapa, Veracruz</p>
+    <div class="acts"><a class="btn" id="listen" href="#">Escuchar</a><a class="btn line" href="#contacto">Contratar</a></div>
+  </div>
+  <div class="photo"><img src="/public/band/cover.jpg" alt="La Mafia Tumbada, foto de grupo"></div>
+</section>
+<section class="s wrap" id="musica" aria-labelledby="h-musica">
+  <h2 class="disp" id="h-musica">Música</h2>
+  <div class="grid" id="rels"></div>
+  <div class="plat" id="plat"></div>
+</section>
+<section class="s wrap" id="video" aria-labelledby="h-video">
+  <h2 class="disp" id="h-video">Videos</h2>
+  <ol class="lineup" id="vids"></ol>
+</section>
+<section class="s wrap" id="integrantes" aria-labelledby="h-band">
+  <h2 class="disp" id="h-band">La banda</h2>
+  <div class="credits" id="band"></div>
+</section>
+<section class="s wrap" id="contacto" aria-labelledby="h-contacto">
+  <div class="ticket">
+    <div class="main"><h2 class="disp" id="h-contacto" style="margin:0">Contratación</h2><p>Canciones propias, covers con actitud y cuatro años de tarima.</p></div>
+    <div class="stub"><a class="btn" id="wa" href="#">Escribir por WhatsApp</a></div>
+  </div>
+</section>
+</main>
+<footer id="social"></footer>
+<script src="data.js"></script>
+<script>
+const M=window.MT,$=id=>document.getElementById(id);
+$('listen').href=M.releases[0].h;$('wa').href=M.links.whatsapp;
+$('rels').innerHTML=M.releases.map(r=>`<a class="rel" href="${r.h}"><span class="back"><b>${r.t}</b><span>${r.s}, en ${r.p}</span></span><img src="${r.c}" alt="${r.t}" width="160" height="160" loading="lazy"></a>`).join('');
+$('plat').innerHTML=[['Spotify','spotify'],['Apple Music','apple'],['YouTube','youtube']].map(([n,k])=>`<a class="btn line" href="${M.links[k]}">${n}</a>`).join('');
+$('vids').innerHTML=M.videos.map((v,i)=>`<li><a href="${M.yt(v.id)}"><img src="${M.thumb(v.id,i===0)}" alt="" loading="lazy"><span>${v.t}</span></a></li>`).join('');
+$('band').innerHTML=M.members.map(m=>`<article class="m"><div class="ph"><img src="${m.img}" alt="${m.n}" loading="lazy"></div><h3>${m.n}</h3><p>${m.r}</p><a href="https://www.instagram.com/${m.ig}/">@${m.ig}</a></article>`).join('');
+$('social').innerHTML=[['Spotify','spotify'],['Apple Music','apple'],['YouTube','youtube'],['Instagram','instagram'],['TikTok','tiktok']].map(([n,k])=>`<a href="${M.links[k]}">${n}</a>`).join('');
+</script>
+</body>
+</html>

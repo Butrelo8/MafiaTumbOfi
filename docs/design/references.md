@@ -1,17 +1,40 @@
-# References: truck on an endless highway (hybrid prototype, 2026-11-09)
+# References: Mafia Tumbada, three directions (2026-11-12)
 
-Paths are relative to `~/projects/visual-lab`. The seed (`mothership/docs/queue/2026-11-09-mto-truck-hybrid-prototype.md`)
-already fixes the path (hybrid three.js + one Cycles loop), the scene and the mood (night + dusk presets, owner update
-11-09), so this table is the library trace for the build, not a menu waiting for a pick.
+Paths are relative to `~/projects/visual-lab`. Each `borrow` cell opens with the direction it feeds:
+**A** Carretera (the truck / Blender night road), **B** Cartel (a print poster and ticket, no 3D),
+**C** En vivo (built on the band's live footage, no 3D). The client material (the logo, the photos, the covers) supplies
+content and brand facts only.
+
+The truck prototype's rows from 2026-11-09 are kept below as direction A. `docs/design/DESIGN.md` still describes that
+prototype.
+
+Gate: `python3 -I ~/projects/visual-lab/web/scripts/refs-check.py docs/design/references.md --sections hero,musica,video,integrantes,contacto,botones`
 
 | section | library entry | borrow | cost |
 |---|---|---|---|
-| hero | `web/visuales.md#recipe-smooth-video-hero` (arraisballet.com) | Poster = exact first frame of the Cycles loop (`ffmpeg -frames:v 1`), so the poster → live scene swap has no jump; loop at 24 fps, keyframe every 2 s, faststart, no audio | B |
-| hero | `web/visuales.md#dissection-landonorris-com` (landonorris.com) | three.js scene in the hero that renders only while visible (`isRendering` flag); here: pause the render loop when the tab is hidden | B |
-| camera-nav | `web/visuales-fichas/kage-scroll-world.md` (kage) | Fixed camera anchors per section, damped move between them with per-stop fov; dependency-free three.js. Here driven by buttons/keys, not scroll | M |
-| camera-nav | `web/visuales-fichas/interacciones-que-responden.md` (rafadesign) | Camera tour between labelled points of one 3D model; the label names where the camera goes | M |
-| labels | `web/visuales.md#technique-text-over-a-rendered-scene` (MTO's own note) | Veil under text sized by measuring the brightest frame under it; lowest alpha that keeps 4.5:1 | B |
-| fallback | `web/visuales.md#dissection-sports-withgoogle-com-teamusa` (teamusa) | Start from `prefers-reduced-motion`; a visible motion toggle; state on `<html>` as a data attribute | B |
-| fallback | `web/visuales.md#dissection-landonorris-com` (landonorris.com) | If WebGL2 is missing, add a class on `<html>` and show the poster/loop; the page works without 3D | B |
-| lighting | user: owner decision 11-09, night and dusk as two presets of one scene; night palette traces to `research/DESIGN.md` (Gótico Tumbado: black, gold, red neon) | One values file (`src/lib/luces.json`) read by both Blender and three.js; preset switch in the UI | M |
-| truck | user: no truck in `blender/assets/`; seed allows a free licensed model. Quaternius "Pickup Truck", CC0, https://poly.pizza/m/qn4grQgHm8 (old atrio used a black full-size pickup) | Full-size pickup, repainted black clearcoat + chrome; wheels are separate nodes so they can spin | B |
+| hero | arraisballet · smooth video hero · `web/visuales.md#recipe-smooth-video-hero` | A: poster is the exact first frame of the Cycles loop, 24 fps, keyframe every 2 s, faststart, no audio. C: same recipe for a muted live-footage loop cut from the band's own files | B |
+| hero | landonorris.com · 3D scene that renders only while visible · `web/visuales.md#dissection-landonorris-com` | A: the live three.js road pauses when off-screen or when the tab is hidden; without WebGL2, a class on `<html>` swaps in the loop | B |
+| hero | lusion.co · dark WebGL stage inside the page · `web/site-reading-fichas/lusion-co.md#look` | A: the scene sits in one framed stage, not full-bleed chrome; one accent only (the logo's gold) | A |
+| hero | anna-dawson · tour posters → colour overlays · `web/designer-fichas/anna-dawson.md` | B: the hero is a poster lockup on paper; band photo as a two-ink overprint (black + the logo's gold) | B |
+| hero | pina-bausch.de · condensed display 80–100 px on a phone · `web/site-reading-fichas/pina-bausch-de.md#look` | B: the name set big at 390 too, stacked; the type is the poster, not a caption over a portrait (that is eptosuno's hero) | B |
+| hero | sadlerswells.com · media entrance overZoom 1.1→1 + fade, 2 s · `web/site-reading-fichas/sadlerswells-com.md#look` | C: the live loop eases in once on load; the 3D logo mark sits over it | B |
+| hero | coastveracruz.com · full-bleed video hero, Veracruz · `web/site-reading-fichas/coastveracruz-com.md#look` | C: the trap to avoid: a 10 MB hero gave 8.1 s mobile LCP; our budget is ≤1.2 MB at 390 with an AV1/H.264 ladder | M |
+| musica | landonorris.com · horizontal gallery driven by scroll · `web/visuales-fichas/galeria-horizontal.md#visual-reading` | A: releases as one strip that passes like road signs | M |
+| musica | mattjumper.com · 3-up thumbnail grid, one accent on the buy control · `web/site-reading-fichas/mattjumper-com.md#look` | B: covers in a tight grid printed on the poster; one gold control per release | B |
+| musica | badomensofficial.com · merch card, second photo on hover · `web/visuales-fichas/tarjeta-merch.md#visual-reading` | B: a cover turns to its back (title, type, platform) on hover or focus, no lift or scale | B |
+| musica | paulkalkbrenner.net · photo breaks into squares then the "Recordings" block · `web/visuales-fichas/transicion-pixelada.md#visual-reading` | C: the hero still breaks into cover-sized squares that become the release grid | B |
+| video | dfm.mt · video rendition sized to its box · `web/site-reading-fichas/dfm-mt.md#look` | A, B, C: thumbnails served at the size the 390 box needs; no embedded YouTube player (SPEC §3) | B |
+| video | Index · load video by proximity · `web/visuales.md#index-by-technique` | C: the live clip in this section only loads when it is near the viewport | B |
+| video | teamusa · all-intra video that advances with scroll · `web/visuales-fichas/video-que-avanza.md#visual-reading` | C: one short live clip (crowd → stage) scrubbed by scroll, kept short with a visible way past (scrolljacking guardrail) | M |
+| integrantes | kage · fixed camera anchors per section, damped move · `web/visuales-fichas/kage-scroll-world.md` | A: one camera stop per member inside the cab (the inside→outside shot, `docs/escena-transicion.md` on main) | M |
+| integrantes | synchronized.studio · type-led, staggered fades ~0.6 s · `web/site-reading-fichas/synchronized-studio.md#look` | B: the names set as type on the poster's credits block, one stagger | B |
+| integrantes | badomensofficial.com · second photo on hover · `web/visuales-fichas/tarjeta-merch.md#visual-reading` | C: member portrait swaps to a stage photo on hover or focus | B |
+| contacto | MTO's own note · veil under text over a rendered scene · `web/visuales.md#technique-text-over-a-rendered-scene` | A: the contact panel over the road, veil sized to the brightest frame (lowest alpha that keeps 4.5:1) | B |
+| contacto | boleto-perforado · ticket-punch transition · `web/visuales-fichas/boleto-perforado.md#visual-reading` | B: contratación is a ticket stub; the WhatsApp control punches through it | B |
+| contacto | arraisballet · poster = first frame · `web/visuales.md#recipe-smooth-video-hero` | C: the closing section reuses the hero's live loop, already cached, under the contact line | B |
+| contacto | teamusa · reduced-motion start, visible motion toggle · `web/visuales.md#dissection-sports-withgoogle-com-teamusa` | A, B, C: honour `prefers-reduced-motion`; one motion toggle in the footer | B |
+| contacto | user: `research/contenido/socials.ts` + SPEC §4 | A, B, C: WhatsApp only, prefilled message with date and city | B |
+| botones | rafadesign · strength tile hover wipe · `web/visuales-fichas/interacciones-que-responden.md#interaction-inventory-the-actual-state-of-each-control` | A: the button fill wipes up from the bottom like a dash light coming on (scale-y 0→1, 500 ms, cubic-bezier(.65,0,.35,1)) and wipes back down on leave. B: the same wipe in gold ink, like a roller pass | B |
+| botones | boleto-perforado · press dips, acts on release · `web/visuales-fichas/boleto-perforado.md#recipe` | B: press dips the control about 90 ms, and the punch happens on release. A: the same press dip, read as a switch | B |
+| botones | rafadesign · magnetic buttons · `web/visuales-fichas/interacciones-que-responden.md#recipe` | C: the main controls lean toward the pointer (up to 6 px x / 3.6 px y, spring 260/26), with a tap dip to 0.96; off on touch and under reduced motion | B |
+| botones | Rive CLI · hover/press state machine without the editor · `rive/rive-notas.md#rive-cli-rml-from-text-no-editor--2026-10-08` | A, B, C: morphing icons (play↔pause, arrow→WhatsApp glyph, menu→close) as small Rive state machines. Library gap: no measured icon morph exists yet, so this is an unproven row | M |

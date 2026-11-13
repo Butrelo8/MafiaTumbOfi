@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mafia Tumbada · A Carretera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;800&family=Saira:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* A — Carretera. Ground #000 and gold come from the logo (public/icon/mafiatumbada.webp): black faces, bronze-gold bevel. */
+:root{--bg:#000;--ink:oklch(95% .008 85);--muted:oklch(80% .01 85);--gold:oklch(80% .13 82);--gold-deep:oklch(62% .11 70);--veil:rgb(0 0 0/.62);--line:oklch(100% 0 0/.14)}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.55 Saira,system-ui,sans-serif}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.skip{position:absolute;left:-999px}.skip:focus{left:16px;top:16px;background:var(--gold);color:#000;padding:12px;z-index:9}
+h1,h2,.disp{font-family:"Saira Condensed",sans-serif;font-weight:800;font-style:italic;text-transform:uppercase;letter-spacing:.005em;line-height:.9}
+.wrap{padding:0 clamp(16px,4vw,64px)}
+/* nav */
+header{position:fixed;inset:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px clamp(16px,4vw,64px);z-index:5;background:linear-gradient(#000c,#0000)}
+header img{height:44px;width:auto}
+header nav{display:flex;gap:4px}
+header nav a{display:none;min-height:44px;align-items:center;padding:0 12px;text-decoration:none;color:var(--muted);font-weight:600}
+@media(min-width:900px){header nav a{display:inline-flex}}
+/* buttons: square, gold wipe from the bottom (rafadesign wipe), press dip (boleto) */
+.btn{position:relative;display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:0 22px;border:2px solid var(--gold);color:var(--ink);text-decoration:none;font:600 16px/1 Saira,sans-serif;overflow:hidden;isolation:isolate;transition:transform 90ms}
+.btn::before{content:"";position:absolute;inset:0;background:var(--gold);transform:scaleY(0);transform-origin:bottom;transition:transform 500ms cubic-bezier(.65,0,.35,1);z-index:-1}
+.btn:hover::before,.btn:focus-visible::before{transform:scaleY(1)}
+.btn:hover,.btn:focus-visible{color:#000}
+.btn:active{transform:translateY(2px)}
+.btn.fill{background:var(--gold);color:#000}
+.btn svg{width:18px;height:18px}
+/* hero */
+.hero{position:relative;min-height:100svh;display:grid;align-items:end;overflow:hidden}
+.hero video,.hero .poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero .copy{position:relative;padding-bottom:clamp(32px,7vh,80px);background:linear-gradient(transparent,var(--veil) 40%)}
+.hero h1{font-size:clamp(64px,13vw,200px);color:var(--ink)}
+.hero h1 span{display:block;color:var(--gold)}
+.hero p{font-size:clamp(18px,1.6vw,22px);margin:14px 0 22px;max-width:30ch;color:var(--muted)}
+.hero .acts{display:flex;gap:12px;flex-wrap:wrap}
+/* sections */
+section.s{padding:clamp(64px,10vw,140px) 0;border-top:1px solid var(--line)}
+h2{font-size:clamp(44px,7vw,96px);margin-bottom:28px}
+/* música: one strip, passes like road signs */
+.strip{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 clamp(16px,4vw,64px) 16px;scrollbar-color:var(--gold-deep) transparent}
+.rel{flex:0 0 clamp(210px,22vw,280px);scroll-snap-align:start;text-decoration:none}
+.rel img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border:1px solid var(--line)}
+.rel b{display:block;font:800 italic 26px/1 "Saira Condensed",sans-serif;text-transform:uppercase;margin-top:12px}
+.rel small{color:var(--muted);font-size:15px}
+.rel:hover b,.rel:focus-visible b{color:var(--gold)}
+.plat{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+/* video */
+.vids{display:grid;gap:18px;grid-template-columns:1fr}
+@media(min-width:900px){.vids{grid-template-columns:2fr 1fr 1fr}.vids a:first-child{grid-row:span 2}}
+.vid{position:relative;display:block;text-decoration:none;background:#111}
+.vid img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;opacity:.85}
+.vid span{display:flex;gap:10px;align-items:center;padding:12px 0;font-weight:600}
+.vid svg{flex:none;width:28px;height:28px;color:var(--gold)}
+/* integrantes */
+.band{display:grid;gap:18px;grid-template-columns:1fr}
+@media(min-width:900px){.band{grid-template-columns:repeat(3,1fr)}}
+.m img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;filter:saturate(.75) contrast(1.05)}
+.m h3{font:800 italic 32px/1 "Saira Condensed",sans-serif;text-transform:uppercase;margin-top:14px}
+.m p{color:var(--muted)}.m a{display:inline-flex;min-height:44px;align-items:center;color:var(--gold)}
+/* contacto */
+.contact{position:relative;min-height:80svh;display:grid;align-items:center;overflow:hidden}
+.contact img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55}
+.contact .panel{position:relative;max-width:640px;background:var(--veil);padding:clamp(24px,4vw,48px)}
+.contact p{font-size:20px;margin:0 0 24px;color:var(--muted)}
+footer{padding:32px clamp(16px,4vw,64px);display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);border-top:1px solid var(--line)}
+footer a{min-height:44px;display:inline-flex;align-items:center}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#musica">Saltar al contenido</a>
+<header>
+  <img src="/public/icon/mafiatumbada.webp" alt="Mafia Tumbada" width="790" height="507">
+  <nav aria-label="Secciones"><a href="#musica">Música</a><a href="#video">Videos</a><a href="#integrantes">La banda</a></nav>
+  <a class="btn" href="#contacto">Contratar</a>
+</header>
+<main>
+<section class="hero" id="hero">
+  <img class="poster" src="/public/escena/poster-1600x900.jpg" alt="" aria-hidden="true">
+  <video id="loop" muted playsinline loop preload="none" poster="/public/escena/poster-1600x900.jpg" aria-hidden="true">
+    <source media="(max-width: 700px)" src="/public/escena/loop-720x1280.mp4" type="video/mp4">
+    <source src="/public/escena/loop-1600x900.mp4" type="video/mp4">
+  </video>
+  <div class="copy wrap">
+    <h1>La Mafia <span>Tumbada</span></h1>
+    <p>Corridos tumbados desde Xalapa, Veracruz.</p>
+    <div class="acts">
+      <a class="btn fill" id="listen" href="#">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 4l14 8-14 8z"/></svg>Escuchar</a>
+      <a class="btn" href="#contacto">Contratar</a>
+    </div>
+  </div>
+</section>
+<section class="s" id="musica" aria-labelledby="h-musica">
+  <h2 class="wrap" id="h-musica">Música</h2>
+  <div class="strip" id="rels"></div>
+  <div class="plat wrap" id="plat"></div>
+</section>
+<section class="s wrap" id="video" aria-labelledby="h-video">
+  <h2 id="h-video">Videos</h2>
+  <div class="vids" id="vids"></div>
+</section>
+<section class="s wrap" id="integrantes" aria-labelledby="h-band">
+  <h2 id="h-band">La banda</h2>
+  <div class="band" id="band"></div>
+</section>
+<section class="contact wrap" id="contacto" aria-labelledby="h-contacto">
+  <img src="/public/escena/poster-1600x900.jpg" alt="" aria-hidden="true">
+  <div class="panel">
+    <h2 id="h-contacto">Contratación</h2>
+    <p>Canciones propias, covers con actitud y cuatro años de tarima.</p>
+    <a class="btn fill" id="wa" href="#">Escribir por WhatsApp</a>
+  </div>
+</section>
+</main>
+<footer id="social"></footer>
+<script src="data.js"></script>
+<script>
+const M=window.MT, $=id=>document.getElementById(id);
+const play='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 4l14 8-14 8z"/></svg>';
+$('listen').href=M.releases[0].h; $('wa').href=M.links.whatsapp;
+$('rels').innerHTML=M.releases.map(r=>`<a class="rel" href="${r.h}"><img src="${r.c}" alt="" width="160" height="160" loading="lazy"><b>${r.t}</b><small>${r.s}, en ${r.p}</small></a>`).join('');
+$('plat').innerHTML=[['Spotify','spotify'],['Apple Music','apple'],['YouTube','youtube']].map(([n,k])=>`<a class="btn" href="${M.links[k]}">${n}</a>`).join('');
+$('vids').innerHTML=M.videos.map((v,i)=>`<a class="vid" href="${M.yt(v.id)}"><img src="${M.thumb(v.id)}" alt="" loading="lazy"><span>${play}${v.t}</span></a>`).join('');
+$('band').innerHTML=M.members.map(m=>`<article class="m"><img src="${m.img}" alt="${m.n}" loading="lazy"><h3>${m.n}</h3><p>${m.r}</p><a href="https://www.instagram.com/${m.ig}/">@${m.ig}</a></article>`).join('');
+$('social').innerHTML=[['Spotify','spotify'],['Apple Music','apple'],['YouTube','youtube'],['Instagram','instagram'],['TikTok','tiktok']].map(([n,k])=>`<a href="${M.links[k]}">${n}</a>`).join('');
+// loop starts only when allowed; poster stays under reduced motion (references.md › hero, contacto)
+const v=$('loop');
+if(!matchMedia('(prefers-reduced-motion: reduce)').matches){v.preload='auto';v.play().catch(()=>{});
+  new IntersectionObserver(([e])=>e.isIntersecting?v.play().catch(()=>{}):v.pause()).observe(v);}
+</script>
+</body>
+</html>

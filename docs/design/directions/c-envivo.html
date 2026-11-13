@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mafia Tumbada · C En vivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Schibsted+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* C — En vivo. Ground and accent come from the logo's bolt: green-bronze patina (dark) + bronze-gold edge. Photos carry the rest. */
+:root{--bg:oklch(17% .018 165);--bg2:oklch(21% .02 165);--ink:oklch(95% .01 90);--muted:oklch(82% .015 120);--bronze:oklch(79% .12 78);--line:oklch(100% 0 0/.12)}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.55 "Schibsted Grotesk",system-ui,sans-serif}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--bronze);outline-offset:3px}
+.skip{position:absolute;left:-999px}.skip:focus{left:16px;top:16px;background:var(--bronze);color:#000;padding:12px;z-index:9}
+.disp{font-family:"Big Shoulders Display",sans-serif;font-weight:900;text-transform:uppercase;line-height:.88;letter-spacing:.01em}
+.wrap{padding:0 clamp(16px,4vw,64px)}
+/* buttons: square bronze edge; magnetic lean toward the pointer (rafadesign), tap dip to .96 */
+.btn{display:inline-flex;align-items:center;gap:12px;min-height:52px;padding:0 22px;border:2px solid var(--bronze);color:var(--ink);background:oklch(17% .018 165/.5);text-decoration:none;font:600 17px/1 "Schibsted Grotesk",sans-serif;transition:background-color 200ms,color 200ms,transform 260ms cubic-bezier(.2,.8,.2,1)}
+.btn:hover,.btn:focus-visible{background:var(--bronze);color:#000}
+.btn:active{transform:scale(.96)!important}
+.btn.fill{background:var(--bronze);color:#000}
+.btn svg{width:20px;height:20px}
+header{position:absolute;inset:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px clamp(16px,4vw,64px);z-index:4}
+header nav{display:flex;gap:4px}
+header nav a{display:none;min-height:44px;align-items:center;padding:0 12px;text-decoration:none;font-weight:600}
+@media(min-width:900px){header nav a{display:inline-flex}}
+/* hero: live still now, live loop later (arraisballet recipe); overZoom 1.1→1 once (sadlerswells) */
+.hero{position:relative;min-height:100svh;display:grid;align-items:end;overflow:hidden;isolation:isolate}
+.hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%;z-index:-2;animation:oz 2s cubic-bezier(.2,.7,.2,1) both}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,oklch(17% .018 165/.1),oklch(17% .018 165/.35) 45%,var(--bg) 96%)}
+@keyframes oz{from{transform:scale(1.1);opacity:0}to{transform:none;opacity:1}}
+.hero .copy{padding-bottom:clamp(36px,8vh,96px);display:grid;gap:20px;justify-items:start}
+.hero .mark{width:clamp(180px,24vw,340px);height:auto;filter:drop-shadow(0 6px 18px #000a)}
+.hero h1{font-size:clamp(56px,9vw,148px)}
+.hero p{font-size:clamp(18px,1.6vw,22px);color:var(--muted);max-width:32ch}
+.acts{display:flex;gap:12px;flex-wrap:wrap}
+section.s{padding:clamp(64px,10vw,140px) 0}
+h2{font-size:clamp(52px,8vw,120px);margin-bottom:32px}
+/* música: big covers in rows */
+.rels{display:grid;gap:2px;grid-template-columns:repeat(3,1fr)}
+@media(min-width:900px){.rels{grid-template-columns:repeat(9,1fr)}}
+.rel{position:relative;display:block;aspect-ratio:1;overflow:hidden;text-decoration:none}
+.rel img{width:100%;height:100%;object-fit:cover;display:block;transition:filter 200ms}
+.rel b{position:absolute;inset:auto 0 0;padding:8px;font:900 18px/1 "Big Shoulders Display",sans-serif;text-transform:uppercase;background:linear-gradient(transparent,#000c);opacity:0;transition:opacity 200ms}
+.rel:hover b,.rel:focus-visible b{opacity:1}
+.lead-rel{display:grid;gap:24px;align-items:center;margin-bottom:28px}
+@media(min-width:900px){.lead-rel{grid-template-columns:minmax(0,420px) 1fr}}
+.lead-rel img{width:100%;aspect-ratio:1;object-fit:cover}
+.lead-rel h3{font:900 clamp(56px,7vw,104px)/.88 "Big Shoulders Display",sans-serif;text-transform:uppercase}
+.lead-rel p{color:var(--muted);margin:8px 0 20px}
+/* videos */
+.video{background:var(--bg2)}
+.lead{position:relative;display:block;text-decoration:none}
+.lead img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.lead .play{position:absolute;left:clamp(16px,3vw,40px);bottom:clamp(16px,3vw,40px);display:flex;align-items:center;gap:16px;font:900 clamp(28px,4vw,56px)/1 "Big Shoulders Display",sans-serif;text-transform:uppercase;text-shadow:0 2px 16px #000}
+.lead .play i{display:grid;place-items:center;width:64px;height:64px;border:2px solid var(--bronze);background:#0009;color:var(--bronze)}
+.lead .play svg{width:26px;height:26px}
+.more{display:grid;gap:2px;grid-template-columns:1fr;margin-top:2px}
+@media(min-width:700px){.more{grid-template-columns:repeat(4,1fr)}}
+.more a{display:block;text-decoration:none;background:var(--bg)}
+.more img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.more span{display:block;padding:12px;font-weight:600;min-height:44px}
+/* integrantes: portrait, stage photo on hover/focus (tarjeta-merch swap) */
+.band{display:grid;gap:2px;grid-template-columns:1fr}
+@media(min-width:900px){.band{grid-template-columns:repeat(3,1fr)}}
+.m{position:relative;overflow:hidden}
+.m img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover}
+.m .cap{position:absolute;inset:auto 0 0;padding:20px;background:linear-gradient(transparent,#000d)}
+.m h3{font:900 clamp(38px,4vw,56px)/.9 "Big Shoulders Display",sans-serif;text-transform:uppercase}
+.m p{color:var(--muted)}.m a{display:inline-flex;min-height:44px;align-items:center;color:var(--bronze)}
+/* contacto: the stage again */
+.contact{position:relative;min-height:90svh;display:grid;align-items:center;isolation:isolate;overflow:hidden}
+.contact>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.contact::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,var(--bg) 10%,oklch(17% .018 165/.55))}
+.contact p{font-size:20px;max-width:30ch;color:var(--muted);margin:0 0 24px}
+footer{padding:28px clamp(16px,4vw,64px);display:flex;gap:18px;flex-wrap:wrap;border-top:1px solid var(--line)}
+footer a{min-height:44px;display:inline-flex;align-items:center}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#musica">Saltar al contenido</a>
+<header>
+  <span></span>
+  <nav aria-label="Secciones"><a href="#musica">Música</a><a href="#video">Videos</a><a href="#integrantes">La banda</a></nav>
+  <a class="btn mag" href="#contacto">Contratar</a>
+</header>
+<main>
+<section class="hero" id="hero">
+  <img src="/public/band/band-2.jpg" alt="" aria-hidden="true">
+  <div class="copy wrap">
+    <img class="mark" src="/public/icon/mafiatumbada.webp" alt="" width="790" height="507">
+    <h1 class="disp">La Mafia Tumbada</h1>
+    <p>Corridos tumbados desde Xalapa, Veracruz.</p>
+    <div class="acts"><a class="btn fill mag" id="listen" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4l13 8-13 8z"/></svg>Escuchar</a><a class="btn mag" href="#contacto">Contratar</a></div>
+  </div>
+</section>
+<section class="s wrap" id="musica" aria-labelledby="h-musica">
+  <h2 class="disp" id="h-musica">Música</h2>
+  <div class="lead-rel" id="feat"></div>
+  <div class="rels" id="rels"></div>
+</section>
+<section class="s wrap video" id="video" aria-labelledby="h-video">
+  <h2 class="disp" id="h-video">Videos</h2>
+  <div id="vids"></div>
+</section>
+<section class="s wrap" id="integrantes" aria-labelledby="h-band">
+  <h2 class="disp" id="h-band">La banda</h2>
+  <div class="band" id="band"></div>
+</section>
+<section class="contact wrap" id="contacto" aria-labelledby="h-contacto">
+  <img src="/public/band/band-1.jpg" alt="" aria-hidden="true">
+  <div><h2 class="disp" id="h-contacto">Contratación</h2><p>Canciones propias, covers con actitud y cuatro años de tarima.</p><a class="btn fill mag" id="wa" href="#">Escribir por WhatsApp</a></div>
+</section>
+</main>
+<footer id="social"></footer>
+<script src="data.js"></script>
+<script>
+const M=window.MT,$=id=>document.getElementById(id);
+const play='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4l13 8-13 8z"/></svg>';
+$('listen').href=M.releases[0].h;$('wa').href=M.links.whatsapp;
+const r0=M.releases[0];
+$('feat').innerHTML=`<img src="${r0.c}" alt="${r0.t}"><div><h3>${r0.t}</h3><p>${r0.s}</p><div class="acts">${[['Spotify','spotify'],['Apple Music','apple'],['YouTube','youtube']].map(([n,k],i)=>`<a class="btn ${i?'':'fill'} mag" href="${i?M.links[k]:r0.h}">${n}</a>`).join('')}</div></div>`;
+$('rels').innerHTML=M.releases.slice(1).map(r=>`<a class="rel" href="${r.h}"><img src="${r.c}" alt="${r.t}" loading="lazy"><b>${r.t}</b></a>`).join('');
+const [v0,...vs]=M.videos;
+$('vids').innerHTML=`<a class="lead" href="${M.yt(v0.id)}"><img src="${M.thumb(v0.id,true)}" alt=""><span class="play"><i>${play}</i>${v0.t}</span></a><div class="more">${vs.map(v=>`<a href="${M.yt(v.id)}"><img src="${M.thumb(v.id)}" alt="" loading="lazy"><span>${v.t}</span></a>`).join('')}</div>`;
+$('band').innerHTML=M.members.map(m=>`<article class="m"><img src="${m.img}" alt="${m.n}" loading="lazy"><div class="cap"><h3>${m.n}</h3><p>${m.r}</p><a href="https://www.instagram.com/${m.ig}/">@${m.ig}</a></div></article>`).join('');
+$('social').innerHTML=[['Spotify','spotify'],['Apple Music','apple'],['YouTube','youtube'],['Instagram','instagram'],['TikTok','tiktok']].map(([n,k])=>`<a href="${M.links[k]}">${n}</a>`).join('');
+// magnetic lean: x 6·clamp(dx), y 3.6·clamp(dy) (rafadesign recipe); fine pointers only, off under reduced motion
+if(matchMedia('(pointer:fine)').matches&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+  document.querySelectorAll('.mag').forEach(b=>{
+    b.addEventListener('pointermove',e=>{const r=b.getBoundingClientRect(),c=v=>Math.max(-1,Math.min(1,v));
+      b.style.transform=`translate(${6*c((e.clientX-r.left-r.width/2)/(r.width/2))}px,${3.6*c((e.clientY-r.top-r.height/2)/(r.height/2))}px)`});
+    b.addEventListener('pointerleave',()=>b.style.transform='')});
+}
+</script>
+</body>
+</html>
