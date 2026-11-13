@@ -107,4 +107,35 @@ Button form: **A: Tecla** (the stills labelled the forms A Tecla, B Boleto, C Ma
 So Tecla is built, Boleto and Marco stay in `docs/design/botones/` as history, the stamp and the notches are not built.
 
 ## Rounds
-(gate answer, R1, R2, R3 table go below)
+
+
+### R1 (commit 9f9e101) and the auditor's 5 fixes, all done in ad9a51b
+1. Hidden toggle was still visible (scoped `display` beat `[hidden]`): `.boton[hidden] { display: none }` plus `scripts/toggle-dom-test.mjs` (run by `src/lib/toggleDom.test.ts`), which failed on the old build and passes on the new one.
+2. Morph middle frames read as fast-forward: a designed middle shape `BLOQUE` (bars close into one block in 90 ms, then taper, 100 ms).
+3. Hover used a `background-color` transition: now an opacity overlay.
+4. The toggle read as a second CTA: `discreto` variant (2 px lip, veil cap, 14 px, 46 px tall).
+5. conform could not run: Type table added; hex values documented. type-size still FAILs (tool limit, below).
+
+### R2 (commit ad9a51b): auditor verdict `audit: pass`
+
+### R3 table (builder, built page http://127.0.0.1:3123/, no code changed after ad9a51b; R2 runs are the R3 runs)
+| row | value | result |
+|---|---|---|
+| overflow-390 / overflow-1440 | 0 elements, scrollWidth 390 / 1440 | PASS |
+| tap-390 | 0 targets under 44 px (toggle 46 px, Tecla 52 px) | PASS |
+| contrast-390 / contrast-1440 | 0 elements | PASS |
+| cls-390 / cls-1440 | 0.000 / 0.024 | PASS |
+| weight-390 | 1.62 MB (baseline 1.55 MB; gsap + MorphSVG 37 KB gzip) | PASS |
+| glyphs | 0 of 94 missing | PASS |
+| fixed-over-text-390 / -1440 | 0 covered | PASS |
+| motion-spec (bands 40-80,150-250,350-500) | 1 animation, 0 off spec (default); 1 with the toggle pressed; 0 under reduce | PASS |
+| motion (reduced) | 0 infinite animations, 0 videos playing | PASS |
+| light / dark | one dark theme; base-light shot renders the same page, recorded n/a (single theme) | n/a |
+| slop-check src | exit 0, pill-button 0; REVIEW js-intersection-reveal = the loop observer (scripts/loop.ts:76) | PASS |
+| refs-check (8 sections) | all PASS | PASS |
+| check-matrix / --sources | 6 rows 0 errors / 12 rows 0 errors | PASS |
+| conform type-face | 0 off | PASS |
+| conform colour | 0 off | PASS |
+| conform type-size | 1 off: 1440 Saira Condensed 187.2 px uppercase (the hero name; conform's size regex reads two-digit integers only, `conform.mjs:23`) | FAIL (tool limit, filed as a gotcha) |
+| bun test | 19 pass, 0 fail | PASS |
+Judge items: the MorphSVG exception (frame strip `docs/design/revisar/botones-iconos/r2/morph/morph.png`, auditor passed); the toggle failure and waiting shots (`r2/estados/`); hover guard. Not verified: touch hover on a real phone, the Mac WebKit pass.
