@@ -80,8 +80,9 @@ function charcoTex() {
   r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(0.45, "rgba(255,255,255,0.35)"); r.addColorStop(1, "rgba(255,255,255,0)");
   g.fillStyle = r; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c);
 }
+const KP = Number(q.get("kp") || 30);  // escena.ts uses 90; 90 over-lights the road against Cycles f96/f191 (round 2)
 const matCharco = new THREE.MeshBasicMaterial({ map: charcoTex(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: true });
-matCharco.color.set(P.postes.color).multiplyScalar(P.postes.intensidad * 0.16);
+matCharco.color.set(P.postes.color).multiplyScalar(P.postes.intensidad * 0.16 * KP / 90);
 tramo.traverse(o => { if (o.isMesh && o.material.name === "lampara") o.material.emissiveIntensity = P.postes.encendidos ? 6 : 0; });
 for (let k = -2; k < 10; k++) {
   const t = k === 0 ? tramo : tramo.clone();
@@ -89,7 +90,7 @@ for (let k = -2; k < 10; k++) {
   const c = new THREE.Mesh(new THREE.PlaneGeometry(16, 16), matCharco);
   c.rotation.x = -Math.PI / 2; c.position.set(3.4, 0.03, -8); t.add(c);
   if (k === 0 || k === 1) {
-    const s = new THREE.SpotLight(P.postes.color, P.postes.intensidad * 90, 28, 1.1, 0.7, 1.4);
+    const s = new THREE.SpotLight(P.postes.color, P.postes.intensidad * KP, 28, 1.1, 0.7, 1.4);
     s.position.set(3.95, 8.7, -8); s.target.position.set(3.0, 0, -8); t.add(s, s.target);
   }
   mundo.add(t);
@@ -125,10 +126,10 @@ const luna = new THREE.DirectionalLight(P.luna.color, P.luna.intensidad * 3); lu
 // cab and bed lights of transicion.luces_interior as RectAreaLights: (pos, aim, w, h, Blender W, colour); intensity = W / area × KA,
 // KA tuned against Cycles f0 (?ka= overrides)
 RectAreaLightUniformsLib.init();
-const KA = Number(q.get("ka") || 0.02);
+const KA = Number(q.get("ka") || 0.02), KC = Number(q.get("kc") || 0.4);  // KC: the bed light only
 for (const [p, m, w, h, W, c] of [[[CX, 0.25, 2.12], [CX, 0.45, 1.3], 0.4, 0.2, 4, [1.0, 0.78, 0.55]],
   [[CX, 1.08, 1.45], [CX, 0.2, 1.8], 1.0, 0.08, 25, [0.55, 0.75, 1.0]], [[CX, -1.0, 2.6], [CX, -2.2, 1.2], 1.4, 0.2, 90, [1.0, 0.82, 0.6]]]) {
-  const l = new THREE.RectAreaLight(new THREE.Color(...c), W / (w * h) * KA, w, h);
+  const l = new THREE.RectAreaLight(new THREE.Color(...c), W / (w * h) * KA * (W === 90 ? KC : 1), w, h);
   l.position.set(...b2t(p)); l.lookAt(...b2t(m)); scene.add(l);
 }
 
