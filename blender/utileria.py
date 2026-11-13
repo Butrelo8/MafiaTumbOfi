@@ -938,7 +938,7 @@ def cortar_guantera():
         return CORTE
     (x0, x1), (y0, y1), (z0, z1) = CORTE_BOX
     dentro = lambda v: x0 <= v.x <= x1 and y0 <= v.y <= y1 and z0 <= v.z <= z1
-    puertas, todos = [], []
+    puertas, todos, cortes = [], [], []
     for o in [o for o in CAM.children_recursive if o.type == "MESH"]:
         mw = o.matrix_world
         idx = [f.index for f in o.data.polygons if dentro(mw @ f.center)]  # door: faces centred in the box
@@ -982,25 +982,39 @@ def cortar_guantera():
         pt.parent = None
         pt.matrix_world = giro @ mw
     w, h = hi.x - lo.x, hi.z - lo.z
-    # inner liner of the door (the cut skin has no inside), turned with it
-    liner = caja((w - 0.01, 0.008, h - 0.01), (piv.x, piv.y + 0.012, lo.z + h / 2), mat("u_guantera_int", (0.03, 0.028, 0.026), 0.8), parent=False)
+    # inner liner of the door (the cut skin has no inside), turned with it. It lies on the skin's plane, which leans ~37° (y hi.y at
+    # the hinge, lo.y at the top): a vertical liner stood off the open door at an angle and showed the two door meshes through the gap
+    lean = math.atan2(hi.y - lo.y, h)
+    nrm = Vector((0, math.cos(lean), math.sin(lean)))  # the skin's inside
+    medio = Vector(((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, (lo.z + hi.z) / 2))
+    liner = caja((w - 0.01, 0.008, math.hypot(hi.y - lo.y, h) - 0.01), medio + nrm * 0.006, mat("u_guantera_int", (0.03, 0.028, 0.026), 0.8),
+                 rot=(lean, 0, 0), parent=False)
     bpy.context.view_layer.update()
     liner.matrix_world = giro @ liner.matrix_world
-    # the dark inner box, open towards the cabin, its rim on the cut edges
+    # the dark inner box, open towards the cabin, its rim on the cut edges. Sized from the hole, not the door: the door is the
+    # front skin only (11.6 cm) and the hole reaches 8 cm lower (probe_guantera.py checks the cover)
     hueco = mat("u_hueco", (0.006, 0.006, 0.006), 0.9)
-    yb, prof, t = lo.y, 0.20, 0.006
-    cx, cz = (lo.x + hi.x) / 2, (lo.z + hi.z) / 2
-    caja((w, t, h), (cx, yb + prof, cz), hueco, parent=False)
-    caja((w, prof, t), (cx, yb + prof / 2, hi.z), hueco, parent=False)
-    caja((w, prof, t), (cx, yb + prof / 2, lo.z), hueco, parent=False)
-    for sx in (lo.x, hi.x):
-        caja((t, prof, h), (sx, yb + prof / 2, cz), hueco, parent=False)
+    yb, prof, t = hlo.y, max(0.20, hhi.y - hlo.y), 0.006
+    bw, bh = hhi.x - hlo.x, hhi.z - hlo.z
+    cx, cz = (hlo.x + hhi.x) / 2, (hlo.z + hhi.z) / 2
+    caja((bw, t, bh), (cx, yb + prof, cz), hueco, parent=False)
+    caja((bw, prof, t), (cx, yb + prof / 2, hhi.z), hueco, parent=False)
+    # below the hinge the box starts at the dash face (hi.y), not at the top of the leaning skin (lo.y): from there the bottom slab
+    # and the walls stood 9 cm into the cabin under the open door (probe_guantera.py "sale"). The walls follow the skin's lean
+    caja((bw, yb + prof - hi.y, t), (cx, (hi.y + yb + prof) / 2, hlo.z), hueco, parent=False)
+    for sx in (hlo.x, hhi.x):
+        me = bpy.data.meshes.new("u_hueco_pared")
+        me.from_pydata([(sx, y, z) for y, z in ((hi.y, hlo.z), (yb + prof, hlo.z), (yb + prof, hhi.z), (lo.y, hhi.z), (hi.y, lo.z))], [], [(0, 1, 2, 3, 4)])
+        pa = bpy.data.objects.new("u_hueco_pared", me)
+        sc.collection.objects.link(pa)
+        _fin(pa, hueco, False)
     luz("POINT", (cx, yb + 0.1, hi.z - 0.03), 2.0, (1.0, 0.8, 0.55), parent=False)
     luz("AREA", (cx - 0.1, yb - 0.45, hi.z + 0.2), 6.0, (1.0, 0.85, 0.65), mira=(cx, yb - 0.1, lo.z), size=0.2, parent=False)
-    n = giro.to_3x3() @ Vector((0, 1, 0))  # the door's inside, now facing up
-    centro = giro @ Vector((piv.x, piv.y + 0.016, lo.z + h / 2))
+    n = giro.to_3x3() @ nrm  # the door's inside, now facing up
+    centro = giro @ (medio + nrm * 0.010)
     print("CORTE centro", centro)
-    CORTE.update(objs=puertas + list(GRUPO), centro=centro, n=n, lo=lo, hi=hi)
+    CORTE.update(objs=puertas + list(GRUPO), centro=centro, n=n, lo=lo, hi=hi, hueco_lo=hlo, hueco_hi=hhi,
+                 caja_lo=Vector((cx - bw / 2 - t / 2, yb, cz - bh / 2 - t / 2)), caja_hi=Vector((cx + bw / 2 + t / 2, yb + prof, cz + bh / 2 + t / 2)))
     for pt in puertas:
         GRUPO.append(pt)
     return CORTE
@@ -1065,3 +1079,7 @@ for nombre, f in OPC.items():
     for o in FIGURAS:
         o.hide_render = False
     print("TOMA", nombre, round(time.time() - t1, 1), "s")
+        cortes += [mw @ vs[v].co for i in idx for v in o.data.polygons[i].vertices]  # the hole left in the dash
+    hlo = Vector((min(v.x for v in cortes), min(v.y for v in cortes), min(v.z for v in cortes)))
+    hhi = Vector((max(v.x for v in cortes), max(v.y for v in cortes), max(v.z for v in cortes)))
+    print("CORTE hueco", hlo, hhi)
