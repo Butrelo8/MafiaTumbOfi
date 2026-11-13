@@ -99,6 +99,23 @@ Starting points: the library row `blender/lab/kiln-utility-box/NOTES.md` (decal 
 `web/designer-fichas/ayzz.md` (placement at angles). The scene-2 camera is `VISTA_ESC2` in `utileria.py`. Draw the sticker art
 as images with alpha die-cut shapes, the way `blender/placa_veracruz.py` draws the plate, not with Blender text.
 
+## Bed props, design pass (06:10, saltydrone): waiting on the owner's pick
+Owner 05:36: "might need to work on those bed truck props as well, like the stickers one". Bed B (picked 03:22) stays the frame:
+piñata hanging from the roll bar, balloons, a low pile. Done: `references.md` › "Bed props, design pass" (`refs-check` PASS on that
+section, id `caja3`); 12 props at real size in `blender/caja3.py` (tololoche and bajo sexto fundas, requinto hard case, ATA road
+case, cooler with the strawberry, party speaker, hat box with PURA MT, tejana, generic beer crate, MT flag, duffel, XLR coil, plus
+papel picado and ratchet straps); worn edges by a Bevel-node mask (kiln-prop `edges="bevel"`); decals are the band stickers from
+`calcas_arte.py` without platform glyphs. Stills on the contact page, section 6: `caja3-hoja` (model sheet), `caja3-a` /
+`-a-esc2` (tidy), `caja3-b` / `-b-esc2` (lived-in). The close-up uses a new, higher camera `VISTA_CAJA3` that sees into the bed;
+`VISTA_CAJA` sees only what clears the bed walls.
+- **Run:** `blender/caja3.py` execs `utileria.py` up to its render loop, adds the `caja3-*` options, then runs that loop (so
+  `utileria.py` itself is untouched). Same arguments as `utileria.py`; about 25-45 s a still at 48 samples after the 30 s build.
+- **Measured:** bed walls at CX ± 0.565 (ray probes, `CAJA3 pared`), roll bar top z 2.27 (`CAJA3 arco z`). `vaciar_caja()` hides
+  Alexandro, Diego, their guitars (child meshes too: hiding the parent left them in round 2's `caja2-*` stills) and the three seat
+  cases from `transicion.py`.
+- **Open:** the owner's pick or mix; the piñata hangs in front of the road case in the close-up (bed B's own layout). Not verified:
+  the look is judged from the stills only.
+
 ## Live port: started, not matched yet
 Done in `lab/vivo/index.html`: the glass override, the tramo cloned with pole SpotLights and additive puddles (from
 `src/scripts/escena.ts`), and the cab and bed RectAreaLights (`?ka=` scales them, `?kc=` the bed light only, `?kp=` the poles).
