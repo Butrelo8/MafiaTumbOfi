@@ -23,6 +23,11 @@
   img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: var(--line); }
   figcaption { margin-top: 6px; color: var(--ink); }
   figcaption b { color: var(--gold); font-size: 20px; margin-right: 6px; }
+  h3 { font-size: 20px; margin: 20px 0 0; text-transform: uppercase; }
+  ul.escena { grid-template-columns: 1fr 1fr; align-items: start; }
+  ul.escena .ancha { grid-column: span 2; }
+  ul.escena .alta img { aspect-ratio: 9 / 16; }
+  @media (min-width: 900px) { ul.escena { grid-template-columns: 2fr 2fr 1fr 1fr; } ul.escena .ancha { grid-column: auto; } }
 </style>
 </head>
 <body>
@@ -30,6 +35,54 @@
 <h1>Utilería, ronda 2: elige una por objeto</h1>
 <p><b>Elegidas (03:22): pantalla B y caja B.</b> Lo que pediste en la ronda 1, de noche y con la G63. Responde con la letra de cada objeto (por ejemplo «pantalla A, placa B»). La ronda 1 sigue en <a href="ronda1.html">su propia página</a>.</p>
 <p>Lo que no es final: la placa usa letras de Windows provisionales y sus colores no están comparados con una foto de la placa 2026, porque no encontramos ninguna publicada. Por eso es una versión estilizada, sin escudos y sin código QR. En la caja se ocultó a Alexandro y a Diego, porque en el plan van en el asiento de atrás. En la guantera se ocultó a Héctor.</p>
+
+<section aria-labelledby="s-escenas">
+<h2 id="s-escenas">Escenas 2-6: el primer y el último cuadro de cada una</h2>
+<p>De noche, con la G63 y lo que ya elegiste: caja B, la mezcla de calcas, la pantalla móvil C, los letreros B y la placa de Veracruz. Los cuatro van en la cabina. Para cada escena: dónde se queda la cámara mientras lees y dónde termina su movimiento, en horizontal y en celular. Son fotos fijas: todavía no hay movimiento. Donde el plan dejaba algo abierto hay dos opciones, y te digo cuál me quedaría. Responde con lo que cambiarías de cada escena (por ejemplo «3 B, 4 A»).</p>
+<h3>2 · Caja (Redes)</h3>
+<p>Empieza alta detrás de la caja, 28 mm, como al final del movimiento de la escena 1. Termina en el hueco entre las dos camionetas, con la pantalla móvil rebasando por la izquierda y el letrero VIDEOS encima: ahí se esconde el corte entre clips en el celular.</p>
+<ul class="escena">
+<li class="ancha"><figure><a href="esc2-abre.jpg"><img src="esc2-abre-mini.jpg" alt="La camioneta desde arriba y atrás en la carretera de noche: la caja con la piñata colgada, globos y juguetes, y las calcas en la puerta trasera" loading="lazy" width="960" height="540"></a><figcaption>Primer cuadro.</figcaption></figure></li>
+<li class="ancha"><figure><a href="esc2-fin.jpg"><img src="esc2-fin-mini.jpg" alt="Entre las dos camionetas: a la izquierda la pantalla móvil con su marco de focos, a la derecha la camioneta de la banda, y adelante el letrero verde VIDEOS" loading="lazy" width="960" height="540"></a><figcaption>Último cuadro: el letrero VIDEOS pasa encima.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc2-abre-movil.jpg"><img src="esc2-abre-movil-mini.jpg" alt="La camioneta desde arriba y atrás en la carretera de noche: la caja con la piñata colgada, globos y juguetes, y las calcas en la puerta trasera, en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc2-fin-movil.jpg"><img src="esc2-fin-movil-mini.jpg" alt="Entre las dos camionetas: a la izquierda la pantalla móvil con su marco de focos, a la derecha la camioneta de la banda, y adelante el letrero verde VIDEOS, en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular.</figcaption></figure></li>
+</ul>
+<h3>3 · Pantalla (Videos), dos opciones</h3>
+<p>El plan pide la cámara junto al espejo del chofer, mirando hacia atrás a la izquierda, con la ventana del mánager a la derecha del cuadro. Las dos cosas a la vez no se pueden: mirando hacia atrás desde el lado del chofer, la camioneta queda a la izquierda. <b>A</b> sigue la posición; <b>B</b> sigue la composición, con la cámara en la puerta de atrás mirando hacia adelante. Me quedaría con <b>B</b>: se ve que la pantalla va al lado de la banda, y en A la pantalla tapa todo.</p>
+<ul class="escena">
+<li class="ancha"><figure><a href="esc3-espejo.jpg"><img src="esc3-espejo-mini.jpg" alt="Opción A: desde el espejo del chofer, la pantalla móvil llena el cuadro y la camioneta apenas asoma a la orilla izquierda" loading="lazy" width="960" height="540"></a><figcaption><b>A</b>Junto al espejo, mirando hacia atrás.</figcaption></figure></li>
+<li class="ancha"><figure><a href="esc3-hombro.jpg"><img src="esc3-hombro-mini.jpg" alt="Opción B: desde la puerta trasera del chofer, la pantalla a la izquierda y el costado de la camioneta con la ventana del mánager a la derecha" loading="lazy" width="960" height="540"></a><figcaption><b>B</b>Desde la puerta de atrás, mirando hacia adelante.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc3-espejo-movil.jpg"><img src="esc3-espejo-movil-mini.jpg" alt="Opción A: desde el espejo del chofer, la pantalla móvil llena el cuadro y la camioneta apenas asoma a la orilla izquierda, en vertical" loading="lazy" width="540" height="960"></a><figcaption><b>A</b>Celular.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc3-hombro-movil.jpg"><img src="esc3-hombro-movil-mini.jpg" alt="Opción B: desde la puerta trasera del chofer, la pantalla a la izquierda y el costado de la camioneta con la ventana del mánager a la derecha, en vertical" loading="lazy" width="540" height="960"></a><figcaption><b>B</b>Celular.</figcaption></figure></li>
+</ul>
+<ul class="escena"><li class="ancha"><figure><a href="esc3-fin.jpg"><img src="esc3-fin-mini.jpg" alt="Desde la esquina trasera del lado del copiloto, a ras de la carretera: la camioneta a la izquierda y el letrero LA BANDA adelante" loading="lazy" width="960" height="540"></a><figcaption>Último cuadro de la escena 3: la cámara dio la vuelta por atrás al lado del copiloto y pasa el letrero LA BANDA.</figcaption></figure></li><li class="alta"><figure><a href="esc3-fin-movil.jpg"><img src="esc3-fin-movil-mini.jpg" alt="Lo mismo en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular.</figcaption></figure></li></ul>
+<h3>4 · Costado (La banda), dos opciones de luz</h3>
+<p>De lado, a 6 m, 24 mm, la camioneta completa. En el storyboard el costado salía casi negro. <b>A</b> la ilumina con una luz suave desde el lado de la cámara, como un carro de filmación; <b>B</b> prende la cabina por dentro. Me quedaría con <b>A</b>: se lee la camioneta completa y las caras en las ventanas; en B el costado se pierde. En celular cada parada es una ventana: aquí Héctor. La cámara va a 2.6 m de alto para pasar por encima del guardarraíl.</p>
+<ul class="escena">
+<li class="ancha"><figure><a href="esc4-relleno.jpg"><img src="esc4-relleno-mini.jpg" alt="Opción A: la camioneta de lado, iluminada desde el lado de la cámara, con Héctor y Diego en sus ventanas y la caja con globos" loading="lazy" width="960" height="540"></a><figcaption><b>A</b>Luz desde el lado de la cámara.</figcaption></figure></li>
+<li class="ancha"><figure><a href="esc4-cabina.jpg"><img src="esc4-cabina-mini.jpg" alt="Opción B: la misma toma con la cabina prendida por dentro y el costado oscuro" loading="lazy" width="960" height="540"></a><figcaption><b>B</b>La cabina prendida por dentro.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc4-relleno-movil.jpg"><img src="esc4-relleno-movil-mini.jpg" alt="Opción A: la camioneta de lado, iluminada desde el lado de la cámara, con Héctor y Diego en sus ventanas y la caja con globos, en vertical" loading="lazy" width="540" height="960"></a><figcaption><b>A</b>Celular.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc4-cabina-movil.jpg"><img src="esc4-cabina-movil-mini.jpg" alt="Opción B: la misma toma con la cabina prendida por dentro y el costado oscuro, en vertical" loading="lazy" width="540" height="960"></a><figcaption><b>B</b>Celular.</figcaption></figure></li>
+</ul>
+<ul class="escena"><li class="ancha"><figure><a href="esc4-fin.jpg"><img src="esc4-fin-mini.jpg" alt="Del lado del chofer: el mánager manejando y Alexandro atrás, la camioneta completa de lado" loading="lazy" width="960" height="540"></a><figcaption>Último cuadro: la cámara pasó por encima del techo al lado del chofer, con la luz A.</figcaption></figure></li><li class="alta"><figure><a href="esc4-fin-movil.jpg"><img src="esc4-fin-movil-mini.jpg" alt="La ventana del mánager, en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular: la ventana del mánager.</figcaption></figure></li></ul>
+<h3>5 · Gira</h3>
+<p>Encima del cofre, 30 mm, mirando la pantalla de atrás de la pantalla móvil. Como todavía no hay archivo de fechas, sale «Próximas fechas · muy pronto», sin fechas inventadas. Termina alta, delante de la camioneta, cuando la cámara ya la rebasó y voltea a verla.</p>
+<ul class="escena">
+<li class="ancha"><figure><a href="esc5-abre.jpg"><img src="esc5-abre-mini.jpg" alt="Sobre el cofre: adelante la pantalla móvil con PRÓXIMAS FECHAS y MUY PRONTO en su pantalla trasera" loading="lazy" width="960" height="540"></a><figcaption>Primer cuadro.</figcaption></figure></li>
+<li class="ancha"><figure><a href="esc5-fin.jpg"><img src="esc5-fin-mini.jpg" alt="Desde arriba y adelante: la camioneta pequeña en su carril entre las luminarias" loading="lazy" width="960" height="540"></a><figcaption>Último cuadro: la cámara voltea hacia la camioneta.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc5-abre-movil.jpg"><img src="esc5-abre-movil-mini.jpg" alt="Sobre el cofre: adelante la pantalla móvil con PRÓXIMAS FECHAS y MUY PRONTO en su pantalla trasera, en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc5-fin-movil.jpg"><img src="esc5-fin-movil-mini.jpg" alt="Desde arriba y adelante: la camioneta pequeña en su carril entre las luminarias, en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular.</figcaption></figure></li>
+</ul>
+<h3>6 · Placa (Contratación)</h3>
+<p>Adelante de la camioneta, baja, 32 mm, con los faros de frente. Termina con el remate: un destello de faros, un paso más cerca de la placa.</p>
+<ul class="escena">
+<li class="ancha"><figure><a href="esc6-abre.jpg"><img src="esc6-abre-mini.jpg" alt="La camioneta de frente, desde abajo: los faros, los cuatro en la cabina y la placa de Veracruz en la defensa" loading="lazy" width="960" height="540"></a><figcaption>Primer cuadro.</figcaption></figure></li>
+<li class="ancha"><figure><a href="esc6-flash.jpg"><img src="esc6-flash-mini.jpg" alt="Más cerca de la placa, con los faros encendidos en destello" loading="lazy" width="960" height="540"></a><figcaption>Último cuadro: el destello.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc6-abre-movil.jpg"><img src="esc6-abre-movil-mini.jpg" alt="La camioneta de frente, desde abajo: los faros, los cuatro en la cabina y la placa de Veracruz en la defensa, en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc6-flash-movil.jpg"><img src="esc6-flash-movil-mini.jpg" alt="Más cerca de la placa, con los faros encendidos en destello, en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular.</figcaption></figure></li>
+</ul>
+<p>Sin verificar: estas fotos se revisaron a ojo y con revisar (números en el reporte), no en movimiento. Las figuras de atrás conservan la pose de tocar guitarra, así que sus manos flotan; eso se arregla con el rig.</p>
+</section>
 
 <section aria-labelledby="s-pantalla">
 <h2 id="s-pantalla">1 · Pantalla del tablero (en lugar de la radio)</h2>

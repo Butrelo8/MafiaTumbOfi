@@ -7,6 +7,23 @@ Round 2 of the prop stills is done for the four props the mothership asked to re
 caja2-a-esc2,caja2-b,caja2-b-esc2,guantera2-borde,guantera2-c`. Run `blender/pantalla_tablero.py` first; it writes the
 screen faces into `tmp/utileria/`.
 
+## Scenes 2-6 key stills (06:30, npcdrone): waiting for the owner's picks
+Contact page section "Escenas 2-6" (`utileria/index.html`, first section; the page shows `-mini.jpg` thumbnails, links go to the
+full 1920x1080 / 1080x1920 files). Options `esc2-abre … esc6-flash` in `utileria.py`, above the glovebox block. Run them like the
+other options with `esc2-abre,esc2-fin,esc3-espejo,esc3-hombro,esc3-fin,esc4-relleno,esc4-cabina,esc4-fin,esc5-abre,esc5-fin,esc6-abre,esc6-flash`
+at 64 samples, one run per format (1920x1080, then 1080x1920; the options pick the phone camera when RH > RW), about 9 min per format.
+- Picks open: scene 3 A (by the mirror, as the table says) vs B (from the rear door; recommended), scene 4 light A (camera-side
+  fill; recommended, `ESC4_LUZ`) vs B (lit cab). The plan's scene-3 line contradicts itself: looking back-left from the driver's
+  mirror puts the truck on the LEFT of frame, so the manager's window can't be on the right.
+- End frames are on purpose not the next scene's hold: 2 and 3 end under the next sign (VIDEOS, LA BANDA), where the phone cut hides.
+- Departures, each seen in a preview first: scene 4 camera at 2.6 m, not 1.9, because 6 m out on the passenger side is beyond the
+  guardrail (x 5.0) and it filled the bottom; scene 5 camera over the roof's front edge (y 0.9) and the pantalla 8 m ahead, not 13.
+- **Weak: `esc6-flash`.** The extra spots light the road, but the lamp lenses don't glow more (×8 on escena.py's `faros` emission
+  shows nothing; revisar clipping hi 0.00 %). The flash needs emissive discs on the real lens positions (ray-cast them). The
+  `faros` change is not restored, so `esc6-flash` must stay the last scene option.
+- No GIRA sign: the plan's table names no gantry before scene 5 (only REDES, VIDEOS, LA BANDA). The rear passengers keep the strumming
+  pose (hands float) until the rig. revisar image: 24 stills, 0 FAIL (banding, clipping only; no --ref exists).
+
 ## What's left (05:35, yappingdrone, at the mothership's stop)
 - **Stickers: the owner's set as of 05:30**, rendered as `calcas3-mix` and `calcas3-mix-esc2`. From A: a-instagram (strawberry),
   a-spotify (holo badge) and a-estrella, whose MT star now reads MÍRANOS / EN YOUTUBE instead of TUMBADO. From B: b-youtube (gold
