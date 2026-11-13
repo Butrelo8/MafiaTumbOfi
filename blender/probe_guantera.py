@@ -2,6 +2,7 @@
 the bin's sloped floor riding up with the door; its back corner sat at y 1.3465, 0.11 m behind the dash face. Builds the scene
 through utileria.py without renders, cuts the glovebox and checks how deep the door's vertices reach before the swing
 (CORTE["hi"].y against GUANTERA.y). Exit 1 above TOPE. Old code (a38984e): 0.112 FAIL; fixed: 0.001 PASS.
+CORTE["lo"/"hi"] must stay the DOOR's bbox: if the inner box is resized to the full cut, give it its own keys and leave these.
 
   /mnt/e/Blender/blender.exe -b --factory-startup --python-exit-code 1 --python "$(wslpath -w blender/probe_guantera.py)" -- \
     "$(wslpath -w /mnt/e/Cursor\ Projects/MTO/blender/escena.py)" "$(wslpath -w tmp/utileria)" 1 ninguno 1280x720 "$(wslpath -w blender/utileria.py)"

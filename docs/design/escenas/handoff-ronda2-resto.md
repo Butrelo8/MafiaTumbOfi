@@ -75,9 +75,11 @@ and the heads retopo.
   the `piel` normal test. A ray-cast from the `guantera2-borde` camera found it. The `roza` dash hypothesis was wrong and is
   reverted. `piel` now also needs every vertex within 4 cm of the dash face. Regression probe: `blender/probe_guantera.py`
   (a38984e: 0.112 m, FAIL; now: 0.0007 m, PASS). Side effect: the door is now only the front skin, 11.6 cm tall, and the inner
-  box spans z 1.279–1.395, while the dash hole still reaches down to z 1.194. In `guantera2-borde.png` this shows as a
-  dark band between the shelf lip and the door. It is not fixed (fix: size the inner box from the removed dash faces, not
-  from the door).
+  box spans z 1.279–1.395, while the dash hole still reaches down to z 1.194. **The incoming check fails: the inner box
+  no longer covers the whole hole.** In `guantera2-borde` this shows as a dark band between the shelf lip and the door. Whether
+  it is see-through has not been checked. Fix: size the inner box from the removed dash faces, under its own `CORTE` keys.
+  `CORTE["lo"/"hi"]` must stay the door's bbox, because `probe_guantera.py` reads `hi.y` as the door's depth. The contact
+  page jpgs `guantera2-*.jpg` are the fixed renders.
 - **Glovebox junk: fixed (03:18).** The cause was the pivot. It was taken from the lowest verts, which are the back of the
   0.2 m-deep cut (y 1.3465). It now sits on the front skin at `GUANTERA.y` (1.234). One side wall of the shell sticks up beside the
   door; it is kept, because bin-style gloveboxes have walls.
