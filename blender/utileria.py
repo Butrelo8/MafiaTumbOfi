@@ -668,6 +668,316 @@ def caja_c():
     return VISTA_CAJA()
 
 
+# ================================================================ round 2 (owner's picks 2026-11-13 02:51; handoff-fase1-ronda2.md)
+PANTALLAS = os.path.join(REPO, "tmp", "utileria")  # faces from blender/pantalla_tablero.py (run it first)
+CRISTAL = mat("u_bisel", (0.008, 0.008, 0.009), 0.18)
+
+
+def cara_pantalla(w, h, loc, inclina, archivo):
+    """Bezel + emissive screen face, top leaning back by `inclina` rad (towards +Y), facing the cabin."""
+    rot = (math.pi / 2 - inclina, 0, 0)
+    n = Vector((0, -math.cos(inclina), math.sin(inclina)))
+    caja((w + 0.016, h + 0.016, 0.012), Vector(loc) - n * 0.004, CRISTAL, rot=rot, bevel=0.003)  # local XY = the face
+    plano(w, h, Vector(loc) + n * 0.0025, img_mat("u_" + archivo, os.path.join(PANTALLAS, archivo + ".png"), emit=2.2, rough=0.15), rot=rot)
+
+
+def techo_tablero(y):
+    """Top of the dash on the centre line at depth y (ray down from inside the cab)."""
+    p = rayo((CX, y, 1.78), (0, 0, -1))
+    print("TECHO", y, p)
+    return p.z if p else 1.62
+
+
+@opcion("radio2-a")
+def radio2_a():
+    """(a) Floating wide screen on top of the dash, MBUX style (G-Class 2025 / Ram 14.5" rows); no cassette, no Tecla."""
+    y = TABLERO.y + 0.06
+    z = techo_tablero(y) + 0.095
+    w = 0.36
+    caja((0.05, 0.03, 0.06), (CX, y + 0.03, z - 0.07), CRISTAL, bevel=0.004)  # stem into the dash top
+    cara_pantalla(w, w / 3, (CX, y, z), 0.12, "pantalla-ancha")
+    return ((CX + 0.10, y - 0.62, z + 0.02), (CX, y, z - 0.10), 30)
+
+
+@opcion("radio2-b")
+def radio2_b():
+    """(b) The screen built into the centre stack where the G63's small COMAND unit sits, between the vents. The Tecla is
+    left out: beside this screen it lands on the right vent (round-2 first still), so it does not sit naturally."""
+    z = 1.52
+    p = rayo((CX, 0.75, z), (0, 1, 0)) or Vector((CX, 1.1, z))
+    w = 0.17
+    cara_pantalla(w, w * 9 / 16, (CX, p.y - 0.012, z), math.atan(0.40), "pantalla-comand")  # stack leans ~22° (PERFIL rays)
+    return ((CX + 0.08, p.y - 0.52, z + 0.10), (CX, p.y, z - 0.04), 32)
+
+
+# ---- plate: stylised after NOM-001-SCT-2-2016 (300×150 mm, r 14 mm corners, 3 mm rim, 4 slots 20×6 mm at 50 mm from the
+# sides and 10 mm from top/bottom, embossed characters 2 mm, legends ≤ 18 mm) and the Veracruz layout (unotv 2025: state
+# name top, characters centre, state name bottom beside a yellow figure). Mothership 02:53: no seals, no QR.
+def rect_redondo(w, h, r, loc, m, grosor=0.0015, segs=6):
+    import bmesh
+    me = bpy.data.meshes.new("placa")
+    bm = bmesh.new()
+    vs = []
+    for cx, cz, a0 in ((w / 2 - r, h / 2 - r, 0), (-w / 2 + r, h / 2 - r, 90), (-w / 2 + r, -h / 2 + r, 180), (w / 2 - r, -h / 2 + r, 270)):
+        for k in range(segs + 1):
+            a = math.radians(a0 + 90 * k / segs)
+            vs.append(bm.verts.new((cx + r * math.cos(a), 0, cz + r * math.sin(a))))
+    f = bm.faces.new(vs)
+    bmesh.ops.solidify(bm, geom=[f], thickness=grosor)
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new("placa", me)
+    sc.collection.objects.link(o)
+    o.location = loc
+    return _fin(o, m, None)
+
+
+def placa2(centro, abajo, ancho_c=0.85):
+    FILL_PLACA()
+    y = DEFENSA.y + 0.016
+    p = Vector((CX, y, 0.72))
+    rect_redondo(0.300, 0.150, 0.014, p, mat("u_placa_alu", (0.75, 0.75, 0.74), 0.35, 1.0))
+    rect_redondo(0.294, 0.144, 0.011, p + Vector((0, 0.0012, 0)), mat("u_placa_blanca", (0.92, 0.92, 0.9), 0.35))
+    f = p + Vector((0, 0.0026, 0))
+    for sx in (-1, 1):
+        for sz in (-1, 1):
+            plano(0.020, 0.006, f + Vector((sx * (0.150 - 0.060), 0.0004, sz * (0.075 - 0.013))), NEGRO_MATE, rot=ROT_P)
+    texto("VERACRUZ", 0.016, f + Vector((0, 0, 0.046)), NEGRO, rot=ROT_P)
+    texto(centro, 0.056, f + Vector((0, 0, 0.0)), NEGRO, rot=ROT_P, extr=0.001, ancho=ancho_c)  # embossed 2 mm
+    texto(abajo, 0.013, f + Vector((0.012, 0, -0.050)), NEGRO, rot=ROT_P)
+    amarillo = mat("u_amarillo_placa", (1.0, 0.72, 0.02), 0.4)
+    bx = 0.012 + 0.0039 * len(abajo) + 0.014  # world +x reads as the plate's left (ROT_P turns it to face +Y)
+    plano(0.018, 0.010, f + Vector((bx, 0.0003, -0.050)), amarillo, rot=ROT_P)  # the yellow figure, as a plain bar
+    return VISTA_PLACA()
+
+
+@opcion("placa2-a")
+def placa2_a():
+    """A1: the round-1 characters (MT·420·VER) and CONTRATACIONES at the bottom beside the yellow figure."""
+    return placa2("MT·420·VER", "CONTRATACIONES")
+
+
+@opcion("placa2-b")
+def placa2_b():
+    """A2: the band name in place of the number; the bottom repeats the state name, as the official layout does."""
+    return placa2("TUMBADA", "VERACRUZ", ancho_c=0.9)
+
+
+# ---- bed props A, fuller: donut, cooler, piñata kept; a pyramid peaking at the piñata. Two cameras: VISTA_CAJA and the
+# scene-2 framing (T.CAMINO[-1], v3 f191), where readability is judged.
+VISTA_ESC2 = lambda: (c1[1], c1[2], c1[3])
+Y0, YC = -2.15, -1.38  # bed centre; roll bar (from the caja-c bulb string anchor)
+ROSA, LIMA, TURQ = (1.0, 0.2, 0.55), (0.55, 0.9, 0.1), (0.1, 0.75, 0.85)
+
+
+def pinata(c, r=0.2):
+    esfera(r, c, mat("u_pinata", ROSA, 0.6))
+    for i in range(7):
+        a = i * 2 * math.pi / 7
+        d = Vector((math.cos(a), 0, math.sin(a)))
+        cono(r * 0.35, 0.0, r * 2, Vector(c) + d * r * 1.6, mat(f"u_pico_{i % 3}", ((1, 0.8, 0.1), TURQ, (0.95, 0.35, 0.1))[i % 3], 0.6),
+             rot=(0, math.atan2(d.x, d.z), 0))
+
+
+def dona(c, rot, color=(0.95, 0.45, 0.6), nombre="u_dona", R=0.30, r=0.12):
+    toro(R, r, c, mat(nombre, color, 0.15), rot=rot)
+
+
+def hielera(c):
+    caja((0.6, 0.4, 0.34), Vector(c) + Vector((0, 0, 0.17)), mat("u_hielera", (0.75, 0.05, 0.04), 0.3), bevel=0.03)
+    caja((0.62, 0.42, 0.07), Vector(c) + Vector((0, 0, 0.37)), BLANCO, bevel=0.02)
+
+
+def pelota(c, r=0.17):
+    """Beach ball: six coloured gores read as bands from above (a sphere with a band material would need UVs)."""
+    for i, col in enumerate(((1, 1, 1), (0.9, 0.1, 0.1), (1, 0.8, 0.1), (0.1, 0.4, 0.9))):
+        o = esfera(r * (1 + 0.012 * i), c, mat(f"u_pelota_{i}", col, 0.25), scale=(1, 0.3, 1) if i else (1, 1, 1))
+        o.rotation_euler = (0, 0, i * math.pi / 4)
+
+
+def globos(base, n, alto=0.75):
+    hilo = mat("u_hilo", (0.9, 0.9, 0.9), 0.5)
+    for i in range(n):
+        a = i * 2.4
+        top = Vector(base) + Vector((0.12 * math.cos(a), 0.12 * math.sin(a), alto + 0.08 * (i % 3)))
+        esfera(0.11, top, mat(f"u_globo_{i % 4}", ((1, 0.8, 0.1), ROSA, TURQ, (0.95, 0.95, 0.95))[i % 4], 0.12), scale=(1, 1, 1.18))
+        d = top - Vector(base)
+        cil(0.002, d.length, Vector(base) + d / 2, hilo, rot=(0, math.atan2(math.hypot(d.x, d.y), d.z), math.atan2(d.y, d.x) + math.pi / 2), verts=6)
+
+
+def bocina(c):
+    caja((0.22, 0.18, 0.34), Vector(c) + Vector((0, 0, 0.17)), mat("u_bocina", (0.03, 0.03, 0.035), 0.5), bevel=0.02)
+    for dz, r in ((0.22, 0.065), (0.08, 0.035)):
+        cil(r, 0.01, Vector(c) + Vector((0, -0.092, dz)), mat("u_cono", (0.08, 0.08, 0.08), 0.7), rot=(math.pi / 2, 0, 0))
+    toro(0.07, 0.006, Vector(c) + Vector((0, -0.095, 0.22)), mat("u_aro_led", TURQ, emit=4.0), rot=(math.pi / 2, 0, 0))
+
+
+def maracas(c):
+    for k, col in enumerate(((0.95, 0.35, 0.1), (0.1, 0.6, 0.3))):
+        p = Vector(c) + Vector((k * 0.08, 0, 0.03))
+        esfera(0.045, p, mat(f"u_maraca_{k}", col, 0.4), scale=(1.2, 1, 1))
+        cil(0.01, 0.14, p + Vector((0.1, 0, 0)), mat("u_mango", (0.6, 0.4, 0.2), 0.6), rot=(0, math.pi / 2, 0.3 * k))
+
+
+def sombrero(c, rot=(0, 0, 0)):
+    paja = mat("u_paja", (0.75, 0.55, 0.25), 0.8)
+    cil(0.25, 0.015, c, paja, rot=rot)
+    cono(0.1, 0.08, 0.14, Vector(c) + Vector((0, 0, 0.075)), paja, rot=rot)
+
+
+@opcion("caja2-a")
+def caja2_a():
+    """A1 stacked pyramid: cooler + speaker as the base, the donut standing behind, the piñata on top as the peak;
+    beach ball, lime ring, maracas and sombrero at the base corners; two balloon bunches tied to the roll bar ends."""
+    hielera((CX - 0.1, Y0, Z0))
+    bocina((CX + 0.42, Y0 - 0.05, Z0))
+    dona((CX - 0.05, Y0 + 0.3, Z0 + 0.42), (math.radians(80), 0, 0))
+    pinata((CX - 0.08, Y0 + 0.05, Z0 + 0.92), 0.18)
+    pelota((CX + 0.48, Y0 - 0.5, Z0 + 0.17))
+    dona((CX - 0.45, Y0 - 0.3, Z0 + 0.08), (0.15, 0, 0), LIMA, "u_dona_lima", 0.2, 0.08)  # inside the tailgate (y ≥ -2.75)
+    maracas((CX + 0.25, Y0 - 0.48, Z0 + 0.01))
+    sombrero((CX - 0.1, Y0 - 0.02, Z0 + 0.45), rot=(0.15, -0.2, 0))
+    for x in (CX - 0.7, CX + 0.7):
+        globos((x, YC, 1.65), 4)
+    return VISTA_CAJA()
+
+
+@opcion("caja2-a-esc2")
+def caja2_a_esc2():
+    caja2_a()
+    return VISTA_ESC2()
+
+
+@opcion("caja2-b")
+def caja2_b():
+    """A2 hanging peak: the piñata hangs from the middle of the roll bar on a rope, balloons rise from the bar beside it,
+    a low pile below (donut flat on the cooler, beach ball, lime ring, speaker, sombrero, maracas)."""
+    hielera((CX - 0.35, Y0 - 0.1, Z0))
+    dona((CX - 0.35, Y0 - 0.1, Z0 + 0.52), (0.1, 0.05, 0))
+    bocina((CX + 0.45, Y0 + 0.35, Z0))
+    pelota((CX + 0.02, Y0 - 0.45, Z0 + 0.17))
+    dona((CX + 0.45, Y0 - 0.3, Z0 + 0.08), (0.2, 0, 0.4), LIMA, "u_dona_lima", 0.2, 0.08)
+    sombrero((CX - 0.55, Y0 + 0.4, Z0 + 0.02))
+    maracas((CX - 0.1, Y0 + 0.4, Z0 + 0.01))
+    pinata((CX, YC - 0.35, Z0 + 1.05), 0.2)
+    cil(0.004, 0.62, (CX, YC - 0.18, Z0 + 1.45), mat("u_hilo", (0.9, 0.9, 0.9), 0.5), rot=(0.55, 0, 0), verts=6)
+    for x in (CX - 0.45, CX + 0.45):
+        globos((x, YC, 1.85), 5, alto=0.8)
+    return VISTA_CAJA()
+
+
+@opcion("caja2-b-esc2")
+def caja2_b_esc2():
+    caja2_b()
+    return VISTA_ESC2()
+
+
+# ---- glovebox C: the door cut out of the G63 mesh. Destructive for the dash: these options must stay last in the file.
+CORTE = {}
+CORTE_BOX = ((1.95, 2.35), (1.15, 1.30), (1.15, 1.38))
+GIRO = math.radians(70)
+
+
+def cortar_guantera():
+    import bmesh
+    from mathutils import Matrix
+    if CORTE:
+        for o in CORTE["objs"]:
+            o.hide_render = False
+            GRUPO.append(o)
+        return CORTE
+    (x0, x1), (y0, y1), (z0, z1) = CORTE_BOX
+    dentro = lambda v: x0 <= v.x <= x1 and y0 <= v.y <= y1 and z0 <= v.z <= z1
+    puertas, todos = [], []
+    for o in [o for o in CAM.children_recursive if o.type == "MESH"]:
+        mw = o.matrix_world
+        idx = [f.index for f in o.data.polygons if dentro(mw @ f.center)]
+        if not idx:
+            continue
+        o.data = o.data.copy()  # single user
+        sel = set(idx)
+        puerta = o.copy()
+        puerta.data = o.data.copy()
+        sc.collection.objects.link(puerta)
+        for ob, quitar in ((o, lambda i: i in sel), (puerta, lambda i: i not in sel)):
+            bm = bmesh.new()
+            bm.from_mesh(ob.data)
+            bm.faces.ensure_lookup_table()
+            bmesh.ops.delete(bm, geom=[f for f in bm.faces if quitar(f.index)], context="FACES")
+            bm.to_mesh(ob.data)
+            bm.free()
+        puertas.append(puerta)
+        todos += [mw @ v.co for v in puerta.data.vertices]
+        print("CORTE", o.name, len(idx), "caras")
+    if not todos:
+        raise RuntimeError("CORTE: no faces in the glovebox box")
+    lo = Vector((min(v.x for v in todos), min(v.y for v in todos), min(v.z for v in todos)))
+    hi = Vector((max(v.x for v in todos), max(v.y for v in todos), max(v.z for v in todos)))
+    print("CORTE bbox", lo, hi)
+    piv = Vector(((lo.x + hi.x) / 2, min(v.y for v in todos if v.z < lo.z + 0.01), lo.z))
+    giro = Matrix.Translation(piv) @ Matrix.Rotation(GIRO, 4, "X") @ Matrix.Translation(-piv)
+    bpy.context.view_layer.update()
+    for pt in puertas:
+        mw = pt.matrix_world.copy()
+        pt.parent = None
+        pt.matrix_world = giro @ mw
+    w, h = hi.x - lo.x, hi.z - lo.z
+    # inner liner of the door (the cut skin has no inside), turned with it
+    # the cut faces run 0.2 m deep (round-2 first still), so the liner hangs off the hinge line, not off the deepest face
+    liner = caja((w - 0.01, 0.008, h - 0.01), (piv.x, piv.y + 0.03, lo.z + h / 2), mat("u_guantera_int", (0.03, 0.028, 0.026), 0.8), parent=False)
+    bpy.context.view_layer.update()
+    liner.matrix_world = giro @ liner.matrix_world
+    # the dark inner box, open towards the cabin, its rim on the cut edges
+    hueco = mat("u_hueco", (0.006, 0.006, 0.006), 0.9)
+    yb, prof, t = lo.y, 0.20, 0.006
+    cx, cz = (lo.x + hi.x) / 2, (lo.z + hi.z) / 2
+    caja((w, t, h), (cx, yb + prof, cz), hueco, parent=False)
+    caja((w, prof, t), (cx, yb + prof / 2, hi.z), hueco, parent=False)
+    caja((w, prof, t), (cx, yb + prof / 2, lo.z), hueco, parent=False)
+    for sx in (lo.x, hi.x):
+        caja((t, prof, h), (sx, yb + prof / 2, cz), hueco, parent=False)
+    luz("POINT", (cx, yb + 0.1, hi.z - 0.03), 2.0, (1.0, 0.8, 0.55), parent=False)
+    luz("AREA", (cx - 0.1, yb - 0.45, hi.z + 0.2), 6.0, (1.0, 0.85, 0.65), mira=(cx, yb - 0.1, lo.z), size=0.2, parent=False)
+    n = giro.to_3x3() @ Vector((0, 1, 0))  # the door's inside, now facing up
+    centro = giro @ Vector((piv.x, piv.y + 0.034, lo.z + h / 2))
+    CORTE.update(objs=puertas + list(GRUPO), centro=centro, n=n, lo=lo, hi=hi)
+    for pt in puertas:
+        GRUPO.append(pt)
+    return CORTE
+
+
+@opcion("guantera2-borde")
+def guantera2_borde():
+    """Close still of the cut edges, before the junk goes in."""
+    c = cortar_guantera()
+    lo, hi = c["lo"], c["hi"]
+    return ((CX + 0.15, lo.y - 0.40, hi.z + 0.08), ((lo.x + hi.x) / 2, lo.y, (lo.z + hi.z) / 2), 30)
+
+
+@opcion("guantera2-c")
+def guantera2_c():
+    """C on the cut door: a loose cassette, picks, a crumpled set list, sunglasses."""
+    from mathutils import Matrix
+    c = cortar_guantera()
+    antes = len(GRUPO)
+    guantera_c_basura(Vector((0, 0, 0)))
+    M = Matrix.Translation(c["centro"] + c["n"] * 0.004) @ Vector((0, 0, 1)).rotation_difference(c["n"]).to_matrix().to_4x4()
+    bpy.context.view_layer.update()
+    for o in GRUPO[antes:]:
+        o.matrix_world = M @ o.matrix_world
+    return VISTA_GUANTERA()
+
+
+def guantera_c_basura(p):
+    caja((0.1, 0.064, 0.012), p + Vector((-0.08, 0, 0.008)), mat("u_casete", (0.05, 0.05, 0.06), 0.2), rot=(0, 0, 0.3))
+    plano(0.07, 0.03, p + Vector((-0.08, 0, 0.0145)), img_mat("u_cover_g2", COVER, emit=0.4), rot=(0, 0, 0.3))
+    for i in range(4):
+        cil(0.012, 0.002, p + Vector((0.0 + i * 0.025, -0.03 + (i % 2) * 0.03, 0.004)), ORO if i % 2 else mat("u_pua", (0.8, 0.1, 0.1), 0.3), verts=3)
+    esfera(0.04, p + Vector((0.1, 0.03, 0.02)), BLANCO, scale=(1.2, 1.0, 0.5))
+    for dx in (-0.025, 0.025):
+        cil(0.02, 0.004, p + Vector((0.06 + dx, -0.04, 0.02)), mat("u_lente", (0.02, 0.02, 0.02), 0.05), rot=(1.2, 0, 0))
+
+
 # ---------------------------------------------------------------- render
 os.makedirs(OUT, exist_ok=True)
 for nombre, f in OPC.items():
@@ -676,7 +986,7 @@ for nombre, f in OPC.items():
     t1 = time.time()
     GRUPO.clear()
     pos, mira, lens = f()
-    ocultos = {"guantera": ("hector",), "caja": ("alejandro", "diego")}.get(nombre.split("-")[0], ())
+    ocultos = {"guantera": ("hector",), "caja": ("alejandro", "diego")}.get(nombre.split("-")[0].rstrip("2"), ())
     for o in FIGURAS:  # Héctor sits over the glovebox; v3 seats Alexandro and Diego in the bed (plan: rear seats)
         if o.name.split("_")[0].split(".")[0] in ocultos:
             o.hide_render = True
