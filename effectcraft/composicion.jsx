@@ -34,6 +34,17 @@ var bg = capa("bg"), fig = capa("fig"), fg = capa("fg");   // added in this orde
 // idle: the band sways a hair with the road (2 px, 0.6 Hz) on top of its own nod
 fig.property("Transform").property("Position").expression = "value + [wiggle(0.6, 2)[0] - value[0], wiggle(0.6, 2, 1, 0.5, time + 7)[1] - value[1], 0]";
 
+// Cycles noise changes every frame in the dark interior (revisar crawl): Remove Grain with temporal filtering
+if (GRANO) {
+    var capas = [bg, fig, fg];
+    for (var i = 0; i < capas.length; i++) {
+        var rg = capas[i].Effects.addProperty("Remove Grain");
+        rg.property("Noise Reduction Settings").property("Noise Reduction").setValue(GRANO);
+        rg.property("Noise Reduction Settings").property("Passes").setValue(2);
+        rg.property("Temporal Filtering").property("Enabled").setValue(1);
+    }
+}
+
 // glow on the lights (dash screen, road lamps, headlight pool): only what is near white
 var g = bg.Effects.addProperty("Glow");
 g.property("Glow Threshold").setValue(78);

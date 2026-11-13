@@ -66,3 +66,53 @@ d / zoom so the frame matches the render at t = 0; a one-node camera pushes 10 %
 (2 px, 0.6 Hz); Glow (threshold 78) on bg; layer and comp motion blur.
 Variants at t = 0 and 6.9 s, side by side: A push 8 % / aperture 40 (the road through the windshield turns to mush),
 B 6 % / 12 (reads as a flat zoom), **C 10 % / 20 / drift 40 px, kept**: most parallax, heads sharp, road still readable.
+
+## Times (RTX 4070 Ti for Cycles; EffectCraft on CPU)
+```
+Blender, per pass, 1080p, 24 spp, OptiX, persistent data:  ~27-29 s/frame (fig too: mostly per-frame scene sync)
+  16:9 batch bg+fig+fg 0-59: 4940 s (bg 1719, fig 1610, fg 1582), scene build ~30 s
+EffectCraft render h264 1920x1080, 168 frames (7 s): 98 s (0.58 s/frame); +Remove Grain x3 layers: 161 s (strength 3: 204 s)
+EffectCraft render-frame 1920x1080: 0.6-1.6 s;  --gpu in WSL is llvmpipe (software Vulkan): 0.54x of CPU
+Lottie export: instant; 13,843 B JSON (3,147 B gzip)
+```
+
+## Done-check: crawl FAIL, and where it comes from
+`eagle.sh` on the 16:9 MP4: exit 1, every row passes except `crawl 0.73 (<= 0.2)` (dark 76 %, flicker 0.16, strobe 0,
+events 0). Bisect, all with the same EffectCraft composition:
+```
+noise-free f0 stills + push/DoF/drift                0.13  pass
+raw bg layer (Blender PNGs looped, locked)           0.20  pass (edge)
+three layers stacked, camera locked, no DoF/wiggle   0.29  FAIL
+full, no DoF                                         0.56
+full + Remove Grain (temporal)                       0.58  (strength 3, 2 passes: 0.60)
+animated bg, frozen fig/fg                           0.55
+frozen bg, animated fig/fg                           0.24
+full (kept)                                          0.73
+```
+The 24-spp Cycles layers boil (OIDN blotches that change with the passing lamp light), mostly on the roof and the dark
+plate behind the heads; the push shrinks revisar's static mask onto exactly those dark areas, and DoF removes high
+frequency from the denominator while the low-frequency blotches stay. Not EffectCraft: its own output on still
+layers passes. eagle-eye (run 680aed12d648): confirms the claim as minor `boiling`; no tears, holes or seam problems.
+
+## EffectCraft: what failed or deviated (0.24.1)
+1. `render --out` and `mcp --automation-read-root/--automation-write-root` cut the path at
+   the first space: `render --out "/mnt/e/Cursor Projects/…/x.mp4"` wrote `/mnt/e/Cursor.mp4`; `mcp
+   --automation-write-root "/mnt/e/Cursor Projects/…"` exited with `automation root /mnt/e/Cursor: No such file or
+   directory`. Paths inside JSON params (`exec file.exportLottie`) and JSX are fine. Workaround: a symlink without spaces.
+2. JSX on a shape layer: `layer.property("Position" | "Scale" | "Opacity")` binds the first shape group's transform,
+   not the layer's (After Effects binds the layer). Use `layer.property("Transform").property(…)`.
+3. Image-sequence import defaults to 30 fps; set `footage.mainSource.conformFrameRate = 24`.
+4. MCP with `--automation-*-root`: `run_script` is refused ("not available while file access is confined"), so a
+   confined agent only has engine commands (`command_run`, `set_property`, `render_frame`…), no JSX.
+5. `--gpu` under WSL2 falls back to llvmpipe (software Vulkan), slower than the CPU path.
+6. `get` with an effect path (`effects/1/noiseReductionSettings/noiseReduction`) answered `no property`; `props --flat`
+   lists the real paths. Nothing crashed.
+Worked as documented: JSX object model (comps, 3D layers, camera + DoF, expressions `wiggle`, `loopOut('cycle')`
+on time remap, Glow, Remove Grain, motion blur), headless `render` with `--progress`, `render-frame`, Lottie export
+with an empty warning list, MCP over stdio (27 tools; `open_project`, `render_frame`, confinement refusals).
+
+## Lottie
+`effectcraft/lottie.jsx`: gold "MAFIA TUMBADA" title (Inter Bold, text exported as shapes) that rises and fades in,
+plus a rule that scales out, 800×240, 3 s. 13,843 bytes (3,147 gzip), `warnings: []`. Plays in lottie-web 5.12.2
+(headless Chromium): 72 frames at 24 fps, frame 2 faded and 25 px lower than frame 36, which matches EffectCraft's own
+render at 1.5 s.
