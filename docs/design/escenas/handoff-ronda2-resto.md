@@ -17,6 +17,45 @@ judged it not real enough. The brief:
 > - Material: a separate shader layer per sticker (white border, clearcoat, a normal map for the edge, a curl on one corner), so they stand off the paint in the scene-2 camera.
 > Show 2 directions as stills (close-up plus the scene-2 camera), then stop for the owner. If you reach 30% context first, put this brief verbatim in your handoff.
 
+### Sticker pass: state at 04:32 (nerddrone)
+Done: references first, now `references.md` › "Stickers, design pass" (`refs-check` PASS on that section, id `calcas3`). Art
+for both directions: `blender/calcas_arte.py` (run: `uv run -q --with numpy --with pillow python -I blender/calcas_arte.py`).
+It writes `tmp/utileria/calcas3/<id>.png` (RGBA, the die-cut is the alpha, white border included), `<id>-n.png` (normal map of the
+raised edge) and `calcas3.json` (w/h in m, finish, glyph slot as UV + mm). Contact sheet: `docs/design/escenas/utileria/calcas3-arte.jpg`.
+Spotify's official icon (from developer.spotify.com/documentation/design, `2024-spotify-logo-icon.zip`):
+`tmp/utileria/calcas3/spotify-icon.png`. Glyph ruling (mothership 04:25): IG, YouTube and TikTok get a **neutral grey upright slot,
+labelled as a slot**. The owner must download the Meta Instagram glyph, the brand.youtube icon and TikTok's logo pack by hand.
+
+| id | finish | art |
+|---|---|---|
+| a-instagram | gloss die-cut vinyl | pink strawberry with sunglasses, SÍGUENOS / EN INSTAGRAM |
+| a-spotify | holo round badge | cassette on an orange sun disc, ESCÚCHANOS |
+| a-youtube | matte paper oval bumper, sun-faded, scuffed | MT, MÍRANOS / EN YOUTUBE on turquoise |
+| a-tiktok | gold chrome letter-cut, no background | sombrero, ANDAMOS / EN TIKTOK |
+| b-instagram | gloss bumper strip, the oldest (heavy fade, scuffs, chips) | SÍGUENOS EN INSTAGRAM, gold on --cap |
+| b-spotify | holo oval | black cassette on a gold disc, ESCÚCHANOS |
+| b-youtube | gloss die-cut | gold strawberry, MÍRANOS / EN YOUTUBE |
+| b-tiktok | matte paper round, the newest | gold sombrero on black, ANDAMOS |
+
+**Next: the Blender half (not started).** Add it to `utileria.py` **above** the glovebox block, which is destructive and must stay last:
+1. `calca3(id, x, z, rot, orden=0)`: a grid of 24×24 in XY, sized from `calcas3.json`, `rot=(pi/2, rot, 0)` like `plano`, sitting
+   0.6 mm + `orden`×0.3 mm off the surface hit by `rayo` (as `en()` in `calcas2`). Curl one corner (bottom-left, away from the glyph):
+   for a vertex whose distance past a fold line 5 cm from the corner is d > 0, lift it along local +Z by R(1 − cos(d/R)) and pull it
+   back by d − R·sin(d/R), with R = 1.5 cm. At ESC2 (about 2.2 px/cm on the tailgate) only a curl of centimetres reads.
+2. Material per sticker: the image gives Base Color and its alpha gives Alpha. A Normal Map node (tangent space, image set to
+   Non-Color) feeds the normal. The finish: `brillo` → coat 1, coat roughness 0.05, roughness 0.35; `mate` → roughness 0.85, no coat;
+   `holo` → metallic 0.6, roughness 0.2, thin film thickness from a noise texture mapped to 250–750 nm, film IOR 1.33; `cromo`
+   → metallic 1, roughness 0.12. Mix by Backfacing into a white backing BSDF (roughness 0.6) with the same alpha, so the curl shows
+   the backing.
+3. Glyph: its own upright quad (no `rot`), at the slot's UV mapped through the sticker's rotation, 1 mm in front. Grey (0.5) for
+   IG, YT and TikTok; `spotify-icon.png` with alpha for Spotify. B's overlaps must never cover a slot.
+4. Options `calcas3-a`, `calcas3-a-esc2`, `calcas3-b`, `calcas3-b-esc2` (close-up = `VISTA_CALCAS`, scene 2 = `VISTA_ESC2`). A: the
+   four spread out like `calcas2`. B: the stack in the upper-left of the tailgate around (CX − 0.4, 1.2): b-instagram under
+   b-youtube, which overlaps its torn end; b-spotify and b-tiktok partly over the strip. Add a `relleno` light near each camera
+   aimed at the tailgate so the gloss and holo catch a highlight toward the lens. Without it, the gloss doesn't read at night.
+5. Add the four stills to `docs/design/escenas/utileria/index.html`. Before the report: read visual-lab `web/ai-slop-tells.md`, run
+   `slop-check.py` and `revisar.sh web` at 390 and 1440 on that page, then stop for the owner's pick between A and B.
+
 Starting points: the library row `blender/lab/kiln-utility-box/NOTES.md` (decal quads ~0.6 mm off the paint, an atlas) and
 `web/designer-fichas/ayzz.md` (placement at angles). The scene-2 camera is `VISTA_ESC2` in `utileria.py`. Draw the sticker art
 as images with alpha die-cut shapes, the way `blender/placa_veracruz.py` draws the plate, not with Blender text.
