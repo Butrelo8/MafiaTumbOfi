@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mafia Tumbada · tres direcciones</title>
+<style>
+:root{--bg:#111;--ink:#eee;--muted:#bbb;--line:#333;--acc:oklch(80% .13 82)}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,sans-serif;padding:24px 16px}
+a{color:var(--acc)}:focus-visible{outline:3px solid var(--acc);outline-offset:3px}
+h1{font-size:28px;margin-bottom:8px}p.lead{color:var(--muted);max-width:70ch;margin-bottom:24px}
+.cols{display:grid;gap:24px}
+@media(min-width:1000px){.cols{grid-template-columns:repeat(3,1fr)}}
+.col h2{font-size:22px}.col p{color:var(--muted);margin:6px 0 12px}
+.shots{display:grid;grid-template-columns:3fr 1fr;gap:8px;align-items:start}
+.shots img{width:100%;height:auto;border:1px solid var(--line);display:block}
+.col a.open{display:inline-flex;min-height:44px;align-items:center}
+table{border-collapse:collapse;margin-top:28px;width:100%;font-size:15px}
+th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+.wrapt{overflow-x:auto}
+</style>
+</head>
+<body>
+<h1>Mafia Tumbada: tres direcciones</h1>
+<p class="lead">Mismo contenido real en las tres; solo cambia el look. Arriba, a 1440 y 390; abajo, los números medidos. Detalle y trazas: <code>docs/design/directions.md</code>.</p>
+<div class="cols">
+  <section class="col"><h2>A · Carretera</h2><p>La camioneta de la banda en una carretera de noche, render de Cycles. Negro y el dorado del logo.</p>
+    <div class="shots"><img src="shots/a-carretera-1440-fold.jpg" alt="A a 1440"><img src="shots/a-carretera-390-fold.jpg" alt="A a 390"></div>
+    <a class="open" href="a-carretera.html">Abrir A</a></section>
+  <section class="col"><h2>B · Cartel</h2><p>Un cartel de baile a dos tintas, negro y dorado sobre papel; la contratación es un boleto.</p>
+    <div class="shots"><img src="shots/b-cartel-1440-fold.jpg" alt="B a 1440"><img src="shots/b-cartel-390-fold.jpg" alt="B a 390"></div>
+    <a class="open" href="b-cartel.html">Abrir B</a></section>
+  <section class="col"><h2>C · En vivo</h2><p>El público y el escenario cargan la página; pátina verde y bronce del rayo del logo.</p>
+    <div class="shots"><img src="shots/c-envivo-1440-fold.jpg" alt="C a 1440"><img src="shots/c-envivo-390-fold.jpg" alt="C a 390"></div>
+    <a class="open" href="c-envivo.html">Abrir C</a></section>
+</div>
+<div class="wrapt"><table>
+<thead><tr><th></th><th>A Carretera</th><th>B Cartel</th><th>C En vivo</th><th>eptosuno.com</th></tr></thead>
+<tbody>
+<tr><th>revisar.sh web (390 + 1440)</th><td>0 FAIL</td><td>0 FAIL</td><td>0 FAIL</td><td>—</td></tr>
+<tr><th>Fallas de contraste</th><td>0</td><td>0</td><td>0</td><td>11</td></tr>
+<tr><th>Peso a 390</th><td>1.51 MB</td><td>0.78 MB</td><td>0.78 MB (+ loop ≤ 1.2 MB)</td><td>363 KB (1440)</td></tr>
+<tr><th>Costo</th><td>Cycles ~12 s/cuadro; loops ya hechos</td><td>ninguno</td><td>necesita el video en vivo de la banda</td><td></td></tr>
+<tr><th>Botones</th><td>relleno dorado que sube, 500 ms</td><td>tinta dorada que sube; se hunde y actúa al soltar</td><td>se inclina hacia el cursor (6 px)</td><td>bordes rectos, cambio de color</td></tr>
+</tbody></table></div>
+</body>
+</html>

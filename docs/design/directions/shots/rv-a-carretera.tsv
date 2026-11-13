@@ -1,0 +1,17 @@
+check                 value                                                  threshold                                                       result  where
+fixed-over-text-390   0 covered                                              0                                                               pass    no fixed element covers text
+motion-frames         0 animations held                                      evidence                                                        info    motion-0.png, motion-mid.png, motion-end.png
+motion-spec           0 animations, 0 off spec                               props transform/opacity/translate/scale/rotate; no bands given  pass    none
+motion-scope          CSS transitions/animations and element.animate() only                                                                  info    rAF/JS-driven animations (framer layout, springs) are not seen: use recordVideo
+overflow-390          0 elements, scrollWidth 390                            0, <= 390                                                       pass    none
+tap-390               0 targets                                              0 under 44 px                                                   pass    none
+contrast-390          0 elements                                             0                                                               pass    none
+cls-390               0.000                                                  <= 0.1                                                          pass    layout-shift sum without recent input
+weight-390            1.53 MB                                                <= 3 MB                                                         pass    encoded bytes until idle, cache off
+fixed-over-text-1440  0 covered                                              0                                                               pass    no fixed element covers text
+overflow-1440         0 elements, scrollWidth 1440                           0, <= 1440                                                      pass    none
+contrast-1440         0 elements                                             0                                                               pass    none
+glyphs                n/a                                                                                                                    info    no text set in an @font-face font
+cls-1440              0.016                                                  <= 0.1                                                          pass    layout-shift sum without recent input
+motion                0 infinite animations, 0 videos playing                0 with reduced motion                                           pass    prefers-reduced-motion: reduce at 390
+/tmp/claude-1001/-mnt-e-Cursor-Projects-MTO-stonkdrone/1e762b61-60f7-4dbf-9312-7f4d364da371/scratchpad/revisar/a-carretera

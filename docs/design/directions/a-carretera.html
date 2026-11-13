@@ -12,7 +12,7 @@
 body{background:var(--bg);color:var(--ink);font:400 17px/1.55 Saira,system-ui,sans-serif}
 a{color:inherit}
 :focus-visible{outline:3px solid var(--gold);outline-offset:3px}
-.skip{position:absolute;left:-999px}.skip:focus{left:16px;top:16px;background:var(--gold);color:#000;padding:12px;z-index:9}
+.skip{position:absolute;left:-999px;min-height:44px;display:inline-flex;align-items:center;padding:0 12px}.skip:focus{left:16px;top:16px;background:var(--gold);color:#000;padding:12px;z-index:9}
 h1,h2,.disp{font-family:"Saira Condensed",sans-serif;font-weight:800;font-style:italic;text-transform:uppercase;letter-spacing:.005em;line-height:.9}
 .wrap{padding:0 clamp(16px,4vw,64px)}
 /* nav */
@@ -38,7 +38,7 @@ header nav a{display:none;min-height:44px;align-items:center;padding:0 12px;text
 .hero p{font-size:clamp(18px,1.6vw,22px);margin:14px 0 22px;max-width:30ch;color:var(--muted)}
 .hero .acts{display:flex;gap:12px;flex-wrap:wrap}
 /* sections */
-section.s{padding:clamp(64px,10vw,140px) 0;border-top:1px solid var(--line)}
+section.s{padding-block:clamp(64px,10vw,140px);border-top:1px solid var(--line)}
 h2{font-size:clamp(44px,7vw,96px);margin-bottom:28px}
 /* música: one strip, passes like road signs */
 .strip{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 clamp(16px,4vw,64px) 16px;scrollbar-color:var(--gold-deep) transparent}

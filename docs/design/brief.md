@@ -6,7 +6,9 @@ checkout. Nothing here is invented.
 
 ## Why the site exists
 
-- The band just signed with **ONErpm** `[ask: date and the band's own announcement post, to link it]`.
+- The band just signed with **ONErpm** (owner, 2026-11-12). There is no public trace of the deal yet: every Apple Music
+  copyright line through "POR EL BLOC" (2026-09-30) reads "℗ MAFIA TUMBADA". `[ask: date, and the band's announcement
+  post to link]`
 - The site is unpaid. Its value is as a **showcase**: it should bring views and credibility to the band, and indirectly
   to the label.
 - It is also the owner's second portfolio case, after StageDanza.
@@ -47,8 +49,10 @@ Both stay visible: Escuchar in the hero, Contratar in the nav and in the closing
   +52 228 353 8827. Prototypes use the `socials.ts` link.
 - `[ask: who is in the 5-person band photo]` `public/band/cover.jpg` shows five people, but `members.ts` lists three.
   The page shows the three in `members.ts` until the band confirms the line-up.
-- `[ask: release dates and the newest single]` The catalog has no dates. Prototypes lead with PUTIFRESA, the first entry
-  in the catalog.
+- Release dates come from the iTunes lookup API (`itunes.apple.com/lookup?id=1777597386&entity=album`): Corazón 2024-11-07,
+  Mírame 2024-12-19, SD 2025-01-06, No Te He Olvidado 2025-02-14, L.A. BUBU 2025-11-11, Tal Vez 2026-01-22,
+  Besos 2026-02-14, L.V. 2026-03-31, Putifresa (with Eddy Tovar) 2026-06-30. Newest: "POR EL BLOC" (Coko Yamasaki ft. the
+  band, 2026-09-30), which is not in the catalog. Prototypes lead with Putifresa. `[ask: lead with POR EL BLOC, or the next single?]`
 - `[ask: bio]` The only approved text is SPEC §8: "La Mafia Tumbada es un grupo de corridos tumbados y regional mexicano
   con base en Xalapa, Veracruz. Canciones propias, covers con actitud y cuatro años de tarima."
 - `[ask: raw live footage]` We only have YouTube links. A video hero needs the band's own files of the Plaza Lerdo show.
