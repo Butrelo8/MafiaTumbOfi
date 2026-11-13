@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Botones e iconos: tres formas</title>
+<style>
+@font-face { font-family: Saira; font-weight: 400; src: url(../../../node_modules/@fontsource/saira/files/saira-latin-400-normal.woff2); }
+@font-face { font-family: Saira; font-weight: 600; src: url(../../../node_modules/@fontsource/saira/files/saira-latin-600-normal.woff2); }
+@font-face { font-family: 'Saira Condensed'; font-weight: 800; src: url(../../../node_modules/@fontsource/saira-condensed/files/saira-condensed-latin-800-normal.woff2); }
+:root {
+  --bg: #000; --ink: oklch(95% 0.008 85); --muted: oklch(80% 0.01 85);
+  --gold: oklch(80% 0.13 82); --gold-deep: oklch(62% 0.11 70); --line: oklch(100% 0 0 / 0.14);
+  --dur-press: 80ms; --dur-state: 250ms; --dur-fill: 500ms; --dur-fill-out: 350ms;
+  --ease-fill: cubic-bezier(0.65, 0, 0.35, 1); --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.5 Saira, system-ui, sans-serif; padding: 24px clamp(16px, 4vw, 64px) 96px; }
+h1, h2 { font-family: 'Saira Condensed', sans-serif; font-weight: 800; font-style: italic; text-transform: uppercase; line-height: 0.95; margin: 0; }
+h1 { font-size: clamp(40px, 7vw, 80px); }
+h2 { font-size: clamp(32px, 5vw, 56px); margin: 56px 0 8px; border-top: 1px solid var(--line); padding-top: 24px; }
+h3 { font: 600 14px/1.2 Saira; color: var(--muted); margin: 28px 0 10px; }
+p.n { color: var(--muted); max-width: 68ch; margin: 8px 0; }
+.fila { display: flex; flex-wrap: wrap; gap: 20px 28px; align-items: flex-end; }
+.celda { display: grid; gap: 8px; justify-items: start; }
+.celda small { color: var(--muted); font-size: 13px; }
+.panel { background: linear-gradient(180deg, #0b0b0d, #050506); border: 1px solid var(--line); padding: 20px; }
+
+/* ---------- shared button bones ---------- */
+.b { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 48px; color: var(--ink); text-decoration: none; font: 600 16px/1 Saira, sans-serif; border: 0; background: none; padding: 0; cursor: pointer; }
+.b svg.i { width: 18px; height: 18px; flex: none; }
+.b svg.c { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 2.4; transition: transform var(--dur-state) var(--ease-out); }
+.b:focus-visible, .b.is-focus { outline: 3px solid var(--gold); outline-offset: 3px; }
+.ring { width: 18px; height: 18px; border: 2.5px solid currentColor; border-right-color: transparent; border-radius: 50%; flex: none; animation: gira 900ms linear infinite; }
+@keyframes gira { to { transform: rotate(1turn); } }
+@media (prefers-reduced-motion: reduce) { .ring { animation: none; } }
+
+/* ---------- Tecla: cap on a lip ---------- */
+.tecla::after { content: ''; position: absolute; left: 0; right: 0; top: 4px; bottom: -4px; background: var(--gold-deep); z-index: 0; }
+.tecla .cap { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 22px; background: var(--gold); color: #000; transition: transform var(--dur-press) linear, background-color var(--dur-state); }
+.tecla:not(.lleno) .cap { background: oklch(17% 0.01 85); color: var(--ink); box-shadow: inset 0 0 0 1px var(--gold-deep); }
+.tecla.is-hover .cap { background: oklch(86% 0.12 82); }
+.tecla:not(.lleno).is-hover .cap { background: oklch(24% 0.012 85); }
+.tecla.is-hover svg.c { transform: translateX(4px); }
+@media (hover: hover) {
+  .tecla:hover .cap { background: oklch(86% 0.12 82); }
+  .tecla:not(.lleno):hover .cap { background: oklch(24% 0.012 85); }
+  .tecla:hover svg.c { transform: translateX(4px); }
+}
+.tecla.is-press .cap, .tecla:active .cap { transform: translateY(3px); }
+.tecla.is-done .cap { transform: translateY(3px); box-shadow: inset 0 0 0 2px var(--gold); }
+.tecla.lleno.is-done .cap { box-shadow: none; background: oklch(86% 0.12 82); }
+
+/* ---------- Boleto: stub, notches by mask on the inner box, ring on the wrapper ---------- */
+.boleto { padding: 0; }
+.boleto .stub { display: inline-flex; align-items: stretch; min-height: 48px; border: 2px solid var(--gold); color: var(--ink);
+  -webkit-mask: radial-gradient(circle 7px at 0 50%, #0000 97%, #000) , radial-gradient(circle 7px at 100% 50%, #0000 97%, #000); -webkit-mask-composite: source-in;
+  mask: radial-gradient(circle 7px at 0 50%, #0000 97%, #000), radial-gradient(circle 7px at 100% 50%, #0000 97%, #000); mask-composite: intersect;
+  transition: transform var(--dur-press) linear; }
+.boleto .main { display: inline-flex; align-items: center; gap: 10px; padding: 0 20px 0 24px; }
+.boleto .cell { display: inline-flex; align-items: center; padding: 0 20px 0 16px; border-left: 2px dashed var(--gold); transition: transform var(--dur-state) var(--ease-out); }
+.boleto.lleno .stub { background: var(--gold); color: #000; }
+.boleto.lleno .cell { border-left-color: #000; }
+.boleto.is-hover .cell { transform: translateX(3px); }
+@media (hover: hover) { .boleto:hover .cell { transform: translateX(3px); } }
+.boleto.is-press .stub, .boleto:active .stub { transform: translateY(2px); }
+.boleto .sello { position: absolute; right: -10px; top: -14px; width: 34px; height: 34px; opacity: 0; transform: scale(1.6) rotate(-12deg); pointer-events: none; }
+.boleto.is-done .sello { opacity: 1; transform: scale(1) rotate(-12deg); transition: transform 250ms var(--ease-out), opacity 120ms; }
+.sello circle { fill: #000; stroke: var(--gold); stroke-width: 2.5; } .sello path { stroke: var(--gold); stroke-width: 3; fill: none; }
+
+/* ---------- Marco: outline, fill wipes up in 500, back down in 350 ---------- */
+.marco { padding: 0 22px; border: 2px solid var(--gold); overflow: hidden; transition: transform var(--dur-press) linear, color var(--dur-fill) var(--ease-fill); isolation: isolate; }
+.marco::before { content: ''; position: absolute; inset: 0; background: var(--gold); transform: scaleY(0); transform-origin: bottom; transition: transform var(--dur-fill-out) var(--ease-fill); z-index: -1; }
+.marco.lleno::before, .marco.is-hover::before, .marco.is-done::before { transform: scaleY(1); transition-duration: var(--dur-fill); }
+.marco.lleno, .marco.is-hover, .marco.is-done { color: #000; }
+@media (hover: hover) { .marco:hover::before { transform: scaleY(1); transition-duration: var(--dur-fill); } .marco:hover { color: #000; } .marco:hover svg.c { transform: translateX(4px); } }
+.marco.is-hover svg.c { transform: translateX(4px); }
+.marco.is-press, .marco:active { transform: translateY(2px); }
+.marco.is-focus, .marco:focus-visible { outline-offset: 3px; }
+
+/* ---------- toggle: a small version of each form ---------- */
+.tog { min-height: 44px; }
+.tecla.tog .cap, .marco.tog { padding: 0 16px; min-height: 44px; } .boleto.tog .stub { min-height: 44px; } .boleto.tog .main { padding: 0 20px 0 22px; }
+
+/* ---------- link variant for platforms ---------- */
+.enlace { color: var(--ink); text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 6px; text-decoration-thickness: 2px; min-height: 44px; }
+.enlace.is-hover svg.c { transform: translateX(4px); } .enlace.is-hover { color: var(--gold); }
+@media (hover: hover) { .enlace:hover svg.c { transform: translateX(4px); } .enlace:hover { color: var(--gold); } }
+
+/* ---------- scene twins: mocks, not renders ---------- */
+.escena { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.vidrio { height: 200px; background: radial-gradient(120% 90% at 70% 10%, #1a1e26 0, #07080b 60%); border: 1px solid var(--line); position: relative; overflow: hidden; perspective: 600px; display: grid; place-items: center; }
+.vidrio small { position: absolute; left: 10px; bottom: 8px; color: var(--muted); font-size: 12px; }
+.m-tecla { width: 120px; height: 56px; transform: rotateX(52deg) rotateZ(-6deg); transform-style: preserve-3d; position: relative; }
+.m-tecla i { position: absolute; inset: 0; background: var(--gold); transform: translateZ(14px); display: grid; place-items: center; color: #000; font: 600 15px Saira; }
+.m-tecla b { position: absolute; inset: 0; background: var(--gold-deep); }
+.m-tecla u { position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: var(--gold-deep); transform-origin: bottom; transform: rotateX(-90deg); }
+.m-boleto { width: 190px; height: 70px; background: var(--gold); color: #000; transform: skewX(-14deg) rotate(-5deg); display: grid; place-items: center; font: 600 15px Saira; position: relative; -webkit-mask: radial-gradient(circle 9px at 0 50%, #0000 97%, #000), radial-gradient(circle 9px at 100% 50%, #0000 97%, #000); -webkit-mask-composite: source-in; mask: radial-gradient(circle 9px at 0 50%, #0000 97%, #000), radial-gradient(circle 9px at 100% 50%, #0000 97%, #000); mask-composite: intersect; }
+.m-marco { width: 150px; height: 70px; border: 5px solid var(--gold); background: linear-gradient(0deg, color-mix(in oklch, var(--gold) 55%, transparent) 55%, transparent 55%); box-shadow: 0 0 28px color-mix(in oklch, var(--gold) 45%, transparent); display: grid; place-items: center; color: var(--ink); font: 600 15px Saira; transform: perspective(500px) rotateY(18deg); }
+
+/* ---------- morph strips ---------- */
+.tira { display: flex; gap: 10px; flex-wrap: wrap; }
+.tira figure { margin: 0; text-align: center; color: var(--muted); font-size: 12px; }
+.tira svg { width: 72px; height: 72px; background: #0b0b0d; border: 1px solid var(--line); display: block; }
+.tira path { fill: var(--gold); }
+</style>
+</head>
+<body>
+<h1>Botones e iconos</h1>
+<p class="n">Tres formas de botón para A Carretera, ninguna es píldora. Cada una se ve en sus estados, en variante llena y plana, como interruptor del loop, y como objeto de la escena 3D futura. Los gemelos de escena son maquetas CSS, no renders. Todas las formas comparten los mismos tiempos: 80 ms al presionar, 250 ms en cambios de estado, 500 ms al llenarse (350 ms al vaciarse).</p>
+<p class="n">Estados forzados con clases para poder verlos juntos. "Cargando" y "Listo" solo existen en el interruptor del loop (el video cargando, el video reproduciéndose); los enlaces no los tienen porque nada carga en esta página.</p>
+
+<div id="formas"></div>
+
+<h2>Morfología del icono</h2>
+<p class="n">Play a pausa en 250 ms: 60 ms de anticipación (el icono se encoge a .88), el cambio pasa por una forma intermedia apretada, rebota al pasarse y se asienta. Seis cuadros, de izquierda a derecha, a 0, 40, 80, 120, 180 y 250 ms. Bajo movimiento reducido el icono cambia en un solo cuadro.</p>
+<h3>Play a pausa</h3><div class="tira" id="tira-pp"></div>
+<p class="n">El anillo de carga no se transforma: gira con CSS y, cuando el video empieza, se desvanece en 150 ms mientras el icono de pausa aparece ya formado.</p>
+
+<script>
+const I = {
+  play: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 4l14 8-14 8z"/></svg>',
+  pausa: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>',
+  chev: '<svg class="c" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>',
+  anillo: '<span class="ring" aria-hidden="true"></span>',
+  sello: '<svg class="sello" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="14"/><path d="M10 17.5l5 5 9-10"/></svg>',
+};
+const ESTADOS = [['reposo',''],['hover','is-hover'],['presionado','is-press'],['foco','is-focus']];
+function boton(f, {lleno, icono, texto, chev = true, tog = false, cls = '', stamp = false}) {
+  const ic = icono ? I[icono] : '';
+  const ch = chev ? I.chev : '';
+  const k = `b ${f} ${lleno ? 'lleno' : ''} ${tog ? 'tog' : ''} ${cls}`;
+  if (f === 'tecla') return `<a class="${k}" href="#"><span class="cap">${ic}<span>${texto}</span>${ch}</span></a>`;
+  if (f === 'boleto') return `<a class="${k}" href="#"><span class="stub"><span class="main">${ic}<span>${texto}</span></span><span class="cell">${ch || I.chev}</span></span>${stamp ? I.sello : ''}</a>`;
+  return `<a class="${k}" href="#">${ic}<span>${texto}</span>${ch}</a>`;
+}
+function fila(titulo, celdas) {
+  return `<h3>${titulo}</h3><div class="fila">${celdas.map(([t, h]) => `<div class="celda">${h}<small>${t}</small></div>`).join('')}</div>`;
+}
+const NOMBRES = { tecla: 'Tecla', boleto: 'Boleto', marco: 'Marco' };
+const NOTAS = {
+  tecla: 'Un teclado de tablero: la tapa dorada sobre un labio de 4 px. Al presionar la tapa baja 3 px sobre el labio y al soltar regresa. La flecha avanza 4 px al pasar. La variante plana usa tapa oscura con borde dorado para no repetir dos tapas doradas en el hero.',
+  boleto: 'Un boleto: muescas de medio círculo en los lados y una perforación punteada antes de la flecha. Al pasar, la parte de la flecha se separa 3 px; al presionar baja 2 px y la acción ocurre al soltar. Cuando el video empieza a reproducirse tras un toque del usuario, un sello cae sobre el boleto del interruptor.',
+  marco: 'Un marco: contorno cuadrado de 2 px; el relleno sube desde abajo en 500 ms y baja en 350 ms. La flecha avanza 4 px. Es el botón de trabajo actual, afinado.',
+};
+const SCENE = {
+  tecla: '<div class="vidrio"><div class="m-tecla"><b></b><u></u><i>Escuchar</i></div><small>Tecla del tablero en la cabina: tapa más labio es una extrusión; presionar es una traslación.</small></div>',
+  boleto: '<div class="vidrio"><div class="m-boleto">Contratar</div><small>Boleto de caseta en el parabrisas, o calcomanía en la defensa: el sello es un cambio de calcomanía.</small></div>',
+  marco: '<div class="vidrio"><div class="m-marco">Escribir</div><small>Marco de placa o señal de carretera: el relleno es un emisivo que sube.</small></div>',
+};
+const SCENE_NOTA = {
+  tecla: 'Gemelo DOM: el mismo enlace o botón, enfocable, con el mismo nombre accesible, sincronizado con la pieza.',
+  boleto: 'Foco del DOM espejado en la pieza como anillo o brillo; área proyectada de al menos 44 px a 390.',
+  marco: 'Cada estado corresponde a un clip de animación o a un parámetro de material; movimiento reducido igual.',
+};
+let html = '';
+for (const f of ['tecla', 'boleto', 'marco']) {
+  html += `<h2>${NOMBRES[f]}</h2><p class="n">${NOTAS[f]}</p>`;
+  html += fila('Lleno · Escuchar en Spotify (hero)', ESTADOS.map(([n, c]) => [n, boton(f, {lleno: true, icono: 'play', texto: 'Escuchar en Spotify', cls: c})]));
+  html += fila('Plano · Contratar (encabezado, hero)', ESTADOS.map(([n, c]) => [n, boton(f, {lleno: false, texto: 'Contratar', cls: c, chev: true})]));
+  html += fila('Plataformas: caja y enlace de texto', [
+    ['caja', boton(f, {lleno: false, texto: 'Spotify', chev: false})],
+    ['enlace de texto', `<a class="b enlace" href="#"><span>Spotify</span>${I.chev}</a>`],
+    ['enlace, hover', `<a class="b enlace is-hover" href="#"><span>Spotify</span>${I.chev}</a>`],
+  ]);
+  const T = (c, ic, tx, ex = {}) => boton(f, {lleno: false, icono: ic, texto: tx, tog: true, chev: false, cls: c, ...ex});
+  html += fila('Interruptor del loop (único botón de verdad)', [
+    ['reposo, reproduciendo', T('', 'pausa', 'Pausar video')],
+    ['hover', T('is-hover', 'pausa', 'Pausar video')],
+    ['presionado', T('is-press', 'pausa', 'Pausar video')],
+    ['foco', T('is-focus', 'pausa', 'Pausar video')],
+    ['cargando (video esperando)', T('', 'anillo', 'Cargando video')],
+    ['listo (reproduciendo tras un toque)', T('is-done', 'pausa', 'Pausar video', {stamp: f === 'boleto'})],
+    ['en pausa', T('', 'play', 'Reproducir video')],
+  ]);
+  html += `<h3>Gemelo en la escena</h3><div class="escena">${SCENE[f]}<p class="n">${SCENE_NOTA[f]} Alcance: solo botones e iconos.</p></div>`;
+}
+document.getElementById('formas').innerHTML = html;
+
+/* morph strips: 8-point shapes, same point order, as MorphSVG will match them */
+const PLAY = [[6,4],[12,7.43],[12,16.57],[6,20],  [12,7.43],[20,12],[20,12],[12,16.57]];
+const PAUSE = [[6,4],[10,4],[10,20],[6,20],  [14,4],[18,4],[18,20],[14,20]];
+const d = (p) => `M${p.slice(0,4).map(q=>q.join(' ')).join('L')}ZM${p.slice(4).map(q=>q.join(' ')).join('L')}Z`;
+const mix = (a, b, t) => a.map((p, i) => [p[0] + (b[i][0]-p[0])*t, p[1] + (b[i][1]-p[1])*t]);
+const backOut = (t) => { const s = 1.9; t -= 1; return t*t*((s+1)*t + s) + 1; };
+const strip = (el, from, to, fn) => {
+  el.innerHTML = [0, 40, 80, 120, 180, 250].map((ms) => {
+    let shape, sc = 1;
+    if (ms < 60) { sc = 1 - 0.12 * (ms / 60); shape = from; }
+    else { const t = Math.min(1, (ms - 60) / 190); sc = 0.88 + 0.12 * backOut(t); shape = fn(t); }
+    return `<figure><svg viewBox="0 0 24 24"><g transform="translate(12 12) scale(${sc}) translate(-12 -12)"><path d="${d(shape)}"/></g></svg>${ms} ms</figure>`;
+  }).join('');
+};
+strip(document.getElementById('tira-pp'), PLAY, PAUSE, (t) => mix(PLAY, PAUSE, backOut(t)));
+</script>
+</body>
+</html>
