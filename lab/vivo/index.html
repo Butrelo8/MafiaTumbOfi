@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba en vivo</title>
+<style>
+  :root { --bg: #000; --ink: #f1eee9; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font: 12px/1.4 ui-monospace, monospace; }
+  #pista { height: 600vh; }
+  canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
+  #info { position: fixed; left: 8px; top: 8px; background: rgba(0,0,0,.7); padding: 4px 8px; white-space: pre; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "/node_modules/three/build/three.module.js", "three/addons/": "/node_modules/three/examples/jsm/" } }
+</script>
+</head>
+<body>
+<canvas id="c" aria-label="Cabina del camión en movimiento; al bajar, la cámara sale por el parabrisas hasta la caja"></canvas>
+<div id="pista"></div>
+<p id="info" aria-live="off">cargando…</p>
+<script type="module">
+// Scene 1 (Cabina) + the 1->2 move live (escenas-plan §3): the v3 Cycles camera rail (blender/transicion.py CAMINO + muestra())
+// driven by scroll, world streaming at the Cycles loop speed whatever the scroll does.
+// ?f=96 freezes frame 96 (camera and road phase) for the side-by-side with the Cycles frames.
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
+import { HDRLoader } from "three/addons/loaders/HDRLoader.js";
+
+const q = new URLSearchParams(location.search);
+const FIJO = q.has("f") ? Number(q.get("f")) : null;
+const cfg = await (await fetch("/src/lib/escena.json")).json();
+const M = cfg.mundo, P = cfg.presets.noche;
+const SPEED = M.recorrido_loop / M.loop_s, NFR = 192, CX = 1.72;
+const CAMINO = [  // blender/transicion.py: (frame, pos, look-at, lens), Blender axes
+  [0, [CX, -0.75, 1.88], [CX, 6.0, 1.45], 20], [40, [CX, 0.45, 1.80], [CX, 8.0, 1.55], 18],
+  [72, [CX, 1.55, 1.95], [CX, 9.0, 1.30], 20], [100, [CX, 2.3, 3.0], [CX, 7.0, 1.0], 22],
+  [140, [CX - 0.3, -1.2, 5.2], [CX, -0.3, 1.2], 24], [191, [CX - 0.8, -6.8, 3.6], [CX, -0.6, 1.35], 28]];
+const b2t = ([x, y, z]) => [x, z, -y];  // Blender (Z up, +Y forward) -> three.js (Y up, -Z forward)
+const cat = (p0, p1, p2, p3, t) => { const t2 = t * t, t3 = t2 * t;
+  return 0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3); };
+function muestra(fr, i) {  // port of transicion.muestra: Catmull-Rom with the frame->segment map smoothstepped
+  const fs = CAMINO.map(c => c[0]);
+  let u = fr / fs.at(-1); u = u * u * (3 - 2 * u);
+  const gg = u * fs.at(-1);
+  const k = gg < fs.at(-1) ? Math.max(...fs.slice(0, -1).map((f, j) => f <= gg ? j : 0)) : fs.length - 2;
+  const t = (gg - fs[k]) / (fs[k + 1] - fs[k]);
+  const val = n => CAMINO[Math.min(Math.max(n, 0), CAMINO.length - 1)][i];
+  if (i === 3) return cat(val(k - 1), val(k), val(k + 1), val(k + 2), t);
+  return [0, 1, 2].map(a => cat(val(k - 1)[a], val(k)[a], val(k + 1)[a], val(k + 2)[a], t));
+}
+
+const canvas = document.getElementById("c"), info = document.getElementById("info");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance", preserveDrawingBuffer: FIJO !== null });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+renderer.toneMapping = THREE.AgXToneMapping;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+const gl = renderer.getContext(), dbg = gl.getExtension("WEBGL_debug_renderer_info");
+const GPU = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : "?";
+const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(40, 1, 0.03, 3000);
+
+const draco = new DRACOLoader().setDecoderPath("/node_modules/three/examples/jsm/libs/draco/gltf/");
+const t0 = performance.now();
+const gltf = await new GLTFLoader().setDRACOLoader(draco).loadAsync(q.get("glb") || "/tmp/vivo/vivo.glb");
+const raiz = gltf.scene, FIGS = ["hector", "diego", "alejandro", "manager"];
+const mundo = new THREE.Group();
+for (const o of [...raiz.children]) {
+  if (o.name === "camion" || o.name === "cerros" || FIGS.includes(o.name)) scene.add(o); else mundo.add(o);
+}
+scene.add(mundo);
+const ruedas = []; scene.traverse(o => { if (/^rueda\d/.test(o.name)) ruedas.push(o); });
+let tris = 0; scene.traverse(o => { if (o.isMesh) tris += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; });
+
+const tex = new THREE.TextureLoader(), rep = (t, x, y, srgb) => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(x, y); t.anisotropy = 8; if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };
+const LARGO = 640;
+const maps = await Promise.all(["carretera.jpg", "carretera-normal.jpg", "carretera-rugosidad.jpg"].map(f => tex.loadAsync(`/public/escena/${f}`)));
+maps.forEach((t, i) => rep(t, 1, LARGO / M.losa, i === 0));
+const road = new THREE.Mesh(new THREE.PlaneGeometry(8, LARGO), new THREE.MeshStandardMaterial({ map: maps[0], normalMap: maps[1], roughnessMap: maps[2] }));
+road.rotation.x = -Math.PI / 2; road.position.set(0, 0.015, -LARGO / 2 + 120);
+const gmap = rep(await tex.loadAsync("/public/escena/terreno.jpg"), 750, 750, true);
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000), new THREE.MeshStandardMaterial({ map: gmap, color: new THREE.Color(0.22, 0.19, 0.16), roughness: 1 }));
+ground.rotation.x = -Math.PI / 2;
+scene.add(road, ground);
+
+const hdr = await new HDRLoader().loadAsync(`/public/escena/${P.hdri}.hdr`);
+hdr.mapping = THREE.EquirectangularReflectionMapping;
+scene.background = hdr;
+scene.environment = new THREE.PMREMGenerator(renderer).fromEquirectangular(hdr).texture;
+scene.backgroundIntensity = P.cielo_intensidad; scene.environmentIntensity = P.cielo_intensidad * 1.5;
+scene.fog = new THREE.FogExp2(P.niebla.color, P.niebla.densidad);
+renderer.toneMappingExposure = P.exposicion;
+for (const dx of [-0.62, 0.62]) {  // headlights (escena.ts)
+  const s = new THREE.SpotLight(P.faros.color, P.faros.intensidad * 1.4, P.faros.alcance, 0.42, 0.6, 1.2);
+  s.position.set(M.carril_x + dx, 0.85, -M.largo_camion / 2 - 0.05); s.target.position.set(M.carril_x + dx * 3, 0, -M.largo_camion / 2 - 25);
+  scene.add(s, s.target);
+}
+const cal = new THREE.PointLight(P.calaveras.color, P.calaveras.intensidad, 6, 2); cal.position.set(M.carril_x, 0.9, M.largo_camion / 2 + 0.3); scene.add(cal);
+const luna = new THREE.DirectionalLight(P.luna.color, P.luna.intensidad * 3); luna.position.set(...P.luna.dir).multiplyScalar(50); scene.add(luna);
+// cab and bed lights of transicion.luces_interior (area lights there; point lights here, energy not matched: first pass)
+for (const [p, e, c] of [[[CX, 0.25, 2.12], 0.6, 0xffc78c], [[CX, 1.08, 1.45], 1.2, 0x8cbfff], [[CX, -1.0, 2.6], 6, 0xffd199]]) {
+  const l = new THREE.PointLight(c, e, 4, 2); l.position.set(...b2t(p)); scene.add(l);
+}
+
+function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); cam.aspect = w / h; }
+addEventListener("resize", resize); resize();
+function poner(fr) {
+  const p = b2t(muestra(fr, 1)), m = b2t(muestra(fr, 2)), lens = muestra(fr, 3);
+  const hf = 2 * Math.atan(18 / lens);  // sensor_fit HORIZONTAL, 36 mm
+  cam.fov = (2 * Math.atan(Math.tan(hf / 2) / cam.aspect)) * 180 / Math.PI;
+  cam.updateProjectionMatrix(); cam.position.set(...p); cam.lookAt(...m);
+}
+const S = window.__vivo = { listo: false, GPU, tris: Math.round(tris), cargaMs: Math.round(performance.now() - t0), dt: [], render: [] };
+let fr = FIJO ?? 0, last = performance.now(), recorrido = 0;
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 0.1); last = now;
+  S.dt.push(now - last + dt * 1000); if (S.dt.length > 300) S.dt.shift();
+  if (FIJO === null) {
+    recorrido += SPEED * dt;
+    const max = document.documentElement.scrollHeight - innerHeight;
+    const meta = Math.min(1, Math.max(0, scrollY / max)) * (NFR - 1);
+    fr += (meta - fr) * (1 - Math.exp(-dt * 8));  // damp toward the scroll target
+  } else recorrido = SPEED * FIJO / 24;
+  mundo.position.z = recorrido % M.tramo;
+  maps.forEach(t => (t.offset.y = (recorrido / M.losa) % 1)); gmap.offset.y = (recorrido / 4) % 1;
+  for (const r of ruedas) r.rotation.x = -(recorrido / 0.474) % (Math.PI * 2);
+  poner(fr);
+  const r0 = performance.now(); renderer.render(scene, cam); S.render.push(performance.now() - r0); if (S.render.length > 300) S.render.shift();
+  const fps = 1000 / (S.dt.reduce((a, b) => a + b, 0) / S.dt.length);
+  info.textContent = `${GPU}\n${fps.toFixed(0)} fps · cuadro ${fr.toFixed(0)} · ${S.tris} tris`;
+  S.listo = true;
+}
+renderer.setAnimationLoop(frame);
+</script>
+</body>
+</html>

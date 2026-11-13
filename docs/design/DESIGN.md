@@ -106,6 +106,9 @@ transfer, over the 150 KB cap, `web/site-reading-fichas/landonorris-com/speed-39
 
 ## Open (the owner's; placeholders in use)
 - WhatsApp number: `socials.ts` (228 353 8827) is used; SPEC §4 says 228 835 1464.
+- Scene props (radio + cassette + dash key, glovebox junk, stickers, pantalla móvil, sign gantries, plate, bed props): three
+  options each, waiting on the owner's pick (`docs/design/escenas/utileria/index.html`; sources in `references.md` › Scene props,
+  phase 1). Each picked element joins Components with its source row; none is a rule yet.
 - Lead release: Putifresa (catalog order); "POR EL BLOC" is not in the catalog.
 - Covers are 160 px (soft in the strip at 1440); logo is a 794 px webp.
 - Tripo figures in the cab (members stop) are not on the page; ToS §5.2.1 is unresolved.
