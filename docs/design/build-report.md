@@ -26,11 +26,14 @@ The tweak bar went to the owner, who kept A's defaults. The build is in `src/` a
 ## Checks
 ```
 revisar.sh web http://localhost:3119/   exit 0, 0 FAIL   (table: docs/design/build-revisar/table.tsv)
-  390:  overflow 0 · tap 0 · contrast 0 · CLS 0.000 · weight 1.49 MB (≤ 3 MB) · fixed-over-text 0
+  390:  overflow 0 · tap 0 · contrast 0 (text on solid ground) · CLS 0.000 · weight 1.49 MB (≤ 3 MB) · fixed-over-text 0
   1440: overflow 0 · contrast 0 · CLS 0.016 · fixed-over-text 0 · glyphs 0/94 missing · reduced motion: 0 videos playing
 slop-check.py src                       0 FAIL; REVIEW kept: js-intersection-reveal (play/pause of the loop, not a reveal)
 refs-check.py references.md             all PASS
 bun test                                10 pass, 0 fail
 ```
+Not verified by any tool: text over the scene (hero line and contact panel on `--veil`); neither revisar nor
+bg-measure measures text over images. States matrix: `check-matrix.py` 0 errors; Components sources: 0 errors.
+
 Mac WebKit pass brief: `docs/queue/2026-11-12-mto-a-carretera-mac-webkit.md`. The `mac-webkit-pass` skill isn't
 installed in this environment, so the brief copies the shape of the 11-09 truck brief.

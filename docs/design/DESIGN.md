@@ -16,7 +16,7 @@
 :root {
   --bg: #000;                       /* the logo's black faces (public/icon/mafiatumbada.webp) */
   --ink: oklch(95% 0.008 85);       /* warm white, directions.md › A */
-  --muted: oklch(80% 0.01 85);      /* secondary text; 4.5:1 on --veil (revisar.sh contrast) */
+  --muted: oklch(80% 0.01 85);      /* secondary text; over the scene it sits on --veil: not verified (no tool measures text over images) */
   --gold: oklch(80% 0.13 82);       /* the logo's bronze-gold bevel, lifted for 11.1:1 on #000 (tweak bar) */
   --gold-deep: oklch(62% 0.11 70);  /* scrollbar only */
   --veil: rgb(0 0 0 / 0.62);        /* references.md › contacto: veil under text over the rendered scene */
@@ -61,12 +61,12 @@ Square everywhere: buttons, covers, panel. No pill (owner: only if picked over 2
 ## States matrix
 | Component | default | hover | focus-visible | pressed / selected | disabled | loading | empty | error | **domain** | a11y |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Boton (line) | gold edge, ink text | gold wipes up, black text | same wipe + 3px gold ring | dips 2 px | n/a: links only | n/a: static link | n/a: always has a label | n/a: static link | n/a | link text names the action |
-| Boton (filled) | gold fill, black text | n/a: already filled, cursor only | 3px gold ring | dips 2 px | n/a | n/a | n/a | n/a | n/a | link text names the action |
-| Release card | cover + title + type | title turns gold | 3px gold ring + gold title | n/a: link | n/a | lazy image, `--line` border holds the box | n/a: 9 fixed releases | n/a: static | n/a | cover `alt=""`, title is the name |
-| Video card | thumb + play + title | title turns gold | 3px gold ring | n/a: link | n/a | lazy, `--line` fill holds 16:9 | n/a | n/a | live video first | thumb `alt=""`, icon hidden |
-| Loop toggle | "Pausar video" | ink text | 3px gold ring | `aria-pressed=true`, "Reproducir video" | n/a | n/a | n/a | play() rejected: poster stays | reduced motion: starts paused | real `<button>`, hidden until JS runs |
-| Hero media | poster | n/a | n/a: `aria-hidden` | n/a | n/a | poster until the loop plays, 0.4 s fade | n/a | no video: poster | reduced motion: poster | `aria-hidden`, `alt=""` |
+| Boton (line) | gold edge, ink text | gold wipes up, black text | same wipe + 3px gold ring | dips 2 px | n/a: links only | n/a: static link | n/a: always has a label | n/a: static link | n/a: not date-bound | link text names the action |
+| Boton (filled) | gold fill, black text | n/a: already filled, cursor only | 3px gold ring | dips 2 px | n/a: links only | n/a: static link | n/a: always has a label | n/a: static link | n/a: not date-bound | link text names the action |
+| Release card | cover + title + type | title turns gold | 3px gold ring + gold title | n/a: link | n/a: links only | lazy image, `--line` border holds the box | n/a: 9 fixed releases | n/a: no remote data | n/a: no dates shown (no tour dates) | cover `alt=""`, title is the name |
+| Video card | thumb + play + title | title turns gold | 3px gold ring | n/a: link | n/a: links only | lazy, `--line` fill holds 16:9 | n/a: 5 fixed videos | a missing YouTube thumb leaves the `--line` box and the title | live video first | thumb `alt=""`, icon hidden |
+| Loop toggle | "Pausar video" | ink text | 3px gold ring | `aria-pressed=true`, "Reproducir video" | n/a: always usable | n/a: the poster covers loading | n/a: one fixed loop | play() rejected: poster stays | reduced motion: starts paused | real `<button>`, hidden until JS runs |
+| Hero media | poster | n/a: not interactive | n/a: `aria-hidden` | n/a: not interactive | n/a: not interactive | poster until the loop plays, 0.4 s fade | n/a: poster always ships | no video: poster | reduced motion: poster | `aria-hidden`, `alt=""` |
 
 ## Do's and Don'ts
 - Do: plain section names, real content only, poster = loop frame 0, square controls.
