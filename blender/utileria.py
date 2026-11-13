@@ -492,9 +492,8 @@ def pantalla_b():
 
 
 @opcion("pantalla-c")
-def pantalla_c():
+def pantalla_c(x=PM_X, y=PM_Y):
     """C: box truck with the side screen framed like a marquee: a row of warm bulbs around it, the rear screen the same."""
-    x, y = PM_X, PM_Y
     cabina_camion(x, y + 3.6, color=(0.02, 0.02, 0.02))
     caja((2.5, 6.0, 3.0), (x, y - 0.4, 2.15), CAP, parent=False)
     panel_led(5.0, 2.2, (x + 1.26, y - 0.4, 2.2), (math.pi / 2, 0, math.pi / 2), BANDA, 80)
@@ -516,13 +515,13 @@ PORTICO_Y = 16.0
 VISTA_PORTICO = lambda: ((CX - 0.6, -7.5, 3.4), (CX + 0.2, PORTICO_Y, 5.4), 36)
 
 
-def letrero(titulo, sub, x, z, w, h):
+def letrero(titulo, sub, x, z, w, h, y=PORTICO_Y):
     """SCT-style green guide sign: white retroreflective border and lettering (stills: Bahnschrift, a DIN 1451 cut)."""
-    plano(w, h, (x, PORTICO_Y - 0.06, z), BLANCO_REFL, parent=False)
-    plano(w - 0.16, h - 0.16, (x, PORTICO_Y - 0.07, z), VERDE_SCT, parent=False)
-    texto(titulo, h * 0.36, (x, PORTICO_Y - 0.08, z + h * 0.08), BLANCO_REFL, parent=False)
+    plano(w, h, (x, y - 0.06, z), BLANCO_REFL, parent=False)
+    plano(w - 0.16, h - 0.16, (x, y - 0.07, z), VERDE_SCT, parent=False)
+    texto(titulo, h * 0.36, (x, y - 0.08, z + h * 0.08), BLANCO_REFL, parent=False)
     if sub:
-        texto(sub, h * 0.15, (x, PORTICO_Y - 0.08, z - h * 0.28), BLANCO_REFL, parent=False)
+        texto(sub, h * 0.15, (x, y - 0.08, z - h * 0.28), BLANCO_REFL, parent=False)
 
 
 @opcion("portico-a")
@@ -539,11 +538,11 @@ def portico_a():
 
 
 @opcion("portico-b")
-def portico_b():
+def portico_b(titulo="REDES", sub="SALIDA  2 km", y=PORTICO_Y):
     """B: cantilever (bandera) sign: one pole on the right shoulder, the sign hanging over the lane."""
-    cil(0.25, 7.2, (CX + 5.5, PORTICO_Y, 3.6), ACERO, verts=16, parent=False)
-    caja((5.6, 0.25, 0.25), (CX + 2.8, PORTICO_Y + 0.2, 6.9), ACERO, parent=False)
-    letrero("REDES", "SALIDA  2 km", CX + 1.2, 6.0, 3.6, 1.8)
+    cil(0.25, 7.2, (CX + 5.5, y, 3.6), ACERO, verts=16, parent=False)
+    caja((5.6, 0.25, 0.25), (CX + 2.8, y + 0.2, 6.9), ACERO, parent=False)
+    letrero(titulo, sub, CX + 1.2, 6.0, 3.6, 1.8, y)
     return VISTA_PORTICO()
 
 
@@ -1200,6 +1199,195 @@ def op_calcas3_mix_esc2():
     calcas3_mix()
     luces3(VISTA_ESC2()[0])
     return VISTA_ESC2()
+
+
+# ================================================================ scenes 2-6, key stills (mothership queue 2026-11-13 05:32)
+# Each scene's opening frame (its hold, escenas-plan §1 camera table) and the end frame of its move. The end frames are the beat
+# under the next sign gantry (2, 3, where the phone clip cut hides), the driver's side (4), the turn ahead of the truck (5) and
+# the headlight flash (6): on purpose not the next scene's hold. Props are the owner's picks: bed B (caja2_b), the sticker mix,
+# pantalla C, sign B (portico_b), the Veracruz plate (placa3). 9:16 when RH > RW: v() keeps 75 % of the horizontal angle, as
+# storyboard.py does; the phone shots that need their own position say so.
+def v(lens):
+    return 18 / math.tan(0.75 * math.atan(18 / lens))
+
+
+def toma(ancha, alta):
+    return alta if RH > RW else ancha
+
+
+SENTADOS = []
+
+
+def asientos_traseros():
+    """All four ride in the cab (owner 23:52): Alexandro and Diego move from the v3 bed to the rear seats, as storyboard.py does,
+    their guitars left face up on the cases. Once per run; later options keep them seated (the glovebox stills hide Héctor only)."""
+    from mathutils import Matrix
+    if SENTADOS:
+        return
+    for nombre, x_bed, lado in (("alejandro", CX - 0.36, -1), ("diego", CX + 0.36, 1)):
+        x = CX + 0.39 * lado
+        respaldo = rayo((x, 0.10, 1.40), (0, -1, 0))
+        cojin = rayo((x, -0.55, 2.10), (0, 0, -1))
+        y_hip = (respaldo.y + 0.20) if respaldo else -0.62
+        z_hip = (cojin.z + 0.07) if cojin and cojin.z < 1.5 else T.CABINA_Z + 0.07
+        arm = bpy.data.objects[nombre + "_rig"]
+        bed_hip = Vector((x_bed, -1.62, T.CAJA_Z + T.CASE_H + 0.07))
+        mover = Matrix.Translation(Vector((x, y_hip, z_hip))) @ Matrix.Rotation(math.pi, 4, "Z") @ Matrix.Translation(-bed_hip)
+        gt = bpy.data.objects["guitarra_" + nombre]
+        gw = gt.matrix_world.copy()
+        gt.parent = None
+        gt.matrix_world = gw
+        arm.matrix_world = mover @ arm.matrix_world
+        gt.matrix_world = Matrix.Translation(Vector((x_bed - 0.05, -1.55, T.CAJA_Z + T.CASE_H + 0.05))) @ Matrix.Rotation(-math.pi / 2, 4, "X")
+        print("ASIENTO", nombre, respaldo, cojin)
+    SENTADOS.append(1)
+    bpy.context.view_layer.update()
+
+
+def base_escena(cama=True):
+    asientos_traseros()
+    if cama:
+        caja2_b()
+
+
+def sin_camara():
+    for o in GRUPO:
+        if o.type == "LIGHT":
+            o.visible_camera = False
+
+
+@opcion("esc2-abre")
+def esc2_abre():
+    """2 Caja hold: high behind the bed, 28 mm (v3 f191). Ref collateral/004 (tail-chase, rear three-quarter, night); changed on
+    purpose: higher, so the bed and the stickers read."""
+    base_escena()
+    calcas3_mix()
+    luces3(VISTA_ESC2()[0])
+    return toma(VISTA_ESC2(), (c1[1], c1[2], v(c1[3])))
+
+
+@opcion("esc2-fin")
+def esc2_fin():
+    """End of move 2→3: the pantalla móvil has overtaken on the left, the camera has dropped into the gap between the two, the
+    VIDEOS sign (B) passes overhead: the cut point."""
+    base_escena()
+    calcas3_mix()
+    pantalla_c(CX - 4.0, 0.0)  # level with the camera: from behind it, its rear screen filled the left of frame
+    portico_b("VIDEOS", "SALIDA  1 km", 9.0)
+    return toma(((CX - 1.95, -2.8, 2.0), (CX - 1.7, 9.0, 4.4), 24), ((CX - 1.95, -2.8, 2.0), (CX - 1.7, 9.0, 4.6), v(24)))
+
+
+@opcion("esc3-espejo")
+def esc3_espejo():
+    """3 Pantalla hold, option A, the table read literally: by the driver's mirror, looking back-left at the side screen, 24 mm. The
+    band truck's side then falls on the LEFT edge (a camera looking back from the driver's side cannot hold that window on the right)."""
+    base_escena()
+    pantalla_c(CX - 4.0, -0.9)
+    return toma(((CX - 1.35, 1.3, 1.95), (CX - 2.74, -1.5, 2.1), 24), ((CX - 1.6, 1.2, 1.95), (CX - 2.74, -1.6, 2.1), v(24)))
+
+
+@opcion("esc3-hombro")
+def esc3_hombro():
+    """3 Pantalla hold, option B, the table's composition kept: the manager's window in the right of frame, so the camera sits
+    behind it at the rear door and looks forward-left at the side screen, which rides level with the cab."""
+    base_escena()
+    pantalla_c(CX - 4.0, 1.6)
+    return toma(((CX - 1.5, -1.9, 2.0), (CX - 2.74, 2.4, 2.0), 24), ((CX - 1.7, -1.6, 2.0), (CX - 2.74, 2.0, 2.05), v(24)))
+
+
+@opcion("esc3-fin")
+def esc3_fin():
+    """End of move 3→4: the pantalla eased ahead; the camera swung round the rear corner to the passenger side and dollies forward
+    alongside; the LA BANDA sign (B) passes. Ref nightcrawler/029 (low rear three-quarter, lane lines converging), mirrored."""
+    base_escena()
+    pantalla_c(CX - 4.0, 14.0)
+    portico_b("LA BANDA", "", 13.0)
+    return toma(((CX + 2.5, COLA - 1.3, 1.3), (CX + 0.7, 13.0, 3.0), 24), ((CX + 2.2, COLA - 1.0, 1.3), (CX + 0.9, 13.0, 3.2), v(24)))
+
+
+def luz_costado(modo, lado):
+    """Scene 4 reads nearly black from the side (storyboard notes). relleno: a soft camera-car light from the camera side.
+    cabina: the cab lit from inside (a warm lamp over each seat), the side left to the road lamps."""
+    if modo == "relleno":
+        # inside the shoulder barrier (x ≈ +4.5) and high: at x 4.2, z 3.4 it lit the barrier's face toward the camera
+        luz("AREA", (CX + lado * 3.0, -0.3, 4.2), 700, (0.85, 0.9, 1.0), mira=(CX + lado * 1.0, -0.3, 1.7), size=2.0, parent=False)
+    else:
+        for x in (CX - 0.4, CX + 0.4):
+            for y in (0.2, -0.6):
+                luz("POINT", (x, y, 1.98), 6, (1.0, 0.75, 0.5), size=0.08, parent=False)
+    sin_camara()
+
+
+def esc4(modo, lado):
+    base_escena()
+    luz_costado(modo, lado)
+    # 6 m out on the passenger side is beyond the guardrail (escena.py, x 5.0): at 1.9 m it filled the bottom as a grey slab, so
+    # the camera rides at 2.6 m and looks over it (both sides, so the two frames match)
+    ancha = ((CX + lado * 6.2, -0.3, 2.6), (CX, -0.3, 1.45), 24)
+    alta = ((CX + lado * 3.0, 0.15, 1.95), (CX + lado * 0.4, 0.15, 1.8), 22)  # phone: one window stop (Héctor; then the manager)
+    return toma(ancha, alta)
+
+
+@opcion("esc4-relleno")
+def esc4_relleno():
+    """4 Costado hold, option A: drive-alongside, passenger side, 6 m out, 24 mm, camera-side fill."""
+    return esc4("relleno", 1)
+
+
+@opcion("esc4-cabina")
+def esc4_cabina():
+    """4 Costado hold, option B: the same frame, the cab lit from inside."""
+    return esc4("cabina", 1)
+
+
+ESC4_LUZ = "relleno"
+
+
+@opcion("esc4-fin")
+def esc4_fin():
+    """4 Costado end: over the roof to the driver's side, the manager and Alexandro (phone: the manager's window)."""
+    return esc4(ESC4_LUZ, -1)
+
+
+@opcion("esc5-abre")
+def esc5_abre():
+    """5 Gira hold: just over the hood, 30 mm, the pantalla móvil ahead in the lane, its rear screen in the empty state (no dates
+    file yet, plan §5). Ref drive/014 (over the dash, the road ahead at night); changed: outside, over the hood."""
+    base_escena(cama=False)
+    pantalla_c(CX, FRENTE + 8.0 + 3.4)  # 13 m left the rear screen unreadable at 30 mm
+    # over the roof's front edge, tilted down so the hood's nose sits on the bottom edge (from y 2.3 the hood was under the frame)
+    return toma(((CX - 0.3, 0.9, 2.45), (CX, FRENTE + 8, 1.25), 30), ((CX - 0.2, 0.9, 2.45), (CX, FRENTE + 8, 1.15), v(30)))
+
+
+@opcion("esc5-fin")
+def esc5_fin():
+    """End of move 5→6: the pantalla turned off; the camera has flown forward past the truck and turns to face it, high. Ref
+    collateral/022 (the car small in its lane between the lamp rows)."""
+    base_escena()
+    return toma(((CX + 0.8, FRENTE + 15.0, 6.0), (CX, FRENTE - 2.5, 1.2), 30), ((CX + 0.5, FRENTE + 13.0, 6.0), (CX, FRENTE - 2.0, 1.0), v(30)))
+
+
+@opcion("esc6-abre")
+def esc6_abre():
+    """6 Placa hold: ahead of the truck, low, travelling backwards, 32 mm, headlights toward camera. Ref collateral/028 (the taxi
+    head-on three-quarter, camera at bumper height)."""
+    base_escena(cama=False)
+    placa3()
+    return toma(((CX + 1.4, FRENTE + 6.5, 0.95), (CX + 0.1, FRENTE - 1.5, 1.2), 32), ((CX + 0.4, FRENTE + 5.5, 0.9), (CX, FRENTE - 1.0, 1.15), v(32)))
+
+
+@opcion("esc6-flash")
+def esc6_flash():
+    """6 Placa end: the button, one headlight flash (plan §2: emissive + spotlight); the camera a step closer to the plate."""
+    base_escena(cama=False)
+    placa3()
+    for f in [o for o in bpy.data.objects if o.name.startswith("faro_") and o.type == "LIGHT"]:
+        p = f.matrix_world.translation
+        luz("SPOT", p, f.data.energy * 6, (1.0, 0.95, 0.88), mira=p + Vector((0, 20, -0.6)), parent=False)
+    # the lamp lenses themselves (escena.py's "faros" material). Not restored: esc6-flash must stay the last scene option
+    bs = bpy.data.materials["faros"].node_tree.nodes["Principled BSDF"]
+    bs.inputs["Emission Strength"].default_value *= 8
+    return toma(((CX + 0.9, FRENTE + 4.2, 0.85), (CX, FRENTE - 0.5, 0.98), 32), ((CX + 0.3, FRENTE + 4.0, 0.85), (CX, FRENTE - 0.5, 1.0), v(32)))
 
 
 # ---- glovebox C: the door cut out of the G63 mesh. Destructive for the dash: these options must stay last in the file.

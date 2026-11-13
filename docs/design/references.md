@@ -124,6 +124,18 @@ Gate: `refs-check.py <this section> --sections calcas3` (the older sections fail
 | calcas3 | user: owner 03:40 via mothership ("we might need to dig more design on the stickers so they stand out as real stickies"); glyph ruling, mothership 04:25; Spotify's icon zip from developer.spotify.com/documentation/design (O). The Meta, YouTube (brand.youtube) and TikTok (developers.tiktok.com design guidelines) packs need a manual download | Grey upright slots sized as clear space (2× the glyph); Spotify's official PNG on its slot | M |
 | calcas3 | user: owner 04:38 on `calcas3-arte.jpg` ("those are good, use more variations like that") | Eight more, band stickers with no platform glyph (no slot, no brand files), same rows as above: A5 PUTIFRESA lettering die-cut (bold-pop, gloss), A6 MT holo starburst (owner 05:30: MÍRANOS / EN YOUTUBE under the MT instead of TUMBADO), A7 lotería-style card EL CASETE (matte paper), A8 MAFIA TUMBADA ribbon (gloss); B5 PURA MT gold chrome letter-cut (troca lettering; owner 05:15: the band is from Xalapa, "pura mt o pura mafiatumbada" instead of PURO VERACRUZ; 05:30 PURA MT), B6 MT shield with a gold rope border (gloss, faded), B7 card EL SOMBRERO (matte, faded, chipped), B8 VER country-code oval (gloss, the oldest after B1). **Not verified:** the lotería card and the country-code oval come from general knowledge; no page of either was opened | M |
 
+## Scenes 2-6, key stills (2026-11-13, run `npcdrone`; mothership queue 2026-11-13-mto-scenes-2-6-stills)
+
+Each scene's opening frame (its hold, `escenas-plan.md` §1 camera table) and the end frame of its move, Cycles, night, the G63 with
+the owner's picked props (bed B, the sticker mix, pantalla C, sign B, the Veracruz plate). Film frames come from frameref
+(`E:\ComfyUI\references\<film>\NNN.jpg`, film-grab): analysis only, never copied into the repo or onto the contact page.
+Gate: `refs-check.py <this section> --sections escenas` (PASS; the older sections fail `row-cites-library`).
+
+| section | library entry | borrow | cost |
+|---|---|---|---|
+| escenas | kage-scroll-world · one camera rail through a live scene, a field of view per segment · `web/visuales-fichas/kage-scroll-world.md` (status: unproven) | Every still is a key on that rail: lens and position per the plan's table, the end frame of each move is where the next segment starts; 2: frame collateral/004 (tail-chase, rear three-quarter, night), kept higher so the bed and stickers read; 3 end: nightcrawler/029 (low rear three-quarter, lane lines converging), mirrored to the passenger side; 5 end: collateral/022 (the car small in its lane between the lamp rows, from high ahead); 6: collateral/028 (head-on three-quarter at bumper height, headlights to camera); 5 hold: drive/014 (the night road ahead over the dash), moved outside over the hood | M |
+| escenas | video-que-avanza · scrubbed pre-rendered clips on the phone, a cut hidden at a gantry · `web/visuales-fichas/video-que-avanza.md` | 9:16 keeps 75 % of the 16:9 horizontal angle (storyboard.py `v()`); scene 4's phone frame is one window per stop; the end frames of 2 and 3 sit under the next sign, where the clip cut hides | M |
+
 ## Bed props, design pass (2026-11-13, run `saltydrone`; owner 05:36 "might need to work on those bed truck props as well, like the stickers one")
 
 Bed B stays the frame: the piñata hangs from the roll bar over a low pile, balloons at the bar's ends. Twelve props a corridos tumbados
