@@ -34,26 +34,29 @@ Each is shown to the owner as stills of all six states at 390 and 1440 before th
 ## One motion language (all three directions)
 ```css
 --dur-press: 80ms;   --dur-state: 250ms;   --dur-fill: 500ms;   /* inside 40-80, 150-250, 350-500 */
+--dur-fill-out: 350ms;
 --ease-fill: cubic-bezier(0.65, 0, 0.35, 1);   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 ```
 Only `transform` and `opacity` animate. A close is not slower than its open. Under `prefers-reduced-motion` nothing loops,
 icons swap without a morph and the first frame after a click equals the settled one.
 
 ## Icons and tools
+GSAP MorphSVG only (mothership 23:05: keep the 150 KB cap; Rive stays an open lab question for the scene phase, unproven).
 | icon | where | morph | tool |
 |---|---|---|---|
-| play to pause | loop toggle `#pausa` | A to B, 250 ms, with the label | GSAP MorphSVG |
-| loading ring to pause (buffering ends) | loop toggle | A to B, part of the 4-state machine below | Rive |
-| loading ring, pause, play (4 states, interruptible) | loop toggle | detailed | Rive state machine, lazy, weight-gated |
-Rule: if the Rive runtime plus file adds more than 150 KB at 390 over the 1.55 MB baseline, or the WebKit pass fails, every icon
-goes to GSAP and the report says so. GSAP and MorphSVG come from npm, self-hosted, loaded only on pages that need them.
+| play to pause | loop toggle `#pausa` | crafted, inside one 250 ms band: 60 ms anticipation (shrink to .88), the morph through a squeezed intermediate shape, overshoot (`back.out`), settle | GSAP MorphSVG |
+| loading ring to pause | loop toggle, when buffering ends | same band | GSAP MorphSVG; the ring's spin is a CSS rotate |
+Exception to "transform and opacity only": MorphSVG sets the path's `d` from JS on a 24 px SVG (cheap to paint). `revisar` cannot
+see it (checklist: motion done with rAF/JS is judged): R1 carries a frame strip of each morph. Under reduced motion the icon
+swaps in one frame with no intermediate shape, and the ring is a static glyph.
+Glyph rule: the play glyph means "this plays media" (Escuchar, video cards, the toggle). Off-site arrows are dropped; the trailing
+chevron belongs to the button form, not to the icon set. Brand marks (Spotify, Apple Music, YouTube) are never morphed or restyled.
 
 ## Plan
 Files: `src/components/Boton.astro` (the picked form), `src/components/Icono.astro` (glyph set plus morph pairs),
-`src/scripts/iconos.ts` (MorphSVG and the Rive hook), `src/lib/estadoBoton.ts` plus its test (the pure part: which state a
+`src/scripts/iconos.ts` (MorphSVG), `src/lib/estadoBoton.ts` plus its test (the pure part: which state a
 button is in from events), the toggle script moved out of the inline block, `docs/design/botones/index.html` (stills for the
-owner, not shipped), DESIGN.md Components and States matrix rows, `package.json` (gsap, `@rive-app/canvas-lite` if the gate
-holds).
+owner, not shipped), DESIGN.md Components and States matrix rows, `package.json` (gsap).
 Entry points reused: Boton, Icono and the `#pausa` toggle; no second entry point.
 
 States per component (domain = real event that drives it):
@@ -61,8 +64,9 @@ States per component (domain = real event that drives it):
 |---|---|---|---|---|---|---|
 | Boton (link, in page) | yes | yes | yes | yes | n/a: an anchor jump is instant | n/a: no result to confirm |
 | Boton (link, off-site: Escuchar, platforms, WhatsApp) | yes | yes | yes | yes | n/a: nothing loads on this page, and on iPhone the native app opens with this page still alive, so a busy state would stick | n/a: leaving the page is not a success to print |
-| Loop toggle | yes | yes | yes | yes | while the video is buffering (`waiting`), real | playing (`playing`), icon and label change |
-| Empty / error / disabled | n/a: static links with fixed labels; the toggle is hidden until JS runs and `play()` rejection leaves it on "Reproducir video" |
+| Loop toggle | yes | yes | yes | yes | while the video is buffering (`waiting`), real; the label becomes "Cargando video" (no `aria-busy`: the label carries it) | playing (`playing`), icon and label change |
+| Error (toggle) | `play()` rejected (iOS Low Power Mode): `pausado = true`, repaint to "Reproducir video". The video's `error` event (source fails): the toggle hides and the poster stays. Both in `estadoBoton.ts` tests |
+| Empty / disabled | n/a: static links with fixed labels; the toggle is hidden until JS runs |
 
 ## Copy deck (Spanish, nothing new on the page except the toggle's loading label)
 Escuchar, Contratar, Escribir por WhatsApp, Spotify, Apple Music, YouTube, "Pausar video", "Reproducir video", and new:
@@ -71,6 +75,30 @@ Escuchar, Contratar, Escribir por WhatsApp, Spotify, Apple Music, YouTube, "Paus
 ## Checks planned (before each round, 390 and 1440, `--theme light` and `--theme dark` both run and both contrast rows recorded, each state via `--state`)
 `revisar.sh` web with `--motion 40-80,150-250,350-500` and `--reduce`; `slop-check.py src`; `refs-check.py`; `check-matrix.py`;
 `tokens.mjs` and `conform.mjs`; bun test; Mac WebKit pass at iPhone size before the owner looks.
+
+## Gate answer (menacedrone, 2026-11-12 23:05) and how each fix is resolved
+1. Scene twin: every form is shown both ways in the stills (DOM states and a mock of its in-scene object: Tecla a dash key,
+   Boleto a decal on the windshield, Marco a plate frame with an emissive fill). DESIGN.md gets "Scene version needs": the DOM
+   twin stays a focusable `a` or `button` with the same accessible name, kept in sync with the prop; DOM focus mirrored onto
+   the prop as a ring or glow; projected hit area at least 44 px at 390; each state maps to a clip or a material parameter;
+   reduced-motion parity. Scope stays buttons and icons.
+2. Rive dropped from the build (table above).
+3. Boleto: the stamp is 250 ms (inside 150-250). It has no done on links, so it lands only on the loop toggle, when the video
+   starts playing after the user pressed "Reproducir video" (a user-driven play, not every buffer). The notches are cut from
+   the inner stub with `mask`; the focus ring is an outline on the unmasked wrapper, so it is not clipped and no notch is
+   filled with `--bg` over the hero video.
+4. Reduced motion: the loading ring is a static glyph; "Cargando video" is a visible label change; `aria-busy` dropped.
+5. Hover, the chevron nudge and the icon lean sit under `@media (hover: hover)`.
+6. Error state fixed as in the states table; staging for the `--state` shots: the loop route aborted (real source failure),
+   `HTMLMediaElement.prototype.play` overridden to reject (init script), and the loop route held open (waiting).
+7. Copy: Escuchar becomes "Escuchar en Spotify" (play glyph kept, destination named; `catalog.json` release 0 is a Spotify
+   link). The platform buttons get no brand marks. Stills decide whether they drop to chevron text links.
+8. Stills show lleno and plain per form, the platform buttons as boxes and as text links, and the toggle in each form. Tecla
+   gets a plain variant that is not a gold cap (accent share: two gold caps in the hero otherwise).
+Also: `slop-check` REVIEW `js-intersection-reveal` at `index.astro:168` is the loop's play/pause observer, not a reveal.
+Light and dark: the page has one dark theme, so the light/dark item is recorded n/a (single theme), not PASS. The wipe back
+down is 350 ms (token `--dur-fill-out`), faster than the 500 ms in. The rafadesign `aria-pressed` half is not borrowed.
+Authored, not from a ficha: the 4 px chevron nudge, the 250 ms icon reaction, Boleto's half-circle notches, the translateY press.
 
 ## Rounds
 (gate answer, R1, R2, R3 table go below)
