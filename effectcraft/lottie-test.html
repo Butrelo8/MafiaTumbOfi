@@ -1,0 +1,15 @@
+<!doctype html>
+<!-- Opens from file:// (no server): titulo.js = "window.TITULO=" + titulo.json. ?f=N shows frame N. Run: effectcraft/lottie-check.sh -->
+<html lang="es"><head><meta charset="utf-8"><title>Lottie test</title>
+<style>body{background:#0b0b0b;margin:0}#a{width:800px;height:240px}</style>
+<script src="titulo.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script></head>
+<body><div id="a"></div><pre id="s" style="color:#ccc"></pre>
+<script>
+const anim = lottie.loadAnimation({container: document.getElementById('a'), renderer: 'svg', loop: true, autoplay: false,
+  animationData: window.TITULO});
+anim.addEventListener('DOMLoaded', () => { anim.goToAndStop(+(new URLSearchParams(location.search).get('f') || 36), true);
+  document.getElementById('s').textContent = JSON.stringify({totalFrames: anim.totalFrames, fr: anim.frameRate, w: anim.animationData.w, h: anim.animationData.h}); });
+anim.addEventListener('data_failed', () => document.getElementById('s').textContent = 'data_failed');
+window.anim = anim;
+</script></body></html>
