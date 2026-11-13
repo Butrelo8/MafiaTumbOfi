@@ -1,0 +1,17 @@
+check                 value                                                  threshold                                                       result  where
+fixed-over-text-390   0 covered                                              0                                                               pass    no fixed element covers text
+motion-frames         23 animations held                                     evidence                                                        info    motion-0.png, motion-mid.png, motion-end.png
+motion-spec           6 animations, 2 off spec                               props transform/opacity/translate/scale/rotate; no bands given  FAIL    span.live animates boxShadow; img animates filter
+motion-scope          CSS transitions/animations and element.animate() only                                                                  info    rAF/JS-driven animations (framer layout, springs) are not seen: use recordVideo
+overflow-390          1 elements, scrollWidth 390                            0, <= 390                                                       FAIL    div.grain right 523
+tap-390               33 targets                                             0 under 44 px                                                   FAIL    a.brand 20x30; a.mini.solid 179x41; a.mini.solid 179x41; a.mini.solid 179x41; a.mini.solid 179x41
+contrast-390          91 elements                                            0                                                               FAIL    .live; .switch; #nowMeta > div:nth-child(1); #nowMeta > div:nth-child(2); #nowMeta > div:nth-child(3)
+cls-390               0.000                                                  <= 0.1                                                          pass    layout-shift sum without recent input
+weight-390            2.53 MB                                                <= 3 MB                                                         pass    encoded bytes until idle, cache off
+fixed-over-text-1440  0 covered                                              0                                                               pass    no fixed element covers text
+overflow-1440         2 elements, scrollWidth 1440                           0, <= 1440                                                      FAIL    div.grain right 1829; div.edge-vignette right 1444
+contrast-1440         92 elements                                            0                                                               FAIL    .live; .switch; #nowMeta > div:nth-child(1); #nowMeta > div:nth-child(2); #nowMeta > div:nth-child(3)
+glyphs                n/a                                                                                                                    info    no text set in an @font-face font
+cls-1440              0.120                                                  <= 0.1                                                          FAIL    layout-shift sum without recent input
+motion                5 infinite animations, 0 videos playing                0 with reduced motion                                           FAIL    prefers-reduced-motion: reduce at 390
+/tmp/claude-1001/-mnt-e-Cursor-Projects-MTO-stonkdrone/1e762b61-60f7-4dbf-9312-7f4d364da371/scratchpad/revisar/eptosuno

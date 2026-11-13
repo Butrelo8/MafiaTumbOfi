@@ -6,17 +6,23 @@ changes. Each one: hero, music, video, members and contact, at 390 and 1440. Com
 
 Measured on all three (localhost, lab):
 
-| | A Carretera | B Cartel | C En vivo | eptosuno.com |
-|---|---|---|---|---|
-| `revisar.sh` web, 390 + 1440 | 0 FAIL | 0 FAIL | 0 FAIL | — |
-| Text contrast fails (WCAG 4.5:1) | 0 | 0 | 0 | 11 (`tokens.mjs`) |
-| Tier-A slop tells (eyebrow, numbered tabs, scroll cue, hollow type, marquee) | 0 | 0 | 0 | 5 by eye |
-| Weight at 390, cache off | 1.51 MB (the loop is 980 KB) | 0.78 MB | 0.78 MB (still image; a loop adds ≤ 1.2 MB) | 363 KB after scroll (1440) |
-| CLS 1440 | 0.016 | 0.078 | 0.063 | 0.001 |
+Every row was measured with the same instrument on both sides: `revisar.sh` web, at 390 and 1440, cache off.
+Raw tables are in `directions/shots/rv-*.tsv`.
 
-All three are **heavier** than eptosuno. Its 363 KB is a real strength. A localhost LCP is not comparable with a live CDN,
-so no speed claim is made. Where we beat it: contrast, no tier-A tells, one display family plus one text family instead
-of five, and assets nobody else on the label has.
+| `revisar.sh` web | A Carretera | B Cartel | C En vivo | eptosuno.com (live) |
+|---|---|---|---|---|
+| FAIL rows | 0 | 0 | 0 | 5 |
+| contrast (elements under 4.5:1, 390) | 0 | 0 | 0 | 91 |
+| tap targets under 44 px (390) | 0 | 0 | 0 | 33 |
+| horizontal overflow | 0 | 0 | 0 | 1 at 390, 2 at 1440 |
+| CLS 1440 | 0.016 | 0.078 | 0.063 | 0.120 (FAIL) |
+| weight at 390 until idle | 1.51 MB | 0.78 MB | 0.78 MB (+ loop ≤ 1.2 MB) | 2.53 MB |
+
+`speed.mjs` at 1440 gives eptosuno 363 KB after one scroll. `revisar.sh` gives 2.53 MB, because it waits for idle with
+the cache off. Only the `revisar.sh` numbers are compared here. Neither tool measures text over images, on either site:
+A's and C's heroes and C's member captions sit on photos and are judged by eye only (not verified). The tier-A tells on
+eptosuno (an eyebrow, numbered tabs, a scroll cue, hollow type, a marquee) are judgment, and so is their absence on ours.
+`slop-check.py` passes every automated row on eptosuno too.
 
 `slop-check.py` on `directions/`: no FAIL rows. Three REVIEW rows are kept on purpose:
 - `js-intersection-reveal` (A): it plays and pauses the loop by visibility. It is not a reveal.
@@ -87,6 +93,22 @@ logo mark over it, and the stage again behind the contact.
 - **How it beats eptosuno:** both use real photos, but C's hero is the crowd, not a portrait, and the palette is patina
   and bronze, not black and red. It differs on 2 of 3 axes (palette and hero mechanism; both use a condensed display).
   It is the closest of the three to eptosuno.
+
+## Honest limits of this round
+
+- A and B share the same button wipe (500 ms, same curve, same press dip). C's hover is an edge-to-fill colour swap, the
+  same idea as eptosuno's, plus a 6 px lean that touch and screenshots never show. The button languages are working
+  versions, not three crafted ones.
+- The icon morphs have no library reference that was measured. The closest is the `web/visuales.md` index row
+  "Interactive micro-animations (buttons, icons)" (landonorris, Rive, described only). Dissecting it is the step that
+  closes the gap (owner: a separate pair chain, `mothership/docs/queue/2026-11-12-mto-buttons-icons-pair.md`).
+- A and C share a hero layout: a dark full-bleed image, the name bottom-left, the same two buttons. Compare them on
+  scene and palette.
+- A's first draft set "TUMBADA" in gold, which is the accent-word pattern; it was removed before the pick.
+
+## Owner's pick
+
+**A, Carretera** (owner, 2026-11-12 21:56). Next: the tweak bar, then the build (`docs/design/handoff-a-build.md`).
 
 ## Recommendation
 

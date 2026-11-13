@@ -85,4 +85,5 @@ No eyebrows, kickers or numbering above headings (slop tells, tier A). Section n
 ## Directions: the owner's pick
 
 Three directions in `docs/design/directions.md`, compared in `docs/design/directions/index.html`.
-`[pending: owner's pick and feedback]`
+**Picked: A, Carretera** (owner, 2026-11-12 21:56). Buttons: the gold fill wipe stays as a working version. Crafted
+buttons and morphing icons come later from a separate pair chain. No pill unless the owner picks it over 2–3 alternatives.

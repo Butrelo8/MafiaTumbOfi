@@ -23,9 +23,11 @@ are eptosuno and ozomatli, and neither has a confirmed current ONErpm deal. **ep
   cache headers (so every visit downloads it again). Built with Claude by Alexander Oliva (alexander-oliva.com).
 - **Type:** Oswald 300 for body (13–16 px), Space Mono 9–11 px for labels, Anton for display (up to 115 px), and
   UnifrakturCook + Pirata One for the blackletter accents. That is five families.
-- **Contrast:** `tokens.mjs` measured 11 text/ground pairs under 4.5:1. For example, grey `#6f6a61` on `#121110` is 3.51,
+- **`revisar.sh` web (live, 390 + 1440):** 5 FAIL rows: 91 elements under 4.5:1, 33 tap targets under 44 px, overflow
+  from `div.grain`, CLS 0.120 at 1440, 2.53 MB at 390 until idle (`directions/shots/rv-eptosuno.tsv`).
+- **Contrast pairs:** `tokens.mjs` measured 11 text/ground pairs under 4.5:1. For example, grey `#6f6a61` on `#121110` is 3.51,
   and the red `#e01f12` on `#121110` is 3.93. Body text is 13 px light Oswald.
-- **slop-check:** passes every automated row on the live URL. By eye, it shows tier-A tells the script misses: an eyebrow
+- **slop-check:** passes every automated row on the live URL (rerun 2026-11-12, `grep -v PASS` empty). By eye, it shows tier-A tells the script misses: an eyebrow
   above the hero name ("MC · OBREGÓN, SONORA · DESDE EL BARRIO AL MUNDO"), numbered tabs ("01 Drop / 02 Música /
   03 Batalla"), a "SCROLL" cue with a line, a marquee band, and the same album block repeated eight times.
 - **What it does well:** real content in depth (eight albums with full tracklists, battles, dates). A clear voice. A
