@@ -3,7 +3,7 @@
 Builds the night scene of the main checkout's blender/escena.py + transicion.py (truck, glass, figures), then applies the
 owner's 2026-11-12 23:52 answers: all four ride in the cab (Alexandro and Diego move to the rear seats), the bed carries
 the instruments and playful props, and the truck never parks (the other vehicle drives too). New props are simple shapes
-standing in for models still to be made; the truck is the current G63 stand-in, not the owner's file.
+standing in for models still to be made; the truck is the G63 on disk, the owner's pick (2026-11-13 00:21).
 
   /mnt/e/Blender/blender.exe -b --factory-startup --python-exit-code 1 --python "$(wslpath -w blender/storyboard.py)" \
     -- <escena.py path (Windows)> <out_dir (Windows)> [samples=24] [only=name,name]

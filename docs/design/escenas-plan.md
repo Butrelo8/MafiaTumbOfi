@@ -8,7 +8,7 @@ A Carretera (35565d7) stays the placeholder until this is built.
 or rides beside it, and the ride ends with their number on the plate. Tone: playful, nothing too serious.
 
 **Storyboard:** `docs/design/escenas/storyboard/hoja-16x9.jpg` and `hoja-9x16.jpg` (one frame per scene, rendered with the
-G63 stand-in, the four figures in the cab, and simple shapes for the props and the screen truck still to be modelled).
+G63 (the final truck), the four figures in the cab, and simple shapes for the props and the screen truck still to be modelled).
 Script: `blender/storyboard.py`. v1's sheets (blockout stops, parked truck) are kept in `storyboard/v1-blockout/` as history. Frames are stored as JPEG; the script writes PNG.
 
 ## 0. Owner rules (23:52–23:54) and what is still open
@@ -19,22 +19,29 @@ Settled:
   scenes are built with the real truck from the start.
 - **All four ride inside the cab** (manager driving, Héctor beside him, Alexandro and Diego in the rear seats). The bed carries
   the instruments and playful props. Window-down names work for everyone.
-- **The manager gets a name plate and a card.**
+- **The manager gets a name plate and a card, like the members (00:21):** "El Manco", CEO y mánager: he does the
+  behind-the-scenes work and runs the whole schedule. Instagram https://www.instagram.com/elmanco420/. His profile
+  shows no display name apart from the handle `elmanco420`, so the plate reads "El Manco", as the owner said.
 - **Tour dates are in**, read from the band's Instagram by a separate watcher job (§5).
-- **Figures:** a friend (a games 3D artist) pays for Tripo; the figures are regenerated on his paid plan as a pre-build step.
-- **Truck:** the owner's Sketchfab G-wagon 6×6 by srush651, on the owner's Mac (§4).
+- **Figures:** the three member figures are licensed from the friend's Tripo AI Pro account (`docs/licencias/tripo-figuras.md`).
+- **Truck (00:21):** the G63 6×6 already on disk (DJS, CC-BY-4.0), not the Mac upload (§4).
+- **Order (00:21):** no transition re-render now; v3 proved the move can be done. Next comes building the scenes correctly,
+  with the transition after them.
 - **No press kit:** the glovebox scene is cut (§1).
 - **Radio:** the least intrusive option (§2, scene 1).
 - **Stickers:** our own designs, placed free-hand on the tailgate and bed (§2, scene 2).
 
 Still open (owner):
-1. **The manager's name**, the role line for his card, and his Instagram if he wants it linked.
-2. **Rights in the regenerated figures.** On Tripo's paid plans the outputs belong to the paying account, which is the friend,
-   not the band. A short written licence from him to the band (commercial use on the website, any medium) closes it. Not
-   legal advice; ToS §5.2.1 as read in `research/2026-11-12-interactividad.md` (C12/C13).
-3. **The v3 transition must be re-rendered.** The owner liked it with Alexandro and Diego in the bed; with them in the cab,
-   the bed reveal at its end now shows instruments and props. About 1.4 h for both formats at the v3 settings
-   (`docs/temblor-texturas.md`: 41 + 43 min) once the new truck and figures are in.
+1. **The manager's figure is not licensed.** The licence covers exactly three files (Héctor, Diego, Alejandro/Alexandro).
+   `manager.glb`, from the Downloads original `cartoon character 3d model.glb`, is outside it. Add it to the licence, or
+   regenerate it on the friend's account and then add it. Any figure that is regenerated is a new file and needs adding too.
+2. **The licence's date.** The header still reads "[Date]", while the closing line reads "11/13/2026". Ask the friend to fill
+   in the header.
+3. **Real-time GLBs and "no redistribution as standalone models":** the plan's answer is in `docs/licencias/tripo-figuras.md`.
+   The figures ship modified (decimated, rigged, compressed) inside one scene file, with no per-figure file and no download.
+   One line from the friend confirming that this counts as "part of a completed project" would close it. Not legal advice.
+4. **Later, not now:** the v3 transition re-render with all four in the cab. The bed reveal at its end now shows instruments and
+   props. About 1.4 h for both formats at the v3 settings (`docs/temblor-texturas.md`: 41 + 43 min), after the scenes are built.
 
 ## 1. Scene distribution
 
@@ -131,7 +138,7 @@ brand guidelines cover colour, scale, clear space and rotation (excerpts only se
 
 ## 3. Desktop and phone
 
-**Desktop: real-time three.js**, with the figures regenerated on the friend's paid Tripo plan (open item 2 for the rights). The
+**Desktop: real-time three.js**, with the licensed figures shipped only inside the scene file (open items 1–3). The
 Cycles look (headlight pools, glass, bounce on the figures) has to be baked into lightmaps or rebuilt (`docs/temblor-texturas.md`:
 even EEVEE changed faces and hair). **Fallback if the bake fails the look:** desktop plays the pre-rendered 16:9 clips with the
 head grids, stickers and lights as sprite overlays on top (the phone's method at desktop size).
@@ -189,10 +196,9 @@ and `video-que-avanza.md` lists the image-sequence comparison as an open item.
 
 | Asset | Source | Status / gap |
 |---|---|---|
-| **Truck** | "Mercedes Benz G-wagon 6x6" by srush651, Sketchfab, https://sketchfab.com/3d-models/mercedes-benz-g-wagon-6x6-10a1f80c971143548d99b3e9ccc118e6, **CC Attribution** (read from the page 2026-11-12; Sketchfab's CC-BY is 4.0), 667.1k triangles, downloadable | The owner has the file **on the Mac**: copy it over (`ssh mac`, skill `mac-mirror`) into `blender/assets/camion/` with the page's licence text. This is **not** the G63 on disk today, which is a different upload by another author. Credit line for the site (footer or credits page): *"Mercedes Benz G-wagon 6x6" (https://sketchfab.com/3d-models/mercedes-benz-g-wagon-6x6-10a1f80c971143548d99b3e9ccc118e6) by srush651 (https://sketchfab.com/srush651), licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/).* Pre-build work: the four door windows as their own meshes, the glovebox door, rear seats measured (`vidrios()`, `sin_cabeceras()` and the seat ray casts need redoing on the new mesh). |
-| Truck in the v3 clips and this storyboard | Brabus G63 6×6 "Mercedes Benz G-Wagon 6X6" by DJS, Sketchfab, CC-BY-4.0 (`blender/assets/camion/g63-6x6/modelo/license.txt`) | Stand-in; replaced by srush651's model. If any frame of it ships, its credit line is in that licence file. |
-| Band figures ×3 + manager | Tripo, **regenerated on the friend's paid plan** as a pre-build step (inputs in `comfy-out/para-subir/`, fixes in `docs/tripo-glb.md`) | Open item 2 (written licence from the friend). Then: rig (Tripo rig API or hand rig; Mixamo forbids shipping its raw files, so not for the live GLBs), decimation to ≤ 30k tris with 1k textures. All four are adult figures. Name the member file `alexandro` (the member is **Alexandro** Montal in `members.ts`; today's file is `alejandro.glb`). |
-| Manager's card | photo, name, role, Instagram | **Open item 1** (name); `public/members/` holds an unlisted `dimora.webp`, not checked whether it is him |
+| **Truck** | Brabus G63 6×6, "Mercedes Benz G-Wagon 6X6" by DJS, Sketchfab, https://sketchfab.com/3d-models/mercedes-benz-g-wagon-6x6-37ddf2e27c004faeb74e174d7f2a5e05, **CC-BY-4.0**, commercial use allowed (`blender/assets/camion/g63-6x6/modelo/license.txt`); already on disk and used in v3 | Owner's pick (00:21) over the Mac upload by srush651. Credit line for the site (footer or credits page), as the licence file asks: *This work is based on "Mercedes Benz G-Wagon 6X6" (https://sketchfab.com/3d-models/mercedes-benz-g-wagon-6x6-37ddf2e27c004faeb74e174d7f2a5e05) by DJS (https://sketchfab.com/DJS_05) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/).* Pre-build work: the four door windows as their own meshes (`vidrios()` already finds the panes), the glovebox door, the rear seats (measured, see the storyboard notes). |
+| Band figures ×3 + manager | Tripo, the friend's Pro account; the licence covers Héctor, Diego and Alejandro/Alexandro (`docs/licencias/tripo-figuras.md`); fixes in `docs/tripo-glb.md` | **The manager's figure is not covered** (open item 1). Then: rig (Tripo rig API or hand rig; Mixamo forbids shipping its raw files, so not for the live GLBs), decimation to ≤ 30k tris with 1k textures, shipped only inside the scene file. All four are adult figures. Name the member file `alexandro` (the member is **Alexandro** Montal in `members.ts`; today's file is `alejandro.glb`). |
+| Manager's card | "El Manco", CEO y mánager, https://www.instagram.com/elmanco420/ | photo still needed (`public/members/` holds an unlisted `dimora.webp`, not checked whether it is him); add him to `members.ts` at build |
 | Head-turn grids, pose clips | rendered / keyed from the rigged figures | after the rig |
 | Pantalla móvil (LED box truck) | model in Blender (`kiln-prop`) or a CC0/CC-BY box truck | new; one model serves scenes 3 and 5 |
 | Radio, cassette, dash key, glovebox junk, bed props (donut, cooler, piñata, instrument cases) | model in Blender (`kiln-prop`) | new; playful, owner may swap any |
@@ -246,7 +252,7 @@ Contratar Tecla. The scene stays in the ride either way.
 
 ## Storyboard notes
 
-`hoja-16x9.jpg` and `hoja-9x16.jpg`, frames in `docs/design/escenas/storyboard/`. Rendered with the G63 stand-in and the
+`hoja-16x9.jpg` and `hoja-9x16.jpg`, frames in `docs/design/escenas/storyboard/`. Rendered with the G63 (the final truck) and the
 figures seated per §0 (Alexandro and Diego moved into the rear seats by `blender/storyboard.py`; their arms keep the old
 strumming pose, so the hands float). The pantalla móvil, bed props and stickers are simple shapes that stand in for models
 still to be made; they show framing and the truck's size in frame, not looks. The move between each pair is in §1. Not
@@ -258,4 +264,4 @@ Weak in these frames, to fix when the real truck is in:
 - 3 Pantalla, 9:16: both vehicles sit small in the lower third. The phone shot needs the camera closer, between the two.
 - 4 Costado: the side of the truck is nearly black and only Héctor's window reads. It needs a rim light from the camera side
   and lit cab interiors so all four windows read.
-- The rear seat was measured by ray cast on the G63 (seat back y −0.73, cushion z 1.19). Redo the measurement on srush651's model.
+- The rear seat was measured by ray cast on the G63 (seat back y −0.73, cushion z 1.19). The G63 is the final truck, so these values hold.
