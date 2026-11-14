@@ -1340,7 +1340,7 @@ def esc4_cabina():
     return esc4("cabina", 1)
 
 
-ESC4_LUZ = "relleno"
+ESC4_LUZ = "cabina"  # owner 11-14: 4B, the lit cab
 
 
 @opcion("esc4-fin")
