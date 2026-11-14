@@ -60,6 +60,7 @@ Tried first and dropped:
 A box around the objects that really are in front is the split that holds under parallax.
 
 ## Composition (effectcraft/composicion.jsx)
+No depth pass was rendered: three discrete planes with the camera's depth of field covered it.
 Three 3D layers at their real distances (seat backs 1.0 m, band 1.25 m = the 100 % plane, bg 2.6 m), each scaled
 d / zoom so the frame matches the render at t = 0; a one-node camera pushes 10 % of the band's distance with a
 40 px drift (16:9), depth of field focused on the band plane by expression, aperture 20; `wiggle` sway on the band
@@ -69,7 +70,7 @@ B 6 % / 12 (reads as a flat zoom), **C 10 % / 20 / drift 40 px, kept**: most par
 
 ## Times (RTX 4070 Ti for Cycles; EffectCraft on CPU)
 ```
-Blender, per pass, 1080p, 24 spp, OptiX device, OIDN denoise:  ~27-29 s/frame, ~22 s of it CPU OIDN denoising
+Blender, per pass, 1080p, 24 spp, OptiX device, OIDN denoise:  ~27-29 s/frame, ~22 s of it OIDN denoising
   same at 96 spp with denoiser OPTIX: ~6 s/frame (96 spp raw: 5.6 s/frame) -> use DENOISER=OPTIX next time
   16:9 batch bg+fig+fg 0-59: 4940 s (bg 1719, fig 1610, fg 1582), scene build ~30 s
 EffectCraft render h264 1920x1080, 168 frames (7 s): 98 s (0.58 s/frame); +Remove Grain x3 layers: 161 s (strength 3: 204 s)
@@ -134,6 +135,7 @@ render at 1.5 s.
 
 ## Result
 ```
+Windows: E:\Cursor Projects\MTO-uncdrone\blender\render\effectcraft\cabina-16x9.mp4 · ...\cabina-9x16.mp4 · ...\lottie\titulo.json
 clips: blender/render/effectcraft/cabina-16x9.mp4  1920x1080 24 fps 168 f H.264 15 Mb/s, 13.1 MB, rendered in 98 s
        blender/render/effectcraft/cabina-9x16.mp4  1080x1920 24 fps 168 f H.264, rendered in 94 s
 eagle.sh/revisar 16:9: exit 1 — crawl 0.73 FAIL; dark 76 % info, flicker 0.16, strobe 0 runs, events 0 pass
