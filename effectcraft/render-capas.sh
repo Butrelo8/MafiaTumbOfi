@@ -5,6 +5,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 w=$1 h=$2 out=$3 samples=$4; shift 4
 mkdir -p "$out"
+export WSLENV="${WSLENV:+$WSLENV:}DENOISE:DENOISER:MUNDO_QUIETO"   # pass the test switches to Windows Blender
 /mnt/e/Blender/blender.exe -b --factory-startup --python-exit-code 1 --python "$(wslpath -w effectcraft/capas.py)" \
   -- "$w" "$h" "$(wslpath -w "$(realpath "$out")")" "$samples" "$@" > "$out.log" 2>&1
-grep -E 'SHA256|CAMARA|PASE|TOTAL' "$out.log"
+grep -E "SHA256|CAMARA|RUIDO|QUIETO|PASE|TOTAL" "$out.log"

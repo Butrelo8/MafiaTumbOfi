@@ -116,6 +116,14 @@ def mascaras():
 
 
 mascaras()
+# denoiser test (revisar crawl): DENOISE=0 renders raw; DENOISER=OPENIMAGEDENOISE|OPTIX (escena.motor leaves the default)
+sc.cycles.use_denoising = os.environ.get("DENOISE", "1") == "1"
+if os.environ.get("DENOISER"):
+    sc.cycles.denoiser = os.environ["DENOISER"]
+if os.environ.get("MUNDO_QUIETO") == "1":  # crawl test: the road and its lamps stop; figures keep their idle
+    bpy.data.objects["mundo"].animation_data_clear()
+    print("MUNDO QUIETO")
+print("RUIDO spp", sc.cycles.samples, "denoise", sc.cycles.use_denoising, sc.cycles.denoiser, sc.cycles.denoising_input_passes)
 sc.render.use_persistent_data = True  # keep the static BVH between frames
 sc.render.image_settings.color_mode = "RGBA"
 t_frame = []
