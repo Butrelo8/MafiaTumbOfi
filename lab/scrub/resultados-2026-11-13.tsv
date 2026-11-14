@@ -1,0 +1,11 @@
+# node lab/scrub/medir-scrub.mjs http://127.0.0.1:3107/lab/scrub/ 4 v3-540x960-g6b.mp4 v3-540x960-g6.mp4 v3-540x960-g240.mp4
+# Playwright Chromium (playwright-core 1.63, headless), 390x844 @2x, CPU throttle 1x and 4x (CDP), 240 scroll steps every 16 ms over the whole track (the 8 s clip in ~4.5 s), clip held in a blob URL
+# encodes: ffmpeg -framerate 24 -i v3-720x1280/f_%04d.png -vf scale=540:960:flags=lanczos -c:v libx264 -preset slow -crf 23 -pix_fmt yuv420p -movflags +faststart
+#   g6b: -g 6 -keyint_min 6 -sc_threshold 0 (default B-frames) | g6: same + -bf 0 | g240: -g 240
+clip	cpu_x	MB	seek_p50_ms	seek_p95_ms	pedidos	adelantados	cuadros	fps_scroll	desfase_medio_s	h264
+v3-540x960-g6b.mp4	1	0.973	9.9	25.8	240	6	230	50.0	0.052	probably
+v3-540x960-g6b.mp4	4	0.973	13.1	36.4	240	3	233	41.1	0.047	probably
+v3-540x960-g6.mp4	1	1.031	7.0	11.9	240	0	240	55.4	0.051	probably
+v3-540x960-g6.mp4	4	1.031	8.4	16.5	240	1	237	49.0	0.047	probably
+v3-540x960-g240.mp4	1	0.776	29.4	70.3	240	117	121	27.7	0.100	probably
+v3-540x960-g240.mp4	4	0.776	39.8	98.6	239	128	111	21.0	0.097	probably

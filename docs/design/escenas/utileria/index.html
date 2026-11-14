@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Utilería: opciones</title>
+<style>
+  :root { --bg: #000; --ink: #f1eee9; --mute: #b9b4ab; --gold: #e7b551; --line: #2a2620; }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 "Saira Condensed", "Arial Narrow", system-ui, sans-serif; }
+  main { max-width: 1400px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: clamp(28px, 5vw, 44px); line-height: 1.05; margin: 0 0 8px; text-transform: uppercase; }
+  h2 { font-size: 24px; margin: 0 0 4px; text-transform: uppercase; }
+  p { margin: 0 0 12px; max-width: 70ch; color: var(--mute); }
+  section { border-top: 1px solid var(--line); padding-top: 20px; margin-top: 28px; }
+  ul { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { ul { grid-template-columns: repeat(3, 1fr); } }
+  a { color: var(--gold); }
+  a:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+  figure { margin: 0; }
+  figure a { display: block; min-height: 44px; }
+  img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: var(--line); }
+  figcaption { margin-top: 6px; color: var(--ink); }
+  figcaption b { color: var(--gold); font-size: 20px; margin-right: 6px; }
+  h3 { font-size: 20px; margin: 20px 0 0; text-transform: uppercase; }
+  ul.escena { grid-template-columns: 1fr 1fr; align-items: start; }
+  ul.escena .ancha { grid-column: span 2; }
+  ul.escena .alta img { aspect-ratio: 9 / 16; }
+  @media (min-width: 900px) { ul.escena { grid-template-columns: 2fr 2fr 1fr 1fr; } ul.escena .ancha { grid-column: auto; } }
+</style>
+</head>
+<body>
+<main>
+<h1>Utilería, ronda 2: elige una por objeto</h1>
+<p><b>Elegidas (03:22): pantalla B y caja B.</b> Lo que pediste en la ronda 1, de noche y con la G63. Responde con la letra de cada objeto (por ejemplo «pantalla A, placa B»). La ronda 1 sigue en <a href="ronda1.html">su propia página</a>.</p>
+<p>Lo que no es final: la placa usa letras de Windows provisionales y sus colores no están comparados con una foto de la placa 2026, porque no encontramos ninguna publicada. Por eso es una versión estilizada, sin escudos y sin código QR. En la caja se ocultó a Alexandro y a Diego, porque en el plan van en el asiento de atrás. En la guantera se ocultó a Héctor.</p>
+
+<section aria-labelledby="s-escenas">
+<h2 id="s-escenas">Escenas 2-6: el primer y el último cuadro de cada una</h2>
+<p>De noche, con la G63 y lo que ya elegiste: caja B, la mezcla de calcas, la pantalla móvil C, los letreros B y la placa de Veracruz. Los cuatro van en la cabina. Para cada escena: dónde se queda la cámara mientras lees y dónde termina su movimiento, en horizontal y en celular. Son fotos fijas: todavía no hay movimiento. Donde el plan dejaba algo abierto hay dos opciones, y te digo cuál me quedaría. Responde con lo que cambiarías de cada escena (por ejemplo «3 B, 4 A»).</p>
+<h3>2 · Caja (Redes)</h3>
+<p>Empieza alta detrás de la caja, 28 mm, como al final del movimiento de la escena 1. Termina en el hueco entre las dos camionetas, con la pantalla móvil rebasando por la izquierda y el letrero VIDEOS encima: ahí se esconde el corte entre clips en el celular.</p>
+<ul class="escena">
+<li class="ancha"><figure><a href="esc2-abre.jpg"><img src="esc2-abre-mini.jpg" alt="La camioneta desde arriba y atrás en la carretera de noche: la caja con la piñata colgada, globos y juguetes, y las calcas en la puerta trasera" loading="lazy" width="960" height="540"></a><figcaption>Primer cuadro.</figcaption></figure></li>
+<li class="ancha"><figure><a href="esc2-fin.jpg"><img src="esc2-fin-mini.jpg" alt="Entre las dos camionetas: a la izquierda la pantalla móvil con su marco de focos, a la derecha la camioneta de la banda, y adelante el letrero verde VIDEOS" loading="lazy" width="960" height="540"></a><figcaption>Último cuadro: el letrero VIDEOS pasa encima.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc2-abre-movil.jpg"><img src="esc2-abre-movil-mini.jpg" alt="La camioneta desde arriba y atrás en la carretera de noche: la caja con la piñata colgada, globos y juguetes, y las calcas en la puerta trasera, en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc2-fin-movil.jpg"><img src="esc2-fin-movil-mini.jpg" alt="Entre las dos camionetas: a la izquierda la pantalla móvil con su marco de focos, a la derecha la camioneta de la banda, y adelante el letrero verde VIDEOS, en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular.</figcaption></figure></li>
+</ul>
+<h3>3 · Pantalla (Videos), dos opciones</h3>
+<p>El plan pide la cámara junto al espejo del chofer, mirando hacia atrás a la izquierda, con la ventana del mánager a la derecha del cuadro. Las dos cosas a la vez no se pueden: mirando hacia atrás desde el lado del chofer, la camioneta queda a la izquierda. <b>A</b> sigue la posición; <b>B</b> sigue la composición, con la cámara en la puerta de atrás mirando hacia adelante. Me quedaría con <b>B</b>: se ve que la pantalla va al lado de la banda, y en A la pantalla tapa todo.</p>
+<ul class="escena">
+<li class="ancha"><figure><a href="esc3-espejo.jpg"><img src="esc3-espejo-mini.jpg" alt="Opción A: desde el espejo del chofer, la pantalla móvil llena el cuadro y la camioneta apenas asoma a la orilla izquierda" loading="lazy" width="960" height="540"></a><figcaption><b>A</b>Junto al espejo, mirando hacia atrás.</figcaption></figure></li>
+<li class="ancha"><figure><a href="esc3-hombro.jpg"><img src="esc3-hombro-mini.jpg" alt="Opción B: desde la puerta trasera del chofer, la pantalla a la izquierda y el costado de la camioneta con la ventana del mánager a la derecha" loading="lazy" width="960" height="540"></a><figcaption><b>B</b>Desde la puerta de atrás, mirando hacia adelante.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc3-espejo-movil.jpg"><img src="esc3-espejo-movil-mini.jpg" alt="Opción A: desde el espejo del chofer, la pantalla móvil llena el cuadro y la camioneta apenas asoma a la orilla izquierda, en vertical" loading="lazy" width="540" height="960"></a><figcaption><b>A</b>Celular.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc3-hombro-movil.jpg"><img src="esc3-hombro-movil-mini.jpg" alt="Opción B: desde la puerta trasera del chofer, la pantalla a la izquierda y el costado de la camioneta con la ventana del mánager a la derecha, en vertical" loading="lazy" width="540" height="960"></a><figcaption><b>B</b>Celular.</figcaption></figure></li>
+</ul>
+<ul class="escena"><li class="ancha"><figure><a href="esc3-fin.jpg"><img src="esc3-fin-mini.jpg" alt="Desde la esquina trasera del lado del copiloto, a ras de la carretera: la camioneta a la izquierda y el letrero LA BANDA adelante" loading="lazy" width="960" height="540"></a><figcaption>Último cuadro de la escena 3: la cámara dio la vuelta por atrás al lado del copiloto y pasa el letrero LA BANDA.</figcaption></figure></li><li class="alta"><figure><a href="esc3-fin-movil.jpg"><img src="esc3-fin-movil-mini.jpg" alt="Lo mismo en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular.</figcaption></figure></li></ul>
+<h3>4 · Costado (La banda), dos opciones de luz</h3>
+<p>De lado, a 6 m, 24 mm, la camioneta completa. En el storyboard el costado salía casi negro. <b>A</b> la ilumina con una luz suave desde el lado de la cámara, como un carro de filmación; <b>B</b> prende la cabina por dentro. Me quedaría con <b>A</b>: se lee la camioneta completa y las caras en las ventanas; en B el costado se pierde. En celular cada parada es una ventana: aquí Héctor. La cámara va a 2.6 m de alto para pasar por encima del guardarraíl.</p>
+<ul class="escena">
+<li class="ancha"><figure><a href="esc4-relleno.jpg"><img src="esc4-relleno-mini.jpg" alt="Opción A: la camioneta de lado, iluminada desde el lado de la cámara, con Héctor y Diego en sus ventanas y la caja con globos" loading="lazy" width="960" height="540"></a><figcaption><b>A</b>Luz desde el lado de la cámara.</figcaption></figure></li>
+<li class="ancha"><figure><a href="esc4-cabina.jpg"><img src="esc4-cabina-mini.jpg" alt="Opción B: la misma toma con la cabina prendida por dentro y el costado oscuro" loading="lazy" width="960" height="540"></a><figcaption><b>B</b>La cabina prendida por dentro.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc4-relleno-movil.jpg"><img src="esc4-relleno-movil-mini.jpg" alt="Opción A: la camioneta de lado, iluminada desde el lado de la cámara, con Héctor y Diego en sus ventanas y la caja con globos, en vertical" loading="lazy" width="540" height="960"></a><figcaption><b>A</b>Celular.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc4-cabina-movil.jpg"><img src="esc4-cabina-movil-mini.jpg" alt="Opción B: la misma toma con la cabina prendida por dentro y el costado oscuro, en vertical" loading="lazy" width="540" height="960"></a><figcaption><b>B</b>Celular.</figcaption></figure></li>
+</ul>
+<ul class="escena"><li class="ancha"><figure><a href="esc4-fin.jpg"><img src="esc4-fin-mini.jpg" alt="Del lado del chofer: el mánager manejando y Alexandro atrás, la camioneta completa de lado" loading="lazy" width="960" height="540"></a><figcaption>Último cuadro: la cámara pasó por encima del techo al lado del chofer, con la luz A.</figcaption></figure></li><li class="alta"><figure><a href="esc4-fin-movil.jpg"><img src="esc4-fin-movil-mini.jpg" alt="La ventana del mánager, en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular: la ventana del mánager.</figcaption></figure></li></ul>
+<h3>5 · Gira</h3>
+<p>Encima del cofre, 30 mm, mirando la pantalla de atrás de la pantalla móvil. Como todavía no hay archivo de fechas, sale «Próximas fechas · muy pronto», sin fechas inventadas. Termina alta, delante de la camioneta, cuando la cámara ya la rebasó y voltea a verla.</p>
+<ul class="escena">
+<li class="ancha"><figure><a href="esc5-abre.jpg"><img src="esc5-abre-mini.jpg" alt="Sobre el cofre: adelante la pantalla móvil con PRÓXIMAS FECHAS y MUY PRONTO en su pantalla trasera" loading="lazy" width="960" height="540"></a><figcaption>Primer cuadro.</figcaption></figure></li>
+<li class="ancha"><figure><a href="esc5-fin.jpg"><img src="esc5-fin-mini.jpg" alt="Desde arriba y adelante: la camioneta pequeña en su carril entre las luminarias" loading="lazy" width="960" height="540"></a><figcaption>Último cuadro: la cámara voltea hacia la camioneta.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc5-abre-movil.jpg"><img src="esc5-abre-movil-mini.jpg" alt="Sobre el cofre: adelante la pantalla móvil con PRÓXIMAS FECHAS y MUY PRONTO en su pantalla trasera, en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc5-fin-movil.jpg"><img src="esc5-fin-movil-mini.jpg" alt="Desde arriba y adelante: la camioneta pequeña en su carril entre las luminarias, en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular.</figcaption></figure></li>
+</ul>
+<h3>6 · Placa (Contratación)</h3>
+<p>Adelante de la camioneta, baja, 32 mm, con los faros de frente. Termina con el remate: un destello de faros, un paso más cerca de la placa.</p>
+<ul class="escena">
+<li class="ancha"><figure><a href="esc6-abre.jpg"><img src="esc6-abre-mini.jpg" alt="La camioneta de frente, desde abajo: los faros, los cuatro en la cabina y la placa de Veracruz en la defensa" loading="lazy" width="960" height="540"></a><figcaption>Primer cuadro.</figcaption></figure></li>
+<li class="ancha"><figure><a href="esc6-flash.jpg"><img src="esc6-flash-mini.jpg" alt="Más cerca de la placa, con los faros encendidos en destello" loading="lazy" width="960" height="540"></a><figcaption>Último cuadro: el destello.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc6-abre-movil.jpg"><img src="esc6-abre-movil-mini.jpg" alt="La camioneta de frente, desde abajo: los faros, los cuatro en la cabina y la placa de Veracruz en la defensa, en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular.</figcaption></figure></li>
+<li class="alta"><figure><a href="esc6-flash-movil.jpg"><img src="esc6-flash-movil-mini.jpg" alt="Más cerca de la placa, con los faros encendidos en destello, en vertical" loading="lazy" width="540" height="960"></a><figcaption>Celular.</figcaption></figure></li>
+</ul>
+<p>Sin verificar: estas fotos se revisaron a ojo y con revisar (números en el reporte), no en movimiento. Las figuras de atrás conservan la pose de tocar guitarra, así que sus manos flotan; eso se arregla con el rig.</p>
+</section>
+
+<section aria-labelledby="s-pantalla">
+<h2 id="s-pantalla">1 · Pantalla del tablero (en lugar de la radio)</h2>
+<p>La pantalla muestra la portada y el título; ‹ › recorre los 9 lanzamientos y «Escuchar» es un botón en la pantalla. El casete ya no está. La tecla dorada solo quedaría si cabe sola junto a la pantalla, y en ninguna de las dos cabe bien, así que no aparece.</p>
+<ul>
+<li><figure><a href="radio2-a.jpg"><img src="radio2-a.jpg" alt="Opción A: pantalla ancha flotando sobre el tablero, con la portada de Putifresa y el botón Escuchar" loading="lazy" width="1280" height="720"></a><figcaption><b>A</b>Pantalla ancha flotando sobre el tablero, como las Mercedes nuevas.</figcaption></figure></li>
+<li><figure><a href="radio2-b.jpg"><img src="radio2-b.jpg" alt="Opción B: pantalla empotrada en el centro del tablero, entre las rejillas de aire" loading="lazy" width="1280" height="720"></a><figcaption><b>B</b>Pantalla empotrada en el tablero, donde la G63 trae su pantallita, como en las Ram nuevas.</figcaption></figure></li>
+<li><figure><a href="pantalla-ancha.jpg"><img src="pantalla-ancha.jpg" alt="La cara de la pantalla de cerca: portada, título PUTIFRESA, Single, puntos de posición, flechas y el botón dorado Escuchar" loading="lazy" width="1200" height="400" style="aspect-ratio: 3 / 1"></a><figcaption>Así se ve la pantalla de cerca, la misma en las dos.</figcaption></figure></li>
+</ul>
+</section>
+
+<section aria-labelledby="s-guantera">
+<h2 id="s-guantera">2 · Guantera C, con la puerta cortada del tablero</h2>
+<p>Ahora la puerta es la de la propia camioneta: se cortó del tablero, gira sobre su borde de abajo y queda abierta a 70°. Adentro hay una caja oscura que ahora cubre todo el hueco del tablero sin salirse hacia la cabina, y el forro de la puerta sigue su inclinación.</p>
+<ul>
+<li><figure><a href="guantera2-borde.jpg"><img src="guantera2-borde.jpg" alt="Primer plano del corte de la guantera, sin objetos, para revisar los bordes" loading="lazy" width="1280" height="720"></a><figcaption>Los bordes del corte, de cerca y sin objetos.</figcaption></figure></li>
+<li><figure><a href="guantera2-c.jpg"><img src="guantera2-c.jpg" alt="Guantera abierta con un casete suelto, plumillas, una lista arrugada y lentes oscuros sobre la puerta" loading="lazy" width="1280" height="720"></a><figcaption><b>C</b>Casete suelto, plumillas, la lista arrugada y lentes, sobre la puerta abierta.</figcaption></figure></li>
+</ul>
+</section>
+
+<section aria-labelledby="s-placa">
+<h2 id="s-placa">3 · Placa, con el diseño actual de Veracruz</h2>
+<p>Sigue la placa de Veracruz que mandaste: el encabezado, la greca dorada en las esquinas, el lema y la línea de servicio. Lo que cambia: nuestras letras en lugar del número; el código QR abre el WhatsApp de la banda; el monograma MT va donde la placa real lleva el escudo nacional, porque la ley lo protege; el escudo del estado es un dibujo parecido, no el oficial.</p>
+<ul>
+<li><figure><a href="placa3.jpg"><img src="placa3.jpg" alt="La placa estilo Veracruz en la defensa, vista desde la cámara de la escena 6, delante de la camioneta y con los faros de frente" loading="lazy" width="1280" height="720"></a><figcaption>Desde la cámara de la escena 6.</figcaption></figure></li>
+<li><figure><a href="placa-veracruz.jpg"><img src="placa-veracruz.jpg" alt="La placa de frente: VERACRUZ arriba, MT-420-VER al centro, greca dorada en las esquinas, QR arriba a la derecha y TRANSPORTE PRIVADO AUTOMOVIL abajo" loading="lazy" width="1200" height="600" style="aspect-ratio: 2 / 1"></a><figcaption>La placa de frente; el QR se puede escanear.</figcaption></figure></li>
+</ul>
+</section>
+
+<section aria-labelledby="s-calcas3">
+<h2 id="s-calcas3">5 · Calcas: la mezcla que elegiste</h2>
+<p>Cada calca es su propia pieza, con su forma y su acabado: vinil brillante troquelado con borde blanco, papel mate, holográfica y cromo dorado. Van pegadas sobre la superficie real de la puerta, pasan por encima de las líneas de la lámina y casi todas tienen una esquina levantada que deja ver el reverso blanco (las de letra recortada van planas). <b>A, «puesto de merch»:</b> colores fuertes, piezas sueltas y nuevas. <b>B, «troca»:</b> negro y dorado, despintadas, amontonadas en la esquina de arriba a la izquierda, con letra de cromo dorado.</p>
+<p><b>Elegiste (05:15) una mezcla de A y B.</b> Así quedó: de A, la fresa (Instagram), la redonda holográfica (Spotify) y la estrella MT, que ahora dice «Míranos en YouTube» en lugar de «Tumbado»; de B, la fresa dorada (YouTube), la redonda negra (TikTok), la carta «El sombrero» y «PURA MT» en cromo, en lugar de «Puro Veracruz» (05:30). También se corrigió la T: el final de su barra salía cortado en todas las calcas. Si quieres cambiar alguna pieza por otra de las hojas de abajo, dime cuál.</p>
+<p>Los cuadros grises son el lugar del ícono oficial de Instagram, YouTube y TikTok: quedan derechos, sin desgaste y sin nada encima, hasta que bajes los archivos oficiales. El de Spotify ya es su ícono oficial.</p>
+<ul>
+<li><figure><a href="calcas3-mix.jpg"><img src="calcas3-mix.jpg" alt="La mezcla de cerca: siete calcas en la puerta trasera, la fresa rosa, la fresa dorada, la redonda de Spotify, la redonda negra, la carta El Sombrero, la estrella MT con MÍRANOS EN YOUTUBE y PURA MT en letra dorada" loading="lazy" width="1280" height="720"></a><figcaption><b>Mezcla</b>De cerca.</figcaption></figure></li>
+<li><figure><a href="calcas3-mix-esc2.jpg"><img src="calcas3-mix-esc2.jpg" alt="La mezcla desde la cámara de la escena 2: la camioneta en la carretera con las siete calcas en la puerta trasera" loading="lazy" width="1280" height="720"></a><figcaption><b>Mezcla</b>Desde la escena 2.</figcaption></figure></li>
+<li><figure><a href="calcas3-a.jpg"><img src="calcas3-a.jpg" alt="Opción A de cerca: seis calcas de colores separadas en la puerta trasera, entre ellas una fresa con lentes, una estrella holográfica con MT, una carta de lotería y un óvalo turquesa" loading="lazy" width="1280" height="720"></a><figcaption><b>A</b>La opción A, puesto de merch, de cerca.</figcaption></figure></li>
+<li><figure><a href="calcas3-a-esc2.jpg"><img src="calcas3-a-esc2.jpg" alt="Opción A desde la cámara de la escena 2: la camioneta en la carretera y las calcas de colores en la puerta trasera" loading="lazy" width="1280" height="720"></a><figcaption><b>A</b>La misma, desde la escena 2.</figcaption></figure></li>
+<li><figure><a href="calcas3-b.jpg"><img src="calcas3-b.jpg" alt="Opción B de cerca: calcas negras y doradas amontonadas arriba a la izquierda, una carta de lotería y un escudo a la derecha y PURA MT en letra dorada" loading="lazy" width="1280" height="720"></a><figcaption><b>B</b>La opción B, troca, de cerca.</figcaption></figure></li>
+<li><figure><a href="calcas3-b-esc2.jpg"><img src="calcas3-b-esc2.jpg" alt="Opción B desde la cámara de la escena 2: la camioneta en la carretera con el montón de calcas negras y doradas en la puerta trasera" loading="lazy" width="1280" height="720"></a><figcaption><b>B</b>La misma, desde la escena 2.</figcaption></figure></li>
+<li><figure><a href="calcas3-arte.jpg"><img src="calcas3-arte.jpg" alt="Las primeras ocho calcas de frente: A a la izquierda, B a la derecha, una por plataforma" loading="lazy" width="1400" height="1640" style="aspect-ratio: 1400 / 1640"></a><figcaption>Las primeras ocho (A a la izquierda, B a la derecha).</figcaption></figure></li>
+<li><figure><a href="calcas3-arte-2.jpg"><img src="calcas3-arte-2.jpg" alt="Ocho calcas nuevas de frente: PUTIFRESA, estrella MT con MÍRANOS EN YOUTUBE, carta El Casete y listón MAFIA TUMBADA en A; PURA MT, escudo MT, carta El Sombrero y óvalo VER en B" loading="lazy" width="1400" height="1640" style="aspect-ratio: 1400 / 1640"></a><figcaption>Ocho más en el mismo estilo, sin ícono de plataforma: PUTIFRESA, estrella MT («Míranos en YouTube»), carta «El casete» y listón en A; «Pura MT», escudo MT, carta «El sombrero» y óvalo VER en B.</figcaption></figure></li>
+</ul>
+</section>
+
+<section aria-labelledby="s-calcas">
+<h2 id="s-calcas">Antes: calcas mezcladas</h2>
+<p>Cuatro estilos juntos, como si se hubieran ido juntando: Instagram troquelada y vieja (ya despintada), Spotify redonda, YouTube en tira y rayada, TikTok troquelada y nueva. El cuadro gris marca dónde va el ícono oficial, derecho y sin desgaste.</p>
+<ul>
+<li><figure><a href="calcas2.jpg"><img src="calcas2.jpg" alt="La puerta trasera con cuatro calcas de estilos distintos: una rosa despintada, una redonda verde, una tira roja rayada y una negra" loading="lazy" width="1280" height="720"></a><figcaption>Las cuatro en la puerta trasera.</figcaption></figure></li>
+</ul>
+</section>
+
+<section aria-labelledby="s-caja3">
+<h2 id="s-caja3">6 · Caja B: lo que carga la banda</h2>
+<p>Se queda la caja B que elegiste: la piñata colgada del arco, los globos y una pila baja. Ahora la pila es equipo de la banda, cada cosa a su tamaño real y con su material: el tololoche y el bajo sexto en fundas acolchadas, el estuche duro del requinto, un road case con MAFIA TUMBADA pintado y esquinas de metal, la hielera con la fresa, una bocina con luces, la sombrerera con PURA MT, una tejana, una caja de cervezas sin marca, la bandera MT, una maleta y un cable. Las calcas son las de la puerta, solo las de la banda, sin íconos de plataforma. La dona sigue.</p>
+<p><b>A, ordenada:</b> las fundas paradas contra la cabina con una correa negra, todo derecho, el papel picado tenso. <b>B, vivida:</b> las fundas recargadas y cruzadas, una correa naranja encima, la sombrerera rodada de lado, la tejana sobre la bocina, la dona apretada entre las cosas, faltan dos cervezas y el papel picado cuelga de un lado.</p>
+<p>Desde la cámara de la escena 2 solo se distinguen las formas y los colores. Los materiales y las calcas se ven en la toma de cerca. Puedes mezclar, como con las calcas: por ejemplo «A, pero con la sombrerera de B», o quitar y cambiar cualquier objeto de la hoja.</p>
+<ul>
+<li><figure><a href="caja3-hoja.jpg"><img src="caja3-hoja.jpg" alt="Hoja de los doce objetos en la carretera, numerados: tololoche, bajo sexto, bandera, bocina, road case, requinto, hielera, sombrerera, tejana, cerveza, maleta y cable" loading="lazy" width="1280" height="720"></a><figcaption>Los doce, numerados, para elegir o quitar.</figcaption></figure></li>
+<li><figure><a href="caja3-a.jpg"><img src="caja3-a.jpg" alt="Opción A de cerca: las fundas paradas contra la cabina, el road case con el requinto encima, la sombrerera y la tejana sobre la caja de cervezas, la dona sobre la hielera, la bocina y la piñata colgada" loading="lazy" width="1280" height="720"></a><figcaption><b>A</b>Ordenada, de cerca.</figcaption></figure></li>
+<li><figure><a href="caja3-a-esc2.jpg"><img src="caja3-a-esc2.jpg" alt="Opción A desde la cámara de la escena 2: la camioneta en la carretera con la caja ordenada, los globos y la bandera" loading="lazy" width="1280" height="720"></a><figcaption><b>A</b>La misma, desde la escena 2.</figcaption></figure></li>
+<li><figure><a href="caja3-b.jpg"><img src="caja3-b.jpg" alt="Opción B de cerca: las fundas cruzadas, una correa naranja, la sombrerera de lado con PURA MT, la tejana sobre la bocina y la dona apretada" loading="lazy" width="1280" height="720"></a><figcaption><b>B</b>Vivida, de cerca.</figcaption></figure></li>
+<li><figure><a href="caja3-b-esc2.jpg"><img src="caja3-b-esc2.jpg" alt="Opción B desde la cámara de la escena 2: la camioneta en la carretera con la caja revuelta, los globos y la bandera" loading="lazy" width="1280" height="720"></a><figcaption><b>B</b>La misma, desde la escena 2.</figcaption></figure></li>
+</ul>
+</section>
+
+<section aria-labelledby="s-caja">
+<h2 id="s-caja">4 · Caja A, más llena</h2>
+<p>Siguen la dona, la hielera y la piñata, y se suman una pelota de playa, globos amarrados al arco, otra dona inflable, maracas, una bocina y un sombrero. Todo va en pirámide, con la piñata hasta arriba. Cada opción se ve dos veces: de cerca y desde la cámara de la escena 2, que es la toma que cuenta.</p>
+<ul>
+<li><figure><a href="caja2-a-esc2.jpg"><img src="caja2-a-esc2.jpg" alt="Opción A desde la cámara de la escena 2: la camioneta en la carretera y en la caja una pirámide de juguetes con la piñata arriba" loading="lazy" width="1280" height="720"></a><figcaption><b>A</b>Apilada: la piñata va sentada sobre la hielera y la dona. Desde la escena 2.</figcaption></figure></li>
+<li><figure><a href="caja2-a.jpg"><img src="caja2-a.jpg" alt="Opción A de cerca: hielera, bocina, dona parada, piñata arriba, pelota, maracas, sombrero y globos en el arco" loading="lazy" width="1280" height="720"></a><figcaption><b>A</b>La misma, de cerca.</figcaption></figure></li>
+<li><figure><a href="caja2-b-esc2.jpg"><img src="caja2-b-esc2.jpg" alt="Opción B desde la cámara de la escena 2: la piñata cuelga del arco sobre una pila baja de juguetes" loading="lazy" width="1280" height="720"></a><figcaption><b>B</b>Colgada: la piñata cuelga del arco y abajo queda una pila baja. Desde la escena 2.</figcaption></figure></li>
+<li><figure><a href="caja2-b.jpg"><img src="caja2-b.jpg" alt="Opción B de cerca: la piñata colgada del arco, globos a los lados y la pila de juguetes abajo" loading="lazy" width="1280" height="720"></a><figcaption><b>B</b>La misma, de cerca.</figcaption></figure></li>
+</ul>
+</section>
+
+<section aria-labelledby="s-elegidas">
+<h2 id="s-elegidas">Ya elegidas, sin foto nueva</h2>
+<p>Pantalla móvil C (camión con marquesina de focos) y letreros verdes B (bandera desde el acotamiento) quedan anotados en el sistema de diseño. </p>
+</section>
+</main>
+</body>
+</html>
