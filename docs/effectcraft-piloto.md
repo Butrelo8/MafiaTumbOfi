@@ -69,7 +69,8 @@ B 6 % / 12 (reads as a flat zoom), **C 10 % / 20 / drift 40 px, kept**: most par
 
 ## Times (RTX 4070 Ti for Cycles; EffectCraft on CPU)
 ```
-Blender, per pass, 1080p, 24 spp, OptiX, persistent data:  ~27-29 s/frame (fig too: mostly per-frame scene sync)
+Blender, per pass, 1080p, 24 spp, OptiX device, OIDN denoise:  ~27-29 s/frame, ~22 s of it CPU OIDN denoising
+  same at 96 spp with denoiser OPTIX: ~6 s/frame (96 spp raw: 5.6 s/frame) -> use DENOISER=OPTIX next time
   16:9 batch bg+fig+fg 0-59: 4940 s (bg 1719, fig 1610, fg 1582), scene build ~30 s
 EffectCraft render h264 1920x1080, 168 frames (7 s): 98 s (0.58 s/frame); +Remove Grain x3 layers: 161 s (strength 3: 204 s)
 EffectCraft render-frame 1920x1080: 0.6-1.6 s;  --gpu in WSL is llvmpipe (software Vulkan): 0.54x of CPU
@@ -89,10 +90,24 @@ animated bg, frozen fig/fg                           0.55
 frozen bg, animated fig/fg                           0.24
 full (kept)                                          0.73
 ```
-The 24-spp Cycles layers boil (OIDN blotches that change with the passing lamp light), mostly on the roof and the dark
-plate behind the heads; the push shrinks revisar's static mask onto exactly those dark areas, and DoF removes high
-frequency from the denominator while the low-frequency blotches stay. Not EffectCraft: its own output on still
-layers passes. eagle-eye (run 680aed12d648): confirms the claim as minor `boiling`; no tears, holes or seam problems.
+Render settings on the 24-frame version of the same composite (`effectcraft/prueba-ruido.sh`), wall time for
+bg+fig+fg × 24 frames:
+```
+24 spp OIDN (the clips)          0.55   ~2000 s
+48 spp OIDN                      0.51    2056 s
+96 spp raw                       0.60     406 s
+96 spp OIDN                      0.48    2169 s
+96 spp OptiX denoiser            0.48     438 s
+96 spp OptiX, world frozen       0.27     471 s   (MUNDO_QUIETO=1: road and lamps stop, figures keep their idle)
+```
+From 24 to 48 spp the bg layer's frame-to-frame high-frequency change in its dark parts drops 5 % (0.247 → 0.234);
+sample noise would drop ~30 %. Freezing the world takes crawl from 0.48 to 0.27. So the crawl is mostly designed motion:
+the passing lamp light sweeping the cab and the road, plus the figures' nod, inside revisar's static mask, which the
+push shrinks onto the dark interior. Render noise is a minor part, and EffectCraft is not the cause (its output on still
+layers: 0.13). With mothership's agreement, the 3 h re-render at 96 spp was not run (its preview reads 0.48).
+eagle-eye: 16:9 run 680aed12d648 (claim confirmed as minor `boiling`, written before the frozen-world test);
+9:16 run 445871e654c0 (claim refuted with the strips and the numbers above; the checker still lists it as a finding).
+No tears, holes or seam problems in either.
 
 ## EffectCraft: what failed or deviated (0.24.1)
 1. `render --out` and `mcp --automation-read-root/--automation-write-root` cut the path at
@@ -116,3 +131,22 @@ with an empty warning list, MCP over stdio (27 tools; `open_project`, `render_fr
 plus a rule that scales out, 800×240, 3 s. 13,843 bytes (3,147 gzip), `warnings: []`. Plays in lottie-web 5.12.2
 (headless Chromium): 72 frames at 24 fps, frame 2 faded and 25 px lower than frame 36, which matches EffectCraft's own
 render at 1.5 s.
+
+## Result
+```
+clips: blender/render/effectcraft/cabina-16x9.mp4  1920x1080 24 fps 168 f H.264 15 Mb/s, 13.1 MB, rendered in 98 s
+       blender/render/effectcraft/cabina-9x16.mp4  1080x1920 24 fps 168 f H.264, rendered in 94 s
+eagle.sh/revisar 16:9: exit 1 — crawl 0.73 FAIL; dark 76 % info, flicker 0.16, strobe 0 runs, events 0 pass
+eagle.sh/revisar 9:16: exit 1 — crawl 0.83 FAIL; dark 69 % info, flicker 0.21, strobe 0 runs, events 0 pass
+loop seams (wrap / mean step), 16:9 bg 1.35x fig 1.04x fg 0.81x; 9:16 bg 1.30x fig 1.06x fg 1.18x (all inside the step range)
+lottie: blender/render/effectcraft/lottie/titulo.json 13,843 B, plays in lottie-web 5.12.2
+```
+
+## Verdict
+CLI: **usable for drones, yes.** Headless, no display, ~0.6 s per 1080p frame on CPU, and the After Effects JSX object
+model (3D layers, camera DoF, expressions, effects, time remap) builds a whole comp from one script. Re-runs are
+deterministic and Lottie export is one command. Watch for: paths with spaces in `--out` and the automation roots,
+and the shape-layer property binding. It's an alpha: nothing crashed in this pilot, but pin the version.
+MCP: works (27 tools, stdio, confinement enforced), but a confined server refuses `run_script`, so a confined drone
+can't use JSX. For drones the CLI + JSX path is better; the MCP suits interactive inspection (`render_frame`,
+`get_property`).
