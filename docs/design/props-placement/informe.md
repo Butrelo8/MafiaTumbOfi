@@ -31,7 +31,8 @@ new piece kept next to the variants it beat: `E:\Cursor Projects\MTO-touchgrasdr
 - The probe now looks through glass: a prop behind the windshield counts as covering the road in scene 1 (the emblem is hidden
   there by the front heads).
 - revisar image: 0 FAIL on all 13 stills; slop-check 0 to review; revisar web passes at 390 and 1440 (0.36 MB).
-- Not done: scenes 3 and 5, 9:16. #33, #34 and the scene-4 light stay open. 16 spp previews went to the owner before the final run.
+- Not done: scenes 3 and 5, 9:16. #33, #34 and the scene-4 light stay open. The 16 spp preview sheet went to the owner as the final run started (factory lamps as default); the owner then confirmed that pick.
+- Legibility: in Grenze Gotisch the capital M reads like a lowercase m, so the emblem can read "mt" (owner question).
 
 Run (an empty option list renders the picks, `FINALES` in `props_placement.py`):
 

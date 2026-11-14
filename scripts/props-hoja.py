@@ -107,6 +107,7 @@ escena (<code>scripts/props-medir.py</code>); el look se juzga en los stills. Re
 {''.join(secciones)}
 <section id="preguntas"><h2>Preguntas abiertas</h2><ol>
 <li>Emblema: (a) de pie, del tamaño actual (letras de unos 14 cm): en la escena 6 ocupa 0.088 % del cuadro, bajo la línea de 0.1 % de la regla 2, así que ahí se ve como un brillo dorado y se lee en los detalles; (b) más grande, para que se lea en la escena 6 (letras de unos 18 cm, casi la mitad del ancho del cofre al frente); o (c) plano sobre el cofre (no se ve desde la cámara baja de la escena 6).</li>
+<li>Letra del emblema: (a) se queda Grenze Gotisch (su M mayúscula parece una m minúscula: se puede leer «mt») o (b) una gótica de mayúsculas más claras, como Pirata One (OFL, la de DESIGN.md).</li>
 <li>Fresa: (a) fruta, (b) resina con oro o (c) peluche; o se espera el modelo del amigo (se cambia un archivo).</li>
 </ol>
 <p>Ya resuelta (13 nov): la barra de luces son las lámparas de fábrica del 6×6, no la de dos pisos estilo Brabus.</p>
