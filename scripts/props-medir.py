@@ -8,7 +8,7 @@ budget 3 for scenes 1 and 6, 4 for 2 and 4), and the zone's total light (linear 
 the zone must win; scene 6 compares the plate, the headlights excluded). A p95 version failed every still by construction: an
 emissive bulb clips to 1.0, so area has to count. Exit 0 always: the table is the result, PASS/FAIL per column.
 """
-import json, sys
+import json, re, sys
 from pathlib import Path
 
 import numpy as np
@@ -44,7 +44,7 @@ for f in sorted(d.glob("medidas-*.json")):
     r1 = "PASS" if cubierta <= 2 else "FAIL"
     r3 = "PASS" if len(leen) <= PRESUPUESTO[esc] else "FAIL"
     r4 = "n/a" if np.isnan(lp95) or np.isnan(zp95) else ("PASS" if zp95 > lp95 else "FAIL")
-    if "cerca" in nombre:  # a close-up shows a prop; the rules hold at the scene camera
+    if not re.match(r"pp\d|pv-\d", nombre):  # a close-up shows a prop; the rules hold at the scene camera
         r1 = r3 = r4 = "detalle"
     det = " ".join(f"{p}:{v['pct_cuadro']}%{'*' if v['luminoso'] else ''}" for p, v in sorted(m["props"].items()))
     filas.append(f"{nombre}\t{esc}\t{cubierta}\t{r1}\t{len(leen)} ({','.join(leen)})\t{r3}\t{zp95:.1f}\t{lp95:.1f}\t{r4}\t{det}")

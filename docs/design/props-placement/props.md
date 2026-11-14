@@ -6,6 +6,23 @@ in `blender/props_placement.py` (built for these stills), **PH** Poly Haven (CC0
 version in the live build (modelled, textured, decimated), not for the still. Rules are in `reglas.md`; whether each one
 "reads" is measured per still (`index.md`).
 
+## Pass 2: the owner's picks (2026-11-13 20:04, run `nocapdrone`)
+
+B in every scene; no PURA MT marquee (P10 out); no cattle horns (P14 stays unbuilt); underglow stays amber. Three pieces were
+redone:
+
+- **P1 is now the real part**: the factory G 63 AMG 6×6 roof spoiler has one LED lamp in each outer pocket (refs [12b], [12c]):
+  a clear lens over a black housing with five round reflector cups, white. The truck model already has both pockets (probed:
+  x ±0.515–0.695 m, z 2.156–2.198 m, lamp faces at y ≤ 1.144 m), unlit; `barra_luces()` fills them (cups, a 60-strength die
+  per cup, a lens, a 25 W spot per lamp aimed 14 m ahead). The owner confirmed this reading over the Brabus XLP 800 two-tier bar
+  (`pv-barra-xlp`), which is a W465 part and failed rule 4 in scene 6.
+- **P5 strawberry** is one swappable file, `blender/props/fresa.glb`, built by `blender/fresa_charm.py` (styles fruta, resina,
+  peluche; fruta kept). Contract for a replacement: one .glb, Z up, metres, origin at the hang point, the charm hanging down -Z;
+  `props_placement.py` scales any model to 4.1 cm and hangs it from the mirror (`PP_FRESA=<path>` tries one without copying).
+- **P15 gold MT hood emblem** (replaces P14): Grenze Gotisch ExtraBold (OFL; `blender/fuentes/`), extruded and bevelled, brand
+  gold (DESIGN.md `--gold`, linear 0.768 0.426 0.021) as polished metal, standing bolted on a black plinth at the hood's front
+  edge. A flat badge (`pv-emblema-plano`) is edge-on from scene 6's low camera.
+
 | # | Prop | Source | Scene · zone | Why it reads at that camera | Route · cost | In stills |
 |---|---|---|---|---|---|---|
 | P1 | **Two-tier LED light bar** across the roof's front edge, black housing, 24 pods | [12] (made for the G63 6×6) | 6 roof front; 4 roof line | Self-lit: the brightest horizontal line in 6, a hard cap on the silhouette in 4. Off or at amber in B so the plate stays brightest (rule 4) | P · 1 h, ~3 k tris, emissive per pod | 4, 6 |
@@ -21,7 +38,8 @@ version in the live build (modelled, textured, decimated), not for the still. Ru
 | P11 | **Underglow**: amber light pools on the road under the body | [17] | 4 road under the truck; 6 road under the bumper | A colour pool that separates the black truck from the black road | light only · 15 min, no geometry | 4, 6 |
 | P12 | **Roof rack with a strapped spare tyre and a road case** | [12] (the Brabus has a rack), [7] (load above the cab) | 4 roof | A touring silhouette; only in A, B drops it (the roof carries one item) | P · 1 h, ~4 k tris | 4 A |
 | P13 | **Band pennants** on short poles at the bed's rear corners | [18] (flags on cars; ours never national) | 2 bed corners; 4 bed's back | Two small vertical accents that mark the bed's corners | P · 20 min | 2 A |
-| P14 | **Cattle horns on the hood** | TV Tropes (T only, no photo) | 6 hood | Strong silhouette, but no photo seen and the cartel-troca reading | not built: owner question | — |
+| P14 | **Cattle horns on the hood** | TV Tropes (T only, no photo) | 6 hood | Strong silhouette, but no photo seen and the cartel-troca reading | not built: owner said no (P15 instead) | — |
+| P15 | **Gold MT emblem** standing on the hood's front edge | owner pick 11-13; DESIGN.md gold and blackletter | 6 hood (scene camera); 1, 4 | Gold metal at the front centre, the one brand mark on the body | P · 30 min, text curve + plinth | 1, 2, 4, 6 (pass 2) |
 | — | Rosary or Virgin statuette (dash, mirror) | Cronista, AP (T) | 1 | Common in Mexican cabs; religious | not built: owner question | — |
 
 ## What the probe found (`stills/medidas.tsv`, % of the frame at the scene camera; reads = ≥ 0.1 % or self-lit)

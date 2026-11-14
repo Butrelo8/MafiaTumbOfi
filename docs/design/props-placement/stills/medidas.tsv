@@ -1,13 +1,13 @@
 still	escena	zona_cubierta_%	r1	props_que_leen	r3	zona_luz	prop_luz	r4	detalle_props
-pp1-a	1	3.4	FAIL	2 (P3,P8)	PASS	23.4	nan	n/a	P3:0.528% P4:0.008% P5:0.041% P8:1.213%
-pp1-b	1	1.7	PASS	1 (P3)	PASS	22.1	nan	n/a	P3:0.363% P4:0.008% P5:0.041%
-pp1-cerca	1	3.77	detalle	2 (P3,P5)	detalle	845.7	nan	detalle	P3:11.167% P5:1.108%
-pp2-a	2	0.2	PASS	2 (P10,P9)	PASS	223.5	104.6	PASS	P10:0.739%* P13:0.093% P2:0.008% P9:0.189%*
-pp2-b	2	0.0	PASS	2 (P10,P9)	PASS	223.7	135.7	PASS	P10:1.024%* P9:0.129%*
-pp2-cerca	2	0.0	detalle	2 (P10,P9)	detalle	20.8	848.5	detalle	P10:3.819%* P9:0.416%*
-pp4-a	4	0.0	PASS	6 (P1,P10,P12,P6,P7,P9)	FAIL	57.5	35.2	PASS	P1:0.116%* P10:0.082%* P12:0.843% P6:0.146% P7:0.135% P9:0.047%*
-pp4-b	4	0.0	PASS	4 (P1,P10,P7,P9)	PASS	57.5	35.4	PASS	P1:0.127%* P10:0.116%* P7:0.135% P9:0.049%*
-pp4-cerca	4	0.0	detalle	4 (P1,P10,P7,P9)	detalle	531.9	436.5	detalle	P1:1.614%* P10:1.292%* P7:0.279% P9:0.115%*
-pp6-a	6	0.0	PASS	2 (P1,P2)	PASS	45.5	108.8	FAIL	P1:0.297%* P2:0.247% P6:0.092% P7:0.06%
-pp6-b	6	0.0	PASS	2 (P1,P2)	PASS	45.4	45.1	PASS	P1:0.297%* P2:0.247% P7:0.06%
-pp6-cerca	6	0.0	detalle	3 (P1,P2,P7)	detalle	nan	145.9	detalle	P1:0.909%* P2:0.861% P7:0.228%
+pp-barra	6	0.0	detalle	2 (P1,P2)	detalle	nan	207.5	detalle	P1:1.488%* P2:8.281% P3:0.03% P7:0.09%
+pp-emblema	6	0.0	detalle	2 (P15,P7)	detalle	nan	nan	detalle	P15:5.852% P7:0.628%
+pp-fresa	1	3.02	detalle	2 (P15,P5)	detalle	1062.4	nan	detalle	P15:0.948% P3:0.004% P5:1.849%
+pp1-b	1	0.79	PASS	1 (P3)	PASS	22.2	nan	n/a	P3:0.363% P4:0.008% P5:0.013%
+pp2-b	2	0.0	PASS	1 (P9)	PASS	223.9	54.0	PASS	P9:0.13%*
+pp4-b	4	0.0	PASS	3 (P1,P7,P9)	PASS	57.5	23.1	PASS	P1:0.005%* P15:0.039% P7:0.135% P9:0.052%*
+pp6-b	6	0.0	PASS	2 (P1,P2)	PASS	45.4	10.4	PASS	P1:0.025%* P15:0.088% P2:0.247% P3:0.049% P7:0.06%
+pv-6-xlp	6	0.0	PASS	2 (P1,P2)	PASS	45.4	59.0	FAIL	P1:0.293%* P15:0.088% P2:0.247% P3:0.049% P7:0.06%
+pv-barra-xlp	6	0.0	detalle	2 (P1,P2)	detalle	nan	969.9	detalle	P1:10.343%* P2:8.281% P3:0.03% P7:0.09%
+pv-emblema-plano	6	0.0	detalle	2 (P15,P7)	detalle	nan	nan	detalle	P15:1.591% P7:0.55%
+pv-fresa-peluche	1	3.13	detalle	2 (P15,P5)	detalle	1064.3	nan	detalle	P15:0.948% P3:0.004% P5:1.95%
+pv-fresa-resina	1	3.02	detalle	2 (P15,P5)	detalle	1061.8	nan	detalle	P15:0.948% P3:0.004% P5:1.846%

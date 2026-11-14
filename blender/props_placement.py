@@ -6,7 +6,10 @@ pixel at 1/5 size from the still's camera, new props hidden and shown, so rules 
 Runs caja3.py (which runs utileria.py's scene and helpers) without its render loop, adds the options, then utileria.py's loop:
 
   /mnt/e/Blender/blender.exe -b --factory-startup --python-exit-code 1 --python "$(wslpath -w blender/props_placement.py)" \
-    -- <escena.py path (Windows)> <out_dir (Windows)> [samples] [pp1-a,pp1-b,...|all] [WxH]
+    -- <escena.py path (Windows)> <out_dir (Windows)> [samples] [pp1-b,pp-barra,...] [WxH]
+
+No option list (or `all`) renders the owner's picks (FINALES: B in scenes 1, 2, 4, 6 and close-ups of the light bar, the
+MT emblem and the strawberry). pp<N>-a and the pv-* variants stay callable by name.
 
 The bed keeps the open pick #34 open: the floor pile is caja3 A (pass PP_CAMA=b for caja3 B); new bed props sit only on the
 roll bar, the rails and the cab. Alexandro and Diego ride in the rear seats (base_escena); only the bed's seat cases and the
@@ -91,9 +94,41 @@ for lado in (-1, 1):
 for x in (0.5, 0.55, 0.58, 0.6, 0.62, 0.66, 0.7):  # the bed wall's top, sampled across its thickness
     print("PP riel", x, [round(h[0].z, 3) for y in (-2.5, -2.1, -1.7) for h in [golpe((CX + x, y, 3.0), (0, 0, -1))] if h])
 RIEL_Z = float(os.environ.get("PP_RIEL_Z", 0)) or 1.235  # bed wall top at x ±0.62-0.66 (the "PP riel" samples)
+
+
+def _corrida(vals, cerca):
+    """The contiguous run of sampled values (step <= 0.006) that contains the one nearest `cerca`."""
+    if not vals:
+        return []
+    vals = sorted(vals)
+    i = min(range(len(vals)), key=lambda k: abs(vals[k] - cerca))
+    a = b = i
+    while a > 0 and vals[a] - vals[a - 1] < 0.006:
+        a -= 1
+    while b < len(vals) - 1 and vals[b + 1] - vals[b] < 0.006:
+        b += 1
+    return vals[a:b + 1]
+
+
+# the factory G 63 AMG 6x6 roof spoiler's two lamp pockets (the model has them, unlit): the run of non-paint hits on the
+# visor face around x ±0.6, z 7 cm under the roof (sonda: x ±0.51-0.69, z 2.157-2.193, lamp faces at y 1.11-1.143)
+BOLSAS = {}
+for lado in (-1, 1):
+    _f = lambda dx, z: golpe((CX + lado * dx, YT + 2.0, z), (0, -1, 0))
+    xs = _corrida([dx for dx in np.arange(0.35, 0.9, 0.005) for h in [_f(dx, TECHO_Z - 0.072)] if h and h[0].y > 0 and h[2] != "pintura_satin"], 0.6)
+    if not xs:
+        continue
+    xm = (xs[0] + xs[-1]) / 2
+    zs = _corrida([z for z in np.arange(TECHO_Z - 0.16, TECHO_Z, 0.002) for h in [_f(xm, z)] if h and h[0].y > 0 and h[2] != "pintura_satin"],
+                  TECHO_Z - 0.072)
+    ys = [h[0].y for dx in np.arange(xs[0], xs[-1] + 1e-4, 0.01) for z in np.arange(zs[0], zs[-1] + 1e-4, 0.004) for h in [_f(dx, z)] if h]
+    BOLSAS[lado] = (CX + lado * xs[0], CX + lado * xs[-1], zs[0], zs[-1], max(ys))
+# the hood along the centre line: front edge and top (for the MT emblem)
+CAPO = [(y, h[0].z) for y in np.arange(FRENTE + 0.2, FRENTE - 1.8, -0.01) for h in [golpe((CX, y, 4.0), (0, 0, -1))] if h and 1.2 < h[0].z < 1.75]
 for n_, v_ in (("TECHO_Z", TECHO_Z), ("YT", YT), ("YR", YR), ("WT", WT), ("CIELO_Z", CIELO_Z), ("PB", (PB_ABAJO, PB_ARRIBA)),
                ("ESPEJO", ESPEJO), ("VT", (VT_ABAJO, VT_ARRIBA)), ("RETROS", RETROS), ("RIEL_Z", RIEL_Z), ("ARCO_Z", ARCO_Z),
-               ("PORTON", PORTON), ("FRENTE", FRENTE), ("COLA", COLA)):
+               ("PORTON", PORTON), ("FRENTE", FRENTE), ("COLA", COLA),
+               ("BOLSAS", BOLSAS), ("CAPO", CAPO[:3] + CAPO[-3:])):
     print("PP", n_, v_)
 for o in bpy.data.objects:
     o.hide_viewport = False
@@ -134,24 +169,47 @@ def entre(a, b, r, m, verts=8):
     return cil(r, d.length, (a + b) / 2, m, rot=(0, math.atan2(math.hypot(d.x, d.y), d.z), math.atan2(d.y, d.x) + math.pi / 2), verts=verts, parent=False)
 
 
-def barra_luces(nivel):
-    """P1, ref [12]: two-tier LED bar over the windshield (Brabus XLP 800 6x6). nivel: 'blanca' (on), 'ambar' (DRL), 'apagada'."""
-    e = {"blanca": 14.0, "ambar": 2.5, "tenue": 0.9, "apagada": 0.0}[nivel]
-    col = (1.0, 0.95, 0.88) if nivel == "blanca" else (1.0, 0.55, 0.15)
-    led = mat(f"pp_led_{nivel}", col if e else (0.2, 0.2, 0.22), 0.15, emit=e)
-    with prop("P1", emisivo=bool(e)):
-        w, y, z = WT * 1.7, YT - 0.06, TECHO_Z + 0.075
-        caja((w, 0.11, 0.09), (CX, y, z), NEGRO, bevel=0.02, parent=False)
-        for i in range(24):
-            x = CX - w / 2 + (i + 0.5) * w / 24
-            cil(0.026, 0.01, (x, y + 0.056, z), led, rot=(math.pi / 2, 0, 0), verts=12, parent=False)
-        for lado in (-1, 1):  # lower tier: two short modules at the corners
-            xc = CX + lado * w * 0.36
-            caja((w * 0.22, 0.09, 0.07), (xc, y + 0.02, z - 0.1), NEGRO, bevel=0.015, parent=False)
-            for i in range(5):
-                cil(0.022, 0.01, (xc - w * 0.09 + i * w * 0.045, y + 0.067, z - 0.1), led, rot=(math.pi / 2, 0, 0), verts=12, parent=False)
-        for lado in (-1, 1):
-            caja((0.03, 0.08, 0.12), (CX + lado * w * 0.48, y - 0.02, TECHO_Z + 0.03), NEGRO, parent=False)
+def barra_luces(variante="fabrica"):
+    """P1, the real part: the factory G 63 AMG 6x6 roof spoiler carries one LED lamp in each outer pocket (refs [12b], [12c]:
+    a clear lens over a black housing with five round reflector cups). The truck model has the pockets, unlit; this fills
+    them. variante 'xlp' adds the Brabus XLP 800 6x6 upper tier (ref [12], a W465 part): 27 round reflectors in a gloss black
+    tray along the visor top, and six cups per pocket like its lower modules. White LED (~6000 K); each lamp also throws a
+    spot ahead, so the light lands on the hood and the road the way a lit lamp's does."""
+    blanco = (1.0, 0.96, 0.92)
+    emisor = mat("pp_led_emisor", blanco, 0.2, emit=60.0)      # a tiny, very bright die: lights its cup like a real LED
+    copa = mat("pp_led_copa", (0.9, 0.9, 0.9), 0.12, metal=1.0)
+    caja_n = mat("pp_led_caja", (0.012, 0.012, 0.013), 0.25)
+    mica = mat("pp_led_mica", (1.0, 1.0, 1.0), 0.04, trans=1.0)
+
+    def copas(xs, y, z, r):
+        for x in xs:
+            bpy.ops.mesh.primitive_cone_add(radius1=r * 0.35, radius2=r, depth=r * 0.7, location=(x, y - r * 0.35, z),
+                                            rotation=(-math.pi / 2, 0, 0), vertices=24, end_fill_type="NOTHING")
+            bpy.ops.object.shade_smooth()
+            _fin(bpy.context.object, copa, False)
+            esfera(r * 0.28, (x, y - r * 0.55, z), emisor, parent=False)
+
+    def lampara(x0, x1, z0, z1, yf, n, foco=True):
+        w, h = x1 - x0, z1 - z0
+        paso = w / n
+        r = min(paso, h) * 0.44
+        caja((w, 0.024, h), ((x0 + x1) / 2, yf - 0.001 - r * 0.7 - 0.012, (z0 + z1) / 2), caja_n, parent=False)  # behind the cups
+        copas([x0 + (i + 0.5) * paso for i in range(n)], yf - 0.001, (z0 + z1) / 2, r)
+        caja((w, 0.003, h), ((x0 + x1) / 2, yf + 0.0015, (z0 + z1) / 2), mica, parent=False)
+        if foco:  # the beam: aimed ahead and a little down, 14 m out
+            o = luz("SPOT", ((x0 + x1) / 2, yf + 0.02, (z0 + z1) / 2), 25, blanco, mira=((x0 + x1) / 2, yf + 14, 0.0), parent=False)
+            o.data.spot_size, o.data.spot_blend, o.data.shadow_soft_size = math.radians(55), 0.6, 0.03
+
+    with prop("P1", emisivo=True):
+        for lado, (xa, xb, z0, z1, ymax) in BOLSAS.items():
+            lampara(min(xa, xb), max(xa, xb), z0, z1, ymax + 0.012, 6 if variante == "xlp" else 5)  # clear of the model's own lamp
+        if variante == "xlp":
+            w, y, z = WT * 1.8, YT - 0.03, TECHO_Z + 0.035
+            caja((w + 0.06, 0.12, 0.085), (CX, y - 0.07, z), mat("pp_xlp_negro", (0.01, 0.01, 0.011), 0.12), bevel=0.012, parent=False)
+            lampara(CX - w / 2, CX + w / 2, z - 0.032, z + 0.032, y + 0.022, 27, foco=False)
+            for dx in (-w / 3, 0, w / 3):
+                o = luz("SPOT", (CX + dx, y + 0.05, z), 25, blanco, mira=(CX + dx, y + 20, 0.0), parent=False)
+                o.data.spot_size, o.data.spot_blend = math.radians(50), 0.5
 
 
 def franja(donde, texto_="MAFIA TUMBADA"):
@@ -214,13 +272,50 @@ def banderin_tablero(x):
         cil(0.012, 0.025, base + Vector((0.09, 0.02, 0.083)), CROMO, parent=False)
 
 
-def fresa(largo):
-    """P5, ref [9]: the strawberry charm under the mirror (the PUTIFRESA joke)."""
+FRESA_GLB = os.environ.get("PP_FRESA") or os.path.join(REPO, "blender", "props", "fresa.glb")
+FRESA_ALTO = 0.041  # ring top to tip
+_FRESA = {}
+
+
+def _fresa_mallas(archivo):
+    """The charm's meshes from its one asset file (blender/fresa_charm.py's contract: Z up, metres, origin at the hang point),
+    baked to world space and normalised: FRESA_ALTO tall, top centre at the origin, so a friend's model drops in at any scale."""
+    if archivo not in _FRESA:
+        antes = set(bpy.data.objects)
+        bpy.ops.import_scene.gltf(filepath=archivo)
+        nuevos = [o for o in bpy.data.objects if o not in antes]
+        mallas = []
+        for o in nuevos:
+            if o.type == "MESH":
+                me = o.data.copy()
+                me.transform(o.matrix_world)
+                mallas.append(me)
+        for o in nuevos:
+            bpy.data.objects.remove(o)
+        pts = [v.co for me in mallas for v in me.vertices]
+        lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
+        hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
+        k = FRESA_ALTO / (hi.z - lo.z)
+        from mathutils import Matrix
+        m = Matrix.Scale(k, 4) @ Matrix.Translation(-Vector(((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, hi.z)))
+        for me in mallas:
+            me.transform(m)
+        _FRESA[archivo] = mallas
+    return _FRESA[archivo]
+
+
+def fresa(largo, archivo=None):
+    """P5, ref [9]: the strawberry charm under the mirror (the PUTIFRESA joke), on a cord `largo` long. The charm is one
+    swappable file (FRESA_GLB, or PP_FRESA=<path>)."""
     top = Vector((ESP.x, ESP.y, ESPEJO[4] if ESPEJO else ESP.z - 0.04))
     with prop("P5"):
-        cil(0.0012, largo, top - Vector((0, 0, largo / 2)), BLANCO, verts=4, parent=False)
-        esfera(0.022, top - Vector((0, 0, largo + 0.02)), mat("pp_fresa", (0.75, 0.03, 0.06), 0.35), scale=(1, 1, 1.25), parent=False)
-        cono(0.02, 0.0, 0.02, top - Vector((0, 0, largo - 0.008)), mat("pp_hoja", (0.1, 0.45, 0.1), 0.5), rot=(math.pi, 0, 0), parent=False)
+        cil(0.0006, largo, top - Vector((0, 0, largo / 2)), mat("pp_cordon", (0.6, 0.02, 0.03), 0.6), verts=6, parent=False)
+        for me in _fresa_mallas(archivo or FRESA_GLB):
+            o = bpy.data.objects.new("pp_fresa", me)
+            sc.collection.objects.link(o)
+            o.location = top - Vector((0, 0, largo))
+            o.rotation_euler = (0, 0, 0.5)
+            _fin(o, None, False)
 
 
 def trompetas():
@@ -336,6 +431,42 @@ def banderines():
             _fin(o, ORO, False)
 
 
+FUENTE_MT = os.path.join(REPO, "blender", "fuentes", "GrenzeGotisch-800.ttf")  # OFL, converted from @fontsource woff2
+ORO_MARCA = mat("pp_oro_marca", (0.768, 0.426, 0.021), 0.22, metal=1.0)  # DESIGN.md --gold oklch(78% 0.15 85), linear sRGB
+
+
+def emblema(modo="parado"):
+    """P15, the owner's pick in place of the cattle horns: a gold MT on the hood in the band's blackletter (Grenze Gotisch
+    ExtraBold), extruded and bevelled, brand gold as polished metal. modo 'parado': stands bolted on a black plinth at the
+    hood's front edge, read from ahead (scene 6's camera sits below the hood, so a flat badge would be edge-on); 'plano':
+    a large flat badge on the hood, read from ahead."""
+    yb, zb = CAPO[0] if CAPO else (FRENTE - 0.2, 1.5)
+    tapa = [(y, z) for y, z in CAPO if y > yb - 0.6]
+    ztop = max(z for y, z in tapa) if tapa else zb
+    with prop("P15"):
+        cu = bpy.data.curves.new("pp_emblema", "FONT")
+        cu.body, cu.font = "MT", bpy.data.fonts.load(FUENTE_MT, check_existing=True)
+        cu.align_x, cu.align_y = "CENTER", "CENTER"
+        cu.bevel_resolution = 2
+        o = bpy.data.objects.new("pp_emblema", cu)
+        sc.collection.objects.link(o)
+        if modo == "parado":
+            y = yb - 0.12
+            z = max((zz for yy, zz in CAPO if abs(yy - y) < 0.02), default=ztop)
+            # size 0.235 (~14 cm letters): 0.15 covered 0.039 % of scene 6's frame and 0.22 0.09 %, under rule 2's 0.1 % line
+            cu.size, cu.extrude, cu.bevel_depth = 0.235, 0.009, 0.002
+            o.location, o.rotation_euler = (CX, y, z + 0.093), (math.pi / 2, 0, math.pi)  # letters seated on the plinth
+            caja((0.32, 0.06, 0.02), (CX, y, z + 0.01), NEGRO, bevel=0.005, parent=False)
+            for dx in (-0.125, 0.125):
+                cil(0.007, 0.006, (CX + dx, y + 0.015, z + 0.021), CROMO, verts=6, parent=False)
+        else:
+            y = yb - 0.45
+            zh = max((z for yy, z in CAPO if abs(yy - y) < 0.02), default=ztop)
+            cu.size, cu.extrude, cu.bevel_depth = 0.32, 0.002, 0.001
+            o.location, o.rotation_euler = (CX, y, zh + 0.004), (0, 0, math.pi)
+        _fin(o, ORO_MARCA, False)
+
+
 # ---------------------------------------------------------------- the bed (#34 stays open) and its bar-level re-place in B
 _techo_caja3 = techo_caja
 
@@ -408,6 +539,14 @@ def sondear(nombre, escena, pos, mira, lens):
             if not h:
                 continue
             ob, m = h[1], h[2]
+            if m.startswith("vidrio") and mostrar:  # a prop seen through the glass covers that zone too (P15 from the cab)
+                h2 = h
+                for _ in range(3):
+                    h2 = golpe(h2[0] + Vector(d).normalized() * 0.003, d)
+                    if not h2 or not h2[2].startswith("vidrio"):
+                        break
+                if h2 and h2[1] in duenio:
+                    ob = h2[1]
             pid = duenio.get(ob)
             et = ("prop:" + pid) if pid else (("zona:" + z) if (z := ZONA[escena](ob, m, h[0])) else "otro")
             ids[k] = leyenda.setdefault(et, len(leyenda))
@@ -451,45 +590,53 @@ def toma_pp(nombre, escena, f):
 CAM1 = (T.CAMINO[0][1], T.CAMINO[0][2], T.CAMINO[0][3])
 
 
-def esc1(arreglo):
+VAR = {"barra": "fabrica", "emblema": "parado", "fresa": None}  # the picks; the pv-* options swap one at a time
+
+
+def camion():
+    """What rides on the truck in every scene (owner, 11-13): the real roof lamps and the gold MT on the hood."""
+    barra_luces(VAR["barra"]); emblema(VAR["emblema"])
+
+
+def esc1(arreglo="b"):
     base_escena(cama=False)
     if arreglo == "a":   # where each first fits: full-width valance, ceiling papel picado, pennant mid-dash, long charm
         flecos(partida=False); picado_techo(); banderin_tablero(CX - 0.1); fresa(0.16)
     else:                # rules 1, 3, 6: the mirror and the road clear, three props, the pennant in the passenger corner
-        flecos(partida=True, largo=0.025); banderin_tablero(CX + 0.14); fresa(0.045)  # rule 1: a 6 cm fringe covered 3 % of the road
+        flecos(partida=True, largo=0.025); banderin_tablero(CX + 0.14); fresa(0.045, VAR["fresa"]); emblema(VAR["emblema"])  # rule 1: a 6 cm fringe covered 3 % of the road
     return CAM1
 
 
-def esc2(arreglo):
+def esc2(arreglo="b"):
     base_escena(cama=False)
     calcas3_mix()
     luces3(VISTA_ESC2()[0])
     if arreglo == "a":   # the caja3 bar as it is; the new props added on top: marquee full on, bulbs everywhere, pennants
         cama("caja3"); marquesina(10.0); bombillas(contorno_caja(), 4.0); franja("trasera"); banderines()
-    else:                # rules 4, 5, 3: the marquee is the one peak and dimmer than the stickers' read, bulbs trace the bar only
-        cama("reglas"); marquesina(3.0); bombillas(contorno_caja(rieles=False), 2.5)
+    else:                # owner: no marquee. Rules 4, 5: the bulbs trace the roll bar only, the piñata under it is the peak
+        cama("reglas"); bombillas(contorno_caja(rieles=False), 2.5)
     relleno_caja(VISTA_ESC2()[0])
     return VISTA_ESC2()
 
 
-def esc4(arreglo):
+def esc4(arreglo="b"):
     base_escena(cama=False)
     luz_costado("relleno", 1)  # scene-4 light pick open: the fill (A), recommended; self-lit props read under either
     if arreglo == "a":
-        cama("caja3"); barra_luces("blanca"); trompetas(); parrilla_techo(); monos((1, -1)); marquesina(10.0)
+        cama("caja3"); barra_luces(); trompetas(); parrilla_techo(); monos((1, -1)); marquesina(10.0)
         bombillas(contorno_caja(), 4.0); bajo_luz()
-    else:                # rule 5: the roof carries one item, the bed one peak; rule 1: nothing above the windows
-        cama("reglas"); barra_luces("ambar"); monos((1,)); marquesina(3.0); bombillas(contorno_caja(), 2.5); bajo_luz()
+    else:                # rule 5: the roof carries only its own lamps, no marquee; rule 1: nothing above the windows
+        cama("reglas"); camion(); monos((1,)); bombillas(contorno_caja(), 2.5); bajo_luz()
     return ((CX + 6.2, -0.3, 2.6), (CX, -0.3, 1.45), 24)
 
 
-def esc6(arreglo):
+def esc6(arreglo="b"):
     base_escena(cama=False)
     placa3()
     if arreglo == "a":
-        barra_luces("blanca"); trompetas(); franja("parabrisas"); monos((1, -1)); bajo_luz(); flecos(partida=False)
-    else:                # rule 4: the plate stays brightest after the headlights, so the bar runs amber; rule 3: three reads
-        barra_luces("tenue"); franja("parabrisas"); monos((1, -1)); bajo_luz(w=150); flecos(partida=True)  # amber at 2.5 out-lit the plate (66.5 vs 45.4)
+        barra_luces(); trompetas(); franja("parabrisas"); monos((1, -1)); bajo_luz(); flecos(partida=False)
+    else:                # rule 4: the plate stays brightest after the headlights; rule 3: three reads
+        camion(); franja("parabrisas"); monos((1, -1)); bajo_luz(w=150); flecos(partida=True)
     return ((CX + 1.4, FRENTE + 6.5, 0.95), (CX + 0.1, FRENTE - 1.5, 1.2), 32)
 
 
@@ -497,11 +644,62 @@ for _e, _f in (("1", esc1), ("2", esc2), ("4", esc4), ("6", esc6)):
     for _a in ("a", "b"):
         toma_pp(f"pp{_e}-{_a}", _e, lambda f=_f, a=_a: f(a))
 
-# close-ups, B arrangement, of each scene's strongest new prop
-toma_pp("pp1-cerca", "1", lambda: (esc1("b"), ((CX - 0.02, 0.62, 1.93), (CX + 0.08, PB_ARRIBA.y, PB_ARRIBA.z - 0.14), 22))[1])  # ahead of the front heads
-toma_pp("pp2-cerca", "2", lambda: (esc2("b"), ((CX - 0.55, -4.9, 2.35), (CX, YC, ARCO_Z + 0.12), 35))[1])  # up at the marquee
-toma_pp("pp4-cerca", "4", lambda: (esc4("b"), ((CX + 2.6, YT + 1.6, TECHO_Z + 0.9), (CX, YT - 0.3, TECHO_Z - 0.2), 30))[1])
-toma_pp("pp6-cerca", "6", lambda: (esc6("b"), ((CX + 0.9, FRENTE + 2.6, 1.9), (CX, YT - 0.2, TECHO_Z - 0.35), 30))[1])
+
+def _bolsa():
+    xa, xb, z0, z1, y = BOLSAS.get(1, (CX + 0.51, CX + 0.69, 2.157, 2.193, 1.14))
+    return Vector(((xa + xb) / 2, y, (z0 + z1) / 2))
+
+
+def _emblema_pos():
+    yb, zb = CAPO[0] if CAPO else (FRENTE - 0.2, 1.5)
+    y = yb - (0.12 if VAR["emblema"] == "parado" else 0.45)
+    return Vector((CX, y, max((z for yy, z in CAPO if abs(yy - y) < 0.02), default=zb)))
+
+
+def _fresa_pos():
+    return Vector((ESP.x, ESP.y, (ESPEJO[4] if ESPEJO else ESP.z - 0.04) - 0.045 - 0.02))
+
+
+# close-ups of the three new pieces, in the B scenes
+CERCA = {
+    "barra": ("6", esc6, lambda: (_bolsa() + Vector((0.55, 1.15, 0.28)), _bolsa() + Vector((-0.38, 0, -0.03)), 40)),
+    "emblema": ("6", esc6, lambda: (_emblema_pos() + Vector((0.6, 1.25, 0.32)), _emblema_pos() + Vector((0, 0, 0.09)), 50)),
+    "fresa": ("1", esc1, lambda: (_fresa_pos() + Vector((-0.12, -0.36, 0.02)), _fresa_pos(), 50)),
+}
+for _n, (_e, _f, _c) in CERCA.items():
+    toma_pp(f"pp-{_n}", _e, lambda f=_f, c=_c: (f("b"), c())[1])
+
+
+def variante(clave, valor, toma):
+    """pv-<toma>-<valor>: the same still with one pick swapped (for the side-by-side), then the pick restored."""
+    e, f, cam = toma
+
+    def _op():
+        viejo = VAR[clave]
+        VAR[clave] = valor
+        try:
+            f("b")
+            return cam()
+        finally:
+            VAR[clave] = viejo
+    return e, _op
+
+
+_FRESAS = os.path.join(REPO, "tmp", "fresa")
+VARIANTES = {
+    "pv-barra-xlp": variante("barra", "xlp", CERCA["barra"]),
+    "pv-6-xlp": variante("barra", "xlp", ("6", esc6, lambda: ((CX + 1.4, FRENTE + 6.5, 0.95), (CX + 0.1, FRENTE - 1.5, 1.2), 32))),
+    "pv-emblema-plano": variante("emblema", "plano", ("6", esc6, lambda: (_emblema_pos() + Vector((0.55, 1.4, 0.75)), _emblema_pos(), 40))),
+    "pv-fresa-resina": variante("fresa", os.path.join(_FRESAS, "fresa-resina.glb"), CERCA["fresa"]),
+    "pv-fresa-peluche": variante("fresa", os.path.join(_FRESAS, "fresa-peluche.glb"), CERCA["fresa"]),
+}
+for _n, (_e, _op) in VARIANTES.items():
+    toma_pp(_n, _e, _op)
+
+# no option list (or `all`) renders the picks, never utileria's older options (the glovebox cut among them)
+FINALES = ["pp1-b", "pp2-b", "pp4-b", "pp6-b", "pp-barra", "pp-emblema", "pp-fresa"]
+if _g["SOLO"] is None:
+    _g["SOLO"] = FINALES
 
 # ---------------------------------------------------------------- utileria.py's render loop over the options above
 exec(compile(MARCA + _cola, U, "exec"), _g)  # _cola: utileria.py's tail, as caja3.py split it
