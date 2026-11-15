@@ -24,8 +24,10 @@ from mathutils import Vector, Matrix
 
 ASSETS_MUNDO = r"\\wsl.localhost\Ubuntu\home\black\cc-out\mto-world\assets\polyhaven-2026-11-14"
 X_LINEA = 3.55   # lane 0..3.5 m holds the truck (centre 1.72); the edge lines sit just outside
-TENDIDO = dict(x=-9.0, fase=36.0, alto=11.0)  # CFE pole line (R1): x, y of the first pole mod 48 m, height. Placement: owner
-# fase 36 = the audit stills the owner picked from; at 0 a pole rose out of the bed in hold 4
+TENDIDO = dict(x=-9.0, fase=36.0, alto=11.0)  # CFE pole line (R1): x, y of the first pole mod PASO_POSTES, height
+# fase 36 = the audit stills the owner picked from; at 0 a pole rose out of the bed in hold 4. Owner 00:32: placement good
+PASO_POSTES = 64.0   # owner 00:32 "one fewer pole and one fewer light": 3 per 192 m loop instead of 4 (was 48 m)
+PASO_FAROLAS = 64.0  # the road lamps leave the 48 m tramo for the Cycles render; the page keeps its 48 m tramo
 ASFALTO = dict(tinte=0.62, rough_rodada=0.6)  # the glossy wheel paths (0.42) clipped scene 6's headlight pool 0.61 %, not the
 # tint: 0.62 with matte paths clips 0.00 % and keeps the floor detail that the it4 tint 0.5 lost (docs/mundo-noche-b.md)
 
@@ -372,12 +374,12 @@ def plantas(padre, periodo, copias):
 # ---------------------------------------------------------------- power line, ground, fog, sky
 
 def tendido(padre, y0, y1):
-    """R1: CFE-style concrete poles every 48 m (the tramo period, divides the loop), a crossarm, three wires sagging 1.2 m
-    per span. Position from TENDIDO (the owner places it: docs/mundo-noche-b.md › Placement)."""
+    """R1: CFE-style concrete poles every PASO_POSTES (divides the loop), a crossarm, three wires sagging 1.2 m per span.
+    Position from TENDIDO (the owner places it: docs/mundo-noche-b.md › Placement)."""
     conc = mat_color("w_concreto", (0.32, 0.31, 0.29), 0.85)
     cable = mat_color("w_cable", (0.01, 0.01, 0.01), 0.4)
-    X, H, fase = TENDIDO["x"], TENDIDO["alto"], TENDIDO["fase"] % 48.0
-    ys = [float(y) for y in np.arange(y0 + fase, y1 + 1, 48.0)]
+    X, H, fase = TENDIDO["x"], TENDIDO["alto"], TENDIDO["fase"] % PASO_POSTES
+    ys = [float(y) for y in np.arange(y0 + fase, y1 + 1, PASO_POSTES)]
     bm = bmesh.new()
     for y in ys:
         bmesh.ops.create_cone(bm, cap_ends=True, segments=8, radius1=0.2, radius2=0.11, depth=H,
@@ -395,6 +397,24 @@ def tendido(padre, y0, y1):
     cables = bpy.data.objects.new("w_cables", cu); cables.data.materials.append(cable)
     _sc().collection.objects.link(cables); cables.parent = padre
     return [postes, cables]
+
+
+def farolas(farol, padre, y0, y1):
+    """The tramo's lamp (pole, arm, lamp, its spot light) moved out of the 48 m tramo into its own collection, instanced
+    every PASO_FAROLAS under `mundo`, at the same y within its period (8 m)."""
+    col = _col_oculta("w_farola")
+    for o in farol:
+        for c in list(o.users_collection):
+            c.objects.unlink(o)
+        col.objects.link(o)
+    out = []
+    for y in np.arange(y0, y1, PASO_FAROLAS):
+        e = bpy.data.objects.new(f"w_farola_{int(y)}", None)
+        e.instance_type, e.instance_collection = "COLLECTION", col
+        e.location = (0, float(y), 0)
+        _sc().collection.objects.link(e); e.parent = padre
+        out.append(e)
+    return out
 
 
 def niebla(cfg):
@@ -440,9 +460,9 @@ def cielo(world, ruta, fuerza, luna):
     print("MUNDO cielo", os.path.basename(ruta), "giro", round(math.degrees(giro)))
 
 
-def construir(mundo, ciclo, P, recorrido):
+def construir(mundo, ciclo, P, recorrido, farol):
     """Build the Night B world under `mundo` (the empty that moves -Y over the loop). `ciclo` = escena.json preset's
-    `cycles` block; P = the preset. Returns every new object."""
+    `cycles` block; P = the preset; farol = the tramo's lamp objects (escena.tramo_props). Returns every new object."""
     sc = _sc()
     y0, y1 = -2 * recorrido, 4 * recorrido     # the view during the whole loop (mundo moves -recorrido), both directions
     copias = range(-2, 4)
@@ -450,7 +470,7 @@ def construir(mundo, ciclo, P, recorrido):
     tierra = _plano("w_terreno", -1500, 1500, -5 * recorrido, 7 * recorrido, 0.0,
                     mat_textura("w_suelo", "sparse_grass", 4.0, (0.22, 0.25, 0.18)), mundo)  # plan fix 9: green verge ground
     flora = plantas(mundo, recorrido, copias)
-    linea = tendido(mundo, y0, y1)
+    linea = tendido(mundo, y0, y1) + farolas(farol, mundo, y0, y1)
     fog = niebla(ciclo["niebla"])
     cielo(sc.world, os.path.join(ASSETS_MUNDO, ciclo["hdri"] + "_2k.hdr"), ciclo["cielo_intensidad"], bpy.data.objects["luna"])
     bpy.data.objects["luna"].data.angle = math.radians(ciclo["luna_angulo"])  # overcast: a soft moon (plan fix 6)

@@ -111,3 +111,22 @@ hold   void before → after (audit B)     floor before → after (audit B)
   - Not fixed: this is the world getting darker on purpose. Lift it in the cab only if the owner finds the seats too dark.
 - Render time per still (variant runs, no probes, the GPU shared with yappingdrone): 11.7–13.7 s. The audit measured
   10.2–10.9 s before. Not timed on a free card.
+
+### After the owner's placement (00:32: "pole placement is good; one fewer pole and one fewer light")
+
+Read as one fewer per 192 m loop. The CFE poles (`mundo.PASO_POSTES`) and the road lamps (`mundo.PASO_FAROLAS`) both go from
+48 to 64 m: 3 per loop instead of 4, still periodic. The lamps leave the 48 m tramo only in the Cycles render: `mundo.farolas()`
+moves pole, arm, lamp and spot into their own collection. The page's GLB tramo keeps its 48 m lamp. The pole phase stays 36 m.
+
+```
+hold   void (audit B)    floor (audit B)    revisar clipping vs before
+1      51.0 (49.8)       1.86 (1.87)        lo 31.82 → 34.10 % FAIL (fewer lamps: the cab gets less light)
+2       0.0 (0.0)        7.12 (7.51)        pass   -5 %: one lamp pool fewer on the road ahead
+3      20.0 (20.7)       3.54 (3.49)        pass
+4       0.3 (0.3)        9.62 (9.57)        pass
+5       1.7 (2.2)        6.37 (6.50)        pass   -2 %
+6       0.0 (0.0)        5.31 (5.09)        pass
+```
+
+SONDA lines are identical before and after. Holds 2 and 5 lose floor detail because the owner asked for fewer lamps. Nothing
+compensates for that, and the brighter look stays a choice for the owner.

@@ -8,7 +8,7 @@
     -- guardar <out.blend (Windows)>
   /mnt/e/Blender/blender.exe -b "<saved.blend (Windows)>" --python "$(wslpath -w blender/colocar.py)" -- leer
 
-Move the whole line (G X / G Y), or scale it in Z for the height. The line stays periodic: every 48 m from the y you set.
+Move the whole line (G X / G Y), or scale it in Z for the height. The line stays periodic: every mundo.PASO_POSTES from the y you set.
 """
 import bpy, os, sys
 from mathutils import Vector
@@ -20,7 +20,7 @@ if argv[0] == "leer":
     import mundo
     p = bpy.data.objects["w_postes"]
     t = dict(mundo.TENDIDO)
-    print("TENDIDO", dict(x=round(t["x"] + p.location.x, 2), fase=round((t["fase"] + p.location.y) % 48.0, 2),
+    print("TENDIDO", dict(x=round(t["x"] + p.location.x, 2), fase=round((t["fase"] + p.location.y) % mundo.PASO_POSTES, 2),
                           alto=round(t["alto"] * p.scale.z, 2)))
     sys.exit(0)
 

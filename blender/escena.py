@@ -429,7 +429,7 @@ def mundo_render(s, preset):
     if "cycles" in P:  # Night B (owner's pick 2026-11-14): road, verges, plants, pole line, fog, sky
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import mundo as mundo_b
-        s["mundo_b"] = mundo_b.construir(mundo, P["cycles"], P, RECORRIDO)
+        s["mundo_b"] = mundo_b.construir(mundo, P["cycles"], P, RECORRIDO, s["props"][:3] + [s["luz_poste"]])
     # animation: world moves -Y by RECORRIDO over NFR frames; wheels turn a whole number of times
     sc.render.fps = FPS
     sc.frame_start, sc.frame_end = 0, NFR - 1
