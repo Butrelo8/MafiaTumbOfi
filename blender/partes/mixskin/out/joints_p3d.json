@@ -1,0 +1,312 @@
+{
+ "frames": [
+  1,
+  299,
+  299
+ ],
+ "joints": {
+  "collar": {
+   "child": "head",
+   "parent": "torso",
+   "ring_verts": 404,
+   "rest_gap_pen_mm": [
+    0.0,
+    34.38,
+    0.0
+   ],
+   "gap_max_mm": 31.1,
+   "gap_frame": 153,
+   "gap_f70_mm": 14.2,
+   "pen_f70_mm": 32.1,
+   "pen_max_mm": 40.9,
+   "pen_frame": 121,
+   "seam_max_mm": 1.8,
+   "seam_frame": 126
+  },
+  "hem": {
+   "child": "torso",
+   "parent": "pelvis",
+   "ring_verts": 464,
+   "rest_gap_pen_mm": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "gap_max_mm": 17.1,
+   "gap_frame": 124,
+   "gap_f70_mm": 3.9,
+   "pen_f70_mm": 0.0,
+   "pen_max_mm": 0.0,
+   "pen_frame": 1,
+   "seam_max_mm": 0.1,
+   "seam_frame": 128
+  },
+  "wrist.L": {
+   "child": "hand.L",
+   "parent": "forearm.L",
+   "ring_verts": 203,
+   "rest_gap_pen_mm": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "gap_max_mm": 26.5,
+   "gap_frame": 177,
+   "gap_f70_mm": 26.5,
+   "pen_f70_mm": 1.3,
+   "pen_max_mm": 1.3,
+   "pen_frame": 163,
+   "seam_max_mm": 0.0,
+   "seam_frame": 1
+  },
+  "elbow.L": {
+   "child": "forearm.L",
+   "parent": "upper_arm.L",
+   "ring_verts": 196,
+   "rest_gap_pen_mm": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "gap_max_mm": 36.7,
+   "gap_frame": 114,
+   "gap_f70_mm": 25.5,
+   "pen_f70_mm": 2.0,
+   "pen_max_mm": 2.1,
+   "pen_frame": 103,
+   "seam_max_mm": 3.5,
+   "seam_frame": 111
+  },
+  "shoulder.L": {
+   "child": "upper_arm.L",
+   "parent": "torso",
+   "ring_verts": 232,
+   "rest_gap_pen_mm": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "gap_max_mm": 67.9,
+   "gap_frame": 131,
+   "gap_f70_mm": 31.6,
+   "pen_f70_mm": 5.2,
+   "pen_max_mm": 6.1,
+   "pen_frame": 241,
+   "seam_max_mm": 4.1,
+   "seam_frame": 120
+  },
+  "hip.L": {
+   "child": "thigh.L",
+   "parent": "pelvis",
+   "ring_verts": 292,
+   "rest_gap_pen_mm": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "gap_max_mm": 50.7,
+   "gap_frame": 285,
+   "gap_f70_mm": 28.0,
+   "pen_f70_mm": 4.2,
+   "pen_max_mm": 4.4,
+   "pen_frame": 216,
+   "seam_max_mm": 1.6,
+   "seam_frame": 252
+  },
+  "knee.L": {
+   "child": "shin.L",
+   "parent": "thigh.L",
+   "ring_verts": 254,
+   "rest_gap_pen_mm": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "gap_max_mm": 42.7,
+   "gap_frame": 93,
+   "gap_f70_mm": 20.0,
+   "pen_f70_mm": 4.1,
+   "pen_max_mm": 4.5,
+   "pen_frame": 160,
+   "seam_max_mm": 1.6,
+   "seam_frame": 93
+  },
+  "cuff.L": {
+   "child": "shoe.L",
+   "parent": "shin.L",
+   "ring_verts": 388,
+   "rest_gap_pen_mm": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "gap_max_mm": 16.6,
+   "gap_frame": 291,
+   "gap_f70_mm": 8.4,
+   "pen_f70_mm": 2.2,
+   "pen_max_mm": 4.7,
+   "pen_frame": 291,
+   "seam_max_mm": 0.4,
+   "seam_frame": 266
+  },
+  "wrist.R": {
+   "child": "hand.R",
+   "parent": "forearm.R",
+   "ring_verts": 204,
+   "rest_gap_pen_mm": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "gap_max_mm": 26.8,
+   "gap_frame": 177,
+   "gap_f70_mm": 26.8,
+   "pen_f70_mm": 0.1,
+   "pen_max_mm": 0.1,
+   "pen_frame": 89,
+   "seam_max_mm": 0.0,
+   "seam_frame": 1
+  },
+  "elbow.R": {
+   "child": "forearm.R",
+   "parent": "upper_arm.R",
+   "ring_verts": 205,
+   "rest_gap_pen_mm": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "gap_max_mm": 33.6,
+   "gap_frame": 243,
+   "gap_f70_mm": 19.2,
+   "pen_f70_mm": 1.9,
+   "pen_max_mm": 2.0,
+   "pen_frame": 93,
+   "seam_max_mm": 9.2,
+   "seam_frame": 239
+  },
+  "shoulder.R": {
+   "child": "upper_arm.R",
+   "parent": "torso",
+   "ring_verts": 230,
+   "rest_gap_pen_mm": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "gap_max_mm": 59.2,
+   "gap_frame": 266,
+   "gap_f70_mm": 41.9,
+   "pen_f70_mm": 5.2,
+   "pen_max_mm": 6.3,
+   "pen_frame": 184,
+   "seam_max_mm": 2.1,
+   "seam_frame": 270
+  },
+  "hip.R": {
+   "child": "thigh.R",
+   "parent": "pelvis",
+   "ring_verts": 285,
+   "rest_gap_pen_mm": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "gap_max_mm": 56.6,
+   "gap_frame": 62,
+   "gap_f70_mm": 38.1,
+   "pen_f70_mm": 4.3,
+   "pen_max_mm": 4.4,
+   "pen_frame": 62,
+   "seam_max_mm": 2.3,
+   "seam_frame": 62
+  },
+  "knee.R": {
+   "child": "shin.R",
+   "parent": "thigh.R",
+   "ring_verts": 250,
+   "rest_gap_pen_mm": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "gap_max_mm": 51.3,
+   "gap_frame": 54,
+   "gap_f70_mm": 33.1,
+   "pen_f70_mm": 4.1,
+   "pen_max_mm": 4.4,
+   "pen_frame": 60,
+   "seam_max_mm": 1.2,
+   "seam_frame": 54
+  },
+  "cuff.R": {
+   "child": "shoe.R",
+   "parent": "shin.R",
+   "ring_verts": 389,
+   "rest_gap_pen_mm": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "gap_max_mm": 23.6,
+   "gap_frame": 62,
+   "gap_f70_mm": 7.5,
+   "pen_f70_mm": 2.3,
+   "pen_max_mm": 4.8,
+   "pen_frame": 119,
+   "seam_max_mm": 5.7,
+   "seam_frame": 62
+  }
+ },
+ "part_to_skinned_median_mm": {
+  "forearm.L": 10.2,
+  "forearm.R": 8.4,
+  "hand.L": 18.1,
+  "hand.R": 16.0,
+  "head": 0.0,
+  "pelvis": 3.6,
+  "shin.L": 1.5,
+  "shin.R": 1.7,
+  "shoe.L": 0.3,
+  "shoe.R": 0.4,
+  "thigh.L": 2.5,
+  "thigh.R": 2.6,
+  "torso": 1.5,
+  "upper_arm.L": 4.8,
+  "upper_arm.R": 2.4
+ },
+ "rigid_dev_max": {
+  "forearm.L": 2.1e-05,
+  "forearm.R": 2.2e-05,
+  "hand.L": 2.1e-05,
+  "hand.R": 2.2e-05,
+  "head": 3.6e-07,
+  "pelvis": 2.3e-06,
+  "shin.L": 1.7e-05,
+  "shin.R": 1.7e-05,
+  "shoe.L": 1.7e-05,
+  "shoe.R": 1.7e-05,
+  "thigh.L": 1.7e-05,
+  "thigh.R": 1.7e-05,
+  "torso": 2.1e-05,
+  "upper_arm.L": 2.1e-05,
+  "upper_arm.R": 2.1e-05
+ },
+ "covers": [
+  "cover_collar",
+  "cover_cuff.L",
+  "cover_cuff.R",
+  "cover_elbow.L",
+  "cover_elbow.R",
+  "cover_hem",
+  "cover_hip.L",
+  "cover_hip.R",
+  "cover_knee.L",
+  "cover_knee.R",
+  "cover_shoulder.L",
+  "cover_shoulder.R",
+  "cover_wrist.L",
+  "cover_wrist.R"
+ ],
+ "kiln_floating_f70": []
+}

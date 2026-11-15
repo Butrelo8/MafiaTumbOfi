@@ -1,0 +1,873 @@
+{
+ "shoulder_pivot": "bone",
+ "joints": {
+  "collar": {
+   "kind": "hull",
+   "child": {
+    "colour": "skin",
+    "rough_metal": [
+     0.757,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 0.286,
+     "skin": 0.385,
+     "white": 0.328
+    },
+    "rgb": [
+     237,
+     149,
+     114
+    ],
+    "caps": 653,
+    "loops": [
+     [
+      396,
+      61.6
+     ]
+    ]
+   },
+   "parent": {
+    "colour": "dark",
+    "rough_metal": [
+     0.753,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 0.32,
+     "skin": 0.347,
+     "white": 0.333
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 591,
+    "loops": [
+     [
+      396,
+      61.6
+     ]
+    ]
+   },
+   "host": "head",
+   "pivot": [
+    -0.003,
+    -0.0008,
+    0.6258
+   ],
+   "pivot_from_ring_centroid_mm": 41.5,
+   "pivot_residual_mm": 6.07,
+   "rot_max_deg": 34.1,
+   "off_hinge_deg": 89.5,
+   "rot_spread_deg": 34.1
+  },
+  "hem": {
+   "kind": "hull",
+   "child": {
+    "colour": "dark",
+    "rough_metal": [
+     0.753,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 1.0,
+     "skin": 0.0,
+     "white": 0.0
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 464,
+    "loops": [
+     [
+      464,
+      112.6
+     ]
+    ]
+   },
+   "parent": {
+    "colour": "dark",
+    "rough_metal": [
+     0.753,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 1.0,
+     "skin": 0.0,
+     "white": 0.0
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 464,
+    "loops": [
+     [
+      464,
+      112.6
+     ]
+    ]
+   },
+   "host": "pelvis",
+   "pivot": [
+    -0.0,
+    -0.0,
+    0.4591
+   ],
+   "pivot_from_ring_centroid_mm": 184.1,
+   "pivot_residual_mm": 0.0,
+   "rot_max_deg": 29.7,
+   "off_hinge_deg": 0.0,
+   "rot_spread_deg": 23.3
+  },
+  "wrist.L": {
+   "kind": "band",
+   "child": {
+    "colour": "skin",
+    "rough_metal": [
+     0.761,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 0.0,
+     "skin": 1.0,
+     "white": 0.0
+    },
+    "rgb": [
+     248,
+     166,
+     132
+    ],
+    "caps": 203,
+    "loops": [
+     [
+      203,
+      45.9
+     ]
+    ]
+   },
+   "parent": {
+    "colour": "skin",
+    "rough_metal": [
+     0.757,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 0.0,
+     "skin": 1.0,
+     "white": 0.0
+    },
+    "rgb": [
+     249,
+     170,
+     137
+    ],
+    "caps": 203,
+    "loops": [
+     [
+      203,
+      45.9
+     ]
+    ]
+   },
+   "host": "forearm.L",
+   "pivot": [
+    0.3313,
+    0.0044,
+    0.3744
+   ],
+   "pivot_from_ring_centroid_mm": 0.0,
+   "pivot_residual_mm": 0.0,
+   "rot_max_deg": 80.0,
+   "off_hinge_deg": 0.0,
+   "rot_spread_deg": 0.0
+  },
+  "elbow.L": {
+   "kind": "hull",
+   "child": {
+    "colour": "skin",
+    "rough_metal": [
+     0.757,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 0.0,
+     "skin": 1.0,
+     "white": 0.0
+    },
+    "rgb": [
+     249,
+     171,
+     137
+    ],
+    "caps": 196,
+    "loops": [
+     [
+      196,
+      35.0
+     ]
+    ]
+   },
+   "parent": {
+    "colour": "skin",
+    "rough_metal": [
+     0.757,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 0.0,
+     "skin": 1.0,
+     "white": 0.0
+    },
+    "rgb": [
+     232,
+     146,
+     111
+    ],
+    "caps": 196,
+    "loops": [
+     [
+      196,
+      35.0
+     ]
+    ]
+   },
+   "host": "upper_arm.L",
+   "pivot": [
+    0.2551,
+    0.003,
+    0.44
+   ],
+   "pivot_from_ring_centroid_mm": 21.6,
+   "pivot_residual_mm": 0.0,
+   "rot_max_deg": 172.4,
+   "off_hinge_deg": 55.7,
+   "rot_spread_deg": 133.2
+  },
+  "shoulder.L": {
+   "kind": "hull",
+   "child": {
+    "colour": "dark",
+    "rough_metal": [
+     0.757,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 1.0,
+     "skin": 0.0,
+     "white": 0.0
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 232,
+    "loops": [
+     [
+      232,
+      45.5
+     ]
+    ]
+   },
+   "parent": {
+    "colour": "dark",
+    "rough_metal": [
+     0.753,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 1.0,
+     "skin": 0.0,
+     "white": 0.0
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 232,
+    "loops": [
+     [
+      232,
+      45.5
+     ]
+    ]
+   },
+   "host": "torso",
+   "pivot": [
+    0.1371,
+    -0.0121,
+    0.495
+   ],
+   "pivot_from_ring_centroid_mm": 17.7,
+   "pivot_residual_mm": 0.0,
+   "rot_max_deg": 116.5,
+   "off_hinge_deg": 89.8,
+   "rot_spread_deg": 86.6
+  },
+  "hip.L": {
+   "kind": "hull",
+   "child": {
+    "colour": "dark",
+    "rough_metal": [
+     0.753,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 1.0,
+     "skin": 0.0,
+     "white": 0.0
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 292,
+    "loops": [
+     [
+      292,
+      60.4
+     ]
+    ]
+   },
+   "parent": {
+    "colour": "dark",
+    "rough_metal": [
+     0.753,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 1.0,
+     "skin": 0.0,
+     "white": 0.0
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 292,
+    "loops": [
+     [
+      292,
+      60.4
+     ]
+    ]
+   },
+   "host": "pelvis",
+   "pivot": [
+    0.06,
+    0.0048,
+    0.26
+   ],
+   "pivot_from_ring_centroid_mm": 11.7,
+   "pivot_residual_mm": 0.0,
+   "rot_max_deg": 54.7,
+   "off_hinge_deg": 86.2,
+   "rot_spread_deg": 40.2
+  },
+  "knee.L": {
+   "kind": "hull",
+   "child": {
+    "colour": "dark",
+    "rough_metal": [
+     0.753,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 1.0,
+     "skin": 0.0,
+     "white": 0.0
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 254,
+    "loops": [
+     [
+      254,
+      50.8
+     ]
+    ]
+   },
+   "parent": {
+    "colour": "dark",
+    "rough_metal": [
+     0.753,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 1.0,
+     "skin": 0.0,
+     "white": 0.0
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 254,
+    "loops": [
+     [
+      254,
+      50.8
+     ]
+    ]
+   },
+   "host": "thigh.L",
+   "pivot": [
+    0.0602,
+    -0.0012,
+    0.18
+   ],
+   "pivot_from_ring_centroid_mm": 11.2,
+   "pivot_residual_mm": 0.0,
+   "rot_max_deg": 60.7,
+   "off_hinge_deg": 0.0,
+   "rot_spread_deg": 23.8
+  },
+  "cuff.L": {
+   "kind": "hull",
+   "child": {
+    "colour": "dark",
+    "rough_metal": [
+     0.749,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 0.638,
+     "skin": 0.163,
+     "white": 0.199
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 684,
+    "loops": [
+     [
+      388,
+      49.5
+     ]
+    ]
+   },
+   "parent": {
+    "colour": "dark",
+    "rough_metal": [
+     0.753,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 0.815,
+     "skin": 0.128,
+     "white": 0.057
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 736,
+    "loops": [
+     [
+      388,
+      49.5
+     ]
+    ]
+   },
+   "host": "shin.L",
+   "pivot": [
+    0.06,
+    0.0048,
+    0.1
+   ],
+   "pivot_from_ring_centroid_mm": 22.4,
+   "pivot_residual_mm": 0.0,
+   "rot_max_deg": 22.7,
+   "off_hinge_deg": 89.3,
+   "rot_spread_deg": 19.0
+  },
+  "wrist.R": {
+   "kind": "band",
+   "child": {
+    "colour": "skin",
+    "rough_metal": [
+     0.761,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 0.0,
+     "skin": 1.0,
+     "white": 0.0
+    },
+    "rgb": [
+     251,
+     178,
+     147
+    ],
+    "caps": 204,
+    "loops": [
+     [
+      204,
+      46.0
+     ]
+    ]
+   },
+   "parent": {
+    "colour": "skin",
+    "rough_metal": [
+     0.757,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 0.0,
+     "skin": 1.0,
+     "white": 0.0
+    },
+    "rgb": [
+     251,
+     178,
+     147
+    ],
+    "caps": 204,
+    "loops": [
+     [
+      204,
+      46.0
+     ]
+    ]
+   },
+   "host": "forearm.R",
+   "pivot": [
+    -0.3302,
+    0.0043,
+    0.3755
+   ],
+   "pivot_from_ring_centroid_mm": 0.2,
+   "pivot_residual_mm": 0.0,
+   "rot_max_deg": 80.0,
+   "off_hinge_deg": 0.0,
+   "rot_spread_deg": 0.0
+  },
+  "elbow.R": {
+   "kind": "hull",
+   "child": {
+    "colour": "skin",
+    "rough_metal": [
+     0.757,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 0.0,
+     "skin": 1.0,
+     "white": 0.0
+    },
+    "rgb": [
+     251,
+     178,
+     147
+    ],
+    "caps": 205,
+    "loops": [
+     [
+      205,
+      34.6
+     ]
+    ]
+   },
+   "parent": {
+    "colour": "skin",
+    "rough_metal": [
+     0.761,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 0.0,
+     "skin": 1.0,
+     "white": 0.0
+    },
+    "rgb": [
+     242,
+     164,
+     129
+    ],
+    "caps": 205,
+    "loops": [
+     [
+      205,
+      34.6
+     ]
+    ]
+   },
+   "host": "upper_arm.R",
+   "pivot": [
+    -0.2551,
+    0.0044,
+    0.4385
+   ],
+   "pivot_from_ring_centroid_mm": 19.6,
+   "pivot_residual_mm": 0.0,
+   "rot_max_deg": 177.2,
+   "off_hinge_deg": 48.0,
+   "rot_spread_deg": 138.4
+  },
+  "shoulder.R": {
+   "kind": "hull",
+   "child": {
+    "colour": "dark",
+    "rough_metal": [
+     0.757,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 1.0,
+     "skin": 0.0,
+     "white": 0.0
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 230,
+    "loops": [
+     [
+      230,
+      45.2
+     ]
+    ]
+   },
+   "parent": {
+    "colour": "dark",
+    "rough_metal": [
+     0.753,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 1.0,
+     "skin": 0.0,
+     "white": 0.0
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 230,
+    "loops": [
+     [
+      230,
+      45.2
+     ]
+    ]
+   },
+   "host": "torso",
+   "pivot": [
+    -0.1371,
+    -0.0041,
+    0.495
+   ],
+   "pivot_from_ring_centroid_mm": 10.6,
+   "pivot_residual_mm": 0.0,
+   "rot_max_deg": 76.4,
+   "off_hinge_deg": 78.8,
+   "rot_spread_deg": 59.9
+  },
+  "hip.R": {
+   "kind": "hull",
+   "child": {
+    "colour": "dark",
+    "rough_metal": [
+     0.753,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 1.0,
+     "skin": 0.0,
+     "white": 0.0
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 285,
+    "loops": [
+     [
+      285,
+      59.6
+     ]
+    ]
+   },
+   "parent": {
+    "colour": "dark",
+    "rough_metal": [
+     0.753,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 1.0,
+     "skin": 0.0,
+     "white": 0.0
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 285,
+    "loops": [
+     [
+      285,
+      59.6
+     ]
+    ]
+   },
+   "host": "pelvis",
+   "pivot": [
+    -0.06,
+    0.0048,
+    0.26
+   ],
+   "pivot_from_ring_centroid_mm": 16.3,
+   "pivot_residual_mm": 0.0,
+   "rot_max_deg": 63.3,
+   "off_hinge_deg": 88.2,
+   "rot_spread_deg": 39.4
+  },
+  "knee.R": {
+   "kind": "hull",
+   "child": {
+    "colour": "dark",
+    "rough_metal": [
+     0.753,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 1.0,
+     "skin": 0.0,
+     "white": 0.0
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 250,
+    "loops": [
+     [
+      250,
+      50.3
+     ]
+    ]
+   },
+   "parent": {
+    "colour": "dark",
+    "rough_metal": [
+     0.753,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 1.0,
+     "skin": 0.0,
+     "white": 0.0
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 250,
+    "loops": [
+     [
+      250,
+      50.3
+     ]
+    ]
+   },
+   "host": "thigh.R",
+   "pivot": [
+    -0.0592,
+    -0.0012,
+    0.18
+   ],
+   "pivot_from_ring_centroid_mm": 11.0,
+   "pivot_residual_mm": 0.0,
+   "rot_max_deg": 107.7,
+   "off_hinge_deg": 0.0,
+   "rot_spread_deg": 74.8
+  },
+  "cuff.R": {
+   "kind": "hull",
+   "child": {
+    "colour": "dark",
+    "rough_metal": [
+     0.749,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 0.674,
+     "skin": 0.149,
+     "white": 0.177
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 666,
+    "loops": [
+     [
+      386,
+      51.1
+     ]
+    ]
+   },
+   "parent": {
+    "colour": "dark",
+    "rough_metal": [
+     0.753,
+     0.0
+    ],
+    "rim_class_frac": {
+     "dark": 0.826,
+     "skin": 0.108,
+     "white": 0.067
+    },
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "caps": 725,
+    "loops": [
+     [
+      386,
+      51.1
+     ]
+    ]
+   },
+   "host": "shin.R",
+   "pivot": [
+    -0.06,
+    0.0048,
+    0.1
+   ],
+   "pivot_from_ring_centroid_mm": 22.1,
+   "pivot_residual_mm": 0.0,
+   "rot_max_deg": 25.2,
+   "off_hinge_deg": 89.7,
+   "rot_spread_deg": 23.9
+  }
+ }
+}

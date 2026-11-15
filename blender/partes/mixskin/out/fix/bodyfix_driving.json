@@ -1,0 +1,33 @@
+{
+ "selfcheck": {
+  "moved_mm": 8.73,
+  "predicted_mm": 8.73,
+  "err_mm": 0.218
+ },
+ "iters": [
+  {
+   "iter": 0,
+   "frames_measured": 151,
+   "frames_inside": 0,
+   "worst_mm": {
+    "Left": [
+     0.0,
+     null
+    ],
+    "Right": [
+     0.0,
+     null
+    ]
+   }
+  }
+ ],
+ "max_angle_deg": {
+  "Left": 0.0,
+  "Right": 0.0
+ },
+ "margin_mm": 1.5,
+ "keyed_frames": [
+  1,
+  151
+ ]
+}

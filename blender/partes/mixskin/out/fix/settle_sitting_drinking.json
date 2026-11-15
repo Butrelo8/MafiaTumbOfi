@@ -1,0 +1,44 @@
+{
+ "iters": [
+  {
+   "iter": 0,
+   "inside_max_mm": 8.19,
+   "frames_inside": 45,
+   "grip_mm": [
+    -0.09,
+    4.63
+   ],
+   "grip_over_3": 302
+  },
+  {
+   "iter": 1,
+   "inside_max_mm": 3.86,
+   "frames_inside": 30,
+   "grip_mm": [
+    0.57,
+    3.52
+   ],
+   "grip_over_3": 2
+  },
+  {
+   "iter": 2,
+   "inside_max_mm": 3.85,
+   "frames_inside": 15,
+   "grip_mm": [
+    0.52,
+    3.09
+   ],
+   "grip_over_3": 1
+  },
+  {
+   "iter": 3,
+   "inside_max_mm": 2.3,
+   "frames_inside": 9,
+   "grip_mm": [
+    0.51,
+    2.78
+   ],
+   "grip_over_3": 0
+  }
+ ]
+}
