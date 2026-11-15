@@ -16,12 +16,16 @@ redone:
   x ±0.515–0.695 m, z 2.156–2.198 m, lamp faces at y ≤ 1.144 m), unlit; `barra_luces()` fills them (cups, a 60-strength die
   per cup, a lens, a 25 W spot per lamp aimed 14 m ahead). The owner confirmed this reading over the Brabus XLP 800 two-tier bar
   (`pv-barra-xlp`), which is a W465 part and failed rule 4 in scene 6.
-- **P5 strawberry** is one swappable file, `blender/props/fresa.glb`, built by `blender/fresa_charm.py` (styles fruta, resina,
-  peluche; fruta kept). Contract for a replacement: one .glb, Z up, metres, origin at the hang point, the charm hanging down -Z;
-  `props_placement.py` scales any model to 4.1 cm and hangs it from the mirror (`PP_FRESA=<path>` tries one without copying).
-- **P15 gold MT hood emblem** (replaces P14): Grenze Gotisch ExtraBold (OFL; `blender/fuentes/`), extruded and bevelled, brand
-  gold (DESIGN.md `--gold`, linear 0.768 0.426 0.021) as polished metal, standing bolted on a black plinth at the hood's front
-  edge. A flat badge (`pv-emblema-plano`) is edge-on from scene 6's low camera.
+- **P5 strawberry** is one swappable file. Owner pick 11-14: the friend's berry with gold 3D seeds,
+  `blender/props/strawberry-s2-oro.glb` (variant B of `docs/fresa-semillas.md` pass 2; the old procedural `fresa.glb` is no longer the
+  default). `props_placement.py` scales any model so its mesh is `PP_FRESA_ALTO` tall (default 0.0647: this berry has no ring and a
+  long stem, so its body is 4.1 cm; a ring-top-to-tip model wants 0.041) and hangs it from the mirror (`PP_FRESA=<path>` tries
+  another). Contract for a replacement: one .glb, Z up, metres, origin at the hang point, the charm hanging down -Z.
+- **P15 gold MT hood emblem** (replaces P14): owner pick 11-14: Pirata One (OFL; `blender/fuentes/`), standing, letters 21.5 cm tall (owner 11-14: "A, go with 21.5 cm"),
+  extruded and bevelled, brand gold (DESIGN.md `--gold`, linear 0.768 0.426 0.021) as polished metal, bolted on a black plinth at the
+  hood's front edge. Scene 6: 0.100 % of the frame (rule 2 asks 0.1 %; 14 cm gave 0.060 %, 18 cm 0.087 %, 20.5 cm 0.098 %). Judged exception
+  accepted by the owner: from the cab (scene 1) it covers 25 px of the road zone, so rule 1 reads 2.17 % against 2 % (23 cm would be 2.49 %). Grenze Gotisch ExtraBold (pass 1) and the other sizes stay as options `em-<modo>-<fuente>` / `em6-<modo>-<fuente>`.
+  A flat badge (`pv-emblema-plano`) is edge-on from scene 6's low camera.
 
 | # | Prop | Source | Scene · zone | Why it reads at that camera | Route · cost | In stills |
 |---|---|---|---|---|---|---|

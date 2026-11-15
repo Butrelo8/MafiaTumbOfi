@@ -272,8 +272,8 @@ def banderin_tablero(x):
         cil(0.012, 0.025, base + Vector((0.09, 0.02, 0.083)), CROMO, parent=False)
 
 
-FRESA_GLB = os.environ.get("PP_FRESA") or os.path.join(REPO, "blender", "props", "fresa.glb")
-FRESA_ALTO = 0.041  # ring top to tip
+FRESA_GLB = os.environ.get("PP_FRESA") or os.path.join(REPO, "blender", "props", "strawberry-s2-oro.glb")  # the owner's pick (11-14): the friend's berry with gold 3D seeds
+FRESA_ALTO = float(os.environ.get("PP_FRESA_ALTO", 0.0647))  # whole mesh height: the friend's berry is ringless with a long stem, so 0.0647 makes its BODY 4.1 cm (a ring-top-to-tip model wants 0.041)
 _FRESA = {}
 
 
@@ -433,37 +433,47 @@ def banderines():
 
 FUENTE_MT = os.path.join(REPO, "blender", "fuentes", "GrenzeGotisch-800.ttf")  # OFL, converted from @fontsource woff2
 ORO_MARCA = mat("pp_oro_marca", (0.768, 0.426, 0.021), 0.22, metal=1.0)  # DESIGN.md --gold oklch(78% 0.15 85), linear sRGB
+# pass 2 (owner never saw the options): the emblem in two blackletters at the same CAP height, so the size labels hold for both.
+# (file, M cap height in em, "MT" advance in em, lowest point of the M below the baseline in em), measured with fontTools; Grenze at size 0.235 has a 14.6 cm cap.
+FUENTES_MT = {"grenze": (FUENTE_MT, 0.622, 1.408, -0.011),
+              "pirata": (os.path.join(REPO, "blender", "fuentes", "PirataOne-400.ttf"), 0.771, 1.005, -0.032)}
+CAP_MT = {"parado": 0.146, "grande": 0.146 * 18 / 14, "plano": 0.199, "elegido": 0.215}  # m cap height: ~14 cm standing (pass 1), ~18 cm, flat (0.32 em of Grenze), the owner's pick (Pirata One, ~21.5 cm, scene 6 >= 0.1 %)
 
 
-def emblema(modo="parado"):
+def emblema(modo="parado", fuente=None):
     """P15, the owner's pick in place of the cattle horns: a gold MT on the hood in the band's blackletter (Grenze Gotisch
-    ExtraBold), extruded and bevelled, brand gold as polished metal. modo 'parado': stands bolted on a black plinth at the
-    hood's front edge, read from ahead (scene 6's camera sits below the hood, so a flat badge would be edge-on); 'plano':
-    a large flat badge on the hood, read from ahead."""
+    ExtraBold, or Pirata One), extruded and bevelled, brand gold as polished metal. modo 'parado': stands bolted on a black
+    plinth at the hood's front edge, read from ahead (scene 6's camera sits below the hood, so a flat badge would be edge-on);
+    'grande': the same at ~18 cm letters; 'plano': a large flat badge on the hood, read from ahead."""
+    ruta, cap_em, ancho_em, pie_em = FUENTES_MT[fuente or VAR["fuente"]]
+    cap = CAP_MT[modo]
+    tam = cap / cap_em
+    k = cap / CAP_MT["parado"]
     yb, zb = CAPO[0] if CAPO else (FRENTE - 0.2, 1.5)
     tapa = [(y, z) for y, z in CAPO if y > yb - 0.6]
     ztop = max(z for y, z in tapa) if tapa else zb
     with prop("P15"):
         cu = bpy.data.curves.new("pp_emblema", "FONT")
-        cu.body, cu.font = "MT", bpy.data.fonts.load(FUENTE_MT, check_existing=True)
-        cu.align_x, cu.align_y = "CENTER", "CENTER"
+        cu.body, cu.font = "MT", bpy.data.fonts.load(ruta, check_existing=True)
+        cu.align_x, cu.align_y = "CENTER", "BOTTOM_BASELINE"
         cu.bevel_resolution = 2
         o = bpy.data.objects.new("pp_emblema", cu)
         sc.collection.objects.link(o)
-        if modo == "parado":
+        if modo != "plano":
             y = yb - 0.12
             z = max((zz for yy, zz in CAPO if abs(yy - y) < 0.02), default=ztop)
-            # size 0.235 (~14 cm letters): 0.15 covered 0.039 % of scene 6's frame and 0.22 0.09 %, under rule 2's 0.1 % line
-            cu.size, cu.extrude, cu.bevel_depth = 0.235, 0.009, 0.002
-            o.location, o.rotation_euler = (CX, y, z + 0.093), (math.pi / 2, 0, math.pi)  # letters seated on the plinth
-            caja((0.32, 0.06, 0.02), (CX, y, z + 0.01), NEGRO, bevel=0.005, parent=False)
-            for dx in (-0.125, 0.125):
-                cil(0.007, 0.006, (CX + dx, y + 0.015, z + 0.021), CROMO, verts=6, parent=False)
+            # cap 14.6 cm (size 0.235 in Grenze): 0.15 covered 0.039 % of scene 6's frame and 0.22 0.09 %, under rule 2's 0.1 % line
+            cu.size, cu.extrude, cu.bevel_depth = tam, 0.009 * k, 0.002 * k
+            o.location, o.rotation_euler = (CX, y, z + 0.0215), (math.pi / 2, 0, math.pi)  # baseline seated on the plinth
+            w = ancho_em * tam * 0.97
+            caja((w, 0.06 * k, 0.02), (CX, y, z + 0.01), NEGRO, bevel=0.005, parent=False)
+            for dx in (-1, 1):
+                cil(0.007 * k, 0.006, (CX + dx * (w / 2 - 0.035 * k), y + 0.015 * k, z + 0.021), CROMO, verts=6, parent=False)
         else:
             y = yb - 0.45
             zh = max((z for yy, z in CAPO if abs(yy - y) < 0.02), default=ztop)
-            cu.size, cu.extrude, cu.bevel_depth = 0.32, 0.002, 0.001
-            o.location, o.rotation_euler = (CX, y, zh + 0.004), (0, 0, math.pi)
+            cu.size, cu.extrude, cu.bevel_depth = tam, 0.002, 0.001
+            o.location, o.rotation_euler = (CX, y, zh + 0.003 - pie_em * tam), (0, 0, math.pi)
         _fin(o, ORO_MARCA, False)
 
 
@@ -590,7 +600,7 @@ def toma_pp(nombre, escena, f):
 CAM1 = (T.CAMINO[0][1], T.CAMINO[0][2], T.CAMINO[0][3])
 
 
-VAR = {"barra": "fabrica", "emblema": "parado", "fresa": None}  # the picks; the pv-* options swap one at a time
+VAR = {"barra": "fabrica", "emblema": "elegido", "fuente": "pirata", "fresa": None}  # the picks; the pv-* options swap one at a time
 
 
 def camion():
@@ -652,7 +662,7 @@ def _bolsa():
 
 def _emblema_pos():
     yb, zb = CAPO[0] if CAPO else (FRENTE - 0.2, 1.5)
-    y = yb - (0.12 if VAR["emblema"] == "parado" else 0.45)
+    y = yb - (0.45 if VAR["emblema"] == "plano" else 0.12)
     return Vector((CX, y, max((z for yy, z in CAPO if abs(yy - y) < 0.02), default=zb)))
 
 
@@ -695,6 +705,35 @@ VARIANTES = {
 }
 for _n, (_e, _op) in VARIANTES.items():
     toma_pp(_n, _e, _op)
+
+
+def _em_pos(modo):
+    yb, zb = CAPO[0] if CAPO else (FRENTE - 0.2, 1.5)
+    y = yb - (0.45 if modo == "plano" else 0.12)
+    return Vector((CX, y, max((z for yy, z in CAPO if abs(yy - y) < 0.02), default=zb)))
+
+
+def _em(modo, fuente, cerca):
+    """em-<modo>-<fuente>: scene 6's truck with one emblem option, from one 3/4 camera that sees all three sizes (cerca) or from
+    scene 6's own low camera (not cerca)."""
+    def _op():
+        viejo = (VAR["emblema"], VAR["fuente"])
+        VAR["emblema"], VAR["fuente"] = modo, fuente
+        try:
+            cam6 = esc6("b")
+            if not cerca:
+                return cam6
+            a = _em_pos("parado")
+            return (a + Vector((0.55, 1.35, 0.55)), a + Vector((0, -0.14, 0.05)), 55)
+        finally:
+            VAR["emblema"], VAR["fuente"] = viejo
+    return _op
+
+
+for _m in ("parado", "grande", "plano", "elegido"):
+    for _f in ("grenze", "pirata"):
+        toma_pp(f"em-{_m}-{_f}", "6", _em(_m, _f, True))
+        toma_pp(f"em6-{_m}-{_f}", "6", _em(_m, _f, False))
 
 # no option list (or `all`) renders the picks, never utileria's older options (the glovebox cut among them)
 FINALES = ["pp1-b", "pp2-b", "pp4-b", "pp6-b", "pp-barra", "pp-emblema", "pp-fresa"]

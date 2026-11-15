@@ -30,14 +30,16 @@ SECCIONES = [
      [("pp-barra", "Se queda · lámparas de fábrica del 6×6"), ("pv-barra-xlp", "Variante · dos pisos estilo Brabus XLP 800"),
       ("pv-6-xlp", "Variante XLP en la escena 6 (para la regla 4)")]),
     ("emblema", "Emblema MT dorado en el cofre",
-     "Letra gótica Grenze Gotisch ExtraBold (licencia OFL, libre), extruida y biselada, en el oro de la marca (DESIGN.md, "
-     "oklch 78 % 0.15 85) como metal pulido. En vez de los cuernos.",
-     [("pp-emblema", "Se queda · de pie, atornillado al frente del cofre"), ("pv-emblema-plano", "Variante · plano sobre el cofre")]),
+     "Letra gótica Pirata One (licencia OFL, libre; elegida por el dueño el 14 nov), de pie con letras de 21.5 cm de alto, extruida y "
+     "biselada, en el oro de la marca (DESIGN.md, oklch 78 % 0.15 85) como metal pulido. En vez de los cuernos. A 21.5 cm ocupa "
+     "0.100 % del cuadro en la escena 6, justo en la línea de 0.1 % de la regla 2 (a 14 y 18 cm, Pirata One no la alcanza). Costo: "
+     "desde la cabina (escena 1) el emblema cubre 2.17 % del camino, 5 px sobre el 2 % de la regla 1; el dueño aceptó esa excepción: «A, go with 21.5 cm».",
+     [("pp-emblema", "Se queda · Pirata One de pie, atornillado al frente del cofre"), ("pv-emblema-plano", "Variante · plano sobre el cofre")]),
     ("fresa", "La fresa del espejo",
-     "Un solo archivo intercambiable: blender/props/fresa.glb (Z arriba, metros, origen en la argolla). Si llega un modelo de un "
-     "amigo, se reemplaza ese archivo y el script lo escala a 4.1 cm.",
-     [("pp-fresa", "Se queda · fruta (semillas en hoyuelos, cáliz, barniz)"), ("pv-fresa-resina", "Variante · resina con oro"),
-      ("pv-fresa-peluche", "Variante · peluche de fieltro"), ("fresa-estudio", "Las tres en estudio")]),
+     "La fresa del modelo del amigo con semillas doradas en 3D (variante B de la pasada 2, elegida por el dueño el 14 nov): su malla y "
+     "sus texturas, intactas, y el cuerpo escalado a 4.1 cm. Un solo archivo intercambiable: blender/props/strawberry-s2-oro.glb "
+     "(Z arriba, metros, origen en el tallo); el script lo escala con PP_FRESA_ALTO (0.0647 para este modelo).",
+     [("pp-fresa", "Se queda · fresa del amigo con semillas doradas")]),
 ]
 
 
@@ -81,6 +83,23 @@ for sid, titulo, nota, tomas in SECCIONES:
         tira.save(LADO / f"{sid}.jpg", quality=80)
     secciones.append(f'<section id="{sid}"><h2>{html.escape(titulo)}</h2><p>{html.escape(nota)}</p><div class="fila">{"".join(figs)}</div></section>')
 
+HOJAS = (
+    '<section id="emblema-2"><h2>Emblema MT: tamaño y letra (pasada 2)</h2><p>Seis tomas de la misma cámara 3/4 sobre el cofre (tres tamaños '
+    'por dos letras, misma altura de mayúscula en las dos letras) y, debajo, lo que hace cada una en la cámara baja de la escena 6. La M de '
+    'Grenze Gotisch se parece a una «m» minúscula; la de Pirata One es una mayúscula clara, pero más angosta. Ahí solo 18 cm en Grenze '
+    'supera la línea de 0.1 % de la regla 2 (0.151 %; Pirata One a 18 cm queda en 0.087 %); el plano es un filo de 0.01 %. El dueño eligió '
+    'Pirata One y se subió a 21.5 cm (0.100 %); esa hoja es de antes del cambio.</p><div class="fila"><figure><a href="lado-a-lado/emblema-2.jpg">'
+    '<img src="mini/emblema-2.jpg" alt="Emblema MT: 3 tamaños por 2 letras, y la escena 6" width="1500" height="1388" loading="lazy"></a>'
+    '<figcaption><strong>Hoja del emblema</strong> · abre la hoja completa (2480 px de ancho)</figcaption></figure></div></section>'
+    '<section id="fresa-semillas-2"><h2>La fresa del amigo con semillas 3D (pasada 2)</h2><p>Se escala la fresa para que el cuerpo mida 4.1 cm '
+    '(antes 2.6 cm) y se prueban semillas más grandes, doradas y a tres alturas sobre el hoyuelo. Se queda B (oro satinado, el doble de '
+    'tamaño, un tercio enterradas, 278 semillas). En la cámara real de la escena 1 la fresa mide unos 38 × 46 px: ninguna variante se lee '
+    'como semillas separadas (de 5 a 9 manchas separadas de 3 px o más, hacen falta 25), se lee como un punteado dorado; de cerca todas se '
+    'leen. La luz de la cabina sigue lavando la mitad de abajo.</p><div class="fila"><figure><a href="lado-a-lado/fresa-semillas-2.jpg">'
+    '<img src="mini/fresa-semillas-2.jpg" alt="Fresa con semillas 3D: pase 1 y variantes" width="1500" height="1062" loading="lazy"></a>'
+    '<figcaption><strong>Hoja de la fresa</strong> · pase 1 y variantes A a F · abre la hoja completa (2438 px de ancho)</figcaption>'
+    '</figure></div></section>')
+
 pagina = f"""<!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Utilería: lo elegido</title>
@@ -104,12 +123,8 @@ dt {{ font-weight:600; color:var(--fg); }} dd {{ margin:0; }}
 imagen abre el still completo (1920×1080, 64 muestras, de noche). Los números salen de una sonda por rayos desde la cámara de cada
 escena (<code>scripts/props-medir.py</code>); el look se juzga en los stills. Reglas: <a href="reglas.md">reglas.md</a>; props:
 <a href="props.md">props.md</a>; fotos: <a href="referencias.md">referencias.md</a>.</p>
-{''.join(secciones)}
-<section id="preguntas"><h2>Preguntas abiertas</h2><ol>
-<li>Emblema: (a) de pie, del tamaño actual (letras de unos 14 cm): en la escena 6 ocupa 0.088 % del cuadro, bajo la línea de 0.1 % de la regla 2, así que ahí se ve como un brillo dorado y se lee en los detalles; (b) más grande, para que se lea en la escena 6 (letras de unos 18 cm, casi la mitad del ancho del cofre al frente); o (c) plano sobre el cofre (no se ve desde la cámara baja de la escena 6).</li>
-<li>Letra del emblema: (a) se queda Grenze Gotisch (su M mayúscula parece una m minúscula: se puede leer «mt») o (b) una gótica de mayúsculas más claras, como Pirata One (OFL, la de DESIGN.md).</li>
-<li>Fresa: (a) fruta, (b) resina con oro o (c) peluche; o se espera el modelo del amigo (se cambia un archivo).</li>
-</ol>
+{''.join(secciones)}{HOJAS}
+<section id="preguntas"><h2>Resuelto el 14 nov y lo que sigue abierto</h2><p>El dueño eligió la fresa B (la del amigo con semillas doradas) y la letra Pirata One para el emblema; el tamaño lo eligió después: «A, go with 21.5 cm» (de pie, letras de 21.5 cm): pasa la regla 2 en la escena 6 (0.100 %) y falla por 5 px la regla 1 en la escena 1 (2.17 % del camino contra 2 %), una excepción aceptada por el dueño.</p>
 <p>Ya resuelta (13 nov): la barra de luces son las lámparas de fábrica del 6×6, no la de dos pisos estilo Brabus.</p>
 <p>Siguen abiertas, sin decidir aquí: #33 (escena 3, espejo o puerta trasera), #34 (acomodo de la caja) y la luz de la escena 4.</p></section>
 </main></body></html>
