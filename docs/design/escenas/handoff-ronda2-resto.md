@@ -7,6 +7,27 @@ Round 2 of the prop stills is done for the four props the mothership asked to re
 caja2-a-esc2,caja2-b,caja2-b-esc2,guantera2-borde,guantera2-c`. Run `blender/pantalla_tablero.py` first; it writes the
 screen faces into `tmp/utileria/`.
 
+## Bed load, real-life pass (2026-11-14, cookingdrone): waiting on the owner's A or B
+The owner rejected caja3 A and B (Board #34): "positioning in real life and it must have sense ... keep the donut, the instruments
+can go in cases". Done: `blender/caja4.py` (runs caja3.py, which runs utileria.py). It probes the bed first (CAJA4 lines: floor
+z 0.933, inner x CX-0.52..+0.531, y -1.10 cab wall .. -2.87 tailgate, rails only 0.25-0.30 m above the floor, rear axles at
+y -1.08 and -2.11) and checks each arrangement in code (`revisar_carga`, CAJA4 CHECK lines). The checks cover: inside the walls
+with the tailgate shut; no interpenetration; anything over the rails under a strap or the net; nothing with more than 3 cm free
+ahead of it; heavy items against the cab. Same 110 kg of gear in both: amp road case, bass, 12-string, requinto and 61-key cases,
+snare case, cable crate, full cooler, moving blankets, the donut. A: cases on edge in a file, four ratchet straps.
+B: flat stacks under a cargo net. Both hook to the same six assumed wall rings (corners + a mid pair; the model has none). Both
+PASS; the recommendation is B (net holds all, 6 vs 8 items over the rails), and the scene stills are dressed with B (`CAMA4`).
+- **Run:** options `caja4-a,caja4-b,caja4-a-esc2,caja4-b-esc2,caja4-a-esc4,caja4-b-esc4,esc2-fin4,esc3-hombro4,esc3-fin4,esc4-fin4,
+  esc5-fin4` at 1920x1080 and `esc2-abre4,esc2-fin4,esc3-hombro4,esc3-fin4,esc4-cabina4,esc4-fin4,esc5-fin4` at 1080x1920, 64 spp
+  (`tmp/caja4/finales.sh` waits for the shared GPU first), then `uv run -q --with pillow python -I tmp/caja4/publicar.py`.
+  If the owner picks A: `WSLENV=CAMA4 CAMA4=a` (Blender is a Windows exe) and re-render the scene options.
+- **Scene picks applied:** 3B (`esc3-hombro`) and 4B (`ESC4_LUZ = "cabina"` in `utileria.py`); DESIGN.md › Components and the plan's
+  camera table say so. The page shows only B for 3 and 4.
+- **Removed on purpose:** piñata, balloons, papel picado, flag (loose things that would not survive the drive); owner question
+  on the page. Scene 4 now shows little of the bed (the load sits low), which is what a real load looks like from the side.
+- **Not verified:** no photo of band gear in a pickup bed was opened (references.md › Bed load, the gap stated); the tie-downs
+  are assumed.
+
 ## Scenes 2-6 key stills (06:30, npcdrone): waiting for the owner's picks
 Contact page section "Escenas 2-6" (`utileria/index.html`, first section; the page shows `-mini.jpg` thumbnails, links go to the
 full 1920x1080 / 1080x1920 files). Options `esc2-abre … esc6-flash` in `utileria.py`, above the glovebox block. Run them like the

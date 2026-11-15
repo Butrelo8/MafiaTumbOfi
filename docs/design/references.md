@@ -174,3 +174,66 @@ Gate: `python3 -I ~/projects/visual-lab/web/scripts/refs-check.py docs/design/re
 | mundo | real world · R1 Commons `File:MEX 180 Estado Veracruz.JPG` (PD, O), R2 `File:Afueras de la ciudad de Jamapa.jpg` (CC BY-SA 4.0, O) · with `blender/blender-notas.md` | Mowed strip 3 m, guinea grass 1–1.6 m to 14 m, shrubs and pachira to 40 m, crowns 22–260 m, nothing 260–700 m, the hill ring under fog; poles every 48 m at x −9, 11 m, three wires sagging 1.2 m | M |
 | mundo | real world · R3 Commons `File:EnteringAlvarado Highway180.JPG` (CC BY-SA 3.0, O); NOM-034-SCT2-SEDATU-2022 (DOF 2023-09-19, O) · with `blender/blender-notas.md` | asphalt_02 at 3 m with wheel paths, oil bands, patches, cracks and a 40 m macro mask, read on y wrapped to the 192 m loop; M-3.1 white right edge, M-3.3 yellow left edge, M-2.3 dashes 4.92/9.85 m (13 per loop), studs every 32 m | M |
 | mundo | real world · F2 Collateral (2004) `collateral/022.jpg`, F3 Sicario (2015) `sicario/032.jpg` (frameref, O) · with `web/visuales-fichas/kage-scroll-world.md` | The LoD rule: hero plants only within ~14 m and inside the lamp and headlight pools; silhouettes beyond against a sky one step lighter | B |
+
+## Bed load, real-life pass (2026-11-14, run `cookingdrone`; owner 11-14 "positioning in real life and it must have sense")
+
+The owner rejected caja3's A and B. This pass loads the bed the way a touring band loads an open pickup: instruments in hard cases
+(owner), the donut kept (owner), heavy items against the cab, straps or a net to the bed's tie-downs, the tailgate shut. Built by
+`blender/caja4.py`, which measures the bed first (floor z 0.933, 1.05 × 1.76 m inside, rails only 0.25-0.30 m above the floor)
+and checks every arrangement in code (`revisar_carga`: inside the walls and ahead of the tailgate, no two props interpenetrate,
+anything above the rails under a strap or the net, nothing can slide forward more than 3 cm, heavy items against the cab).
+What we match: the load-out order of the guides and forum posts below. What we change on purpose: the piñata, balloons, papel
+picado and flag are gone (they hang loose and would not survive the drive); the cases keep the sticker art.
+Marks: O = photo or page opened and looked at; S = search excerpt only; T = text of the page read, no photo.
+**The gap, plainly:** no photo of band gear loaded in a pickup bed was opened. Forum threads that have them (TalkBass, DrumForum,
+Maverick Truck Club, MusicPlayer) refused automated fetches (403, paywall redirect), Flickr rate-limited (429), and the earlier
+pass's 22 photos (`cc/goblindrone:docs/design/props-placement/referencias.md`) hold no band gear in a bed. The positions rest on
+the loading guides (text) and on two real photos of touring gear outside a truck.
+Gate: `refs-check.py <this section> --sections caja4`.
+
+| section | library entry | borrow | cost |
+|---|---|---|---|
+| caja4 | kiln-prop · background prop: inventory, real size logged, one material per physical material, worn edges from a Bevel-node mask · `blender/skills/kiln-prop/SKILL.md` | Every prop built by script at its real size (docstrings in `caja4.py`): hard cases 0.98-1.22 m, a 61-key keyboard case 1.02 m, a 14-inch snare case, a milk crate of cables, navy quilted moving blankets; reuses caja3's laminate, tolex, aluminium and cooler materials | M |
+| caja4 | kiln-utility-box · decals as quads ~0.6 mm off the surface · `blender/lab/kiln-utility-box/NOTES.md` | Band stickers on the amp case lid and the B case lids (a-mafia, b-ver, a-putifresa, b-pura, b-escudo, a-estrella), the stencil MAFIA TUMBADA · BACKLINE 01 on the amp case | B |
+| caja4 | real world · "4am Load Out", flickr.com/photos/96913438@N00/21696703 via Openverse (O, CC BY-NC-ND): night, a crew rolling ATA road cases into a truck, the cases packed tight side by side · with `blender/skills/kiln-prop/SKILL.md` | Cases go in as a tight block, nose to tail, with no gaps to slide into | M |
+| caja4 | real world · "Gear", flickr.com/photos/40609437@N04/7872450798 via Openverse (O, CC BY-NC): a stickered guitar hard case, gig bags and a plastic milk crate holding cables · with `blender/skills/kiln-prop/SKILL.md` | The cable kit rides in a milk crate; hard cases carry stickers | M |
+| caja4 | real world · drum cases with a rolling trap case, vintagedrumforum.com/attach/73597 and attach/73614 (O): round drum cases stacked, ATA trunks on casters · with `blender/skills/kiln-prop/SKILL.md` | The snare case is a round can with a lid band and strap; road cases have butterfly latches and ball corners | B |
+| caja4 | real world · Art of Manliness, "How to load a pick-up truck", artofmanliness.com/skills/cars/how-to-load-a-pick-up-truck/ (O, an illustration, not a photo): heavy items as close to the cab as possible, even left to right, long items along the sides, boxes between them heavy at the bottom, ratchet straps, a tarp or webbing over the top · with `blender/skills/kiln-prop/SKILL.md` | Both arrangements: amp and full cooler against the cab wall; long cases lengthwise; B's net is the "webbing over the top" | M |
+| caja4 | real world · cargo guides (S): place the heaviest cargo against the cab, over the axle, so it can't slide forward in hard braking; at least two straps per major item; hooks seated in the tie-down loops, not on the rails; pickups have tie-downs near the cab and near the tailgate (uhaul.com, slashgear.com "truck bed tie-down tips", jacosuperiorproducts.com cargo management) · with `blender/skills/kiln-prop/SKILL.md` | The amp is under two straps in A; straps and net hook only to six rings on the walls (four corners, one mid pair; the model has none, so they are assumed and drawn the same in A and B); the checker's frenado rule | M |
+| caja4 | real world · TalkBass threads (S): "strap everything down", a bass on its side under a bungee net, a padded bed, cabs not laid on their back; Fender, "5 dos and don'ts for transporting your amp" (S): a cover or case, face down at most · with `blender/skills/kiln-prop/SKILL.md` | The amp travels upright in its case; cases lie flat or on edge, never loose; blankets as padding and void fill | M |
+| caja4 | user: owner 11-14 on Board #34: "keep the donut, the instruments can go in cases for much easier modeling, what props can we get that are easier to do"; scene picks the same day: 3B (rear door), 4B (lit cab) | Two arrangements (A strapped, B under a net), the donut on top of each, the scene stills re-dressed with B and the picks applied | M |
+
+## More props on bed B (2026-11-14, run `ldrone`; owner 11-14 "they can be irrelevant to the genre but must look good")
+
+The owner picked bed B and asked whether to keep adding props. Twelve candidates sit on top of B. Each one is built by script in
+`blender/caja5.py`, at real size and in the DESIGN.md palette (black, warm white and gold, plus the donut's pink as the one
+accent). Each rides the way it would on the road: under B's net, bolted or zip-tied to the sport bar, in the stake pocket, or
+over the cab. Three amounts are shown (ligera, media, llena). Each is measured against props-placement rules 1 and 3 and for
+silhouette overlap (CAJA5 MEDIDA lines).
+
+What we match: how each item is carried in the reference photos below. What we change on purpose:
+- the piñata and the balloons ride bagged and netted instead of hanging;
+- the flag stands in the stake pocket instead of the roll bar;
+- the props' colours move to the palette (the reference piñata is blue and yellow; the crate's red becomes the stock yellow).
+
+Marks: O = photo opened and looked at (a thumbnail); S = search excerpt only.
+**The gap, plainly:** the balloons have no photo. The searches ("balloons in bag car", "balloons tied car") returned airships
+and parades. The transport bag is a common balloon-shop practice, not checked against a photo.
+Gate: `refs-check.py <this section> --sections caja5`.
+
+| section | library entry | borrow | cost |
+|---|---|---|---|
+| caja5 | kiln-prop · background prop: inventory, real size logged, one material per physical material · `blender/skills/kiln-prop/SKILL.md` | Every candidate built by script at its real size (docstrings in `caja5.py`): 0.66 m star piñata, 11-inch balloons, 0.15 × 0.17 m papel picado, 7'0" board, 20 L can, 0.62 m neon panel; caja3's flag, hat box, beer crate and speaker reused | M |
+| caja5 | real world · Wikimedia Commons "Star stjärna pinata SWEDEN" (O, CC BY-SA 3.0): a star piñata, five cones and tissue fringe at the tips · with `blender/skills/kiln-prop/SKILL.md` | Piñata shape: a ball with five cones and a fringe at each tip; colours moved to gold and black with pink fringe | B |
+| caja5 | real world · Commons "Adorno de papel picado en la calle Carranza de Aguascalientes 07" and "Papel picado, Feria Nacional del Libro de la BUAP" (O, CC BY-SA 4.0): strings of punched tissue panels over a street · with `blender/skills/kiln-prop/SKILL.md` | Panels on a taut string, punched pattern as alpha; tied at both ends | B |
+| caja5 | real world · Commons "American Flag on Pickup Truck" (O, CC BY-SA 4.0) and "Flags on a truck in Greenwood, October 2023" (O, CC BY 4.0): flags on poles in a pickup bed's corners · with `blender/skills/kiln-prop/SKILL.md` | The MT flag on a 1.5 m pole in the rear left stake pocket, flying back | B |
+| caja5 | real world · Commons "Chevrolet Colorado Lifeguard at La Jolla" and "KNRM Lifeguard Schiermonnikoog Volkswagen Amarok" (O, CC BY 2.0): surfboards on a rack over a pickup bed; "Osaka Motor Show 2017 (286)" (O): a board standing in a bed · with `blender/skills/kiln-prop/SKILL.md` | The board rides over the cab on a rack bar clamped to the sport bar and a roof pad, strapped, deck down and fins up | M |
+| caja5 | real world · Commons "Lyspærer i rekke" (O, CC BY-SA 3.0): a festoon string of round bulbs on black cable · with `blender/skills/kiln-prop/SKILL.md` | Warm bulbs on short pigtails off a black cable, zip-tied along the sport bar and the bed ledges (outline lights, props-placement rule 7) | B |
+| caja5 | real world · Commons "Lightboks.webp" (O, CC0) and "Roland CUBE Street with batteries" (O, CC BY 2.0): battery speakers with lit drivers · with `blender/skills/kiln-prop/SKILL.md` | caja3's tower speaker with its rings in gold and pink, lying rings-up under the net | B |
+| caja5 | real world · Commons "Hat Tin" (O, CC BY 2.5), "2 Kisten Bier in einem Reisebus" (O, CC BY-SA 4.0), "Camping-Chair-Background" (O, public domain), "Helinox Ground Chair 1" (O, CC BY-SA 4.0) · with `blender/skills/kiln-prop/SKILL.md` | Round hat box; crates of bottles carried in a vehicle; folding chairs flat | B |
+| caja5 | real world · Openverse "Willys MB", flickr.com/photos/10101160@N08/2852611529 (O, CC BY-NC): a jerry can in a holder on a jeep · with `blender/skills/kiln-prop/SKILL.md` | The can in a steel tray with a strap, bolted beside the right rail | B |
+| caja5 | real world · Commons "Neon.JPG" (O, CC BY-SA 3.0) and "Boulevard Hotel (Neon sign), Miami Beach" (O, public domain): neon letters as glowing outline tubes · with `blender/skills/kiln-prop/SKILL.md` | MT as gold outline tubes (text bevel, no fill) on a black panel | B |
+| caja5 | real world · props-placement rules, `cc/goblindrone` docs/design/props-placement/reglas.md (O): rule 1 sight lines (scene 2: the tailgate stickers, ≤ 2 % covered), rule 3 clutter budget (4 per exterior view), rule 5 one silhouette, rule 7 two light colours, rule 8 it rides · with `blender/skills/kiln-prop/SKILL.md` | caja5's `medir`: rule 1 and rule 3 measured by ray casts at 1/5 of the still, plus the share of silhouette where items over the rails stack | M |
+| caja5 | user: owner 11-14 picked bed B: "Need to see if we keep adding more props, they can be irrelevant to the genre but must look good" (via mothership) | Twelve candidates alone in studio light for one-by-one picks, three amounts on B, the piñata, balloons, papel picado and flag back as candidates, packed to survive the drive | M |
+| caja5 | ai-mesh-to-rig · image → mesh with local TRELLIS.2, then cleanup in Blender · `blender/ai-mesh-to-rig.md` | The alien: TRELLIS.2 through StableGen's graph (`MTO-colddrone/blender/partes/trellis2.sh`, seed 33, 203 s) from the owner's photo cropped to the alien by hue (`tmp/caja5/recorte.py`; the photo and the crop stay local), scaled to 1.5 m, its texture kept, roughness 0.12 plus a clear coat for blown vinyl. Mirroring the crop to remove the person's fingers merged the legs (the toy leans), so the first mesh stays, with a small bump on one shoulder | M |
+| caja5 | user: owner 11-14 picks from the studio sheet (via mothership): "let's keep the 5 speaker and 7 the beer box, also if we can add the alien to our props", his photo of a 1.5 m green inflatable alien; then "also if you can add soda cans, water props to the middle in the van or give them to the characters" | One dressed B (speaker, beer crate, alien standing on the amp case strapped to the sport bar); drinks with made-up labels (`blender/etiquetas.py`) in the front console's cupholders and against Diego's hand on the rear armrest, parented to the hand bone, 0 hand vertices inside the can | M |

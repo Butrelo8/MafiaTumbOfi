@@ -73,6 +73,8 @@ Square everywhere: buttons, covers, panel. No pill (owner: only if picked over 2
 | Scene prop, pantalla móvil (owner's pick C, 2026-11-13): a box truck with the side LED screen framed by a marquee of warm bulbs, the rear screen the same; LED look = pixelated image under a round-dot mask, emissive; the rear screen shows the empty state ("Próximas fechas · Muy pronto"), never invented dates | references.md › Scene props, phase 1 › pantalla (peru-retail LED box trucks); `blender/utileria.py` `pantalla-c` |
 | Scene prop, green signs (owner's pick B, 2026-11-13): a bandera cantilever from the right shoulder, the sign over the band's lane; SCT green field, white retroreflective legend and border, clearance over 5.5 m; shipped lettering in "tipografía México" (stills use Bahnschrift) | references.md › Scene props, phase 1 › portico (NOM-034-SCT2/SEDATU-2022; the El Puertecito cantilever photo); `blender/utileria.py` `portico-b` |
 | Scene prop, licence plate (owner approved 2026-11-13 03:36): after the current Veracruz private-car plate: white field, VERACRUZ heading, olive stepped fret in the top corners, faint crest watermark, QR top right (the counted `/wa/` route), slogan logo, TRANSPORTE PRIVADO AUTOMOVIL, 30, red T; ours: MT-420-VER, the MT monogram in the national-seal spot, a simplified crest lookalike. Seen from the scene-6 camera | references.md › Scene props, round 2 › placa (the owner's reference image; NOM-001-SCT-2-2016 for size and slots); `blender/placa_veracruz.py`, `blender/utileria.py` `placa3` |
+| Scene camera 3 (owner's pick B, 2026-11-14): the hold at the driver's rear door, looking forward-left at the side screen, the manager's window on the right of frame | references.md › escenas; `blender/utileria.py` `esc3-hombro` |
+| Scene light 4 (owner's pick B, 2026-11-14): the cab lit from inside (a warm 6 W point over each seat), the side left to the road lamps; `ESC4_LUZ = "cabina"` | references.md › escenas; `blender/utileria.py` `luz_costado`, `esc4-cabina` / `esc4-fin` |
 | Motion tokens: `--dur-press` 80 ms, `--dur-state` 250 ms, `--dur-fill` 500 ms, `--ease-out` | references.md › estados (boleto-perforado timing family; bands 40-80, 150-250, 350-500) |
 
 ## Motion
@@ -112,7 +114,8 @@ transfer, over the 150 KB cap, `web/site-reading-fichas/landonorris-com/speed-39
   The scene plate's QR (`blender/placa_veracruz.py`, `WA`) points at the counted route `https://mafiatumbada.com/wa/5212283538827`,
   pending the band's confirmation. To swap it: edit `WA`, run `uv run -q --with pillow --with qrcode python -I blender/placa_veracruz.py`,
   then re-render `placa3` with `blender/utileria.py`. The site's live WhatsApp buttons need the same swap.
-- Scene props (radio + cassette + dash key, glovebox junk, stickers, pantalla móvil, sign gantries, plate, bed props): three
+- Scene props (radio + cassette + dash key, glovebox junk, stickers, pantalla móvil, sign gantries, plate, bed props; the bed is `caja4` B, picked 2026-11-14, dressed in `caja5` with the speaker, the beer crate and the
+  inflatable alien; drinks in the cab still open, console or hand): three
   options each, waiting on the owner's pick (`docs/design/escenas/utileria/index.html`; sources in `references.md` › Scene props,
   phase 1). Each picked element joins Components with its source row; none is a rule yet.
 - Lead release: Putifresa (catalog order); "POR EL BLOC" is not in the catalog.
