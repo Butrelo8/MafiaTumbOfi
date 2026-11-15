@@ -1,0 +1,38 @@
+{
+ "frame": 305,
+ "ease_in": [
+  218,
+  240
+ ],
+ "ease_out": [
+  332,
+  350
+ ],
+ "delta_deg": {
+  "RightArm": 37.8,
+  "RightForeArm": 79.4,
+  "RightHand": 99.3,
+  "RightHandIndex1": 0.0,
+  "RightHandIndex2": 0.0,
+  "RightHandIndex3": 0.0
+ },
+ "selfcheck": {
+  "hand_mm": 0.0,
+  "prop_bottle_mm": 0.0
+ },
+ "window": [
+  213,
+  355
+ ],
+ "elbow_deg_before": [
+  65.1,
+  110.8
+ ],
+ "elbow_deg_after": [
+  23.0,
+  85.7
+ ],
+ "hand_jump_mm_per_frame_before": 9.1,
+ "hand_jump_mm_per_frame_after": 12.7,
+ "hand_moved_mm_at_key": 69.2
+}

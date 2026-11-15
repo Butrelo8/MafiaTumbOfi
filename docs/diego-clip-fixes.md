@@ -4,11 +4,52 @@ Spec: `/home/black/projects/mothership/docs/queue/2026-11-14-diego-clip-fixes.md
 Scripts: `blender/partes/mixskin/`. Numbers: `blender/partes/mixskin/out/fix/*.json`. Corrected blends: `blender/assets/reparto/`
 (git-ignored).
 
-**State, 2026-11-14 22:50:**
+**State, 2026-11-14 23:45:**
 - Driving is done and passes.
-- The owner now places the props for sitting_drinking (the bottle) and guitar_playing by hand. The mothership changed the
-  process at 22:36.
-- Their placement blends are ready. The checks below run after he saves.
+- Sitting_drinking is done and passes, with the owner's hand pose (see "Sitting_drinking: done").
+- Guitar_playing waits on the owner's placement. The mothership changed the process at 22:36: the owner places props by
+  hand.
+
+## Sitting_drinking: done
+
+**The owner's pose.**
+- He posed the hand in `diego_place_drinking.blend`, saved at 23:01; a copy is kept as `diego_place_drinking_owner2301.blend`.
+- The pose: an IK control `MANO_ctrl` (on RightForeArm, chain 2, plus Copy Rotation on RightHand), an elbow pole
+  `CODO_ctrl`, and the bottle on an empty that rides the hand (`place_ik.py`). No finger keys.
+- His control sat 24 mm past the arm's reach, which locks the elbow straight.
+
+**The small fix on top** (`place_nudge.py`, 4 / 14 mm), applied under the mothership's rule:
+- MANO_ctrl is pulled back 24 mm toward the shoulder; the hand moves 4 mm and the elbow unlocks from 0.2° to 23.6°.
+- The bottle slides 14 mm along its axis, out of the face. At f305 that leaves 0 inside, with the fist at 0.34 mm.
+
+**The sip bake** (`sip_bake.py`):
+- His evaluated f305 pose goes into the fix layer: arm 37.8°, forearm 79.4°, hand 99.3°.
+- It is eased in over f218–240 and out over f332–350, and matches his pose exactly at f305 (0.0 mm).
+- In the eased window the elbow bend ranges 23–86°. The hand moves at most 12.7 mm per frame, against 9.1 in the clip.
+
+**The bottle outside the sip.** His fixed angle in the hand drove the bottle into the thigh (16.7 mm) and the left hand
+(23.8 mm) at rest.
+- `prop_rest.py` keys the earlier fitted rest angle outside f218–350 and eases to his angle inside.
+- The empty rides the hand bone at a constant offset of about 12 cm, not at its head frame; `prop_rest.py` measures that
+  offset and applies the rest angle through it.
+- `prop_settle.py` (two runs, max-filtered and smoothed slides) clears the remaining face touches at f243–277 and
+  f177–179, and pulls the grip into the 0.5–2.5 mm band.
+
+**After** (`out/fix/after_sitting_drinking.json`, every frame f1–457):
+- **0 inside on every contact:** hands, forearms, seat and bottle, both ways.
+- **Grip:** 0.50–2.44 mm.
+- **Floor:** the bottle stays at least 66 mm above it.
+- **Mouth:** the bottle's lip touches at the corner of the mouth or the philtrum. It is 56–96 mm from the lip-centre vertex
+  over f241–331 (`out/fix/mouth_sitting_drinking.json`).
+- **eagle.sh:** crawl 0.09, flicker 0.00, strobe 0, exit 0. Its one event, a jump at f83, is the clip's own sit-down
+  (ickdrone's original run had it at f89; the hips move at 6–8 mm per frame).
+
+Paths:
+- blend: `blender/assets/reparto/diego_clip_sitting_drinking_sip.blend`;
+- render directory: `blender/render/reparto/partes/diego/clips/fix/sitting_drinking_final/`, holding:
+  - sheet: `sitting_drinking-contact.jpg`;
+  - close-ups: `sitting_drinking-closeups.jpg`;
+  - clip: `sitting_drinking_wb.mp4`.
 
 ## How it is measured
 
