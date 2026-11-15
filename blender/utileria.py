@@ -1255,7 +1255,17 @@ def pantalla_consola():
     return e
 
 
-CAMION_EXTRA += [pantalla_consola]
+def calcas_r1():
+    """The owner's seven r1 picks (approved 04:16): three on the tailgate's free corners and top gap, round the mix (scene 2), four
+    in a row on the right bed side above the wheel-arch flare (scene 4B's side). Checked against every sticker already in the
+    option (the mix) for glyph slots."""
+    previas = [o for o in GRUPO if o.get("c3")]
+    cs = [calca3(id, c["u"], c["z"], c["rot"], orden=c["orden"], cara=c["cara"], escala=c["escala"]) for id, c in COLOCA["calcas_r1"].items()]
+    ranuras_libres(previas + cs)
+    return cs
+
+
+CAMION_EXTRA += [pantalla_consola, calcas_r1]
 
 
 # ================================================================ scenes 2-6, key stills (mothership queue 2026-11-13 05:32)

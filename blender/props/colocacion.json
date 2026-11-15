@@ -13,5 +13,63 @@
   ],
   "escala": 1.0,
   "ancho": 0.2
+ },
+ "calcas_r1": {
+  "r1-gallo": {
+   "cara": "porton",
+   "u": -0.66,
+   "z": 1.24,
+   "rot": 0.06,
+   "escala": 1.0,
+   "orden": 0
+  },
+  "r1-corazon": {
+   "cara": "porton",
+   "u": 0.68,
+   "z": 1.26,
+   "rot": -0.08,
+   "escala": 1.0,
+   "orden": 0
+  },
+  "r1-x-holo": {
+   "cara": "porton",
+   "u": -0.06,
+   "z": 1.335,
+   "rot": 0.04,
+   "escala": 1.0,
+   "orden": 1
+  },
+  "r1-slogan": {
+   "cara": "der",
+   "u": -2.45,
+   "z": 1.355,
+   "rot": 0.02,
+   "escala": 1.0,
+   "orden": 0
+  },
+  "r1-placa": {
+   "cara": "der",
+   "u": -2.0,
+   "z": 1.355,
+   "rot": -0.03,
+   "escala": 1.0,
+   "orden": 0
+  },
+  "r1-arriba": {
+   "cara": "der",
+   "u": -1.55,
+   "z": 1.35,
+   "rot": -0.02,
+   "escala": 1.0,
+   "orden": 0
+  },
+  "r1-bubu": {
+   "cara": "der",
+   "u": -1.05,
+   "z": 1.36,
+   "rot": 0.03,
+   "escala": 1.0,
+   "orden": 0
+  }
  }
 }
