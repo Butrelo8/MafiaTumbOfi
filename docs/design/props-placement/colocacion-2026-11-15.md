@@ -9,7 +9,7 @@ the checks.
 `props_placement.camion()` runs in all six montaje scenes. It now also runs the items below, so `montaje.py` did not change.
 Integration can move the calls into `montaje.py` if it prefers.
 
-| Item | Code | Where (first guess) | Scenes where it reads |
+| Item | Code | Where (first guess) | Visible in (eye only, not verified by a tool) |
 |---|---|---|---|
 | Console screen | `utileria.pantalla_consola` | The centre stack, over the G63's own small display: 0.20 m wide, 16:9, centre z 1.615, leaning about 13° | 1 |
 | Console bottle | `caja5.bebidas_consola` (nerddrone's redo, `d237f62`) | Ahead of the shifter | 1 |
@@ -38,6 +38,9 @@ The files are in `E:\Cursor Projects\MTO-colocar\2026-11-15\`: `colocar-pantalla
   `colocacion.json`, and prints each value it changed.
 
 ## For the follow-up drone (open checks)
+
+- **Scene 2, rule 1 is unmeasured with the instruments in.** The rule caps the tailgate sticker pixels covered by bed props at
+  2 % (caja5 `medir`). The tololoche's tail sits at y −2.84, about 2 cm inside the gate's inner face.
 
 - **r1-arriba's tent is 29.8 mm in scene 1, against 12.1 mm in scenes 2–6.**
   - Every scene prints 778–826 "pozos" for it, and 236–380 for placa and bubu.
