@@ -127,3 +127,19 @@ gotchas:
 - joining parts by deleting vertices → sawtooth rims; bisect on the cut plane, snap the band to the body ring with a fade, keep the body column clamped inside
 - a garment push-out with a hard clamp on ~12k vertices crumpled the shirt → harmonic (smoothed) push-out only, report the residue
 - signed distance from surface samples on a TRELLIS mesh flipped on its ~500 small inner pieces → sample only the largest component with fixed normals
+
+## 2026-11-15 00:15 — model pass (successor session)
+
+- **The 11-14 23:37 poke-through table is void.** `pokethrough.py` measured against the skin's "largest connected
+  piece", which was 1,303 of 206,161 vertices: TRELLIS splits the skin at UV seams into 3,439 pieces. Welded by
+  position, it is 36 pieces: a double body wall (two full-height pieces), four overlapping open shells per hand, the
+  head open at the neck. The script now uses the rigged Mixamo proxy (one watertight piece, same weights) as the body
+  volume. Positive control: a point 5 mm inside the hip reads 4.15 mm. `hands_cloth` is not validated yet.
+- The owner paused clip fixes (23:56). The work is model quality: seams, lids, hands, shoes, skin, hair, chain.
+- Owner's picks (00:13): pale peach skin, soft dark-brown matte hair without the fringe notches, and the silver
+  chain, all as in `diego.png`.
+- Wrist seams, two tries, both worse, reverted. Decimating before the joints didn't help. Clamping the body column
+  inside the hand's per-angle radius made spikes. Next is a piece-coloured render to find which shell the teeth
+  belong to.
+- Stills: `stills.py` now adds a face front and 3/4, and frames the hand from outside the body. Rest-pose stills use a
+  pre-script that sets `pose_position = "REST"`. Seam close-ups: `seam_view.py`.

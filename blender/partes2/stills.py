@@ -1,9 +1,10 @@
 # stills.py -- <out dir> <frames f,f,...> [fbx] [hand side]: Workbench stills (studio light, texture colour, 500 px) on an
 # open blend, or on a Mixamo FBX imported into an empty scene (today's Diego: the clip FBX downloaded With Skin is his
 # own mesh and Mixamo skin). Per frame: front and three-quarter, framed on the visible meshes' posed bounds; with a
-# hand side (Left|Right), also a close-up following mixamorig:<side>Hand (12 cm frame, from the back of the hand).
+# hand side (Left|Right), also a close-up following mixamorig:<side>Hand (14 cm frame, from outside the body, a little in front) and
+# the face (mixamorig:Head, 42 cm frame, front and three-quarter).
 import bpy, sys, os, math
-from mathutils import Vector
+from mathutils import Vector, Matrix
 a = sys.argv[sys.argv.index("--") + 1:]
 out, frames = a[0], [int(x) for x in a[1].split(",")]; fbx = a[2] if len(a) > 2 and a[2] != "-" else None
 hand = a[3] if len(a) > 3 else None
@@ -37,6 +38,12 @@ for f in frames:
         shoot(os.path.join(out, f"f{f:04d}_{name}.png"), ctr, Vector((math.sin(math.radians(az)), -math.cos(math.radians(az)), 0)), max(hi - lo) * 1.1)
     if hand:
         M = arm.matrix_world @ arm.pose.bones[f"mixamorig:{hand}Hand"].matrix
-        c = M @ Vector((0, 0.06 / arm.matrix_world.to_scale()[0], 0)); up = (M.to_3x3() @ Vector((0, 0, 1))).normalized()
-        shoot(os.path.join(out, f"f{f:04d}_hand.png"), c, up, 0.14)
+        c = M @ Vector((0, 0.06 / arm.matrix_world.to_scale()[0], 0))
+        hips = arm.matrix_world @ arm.pose.bones["mixamorig:Hips"].head; side = c - hips; side.z = 0   # from outside the body
+        side = (side.normalized() + Vector((0, -0.6, 0))).normalized()
+        shoot(os.path.join(out, f"f{f:04d}_hand.png"), c, side, 0.14)
+        H = arm.matrix_world @ arm.pose.bones["mixamorig:Head"].matrix          # face: 25 cm frame, front and 3/4
+        c = H @ Vector((0, 0.15 / arm.matrix_world.to_scale()[0], 0)); fwd = (H.to_3x3() @ Vector((0, 0, 1))).normalized()
+        for name, az in (("face", 0), ("face_q", 35)):
+            d = Matrix.Rotation(math.radians(az), 3, "Z") @ fwd; shoot(os.path.join(out, f"f{f:04d}_{name}.png"), c, d, 0.42)
 print("@@ stills", len(frames), "frames", "fbx" if fbx else "blend", out)
