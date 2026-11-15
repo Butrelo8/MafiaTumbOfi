@@ -25,9 +25,10 @@ Diego holding his drink (colddrone). Dropped on purpose: uncdrone's bed B 'regla
 bulbs along the bed and roll bar, which belong to the older bed; the props lane decides whether bulbs come back on caja5.
 
 Cast slot (apedrone's Tripo cast drops in here): collection `reparto` with one child collection per seat, each holding an empty
-`asiento_<who>` at the seated hip point, facing forward, with custom properties alto_m (Diego, Alexandro 1.74; Héctor, the
-manager 1.67), rol and asiento; the stand-ins sit in the same collection, so a drop-in replaces the contents. Diego is the
-interim colddrone clip (sitting_drinking with the owner's hand pose and the sip bake), live rig, scaled to 1.74 m.
+`asiento_<who>` at the seated hip point, facing forward, with custom properties alto_m (the owner's heights on the truck
+convention, confirmed 2026-11-15 04:34: Diego, Alexandro 1.25; Héctor, the manager 1.20 = 1.25 x 1.67/1.74), rol and asiento;
+the stand-ins sit in the same collection, so a drop-in replaces the contents. Diego is the interim colddrone clip
+(sitting_drinking with the owner's hand pose and the sip bake), live rig, scaled to his alto_m.
 
 Placing a rigged clip: parent its top-level objects to one empty and move the empty. Setting matrix_world on the armature and on
 its children one by one moves bone-parented children twice (they read the bone's pose before the depsgraph updates): that was
@@ -63,11 +64,14 @@ assert not _destapados, f"props_placement's probe made viewport-hidden objects v
 
 
 # ---------------------------------------------------------------- 3. cast slot and the interim Diego
-ASIENTOS = {  # who -> (seat, role, height m); the figure names the chain uses
-    "manager": ("delantero izquierdo", "conductor (El Manco)", 1.67),
-    "hector": ("delantero derecho", "copiloto", 1.67),
-    "alejandro": ("trasero izquierdo", "Alexandro", 1.74),
-    "diego": ("trasero derecho", "Diego", 1.74),
+ASIENTOS = {  # who -> (seat, role, height m, head top above the Hips bone as a fraction of height); the chain's figure names
+    # (apedrone's "alexandro" is the chain's "alejandro"). The fraction is apedrone's v5 figure in its rest pose
+    # (MTO-apedrone blender/assets/reparto-v5/cast_alturas/cast.blend, measured 2026-11-15): an upright-torso estimate until
+    # a seated clip exists.
+    "manager": ("delantero izquierdo", "conductor (El Manco)", 1.20, 0.748),
+    "hector": ("delantero derecho", "copiloto", 1.20, 0.748),
+    "alejandro": ("trasero izquierdo", "Alexandro", 1.25, 0.674),
+    "diego": ("trasero derecho", "Diego", 1.25, 0.678),
 }
 DIEGO_OBJS = []
 
@@ -91,9 +95,9 @@ def techo_sobre(p):
     return h.z if h else float("nan")
 
 
-def diego_interino(cadera, giro):
+def diego_interino(cadera, giro, alto):
     """colddrone's sitting_drinking clip, live: its top-level objects under one empty that puts the posed Hips (frame 0 of this
-    scene = the clip's first key) on the seat's hip point, facing forward, scaled so the rest pose is 1.74 m."""
+    scene = the clip's first key) on the seat's hip point, facing forward, scaled so the rest pose is `alto` m."""
     with bpy.data.libraries.load(DIEGO_CLIP, link=False) as (s, d):
         d.objects = [n for n in s.objects]
     nuevos = [o for o in d.objects if o is not None and o.type in ("MESH", "ARMATURE", "EMPTY") and o.name.split(".")[0] != "prop_seat"]
@@ -113,7 +117,7 @@ def diego_interino(cadera, giro):
     lo, hi = alto_z()
     mx.data.pose_position = "POSE"
     sc.frame_set(0)
-    k = 1.74 / (hi - lo)
+    k = alto / (hi - lo)
     hips = mx.matrix_world @ mx.pose.bones["mixamorig:Hips"].head
     raiz = bpy.data.objects.new("diego_raiz", None)
     sc.collection.objects.link(raiz)
@@ -136,7 +140,7 @@ def montar_reparto():
     asientos_traseros()
     raiz = bpy.data.collections.new("reparto")
     sc.collection.children.link(raiz)
-    for quien, (asiento, rol, alto) in ASIENTOS.items():
+    for quien, (asiento, rol, alto, sobre_cadera) in ASIENTOS.items():
         col = bpy.data.collections.new("reparto_" + quien)
         raiz.children.link(col)
         rig = bpy.data.objects[quien + "_rig"]
@@ -152,10 +156,10 @@ def montar_reparto():
         techo = techo_sobre(cad)
         cabeza = None
         if quien == "diego":
-            objs, cabeza = diego_interino(cad, giro)
+            objs, cabeza = diego_interino(cad, giro, alto)
             DIEGO_OBJS.extend(objs)
             mover_a(col, objs)
-        estimada = cad.z + 0.52 * alto - 0.09  # seated: vertex ~0.52 of stature above the seat, hip joint ~0.09 above it
+        estimada = cad.z + sobre_cadera * alto  # apedrone's figure, torso upright
         fr = giro @ Vector((0, -1, 0))
         print(f"MONTAJE asiento {quien} {asiento} alto {alto} cadera ({cad.x:.3f}, {cad.y:.3f}, {cad.z:.3f}) frente ({fr.x:+.2f}, {fr.y:+.2f}) techo {techo:.3f} "
               f"cabeza {'medida' if cabeza else 'estimada'} {cabeza or estimada:.3f} libre {techo - (cabeza or estimada):+.3f}", flush=True)
