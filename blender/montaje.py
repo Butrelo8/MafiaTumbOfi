@@ -54,9 +54,12 @@ exec(compile(open(C5, encoding="utf8").read().rsplit(LAZO, 1)[0], C5, "exec"), g
 PP = os.path.join(AQUI, "props_placement.py")
 _pp = open(PP, encoding="utf8").read()
 _ini, _fin_pp = _pp.index('CAMA = os.environ.get("PP_CAMA"'), _pp.index('for _e, _f in (("1", esc1)')
+_ocultos = {o.name for o in bpy.data.objects if o.hide_viewport}  # Night B fog and plants (1339acc)
 P = dict(globals())
 P["np"] = np
 exec(compile("\n" * _pp[:_ini].count("\n") + _pp[_ini:_fin_pp], PP, "exec"), P)
+_destapados = [o.name for o in bpy.data.objects if o.name in _ocultos and not o.hide_viewport]
+assert not _destapados, f"props_placement's probe made viewport-hidden objects visible to the rays again: {_destapados[:5]}"
 
 
 # ---------------------------------------------------------------- 3. cast slot and the interim Diego
@@ -122,6 +125,10 @@ def diego_interino(cadera, giro):
     sc.frame_set(0)
     lo2, hi2 = alto_z()
     print(f"MONTAJE diego clip reposo {hi - lo:.3f} m -> escala {k:.3f}; sentado z {lo2:.3f}..{hi2:.3f}", flush=True)
+    botella = next((o for o in nuevos if o.name.startswith("prop_bottle") and o.type == "MESH"), None)
+    if botella:
+        mano = mx.matrix_world @ mx.pose.bones["mixamorig:RightHand"].head
+        print(f"MONTAJE diego botella->mano {(botella.matrix_world.translation - mano).length:.3f} m (expected 0.069 x {k:.2f} = {0.069 * k:.3f}: the empty file at 1.0 m)", flush=True)
     return [raiz] + nuevos, hi2
 
 
