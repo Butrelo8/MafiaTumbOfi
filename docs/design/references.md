@@ -156,3 +156,21 @@ Gate: `refs-check.py <this section> --sections caja3`. **Not verified:** no phot
 | caja3 | real world · plastic papel picado for outdoor fiestas, walmart.com/ip/Mexican-Party-Banners-5-Pack-with-10-Tissue-Paper-Flags-per-Banner-Papel-Picado-Mexicano-by-Fiesta-Wraps/2045499676 (S): plastic panels sewn on a string, ~16 × 12.5 in, "some of the colors would flip in a breeze" · with `web/visuales.md` (Y2K floating stickers row: playful colour shapes) | A string of 9 punched panels along the roll bar (A taut, B sagging off one end), the bed props' pink, turquoise, lemon, lime and orange; panel 0.24 × 0.30 m, punch pattern as alpha | M |
 | caja3 | real world · generic objects, no single source, sizes assumed and logged: Coleman-style 48 qt cooler (0.64 × 0.37 × 0.42 m, as round 1's outdoorgearlab row), party tower speaker 0.72 m, tejana hat box 0.50 m across, straw tejana, 12-bottle crate (no brand), band flag 0.90 × 0.60 m on a pole, duffel, XLR coil, ratchet straps · with `blender/skills/kiln-prop/SKILL.md` | The rest of the twelve; the flag carries the MT shield (b-escudo) on black, never a national flag | M |
 | caja3 | user: the sticker pass as the model (owner 05:36 "like the stickers one"); bed B picked 03:22 (`docs/design/escenas/utileria/index.html`) | Model sheet first, then A tidy / B lived-in at both cameras, and stop for the owner's mix | M |
+
+## World, Night B (2026-11-14, run `yeehawdrone`; owner's pick 19:13 of the world audit, built in `blender/mundo.py`)
+
+The world around the truck for scenes 1–6: road, verges, plants, far field, sky and mist. The audit's photos and film frames
+(`~/cc-out/mto-world/referencias.md`, R1–R4 and F1–F4) carry over; film frames are analysis only, never copied into the repo.
+What we match: R1's plants up to the asphalt and the pole line on the verge, R2's far trees as one band of crowns, R3's worn
+asphalt, F2's lamp halos in haze over a warm-grey sky floor, F3's detail only inside the light pools. What we change on
+purpose: night instead of day (R1–R3), no city glow (F2), our road is one carriageway of a divided autopista, so the left edge
+is yellow and the lane line white dashed (R1 has a double yellow centre line).
+Gate: `python3 -I ~/projects/visual-lab/web/scripts/refs-check.py docs/design/references.md --sections mundo`.
+
+| section | library entry | borrow | cost |
+|---|---|---|---|
+| mundo | user: owner 19:13 via mothership, direction B of `~/cc-out/mto-world/hoja-direcciones.jpg` ("Húmeda, neblina"); 23:56 "before digging further into more animations, let's work on the scene and models" | Night B in every scene's Cycles render: overcast sky (kloppenheim_07, 0.25), mist 0.0028, dense green verge, tropical shrubs, a crown band, a CFE pole line | M |
+| mundo | blender-notas · fog behaves the opposite between engines, don't transfer volume values · `blender/blender-notas.md` | The Cycles fog is its own key (`escena.json` noche.cycles.niebla, a fog box 82 m high so the sky stays clean); the page's FogExp2 0.012 is left alone | B |
+| mundo | real world · R1 Commons `File:MEX 180 Estado Veracruz.JPG` (PD, O), R2 `File:Afueras de la ciudad de Jamapa.jpg` (CC BY-SA 4.0, O) · with `blender/blender-notas.md` | Mowed strip 3 m, guinea grass 1–1.6 m to 14 m, shrubs and pachira to 40 m, crowns 22–260 m, nothing 260–700 m, the hill ring under fog; poles every 48 m at x −9, 11 m, three wires sagging 1.2 m | M |
+| mundo | real world · R3 Commons `File:EnteringAlvarado Highway180.JPG` (CC BY-SA 3.0, O); NOM-034-SCT2-SEDATU-2022 (DOF 2023-09-19, O) · with `blender/blender-notas.md` | asphalt_02 at 3 m with wheel paths, oil bands, patches, cracks and a 40 m macro mask, read on y wrapped to the 192 m loop; M-3.1 white right edge, M-3.3 yellow left edge, M-2.3 dashes 4.92/9.85 m (13 per loop), studs every 32 m | M |
+| mundo | real world · F2 Collateral (2004) `collateral/022.jpg`, F3 Sicario (2015) `sicario/032.jpg` (frameref, O) · with `web/visuales-fichas/kage-scroll-world.md` | The LoD rule: hero plants only within ~14 m and inside the lamp and headlight pools; silhouettes beyond against a sky one step lighter | B |
