@@ -1,0 +1,113 @@
+{
+ "selfcheck": {
+  "moved_mm": 6.07,
+  "predicted_mm": 6.07,
+  "err_mm": 0.152
+ },
+ "iters": [
+  {
+   "iter": 0,
+   "frames_measured": 188,
+   "frames_inside": 188,
+   "worst_mm": {
+    "Left": [
+     0.0,
+     null
+    ],
+    "Right": [
+     30.78,
+     35
+    ]
+   },
+   "min_push_across_arm": {
+    "Left": 1.0,
+    "Right": 0.92
+   }
+  },
+  {
+   "iter": 1,
+   "frames_measured": 188,
+   "frames_inside": 187,
+   "worst_mm": {
+    "Left": [
+     0.0,
+     null
+    ],
+    "Right": [
+     15.35,
+     21
+    ]
+   },
+   "min_push_across_arm": {
+    "Left": 1.0,
+    "Right": 0.85
+   }
+  },
+  {
+   "iter": 2,
+   "frames_measured": 188,
+   "frames_inside": 124,
+   "worst_mm": {
+    "Left": [
+     0.0,
+     null
+    ],
+    "Right": [
+     14.76,
+     122
+    ]
+   },
+   "min_push_across_arm": {
+    "Left": 1.0,
+    "Right": 0.83
+   }
+  },
+  {
+   "iter": 3,
+   "frames_measured": 188,
+   "frames_inside": 29,
+   "worst_mm": {
+    "Left": [
+     0.0,
+     null
+    ],
+    "Right": [
+     12.81,
+     155
+    ]
+   },
+   "min_push_across_arm": {
+    "Left": 1.0,
+    "Right": 0.78
+   }
+  },
+  {
+   "iter": 4,
+   "frames_measured": 188,
+   "frames_inside": 0,
+   "worst_mm": {
+    "Left": [
+     0.0,
+     null
+    ],
+    "Right": [
+     0.0,
+     null
+    ]
+   },
+   "min_push_across_arm": {
+    "Left": 1.0,
+    "Right": 1.0
+   }
+  }
+ ],
+ "max_angle_deg": {
+  "Left": 0.0,
+  "Right": 25.38
+ },
+ "margin_mm": 1.5,
+ "keyed_frames": [
+  1,
+  188
+ ]
+}
