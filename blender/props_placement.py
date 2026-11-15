@@ -603,9 +603,10 @@ VAR = {"barra": "fabrica", "emblema": "elegido", "fuente": "pirata", "fresa": No
 
 
 def camion():
-    """What rides on the truck in every scene (owner, 11-13): the real roof lamps and the gold MT on the hood; then the props
+    """What rides on the truck in every scene (owner, 11-13): the real roof lamps and the gold MT on the hood; the roll-bar bulbs
+    (P9, as pp2-b: the arch only, 2.5; owner 11-15 05:41 "bring the roll-bar bulbs back", montaje had left them out); then the props
     phase's additions (utileria.CAMION_EXTRA: the console screen, the r1 stickers, and caja5's console drink when caja5 is loaded)."""
-    barra_luces(VAR["barra"]); emblema(VAR["emblema"])
+    barra_luces(VAR["barra"]); emblema(VAR["emblema"]); bombillas(contorno_caja(rieles=False), 2.5)
     for f in CAMION_EXTRA:
         f()
 
@@ -626,7 +627,7 @@ def esc2(arreglo="b"):
     if arreglo == "a":   # the caja3 bar as it is; the new props added on top: marquee full on, bulbs everywhere, pennants
         cama("caja3"); marquesina(10.0); bombillas(contorno_caja(), 4.0); franja("trasera"); banderines()
     else:                # owner: no marquee. Rules 4, 5: the bulbs trace the roll bar only, the piñata under it is the peak
-        cama("reglas")
+        cama("reglas"); bombillas(contorno_caja(rieles=False), 2.5)
     relleno_caja(VISTA_ESC2()[0])
     return VISTA_ESC2()
 
@@ -638,7 +639,7 @@ def esc4(arreglo="b"):
         cama("caja3"); barra_luces(); trompetas(); parrilla_techo(); monos((1, -1)); marquesina(10.0)
         bombillas(contorno_caja(), 4.0); bajo_luz()
     else:                # rule 5: the roof carries only its own lamps, no marquee; rule 1: nothing above the windows
-        cama("reglas"); camion(); monos((1,)); bombillas(contorno_caja(), 2.5); bajo_luz()
+        cama("reglas"); camion(); monos((1,)); bombillas(contorno_caja(arco=False), 2.5); bajo_luz()  # camion() has the arch's
     return ((CX + 6.2, -0.3, 2.6), (CX, -0.3, 1.45), 24)
 
 
