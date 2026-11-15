@@ -567,38 +567,77 @@ def bebidas_consola():
     _g["dg"] = bpy.context.evaluated_depsgraph_get()
 
 
-def bebida_en_mano(fig="diego", hueso="mano_p", tipo="lata-oro"):
-    """(b) A can in a rider's free hand: Diego's inner hand rests on the rear armrest (bone tip probed 11-14: no rider's hand is in clear view of the 4B cameras). The figures have one
-    bone per hand and no fingers, so the can stands against the hand, never through it: a search round the hand keeps the spot
-    where no hand vertex is inside the can and the gap to the hand is smallest, then parents it to the hand bone (it follows the
-    pose). Prints CAJA5 MANO with the vertices inside (a fail if > 0) and the gap."""
+MANO_POSE = os.environ.get("CAJA5_POSE", "ventana")
+POSES = {  # Héctor's hand that holds the bottle, and where it goes from the shoulder (armature units; None: left on the thigh)
+    "regazo": ("mano_p", None),                      # console side, as posed: the bottle sits below every scene camera
+    "alzada": ("mano_p", (0.0, -0.22, -0.10)),       # console side over the lap: below the window sill
+    "alta": ("mano_p", (0.0, -0.20, 0.04)),          # console side at the mouth: the bottle floats by his ear
+    "ventana": ("mano_n", (0.0, -0.24, 0.0)),        # door side at the chest: seen through his window (scene 4B)
+}
+ALZADA = []
+
+
+def alzar_mano(fig="hector", lado=1, objetivo=(0.0, -0.22, -0.10), polo=(1.0, 0.2, -1.0)):
+    """Raise one hand off the thigh, as if holding a bottle in front of the belly: re-keys frame 0 with transicion's own Pose and
+    two-bone IK (brazo). `objetivo` is the hand's end point from the shoulder, in armature units (the figure faces -Y). Every
+    other bone gets sentar()'s frame-0 direction for Héctor (head from h_cabeza(0), the other hand on the thigh, as regazo)."""
+    rig = bpy.data.objects[fig + "_rig"]
+    j = {b.name: (b.head_local.copy(), b.tail_local.copy()) for b in rig.data.bones}
+    P = T.Pose(rig, j)
+    otro = -lado
+    k_otro = "n" if otro < 0 else "p"
+    rodilla = P.j[f"muslo_{k_otro}"][0] + Vector((0.02 * otro, -0.16, 0.06))
+    k = "n" if lado < 0 else "p"
+    dirs = {"columna": Vector((0, 0.10, 1)).normalized(), "cabeza": Vector((0.10, 0.0, 1)).normalized(),
+            "muslo_n": Vector((-0.12, -1, -0.04)).normalized(), "muslo_p": Vector((0.12, -1, -0.04)).normalized(),
+            "pierna_n": Vector((-0.05, -0.25, -1)).normalized(), "pierna_p": Vector((0.05, -0.25, -1)).normalized()}
+    dirs.update(T.brazo(P, otro, rodilla, Vector((otro * 1.0, 0.5, -0.6))))
+    dirs.update(T.brazo(P, lado, P.j[f"brazo_{k}"][0] + Vector(objetivo), Vector(polo)))
+    P.poner(dirs, 0)
+    sc.frame_set(0)
+    bpy.context.view_layer.update()
+
+
+def bebida_en_mano(fig="hector", hueso=POSES[MANO_POSE][0], tipo="agua"):
+    """(b) A drink in a rider's hand (owner 11-14: drinks in the hand only; Héctor holds the water bottle, his console-side hand).
+    The figures have one bone per hand and no fingers, so the drink stands against the hand, never through it: a search round
+    the hand keeps the spot where no body vertex is inside the drink and the gap to the hand's own vertices (its vertex group)
+    is smallest, the hand partway up a bottle; then it parents the drink to the hand bone (it follows the pose). Prints CAJA5
+    MANO with the vertices inside (a fail if > 0) and the gap."""
     asientos_traseros()
+    if fig == "hector" and POSES[MANO_POSE][1] and not ALZADA:
+        lado = -1 if hueso.endswith("_n") else 1
+        alzar_mano(lado=lado, objetivo=POSES[MANO_POSE][1], polo=(lado * 1.0, 0.2, -1.0))
+        ALZADA.append(1)
     bpy.context.view_layer.update()
     rig, cuerpo = bpy.data.objects[fig + "_rig"], bpy.data.objects[fig]
     b = rig.pose.bones[hueso]
     centro = rig.matrix_world @ ((b.head + b.tail) / 2)
+    R, H = (0.0335, 0.23) if tipo == "agua" else (0.033, 0.122)
     dg = bpy.context.evaluated_depsgraph_get()
     ev = cuerpo.evaluated_get(dg)
     me = ev.to_mesh()
-    vs = [ev.matrix_world @ v.co for v in me.vertices]
+    gi = cuerpo.vertex_groups[hueso].index
+    vs = [(ev.matrix_world @ v.co, any(g.group == gi and g.weight >= 0.5 for g in v.groups)) for v in me.vertices]
     ev.to_mesh_clear()
-    cerca = [v for v in vs if (v - centro).length < 0.2]
-    R, H = 0.033, 0.122
+    cerca = [p for p in vs if (p[0] - centro).length < H + 0.12]
+    bajo = range(-16, 3) if tipo == "agua" else range(-8, 3)
     mejor = None
-    for dz in [k * 0.01 for k in range(-8, 3)]:
+    for dz in [k * 0.01 for k in bajo]:
         for dx in [k * 0.01 for k in range(-9, 10)]:
             for dy in [k * 0.01 for k in range(-9, 10)]:
                 base = centro + Vector((dx, dy, dz))
                 dentro, gap = 0, 9.0
-                for v in cerca:
+                for v, mano in cerca:
                     if base.z <= v.z <= base.z + H:
                         rr = math.hypot(v.x - base.x, v.y - base.y)
                         if rr < R:
                             dentro += 1
                             break
-                        gap = min(gap, rr - R)
+                        if mano:
+                            gap = min(gap, rr - R)
                 if dentro == 0 and gap < 9:
-                    clave = (round(gap, 3), abs(dz), math.hypot(dx, dy))
+                    clave = (round(gap, 3), abs(dz + 0.4 * H) if tipo == "agua" else abs(dz), math.hypot(dx, dy))
                     if mejor is None or clave < mejor[0]:
                         mejor = (clave, base)
     base = mejor[1] if mejor else centro
@@ -609,21 +648,23 @@ def bebida_en_mano(fig="diego", hueso="mano_p", tipo="lata-oro"):
     raiz.parent, raiz.parent_type, raiz.parent_bone = rig, "BONE", hueso
     raiz.matrix_world = M
     bpy.context.view_layer.update()
-    dentro = sum(1 for v in cerca if base.z <= v.z <= base.z + H and math.hypot(v.x - base.x, v.y - base.y) < R)
-    print(f"CAJA5 MANO {fig} {hueso} base {tuple(round(x, 3) for x in base)} dentro {dentro} gap {mejor[0][0] if mejor else 'nan'} m"
+    dentro = sum(1 for v, _m in cerca if base.z <= v.z <= base.z + H and math.hypot(v.x - base.x, v.y - base.y) < R)
+    print(f"CAJA5 MANO {fig} {hueso} {tipo} pose {MANO_POSE} base {tuple(round(x, 3) for x in base)} dentro {dentro} gap {mejor[0][0] if mejor else 'nan'} m"
           f" -> {'PASS' if dentro == 0 and mejor else 'FAIL'}")
     return base
 
 
-def medir1(nombre, pos, mira, lens):
+def medir1(nombre, pos, mira, lens, pasa_vidrio=False, paso=5):
     """Scene 1, rule 1: of the road band seen through the windshield (glass hits ahead of the cab's middle, below 1.87 m: the
-    lower 70 % of the glass, props_placement.py's band), the share covered by the drinks (≤ 2 %)."""
+    lower 70 % of the glass, props_placement.py's band), the share covered by the drinks (≤ 2 %). pasa_vidrio: rays go on
+    through any other glass (a side window, told by the hit face's material), to count the drinks' visible pixels from outside
+    the cab (scene 4). paso: one ray per paso × paso pixels (2 for a drink that is a few pixels wide)."""
     for ob in sc.objects:
         if ob.hide_render and not ob.hide_viewport:
             ob.hide_viewport = True
     bpy.context.view_layer.update()
     dg = bpy.context.evaluated_depsgraph_get()
-    W, H = RW // 5, RH // 5
+    W, H = RW // paso, RH // paso
     R = (Vector(mira) - Vector(pos)).to_track_quat("-Z", "Y").to_matrix()
     th = 18 / lens
     nuevos = {o.name for o in GRUPO if o.name.startswith("k5_bebida") or (o.parent and o.parent.name.startswith("k5_bebida"))}
@@ -646,16 +687,22 @@ def medir1(nombre, pos, mira, lens):
                 if m and m.name.startswith("vidrio") and loc.y > 0.6 and loc.z < 1.87:
                     zona += 1
                     cubierta += tapado
+                elif pasa_vidrio and ob.type == "MESH" and idx < len(ob.data.polygons) and \
+                        (ob.material_slots[ob.data.polygons[idx].material_index].material.name.startswith(("vidrio", "mica"))):
+                    o = loc + d * 0.001
+                    continue
                 break
     r1 = 100.0 * cubierta / zona if zona else float("nan")
-    print(f"CAJA5 MEDIDA {nombre} camino {zona} px cubierto {r1:.2f} % -> r1 {'PASS' if zona and r1 <= 2 else 'FAIL'} | bebidas visibles {vis} px")
+    print(f"CAJA5 MEDIDA {nombre} camino {zona} px cubierto {r1:.2f} % -> r1 {'PASS' if zona and r1 <= 2 else 'FAIL'} | bebidas visibles {vis} px"
+          f" (1 ray per {paso}x{paso} px)")
 
 
 @opcion("caja5-bebidas-esc1")
 def bebidas_esc1():
-    """(a) in scene 1's hold: between the rear headrests, 20 mm, the road through the windshield (transicion.CAMINO[0])."""
+    """Scene 1's hold with the drink in the hand (owner 11-14: no console): between the rear headrests, 20 mm, the road
+    through the windshield (transicion.CAMINO[0])."""
+    cama_elegida()
     base_escena()
-    bebidas_consola()
     bebida_en_mano()
     t1 = toma((T.CAMINO[0][1], T.CAMINO[0][2], T.CAMINO[0][3]), (T.CAMINO[0][1], T.CAMINO[0][2], v(T.CAMINO[0][3])))
     medir1("caja5-bebidas-esc1", *t1)
@@ -664,16 +711,17 @@ def bebidas_esc1():
 
 @opcion("caja5-bebidas-esc4")
 def bebidas_esc4():
-    """Both placements in scene 4B's hold (passenger side, the lit cab)."""
+    """Scene 4B's hold (passenger side, the lit cab) with the drink in the hand."""
+    cama_elegida()
     t4 = esc4_cabina()
-    bebidas_consola()
     bebida_en_mano()
+    medir1("caja5-bebidas-esc4", *t4, pasa_vidrio=True, paso=2)
     return t4
 
 
 @opcion("caja5-bebidas-consola")
 def bebidas_cerca_consola():
-    """(a) close: the console from over the rear armrest."""
+    """(a) close: the console from over the rear armrest. Dropped by the owner 11-14 (kept as a text link on the page)."""
     base_escena()
     bebidas_consola()
     luz("AREA", (CX - 0.05, 0.5, 2.05), 6, (1.0, 0.85, 0.65), mira=(CX - 0.05, 0.52, 1.4), size=0.4, parent=False)
@@ -681,14 +729,25 @@ def bebidas_cerca_consola():
     return ((CX + 0.12, -0.15, 1.78), (CX - 0.05, 0.52, 1.42), 30)
 
 
-@opcion("caja5-bebidas-mano")
-def bebidas_cerca_mano():
-    """(b) close: the can at Diego's hand on the rear armrest, from the other rear seat."""
+def cama_elegida():
+    _g["caja2_b"] = lambda: vestir("elegida")  # base_escena() dresses bed B with the owner's picks, whatever ran before
+
+
+def cerca_mano(cam):
+    cama_elegida()
     base_escena()
     p = bebida_en_mano()
-    luz("AREA", p + Vector((-0.2, 0.1, 0.6)), 5, (1.0, 0.85, 0.65), mira=p, size=0.4, parent=False)
+    c = p + Vector((0, 0, 0.11))
+    luz("AREA", c + Vector((-0.25, 0.25, 0.45)), 5, (1.0, 0.85, 0.65), mira=c, size=0.4, parent=False)
     sin_camara()
-    return ((CX - 0.30, -0.05, 1.80), p + Vector((0, 0, 0.06)), 32)
+    m = c + Vector((0, 0, 0.12))  # between the bottle and his face: both in frame, the door below kept to a strip
+    return (m + Vector(cam), m, 32)
+
+
+@opcion("caja5-bebidas-mano")
+def bebidas_cerca_mano():
+    """(b) close: Héctor's water bottle, from outside his window (scene 4B's side), closer."""
+    return cerca_mano((0.95, -0.20, 0.12))
 
 
 # Studio: each candidate alone in a closed grey box far above the set, key / fill / rim, 1:1 (render at 1080x1080).
