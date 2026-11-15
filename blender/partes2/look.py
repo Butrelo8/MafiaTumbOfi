@@ -2,8 +2,8 @@
 #   skin  : every skin texture (the four "Diego" materials) shifted so its skin cluster's median is the source's pale
 #           peach, sRGB (226, 192, 170) = the median of the source's cheek, forehead and arm patches. Per-pixel channel
 #           gain in linear light, weighted by closeness to the old skin median (eye whites, pupils, brows keep theirs).
-#   hair  : soft dark brown, sRGB (64, 55, 51): each dark texel becomes that colour times (L + 0.02) / (median L + 0.02),
-#           clipped to 0.6-1.4 (the texture is near black, so this keeps what little shading it has); matte: roughness 1, specular 0.1 (Principled and Workbench).
+#   hair  : soft dark brown, sRGB (64, 55, 51), flat over the whole texture (it was near black, and recolouring only its
+#           dark texels left skin-coloured stripes on the cut edge at the nape); matte: roughness 1, specular 0.1.
 #   chain : a silver chain on the shirt as in the source: a closed curve around the neck 1.5 mm off the shirt, at the
 #           collar behind and dipping DIP in front, 1.1 mm bevel, metallic, bone-parented to mixamorig:Spine2.
 # Prints each image's old median and the gain; saves out.blend (images re-packed).
@@ -42,15 +42,13 @@ for slot in bpy.data.objects["Diego"].material_slots:                      # ski
     print("@@ skin", slot.material.name, img.name, img.colorspace_settings.name, "old median sRGB", (med * 255).round().tolist(), "gain", gain.round(2).tolist())
 
 hm = bpy.data.objects["hair"].material_slots[0].material; img = base_image(hm); P = pixels(img); C = P[:, :3]   # hair
-L = C @ np.array([0.2126, 0.7152, 0.0722]); dark = L < 0.35
-med = np.median(L[dark]); rel = np.clip((L[dark] + 0.02) / (med + 0.02), 0.6, 1.4)     # the texture is near black: floor
-C[dark] = np.clip(HAIR[None, :] * rel[:, None], 0, 1); store(img, P)
+C[:] = HAIR; store(img, P)        # flat: the texture is near black, and its cut edge at the nape carried skin texels
 bsdf = hm.node_tree.nodes["Principled BSDF"]
 for k in ("Roughness", "Metallic"):
     for l in list(bsdf.inputs[k].links): hm.node_tree.links.remove(l)
 bsdf.inputs["Roughness"].default_value = 1.0; bsdf.inputs["Metallic"].default_value = 0.0
 bsdf.inputs["Specular IOR Level"].default_value = 0.1; hm.roughness = 1.0; hm.metallic = 0.0; hm.specular_intensity = 0.1
-print("@@ hair median luminance %.3f -> sRGB %s" % (med, (HAIR * 255).round().tolist()))
+print("@@ hair flat sRGB %s, matte" % (HAIR * 255).round().tolist())
 
 sh = bpy.data.objects["shirt"]; dg = bpy.context.evaluated_depsgraph_get(); arm = bpy.data.objects["mx"]   # chain
 arm.data.pose_position = "REST"; bpy.context.view_layer.update()

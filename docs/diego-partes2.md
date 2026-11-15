@@ -176,3 +176,21 @@ gotchas:
 - Rebuild from the dressed blend: `rebuild_tail.sh` (bind, look, 4 clips, lids; ~2 min). The clip blends changed, so
   their 11-14 eagle results are stale.
 - Stills: `render/.../model/v2/model_v2.jpg` (rest, beside the source).
+
+### 00:41–01:00: shoes lined up, body single wall
+- **The body had two complete walls** (TRELLIS; welded pieces of 39k and 24k vertices, both full height). The inner
+  one's sawtooth made the wrist teeth (a piece-coloured render shows them green) and the band at the back of the neck.
+  `assemble.py drop_inner_wall()` keeps the outer wall (larger median radius at z 0.35–0.55: 169.4 against 167.0 mm).
+  The wrist teeth are mostly gone. Left: a faint ring line and small flaps under the right wrist.
+  Seams sheet: `render/.../model/seams/cmp.jpg`.
+- **Shoes, line-up (owner 00:39).**
+  - The box fit put the shoes where the fused Diego's shoes were, but the new legs stand elsewhere: the pant leg met
+    the shoe 57 % back from the toe, where the reference has 74 %.
+  - `shoes_box.py` now slides each shoe so the pant leg at the shoe top sits at the reference's fractions of the shoe
+    box: 0.74 back, 0.30 from the inner edge. `diego.png` agrees: cuff centre ~0.32 from the inner edge.
+  - Height: the reference (top 0.09, source ~0.083) is right. Keeping TRELLIS's height put the cuff inside the shoe.
+  - Sheet: `render/.../model/v3/feet_v3.jpg`.
+- **Hair:** flat brown. Recolouring only its dark texels had left skin-coloured stripes on the nape edge.
+- **Open:**
+  - the ragged nape edge of the hair (geometry, cut from the fused mesh; it was there on 11-14 too);
+  - a ragged patch on the shirt's lower back at the hem (on 11-14 too).

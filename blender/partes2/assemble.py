@@ -101,8 +101,31 @@ def joint(body, part, c0, a, J, name):
         name, rb.min() * 1000, rb.max() * 1000, np.median(rb) * 1000, np.median(r0) * 1000, band.sum()))
 
 
+def drop_inner_wall(o):
+    """TRELLIS gave the body two complete walls (welded by position: 39k and 24k vertices, both full height). Both were
+    cut at the joints, and the inner one's sawtooth showed as teeth at the wrists and a band at the neck. Keep the
+    outer one: the larger median distance from the torso axis at z 0.35-0.55."""
+    P = coords(o); _, wid = np.unique(np.round(P / 1e-5).astype(np.int64), axis=0, return_inverse=True); wid = wid.ravel()
+    E = np.empty(len(o.data.edges) * 2, np.int64); o.data.edges.foreach_get("vertices", E); E = wid[E.reshape(-1, 2)]
+    par = np.arange(wid.max() + 1)
+    def find(x):
+        while par[x] != x: par[x] = par[par[x]]; x = par[x]
+        return x
+    for p, q in E:
+        rp, rq = find(p), find(q)
+        if rp != rq: par[rp] = rq
+    comp = np.array([find(x) for x in range(len(par))])[wid]; u, cnt = np.unique(comp, return_counts=True)
+    two = u[np.argsort(-cnt)[:2]]; H = P[:, 2].max() - P[:, 2].min()
+    if any(np.ptp(P[comp == c, 2]) < 0.8 * H for c in two): print("@@ body: no double wall"); return
+    band = (P[:, 2] > 0.35) & (P[:, 2] < 0.55); ax = P[band, :2].mean(0)
+    rad = [np.median(np.linalg.norm(P[(comp == c) & band, :2] - ax, axis=1)) for c in two]
+    inner = two[int(np.argmin(rad))]; delete(o, comp == inner)
+    print("@@ body: dropped the inner wall, %d verts (median radius %.1f vs %.1f mm)" % ((comp == inner).sum(), min(rad) * 1000, max(rad) * 1000))
+
+
 J = lambda n: json.load(open(os.path.join(fit, n + ".json")))
 body = load("body", J("body")["T"]); head = load(head_name, J(head_name)["T"]); HJ = J("hand")
+drop_inner_wall(body)
 B = coords(body); slab = B[(np.abs(B[:, 2] - CUT) < 0.002) & (np.abs(B[:, 0]) < 0.12) & (np.abs(B[:, 1]) < 0.12)]
 c0 = np.r_[slab[:, :2].mean(0), CUT]
 NECK["cut"] = 0.0; joint(body, head, c0, np.array([0, 0, 1.0]), NECK, "neck")
