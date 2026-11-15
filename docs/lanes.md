@@ -63,9 +63,9 @@ Each file has one owner. `utileria.py` is the exception: it is split by function
 | Lane | Owns (files) | Owns (scene collections and objects) | First task |
 |---|---|---|---|
 | **Integration** (highkeydrone) | `blender/montaje.py`, `docs/lanes.md`, the merges | `reparto` and its seat empties `asiento_*`; the `montaje-esc*` options | Wire in each lane as it hands back. The cast drop-in comes first |
-| **Layout / cameras** | `blender/transicion.py` (`CAMINO`, the camera rail and the seating poses), `blender/storyboard.py`, `blender/colocar.py`, and in `utileria.py` the scene-hold block from `def v(lens)` to `esc6_flash` (the `toma(...)` tuples, `luz_costado`) | Cameras `cam_*`, `cam_transicion` | Check that each hold still frames its subject now that the cast is at real height (see Findings › Seat clearance). Scene 6's camera currently lives in `montaje.py`'s `m_esc6` (from pp6-b); move it into a `esc6` hold in `utileria.py` so layout owns it |
+| **Layout / cameras** | `blender/transicion.py` (`CAMINO`, the camera rail and the seating poses), `blender/storyboard.py`, `blender/colocar.py`, and in `utileria.py` the scene-hold block from `def v(lens)` to `esc6_flash` (the `toma(...)` tuples, `luz_costado`) | Cameras `cam_*`, `cam_transicion` | Check that each hold still frames its subject at the cast's heights (1.25 / 1.20 m, Findings › Seat clearance). Scene 6's camera currently lives in `montaje.py`'s `m_esc6` (from pp6-b); move it into a `esc6` hold in `utileria.py` so layout owns it |
 | **World** (yeehawdrone's line) | `blender/mundo.py`, `escena.py`'s `mundo_render` world part, the `noche` values in `src/lib/escena.json`, `docs/mundo-noche-b.md`, `docs/licencias/mundo-polyhaven.md` | `mundo`, every `w_*`, poles, lamps, plants, fog | Loop check: frame 192 must equal frame 0 for each hold (`eagle.sh` on a short clip). The raw sheet checked stills only. The lane needs no change (Findings › Lane) |
-| **Characters** (apedrone, Tripo cast) | `blender/tripo-v5/`, `docs/tripo-reparto-v5.md`, `blender/partes/`, `blender/partes2/`, `blender/reparto.py`, `blender/personaje.py`, `blender/assets/reparto*` (untracked) | The contents of `reparto/reparto_<who>` | Deliver the four Tripo figures as clip .blends: Mixamo rig, metres, facing −Y, scaled to `alto_m`. Integration places each one on its `asiento_<who>` through one root empty, the way `montaje.py`'s `diego_interino` does. Resolve the seat clearance first (Findings) |
+| **Characters** (apedrone, Tripo cast) | `blender/tripo-v5/`, `docs/tripo-reparto-v5.md`, `blender/partes/`, `blender/partes2/`, `blender/reparto.py`, `blender/personaje.py`, `blender/assets/reparto*` (untracked) | The contents of `reparto/reparto_<who>` | Deliver the four Tripo figures as seated clip .blends: Mixamo rig, metres, facing −Y, scaled to `alto_m` (1.25 m Diego and Alexandro, 1.20 m Héctor and the manager). Name each rig after its figure: `cast_alturas/cast.blend` has `Armature`…`Armature.003`, in `cast.json`'s order (diego, hector, alexandro, manager). apedrone's `alexandro` is the chain's `alejandro`; the chain keeps its name, because other code finds `alejandro_rig`. Integration places each one on its `asiento_<who>` through one root empty, the way `montaje.py`'s `diego_interino` does. Measure the seated head against the ceiling (Findings › Seat clearance) |
 | **Props** | `utileria.py` (everything outside layout's hold block), `caja3.py`, `caja4.py`, `caja5.py`, `props_placement.py`, `calcas_arte.py`, `etiquetas.py`, `pantalla_tablero.py`, `placa_veracruz.py`, `fresa_charm.py`, `blender/props/`, `blender/fuentes/`, `docs/design/props-placement/`, `docs/design/escenas/utileria/` | Everything built into `GRUPO` by an option: the bed load, the stickers, the cab dressing, the roof lamps, the MT emblem, the plate, the screen truck | **(1) The dashboard screen** (below). **(2) The seven sticker decals** (below) |
 | **Animation** (parked) | `blender/temblor.py`, `blender/vivo.py`; the clips' motion | none yet | Parked until the cast and props are in. Then the v3 transition re-render with all four in the cab (escenas-plan §0 item 4) |
 
@@ -139,25 +139,27 @@ on every build:
   edge is on the truck's right.
 - Open question for the owner: which render looked like the wrong lane?
 
-**Seat clearance: the cast at real height does not fit the cab (an owner and cast question).** Each seat's ceiling was
-found with a ray straight up from the seated hip point:
+**Seat clearance: the cast fits at the owner's truck convention (1.25 / 1.20 m).** The owner confirmed the heights at
+04:34 (apedrone, `docs/tripo-reparto-v5.md` › Heights): the tallest figure is 1.25 m, as the truck build's figures always
+were, and the others keep the owner's ratios. That is 1.25 m for Diego and Alexandro, and 1.25 × 1.67/1.74 = 1.20 m for
+Héctor and the manager. `montaje.py`'s `ASIENTOS` now carries these heights, and the interim Diego is scaled to 1.25 m.
+Each seat's ceiling was found with a ray straight up from the seated hip point (build of 2026-11-15 05:34):
 
 ```
-seat               hip z   ceiling z   stature   head top z                  room
-manager  front L   1.150   2.189       1.67      1.928 (estimate, real body)  +0.261
-Héctor   front R   1.150   2.190       1.67      1.928 (estimate, real body)  +0.262
-Alexandro rear L   1.259   2.187       1.74      2.074 (estimate, real body)  +0.113
-Diego    rear R    1.259   2.187       1.74      2.472 (measured, the clip)  -0.285
+seat               hip z   ceiling z   height   head top above hips        head top z                  room
+manager  front L   1.150   2.189       1.20     0.748 x (apedrone, rest)   2.048 (estimate)            +0.141
+Héctor   front R   1.150   2.190       1.20     0.748 x (apedrone, rest)   2.048 (estimate)            +0.143
+Alexandro rear L   1.259   2.187       1.25     0.674 x (apedrone, rest)   2.102 (estimate)            +0.085
+Diego    rear R    1.259   2.187       1.25     colddrone clip, seated     2.130 (measured, the clip)  +0.057
 ```
 
-- The estimates assume real-body proportions: the top of the head sits about 0.52 × stature above the seat.
-- The figures are cartoon proportions. colddrone's Diego, seated, has his head top 0.697 × stature above his hips.
-- At 1.74 m that puts his head 0.285 m through the roof (`montaje-esc1.png` shows it).
-- With those proportions, the tallest figure that fits with 2 cm to spare is 1.30 m in the rear seats and 1.46 m in
-  the front seats.
-- The old Tripo stand-ins ride at 1.25 m.
-- Measure apedrone's four the same way before choosing a scale. The choices are: shorter figures, a lower seat point,
-  or figures that slouch. Shrinking them is not the integration lane's call.
+- The estimates use apedrone's v5 figures in their rest pose (`MTO-apedrone/blender/assets/reparto-v5/cast_alturas/cast.blend`,
+  the mesh top above the Hips bone), with the torso upright. No seated clip of those figures exists yet. When one comes,
+  the build measures it.
+- Why 1.74 m failed: colddrone's Diego, seated, has his head top 0.697 × his height above his hips. At 1.74 m his head
+  went 0.285 m through the roof (the 05:10 build, log `crudo/montaje-174.log`). The tallest figure that fits with 2 cm
+  to spare is 1.30 m in the rear seats and 1.46 m in the front seats, so 1.25 / 1.20 m fit.
+- Diego's bottle-to-hand distance scales with him: 0.086 m at 1.25 m, which is 0.069 × 1.25 from the empty-file test.
 
 **Untracked input with no generator.** `tmp/utileria/calcas3/spotify-icon.png` (the Spotify glyph on the scene-2
 sticker) is made by no script in the repo. It was copied from `MTO-nerddrone/tmp/utileria/calcas3/`. Props lane: add it
@@ -170,14 +172,16 @@ objects it hid. `montaje.py` asserts this on every build.
 ## Open questions (for the owner, through the mothership)
 
 1. **Is the bed final?** The build uses caja5 'elegida' (nerddrone dafaa18), the latest committed bed. nerddrone also
-   has uncommitted work (`tmp/caja6`, `tmp/caja7`, the caja5 console redo). It changes the cab drinks, not the bed load.
+   has uncommitted work (`tmp/caja6`, `tmp/caja7`, the caja5 console redo). It changes the cab drinks, not the bed load. The decisions file asks to reconcile uncdrone's strawberry B and Pirata
+   One MT into caja5. The build already does that: `props_placement.py`'s body puts both on the truck in every scene.
 2. **The lane.** The truck is already in the right lane (Findings › Lane). Which render looked wrong?
-3. **The cast at 1.74 / 1.67 m doesn't fit seated with cartoon proportions.** The rear seats fit at most 1.30 m and the
-   front seats 1.46 m (Findings › Seat clearance). The choices are shorter figures, lower seat points, or a slouch.
+3. **Answered: the cast's heights.** The owner confirmed 1.25 / 1.20 m at 04:34. They fit the seats
+   (Findings › Seat clearance), and the build uses them.
 4. **Do the roll-bar bulbs (P9) come back on caja5?** The pp B scenes had them on the older bed; montaje leaves them out.
 5. **Which interim Diego?** colddrone's TRELLIS.2 clip is in the build, and skibididrone's partes2 is merged as code only.
    Both give way to apedrone's Tripo Diego.
-6. **Who places the stickers?** The picks' README says the integration branch merges them; the brief gives them to the
-   props lane, and this file follows the brief.
+6. **Who places the stickers?** The owner's decisions file says "place them in the integration step", and so does the
+   picks' README. The 04:18 brief gave them to the props lane, and this file follows the brief. Nobody has placed them
+   yet.
 7. **Housekeeping.** colddrone committed `blender/partes/__pycache__/inspect.cpython-314.pyc`, and
    `blender/__pycache__/` shows up untracked after any run. `.gitignore` has no `__pycache__/` line. It was left as it is.
