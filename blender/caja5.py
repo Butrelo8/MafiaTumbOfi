@@ -402,6 +402,57 @@ def vestir(nivel):
     print(f"CAJA5 VARIANTE {nivel} nuevos {len(lista)} ({','.join(lista)})")
 
 
+# ---------------------------------------------------------------- the trio's instruments, out of their cases (owner 11-15 05:41:
+# "he doesn't see the band's instruments in the bed"). blender/assets/guitarra.blend (Blend Swap, no licence file) and tololoche.blend
+# (no source recorded) stay out: licences unchecked (escenas-plan.md asset table). Our own primitives at the sizes of
+# references.md › caja3 (tololoche 1.80 m, lower bout 0.66; bajo sexto 1.05 m, 0.44; requinto 0.98 m, 0.36 for its case, so the
+# instrument ~0.90 m, 0.33). Built face up (+z), neck along +y, the origin under the lower bout's tail on the back; where each sits
+# is blender/props/colocacion.json › instrumentos (the owner places them in the hand-off .blend).
+INSTRUMENTOS = {  # id: (length, lower bout, upper bout, body length, depth, neck width, top colour, side colour, round hole)
+    "tololoche": (1.80, 0.66, 0.50, 1.10, 0.25, 0.07, (0.40, 0.17, 0.05), (0.20, 0.07, 0.02), False),
+    "bajo_sexto": (1.05, 0.44, 0.34, 0.52, 0.12, 0.065, (0.48, 0.24, 0.07), (0.02, 0.02, 0.02), True),  # a sunburst centre: (0.30, 0.10, 0.03) merged with the load in scene 2
+    "requinto": (0.90, 0.33, 0.25, 0.42, 0.09, 0.05, (0.62, 0.42, 0.20), (0.10, 0.05, 0.02), True),
+}
+
+
+def instrumento(id):
+    """One instrument as primitives under an empty `inst_<id>`: two bouts (flat cylinders), the top's hole (round, or a bass's two
+    f-holes), bridge, neck with a dark fingerboard, headstock (a scroll on the bass, its endpin under the tail)."""
+    L, inf, sup, cuerpo, prof, cuello, tapa, aro, redondo = INSTRUMENTOS[id]
+    mt, ma, mo = mat(f"k5_{id}_tapa", tapa, 0.3), mat(f"k5_{id}_aro", aro, 0.35), mat("k5_ebano", (0.012, 0.009, 0.007), 0.4)
+    e = bpy.data.objects.new("inst_" + id, None)
+    sc.collection.objects.link(e)
+    for r, y in ((inf / 2, inf / 2), (sup / 2, cuerpo - sup / 2)):
+        cil(r, prof, (0, y, prof / 2), ma, verts=48, parent=e)
+        cil(r - 0.006, 0.003, (0, y, prof + 0.0015), mt, verts=48, parent=e)  # the top, inset from the sides
+    yb = inf * 0.45  # the bridge, on the lower bout
+    caja((cuello * 1.8, 0.02, 0.012), (0, yb, prof + 0.009), mo, parent=e)
+    if redondo:
+        cil(sup * 0.24, 0.002, (0, cuerpo - sup * 0.62, prof + 0.0035), mo, verts=32, parent=e)
+    else:
+        for s in (-1, 1):
+            caja((0.012, 0.16, 0.002), (s * inf * 0.22, inf * 0.62, prof + 0.0035), mo, rot=(0, 0, s * 0.12), parent=e)
+    largo = L - cuerpo - (0.12 if redondo else 0.16)  # neck from the upper bout's top to the head
+    caja((cuello, largo, 0.03), (0, cuerpo + largo / 2 - 0.02, prof - 0.005), ma, parent=e)
+    caja((cuello, largo + cuerpo * 0.35, 0.006), (0, cuerpo + largo / 2 - cuerpo * 0.175 - 0.02, prof + 0.013), mo, parent=e)
+    yc = cuerpo + largo - 0.02
+    if redondo:
+        caja((cuello * 1.6, 0.17, 0.018), (0, yc + 0.085, prof - 0.01), ma, rot=(-0.2, 0, 0), parent=e)
+    else:
+        caja((cuello, 0.12, 0.05), (0, yc + 0.06, prof - 0.005), ma, parent=e)
+        cil(0.035, cuello * 0.9, (0, yc + 0.13, prof + 0.01), ma, rot=(0, math.pi / 2, 0), verts=24, parent=e)  # the scroll
+        cil(0.008, 0.10, (0, -0.05, prof / 2), mo, rot=(math.pi / 2, 0, 0), verts=12, parent=e)  # the endpin
+    c = COLOCA["instrumentos"][id]
+    e.location, e.rotation_euler, e.scale = c["loc"], c["rot"], (c["escala"],) * 3  # children were built at the identity
+    _fin(e, None, None)
+    print("CAJA5 INSTRUMENTO", id, tuple(round(v, 3) for v in c["loc"]), "largo", L)
+    return e
+
+
+def instrumentos():
+    return [instrumento(id) for id in INSTRUMENTOS]
+
+
 # ---------------------------------------------------------------- scene-2 measures (props-placement reglas.md, rules 1-3)
 HIST = {}
 
@@ -740,6 +791,7 @@ def bebidas_consola(var=CONSOLA_VAR):
 
 
 CAMION_EXTRA.append(bebidas_consola)  # the montaje scenes carry the console bottle under the screen (mothership 05:43)
+CAMION_EXTRA.append(instrumentos)     # and the trio's instruments on the load (owner 05:41)
 
 
 MANO_POSE = os.environ.get("CAJA5_POSE", "ventana")
