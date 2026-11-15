@@ -1,0 +1,384 @@
+{
+ "src": "Body",
+ "verts_in": 198989,
+ "verts_welded": 146137,
+ "faces": 299395,
+ "weld": 1e-05,
+ "shoulder": "armhole",
+ "pin": true,
+ "align": null,
+ "cuts": {
+  "collar": {
+   "co": [
+    0.0,
+    -0.008467987179756165,
+    0.5835220813751221
+   ],
+   "no": [
+    0.0,
+    -0.3387194871902466,
+    0.940887451171875
+   ],
+   "shift_mm": 25.0,
+   "leak": false,
+   "ring_radius_mm": null,
+   "child_verts": 17164,
+   "child": "head",
+   "parent": "torso"
+  },
+  "hem": {
+   "co": [
+    0.0,
+    0.0,
+    0.2750000059604645
+   ],
+   "no": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "shift_mm": 0.0,
+   "leak": false,
+   "ring_radius_mm": null,
+   "child_verts": 55137,
+   "child": "torso",
+   "parent": "pelvis"
+  },
+  "wrist.L": {
+   "co": [
+    0.26486629247665405,
+    0.004008435644209385,
+    0.4141470193862915
+   ],
+   "no": [
+    0.8075562119483948,
+    -0.08063025027513504,
+    -0.584253191947937
+   ],
+   "shift_mm": -5.0,
+   "leak": false,
+   "ring_radius_mm": 34.6,
+   "child_verts": 1714,
+   "child": "hand.L",
+   "parent": "forearm.L"
+  },
+  "elbow.L": {
+   "co": [
+    0.20763608813285828,
+    0.009722569957375526,
+    0.4555521011352539
+   ],
+   "no": [
+    0.8100711107254028,
+    -0.017434291541576385,
+    -0.5860724449157715
+   ],
+   "shift_mm": 0.0,
+   "leak": false,
+   "ring_radius_mm": 35.8,
+   "child_verts": 2241,
+   "child": "forearm.L",
+   "parent": "upper_arm.L"
+  },
+  "shoulder.L": {
+   "co": [
+    0.1334727257490158,
+    0.005522849969565868,
+    0.5092080235481262
+   ],
+   "no": [
+    0.8093430399894714,
+    0.04583146423101425,
+    -0.5855454206466675
+   ],
+   "shift_mm": 35.0,
+   "leak": false,
+   "ring_radius_mm": null,
+   "child_verts": 7241,
+   "child": "upper_arm.L",
+   "parent": "torso"
+  },
+  "hip.L": {
+   "co": [
+    0.0015811388147994876,
+    0.0,
+    0.230256587266922
+   ],
+   "no": [
+    0.3162277638912201,
+    0.0,
+    -0.9486832618713379
+   ],
+   "shift_mm": 5.0,
+   "leak": false,
+   "ring_radius_mm": null,
+   "child_verts": 13023,
+   "child": "thigh.L",
+   "parent": "pelvis"
+  },
+  "knee.L": {
+   "co": [
+    0.0582987442612648,
+    -0.0034120932687073946,
+    0.15438562631607056
+   ],
+   "no": [
+    0.06278961151838303,
+    -0.004424880258738995,
+    -0.9980170130729675
+   ],
+   "shift_mm": 7.5,
+   "leak": false,
+   "ring_radius_mm": 50.2,
+   "child_verts": 11162,
+   "child": "shin.L",
+   "parent": "thigh.L"
+  },
+  "cuff.L": {
+   "co": [
+    0.06499999761581421,
+    0.0,
+    0.07800000160932541
+   ],
+   "no": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "shift_mm": 0.0,
+   "leak": false,
+   "ring_radius_mm": null,
+   "child_verts": 8465,
+   "child": "shoe.L",
+   "parent": "shin.L"
+  },
+  "wrist.R": {
+   "co": [
+    -0.2648676335811615,
+    0.00404543848708272,
+    0.41414618492126465
+   ],
+   "no": [
+    -0.8072956204414368,
+    -0.08452007174491882,
+    -0.5840632915496826
+   ],
+   "shift_mm": -5.0,
+   "leak": false,
+   "ring_radius_mm": 34.8,
+   "child_verts": 1705,
+   "child": "hand.R",
+   "parent": "forearm.R"
+  },
+  "elbow.R": {
+   "co": [
+    -0.20764939486980438,
+    0.010035920888185501,
+    0.45554250478744507
+   ],
+   "no": [
+    -0.8100103735923767,
+    -0.021339930593967438,
+    -0.5860270857810974
+   ],
+   "shift_mm": 0.0,
+   "leak": false,
+   "ring_radius_mm": 35.7,
+   "child_verts": 2216,
+   "child": "forearm.R",
+   "parent": "upper_arm.R"
+  },
+  "shoulder.R": {
+   "co": [
+    -0.1334775984287262,
+    0.006194331217557192,
+    0.5092045664787292
+   ],
+   "no": [
+    -0.8094825744628906,
+    0.04192563518881798,
+    -0.5856450200080872
+   ],
+   "shift_mm": 35.0,
+   "leak": false,
+   "ring_radius_mm": null,
+   "child_verts": 7267,
+   "child": "upper_arm.R",
+   "parent": "torso"
+  },
+  "hip.R": {
+   "co": [
+    -0.003162277629598975,
+    0.0,
+    0.22551317512989044
+   ],
+   "no": [
+    -0.3162277638912201,
+    0.0,
+    -0.9486832618713379
+   ],
+   "shift_mm": 10.0,
+   "leak": false,
+   "ring_radius_mm": null,
+   "child_verts": 12810,
+   "child": "thigh.R",
+   "parent": "pelvis"
+  },
+  "knee.R": {
+   "co": [
+    -0.05829881131649017,
+    -0.0033118051942437887,
+    0.15438392758369446
+   ],
+   "no": [
+    -0.06278877705335617,
+    -0.0066957371309399605,
+    -0.9980043172836304
+   ],
+   "shift_mm": 7.5,
+   "leak": false,
+   "ring_radius_mm": 49.8,
+   "child_verts": 11046,
+   "child": "shin.R",
+   "parent": "thigh.R"
+  },
+  "cuff.R": {
+   "co": [
+    -0.06499999761581421,
+    0.0,
+    0.07800000160932541
+   ],
+   "no": [
+    0.0,
+    0.0,
+    -1.0
+   ],
+   "shift_mm": 0.0,
+   "leak": false,
+   "ring_radius_mm": null,
+   "child_verts": 8391,
+   "child": "shoe.R",
+   "parent": "shin.R"
+  }
+ },
+ "parts": {
+  "head": {
+   "bone": "ORG-spine.006",
+   "pinned": false,
+   "faces": 167479,
+   "cap_faces": 542,
+   "open_edges_after": 32
+  },
+  "torso": {
+   "bone": "ORG-spine.003",
+   "pinned": false,
+   "faces": 50001,
+   "cap_faces": 1489,
+   "open_edges_after": 18
+  },
+  "pelvis": {
+   "bone": "ORG-spine",
+   "pinned": false,
+   "faces": 4628,
+   "cap_faces": 1041,
+   "open_edges_after": 0
+  },
+  "upper_arm.L": {
+   "bone": "ORG-upper_arm.L",
+   "pinned": true,
+   "faces": 5967,
+   "cap_faces": 436,
+   "open_edges_after": 0
+  },
+  "forearm.L": {
+   "bone": "ORG-forearm.L",
+   "pinned": true,
+   "faces": 2775,
+   "cap_faces": 400,
+   "open_edges_after": 0
+  },
+  "hand.L": {
+   "bone": "ORG-hand.L",
+   "pinned": true,
+   "faces": 7495,
+   "cap_faces": 200,
+   "open_edges_after": 0
+  },
+  "thigh.L": {
+   "bone": "ORG-thigh.L",
+   "pinned": false,
+   "faces": 4552,
+   "cap_faces": 551,
+   "open_edges_after": 0
+  },
+  "shin.L": {
+   "bone": "ORG-shin.L",
+   "pinned": false,
+   "faces": 6723,
+   "cap_faces": 896,
+   "open_edges_after": 0
+  },
+  "shoe.L": {
+   "bone": "ORG-foot.L",
+   "pinned": false,
+   "faces": 18057,
+   "cap_faces": 637,
+   "open_edges_after": 3
+  },
+  "upper_arm.R": {
+   "bone": "ORG-upper_arm.R",
+   "pinned": true,
+   "faces": 6093,
+   "cap_faces": 453,
+   "open_edges_after": 2
+  },
+  "forearm.R": {
+   "bone": "ORG-forearm.R",
+   "pinned": true,
+   "faces": 2734,
+   "cap_faces": 406,
+   "open_edges_after": 0
+  },
+  "hand.R": {
+   "bone": "ORG-hand.R",
+   "pinned": true,
+   "faces": 7509,
+   "cap_faces": 200,
+   "open_edges_after": 0
+  },
+  "thigh.R": {
+   "bone": "ORG-thigh.R",
+   "pinned": false,
+   "faces": 4333,
+   "cap_faces": 531,
+   "open_edges_after": 0
+  },
+  "shin.R": {
+   "bone": "ORG-shin.R",
+   "pinned": false,
+   "faces": 6621,
+   "cap_faces": 880,
+   "open_edges_after": 0
+  },
+  "shoe.R": {
+   "bone": "ORG-foot.R",
+   "pinned": false,
+   "faces": 17908,
+   "cap_faces": 634,
+   "open_edges_after": 1
+  }
+ },
+ "unreached_pieces": 34,
+ "unreached_faces": 167371,
+ "clash": {},
+ "wrist_pivot_L": [
+  0.2645018696784973,
+  0.004000076092779636,
+  0.41364434361457825
+ ],
+ "wrist_pivot_R": [
+  -0.26444104313850403,
+  0.0032275007106363773,
+  0.4136750102043152
+ ]
+}
