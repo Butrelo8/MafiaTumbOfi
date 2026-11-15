@@ -47,6 +47,27 @@ Times: `blender/render/reparto/partes2/diego/tiempos.log` (append the remaining 
 - Sent to the user: the part sheet `partes-klein.jpg`, `fit/dress_sheet.png`, `blink_strip.png`,
   `clips/idle_st.png`.
 
+## Poke-through results (finished 23:37; `render/reparto/partes2/diego/clips/poke_<clip>.json`, per-frame rows inside)
+
+| clip | cloth→body visible max (frame, frames > 1 mm) | cloth→body raw | body→cloth | hands→trunk |
+|---|---|---|---|---|
+| driving | 0.0 | 0.0 | 0.0 | 0.0 |
+| guitar_playing | **18.8 (f122, 111 frames)** | 18.8 (127) | 15.0 (188 frames) | 0.0 |
+| idle | 2.4 (f190, 8 frames) | 2.4 | 15.0 (251 frames) | 0.0 |
+| sitting_drinking | **16.2 (f82, 10 frames)** | 18.4 | 15.0 (58 frames) | 0.0 |
+
+- **The done-check (≤ 1 mm) is not met yet on 3 of 4 clips.** Every rest value is 0.0.
+- **body→cloth = 15.0 is the ray's 1.5 cm limit** on every frame, so it is almost surely a false hit of the metric.
+  The likely case: arms down beside the shirt, where a visible arm vertex's inward ray reaches cloth across the arm.
+  Find the vertex (add its position to the rows) and render it before believing it.
+- **cloth→body 16–19 mm on guitar f122 and sitting f82 is a real candidate.**
+  - Likely sleeve or hem cloth inside the arm or thigh at a strong bend (Data Transfer weights from the skin, but the
+    cloth sits 2–6 mm off it).
+  - Next: close-ups at those frames, then fixes. Candidates: a Shrinkwrap "outside surface" modifier on the clothes
+    after the Armature (target the skin, offset 1 mm), or more Corrective Smooth.
+- **hands→trunk 0.0 everywhere** disagrees with today's Diego (hands 6–7.5 mm into the hips), and the test has no
+  positive control. Before reporting it, check that a hand vertex placed inside the hip reads > 0.
+
 ## Exact next step
 
 1. When `clips_wb.sh` is done (one GPU job at a time), make the side-by-side sheets with `stills.py`.
