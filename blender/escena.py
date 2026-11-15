@@ -370,9 +370,10 @@ def mundo_render(s, preset):
     mundo = bpy.data.objects.new("mundo", None)
     sc.collection.objects.link(mundo)
     losa = MUNDO["losa"]
-    road = plano("carretera", 8.0, largo_total, -120, 0.015, tex_mat("asfalto_carril", "Road007"), 8.0)
-    ground = plano("terreno", 3000, largo_total + 1400, -820, 0.0, tex_mat("terreno", "Asphalt031", oscurecer=0.22, tinte=(1.0, 0.86, 0.72)), 4.0)
-    road.parent = mundo; ground.parent = mundo
+    if "cycles" not in P:  # presets with a `cycles` block get blender/mundo.py's world at the end instead
+        road = plano("carretera", 8.0, largo_total, -120, 0.015, tex_mat("asfalto_carril", "Road007"), 8.0)
+        ground = plano("terreno", 3000, largo_total + 1400, -820, 0.0, tex_mat("terreno", "Asphalt031", oscurecer=0.22, tinte=(1.0, 0.86, 0.72)), 4.0)
+        road.parent = mundo; ground.parent = mundo
     # instances of the tramo every TRAMO m, enough to cover the view during the whole loop
     for k in range(-2, (largo_total - 120) // TRAMO):
         inst = bpy.data.objects.new(f"tramo_{k}", None)
@@ -425,6 +426,10 @@ def mundo_render(s, preset):
     nt.links.new(env.outputs["Color"], bg.inputs["Color"])
     out = next(n for n in nt.nodes if n.type == "OUTPUT_WORLD")
     nt.links.new(bg.outputs["Background"], out.inputs["Surface"])
+    if "cycles" in P:  # Night B (owner's pick 2026-11-14): road, verges, plants, pole line, fog, sky
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import mundo as mundo_b
+        s["mundo_b"] = mundo_b.construir(mundo, P["cycles"], P, RECORRIDO)
     # animation: world moves -Y by RECORRIDO over NFR frames; wheels turn a whole number of times
     sc.render.fps = FPS
     sc.frame_start, sc.frame_end = 0, NFR - 1
