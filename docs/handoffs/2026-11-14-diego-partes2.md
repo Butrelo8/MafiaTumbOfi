@@ -34,10 +34,16 @@ Times: `blender/render/reparto/partes2/diego/tiempos.log` (append the remaining 
     `bg1cd8roz`, writing `render/reparto/partes2/diego/clips/poke_<clip>.json`. If those files are missing, rerun:
     `cd blender/partes2; $B -b "$(w $A/diego_p2_<clip>.blend)" --python pokethrough.py -- "$(w $R/poke_<clip>.json)" 1`
     (~1.7 s per frame).
-- **Workbench clips + eagle.sh** (`clips_wb.sh`, background task `b5ngtosiw`, in order driving, guitar_playing,
-  idle, sitting_drinking → `clips/<clip>/<clip>_wb.mp4`, `eagle.log`).
-  - **driving passed:** crawl 0.03, flicker 0.01, strobe 0, exit 0.
-  - Check the others' `eagle.log`; rerun with `./clips_wb.sh <clip>`.
+- **Workbench clips + eagle.sh: done, all four pass, exit 0** (`clips_wb.sh` →
+  `render/reparto/partes2/diego/clips/<clip>/<clip>_wb.mp4`, `eagle.log`). Today's Diego, for comparison: 0.02 / 0.12 /
+  0.05.
+
+  | clip | frames | crawl | flicker | strobe |
+  |---|---|---|---|---|
+  | driving | 151 | 0.03 | 0.01 | 0 |
+  | guitar_playing | 188 | 0.10 | 0.00 | 0 |
+  | idle | 251 | 0.03 | 0.01 | 0 |
+  | sitting_drinking | 457 | 0.04 | 0.00 | 0 |
 - Sent to the user: the part sheet `partes-klein.jpg`, `fit/dress_sheet.png`, `blink_strip.png`,
   `clips/idle_st.png`.
 
