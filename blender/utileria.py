@@ -1229,6 +1229,35 @@ def op_calcas3_mix_esc2():
     return VISTA_ESC2()
 
 
+# ================================================================ props phase (owner 2026-11-15 04:16, docs/lanes.md › Props lane)
+# Where the console screen and the r1 stickers sit comes from blender/props/colocacion.json: the first guess is in it, and the owner's
+# placement .blend is read back into it by blender/colocacion_leer.py. CAMION_EXTRA is what rides on the truck in every montaje
+# scene (props_placement.camion() runs it): the screen and the r1 stickers here; caja5 adds the console drink.
+COLOCA = json.load(open(os.path.join(REPO, "blender", "props", "colocacion.json"), encoding="utf8"))
+CAMION_EXTRA = []
+
+
+def pantalla_consola():
+    """The dashboard screen in the centre stack, over the console drink (owner 04:16: "the middle dashboard where they put the
+    drinks"): radio2-b's face (pantalla-comand, 16:9) under one empty, `pantalla_consola`, whose local XY is the face and local +Z
+    its normal toward the cab. The stack face leans ~22° (rays +y at the centre line, 11-15: y 1.077 at z 1.46, 1.126 at 1.58)."""
+    c = COLOCA["pantalla"]
+    e = bpy.data.objects.new("pantalla_consola", None)
+    sc.collection.objects.link(e)
+    w = c["ancho"]
+    h = w * 9 / 16
+    caja((w + 0.016, h + 0.016, 0.012), (0, 0, -0.004), CRISTAL, bevel=0.003, parent=e)
+    plano(w, h, (0, 0, 0.0025), img_mat("u_pantalla-comand", os.path.join(PANTALLAS, "pantalla-comand.png"), emit=2.2, rough=0.15), rot=(0, 0, 0), parent=e)
+    e.location, e.rotation_euler, e.scale = c["loc"], c["rot"], (c["escala"],) * 3  # children were built at the identity
+    _fin(e, None, None)
+    bpy.context.view_layer.update()
+    print("PANTALLA consola", tuple(round(v, 3) for v in e.matrix_world.translation), "ancho", round(w * c["escala"], 3))
+    return e
+
+
+CAMION_EXTRA += [pantalla_consola]
+
+
 # ================================================================ scenes 2-6, key stills (mothership queue 2026-11-13 05:32)
 # Each scene's opening frame (its hold, escenas-plan §1 camera table) and the end frame of its move. The end frames are the beat
 # under the next sign gantry (2, 3, where the phone clip cut hides), the driver's side (4), the turn ahead of the truck (5) and

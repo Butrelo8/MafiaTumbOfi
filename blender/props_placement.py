@@ -603,8 +603,11 @@ VAR = {"barra": "fabrica", "emblema": "elegido", "fuente": "pirata", "fresa": No
 
 
 def camion():
-    """What rides on the truck in every scene (owner, 11-13): the real roof lamps and the gold MT on the hood."""
+    """What rides on the truck in every scene (owner, 11-13): the real roof lamps and the gold MT on the hood; then the props
+    phase's additions (utileria.CAMION_EXTRA: the console screen, the r1 stickers, and caja5's console drink when caja5 is loaded)."""
     barra_luces(VAR["barra"]); emblema(VAR["emblema"])
+    for f in CAMION_EXTRA:
+        f()
 
 
 def esc1(arreglo="b"):
@@ -623,7 +626,7 @@ def esc2(arreglo="b"):
     if arreglo == "a":   # the caja3 bar as it is; the new props added on top: marquee full on, bulbs everywhere, pennants
         cama("caja3"); marquesina(10.0); bombillas(contorno_caja(), 4.0); franja("trasera"); banderines()
     else:                # owner: no marquee. Rules 4, 5: the bulbs trace the roll bar only, the piñata under it is the peak
-        cama("reglas"); bombillas(contorno_caja(rieles=False), 2.5)
+        cama("reglas")
     relleno_caja(VISTA_ESC2()[0])
     return VISTA_ESC2()
 

@@ -1,0 +1,17 @@
+{
+ "_nota": "Read by utileria.py (pantalla_consola, calcas_r1). First guess by teadrone 2026-11-15; the owner's placement .blend is read back into it by blender/colocacion_leer.py. pantalla: the empty's world location, Euler XYZ and uniform scale, ancho = the face width in m. calcas_r1: cara porton (u = x from the centre line) or der/izq (u = world y), z, rot (spin in the face's plane, rad), escala, orden (0.3 mm layers). instrumentos: each empty's world location, Euler XYZ and uniform scale (built face up, neck +y, origin under the tail on the back). Screen kept: B (11-15), one screen over the G63's own unit; A (0.17 m at z 1.52) stacked two screens and its lower edge sat behind the console bottle.",
+ "pantalla": {
+  "loc": [
+   1.72,
+   1.115,
+   1.615
+  ],
+  "rot": [
+   1.35,
+   0.0,
+   0.0
+  ],
+  "escala": 1.0,
+  "ancho": 0.2
+ }
+}
