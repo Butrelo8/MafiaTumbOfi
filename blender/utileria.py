@@ -942,17 +942,40 @@ def alfa3(id):
     return ALFA3[id]
 
 
-def pared3(x, z):
-    """Tailgate surface y at (x, z): the first hit along +y that is not a sticker."""
-    o = Vector((x, PORTON.y - 1.0, z))
+def pared3(p, nrm):
+    """The body surface under p, as its height along the face's outward normal nrm (p is on the sticker's base plane): the first
+    hit from 1 m out along -nrm that is not a sticker."""
+    o, d = p + nrm * 1.0, -nrm
     for _ in range(12):
-        hit, loc, n, i, ob, m = sc.ray_cast(dg, o, Vector((0, 1, 0)))
+        hit, loc, n, i, ob, m = sc.ray_cast(dg, o, d)
         if not hit:
             return None
         if not ob.name.startswith("c3_"):
-            return loc.y
-        o = loc + Vector((0, 0.0001, 0))
+            return (loc - p).dot(nrm)
+        o = loc + d * 0.0001
     return None
+
+
+# The faces a sticker can go on: the tailgate (u = x from the centre line), and the bed sides above the wheel-arch flare (u = world
+# y). Probed 2026-11-15 in the integration build: the tailgate is flat at y -2.87 over x ±0.8, z 0.95-1.45; each bed side is flat
+# at x ±0.84 from the centre line over y -2.80..-0.30, z 1.28-1.43 (the flare's crease is at z 1.21-1.27), and behind the rear
+# wheel over y -2.80..-2.55, z 0.97-1.21.
+CARAS3 = {}
+
+
+def cara3(cara):
+    """(base-plane point at u 0, z 0; outward normal; the grid's Euler for spin 0) of a face: "porton", "der" (+x), "izq" (-x)."""
+    if cara not in CARAS3:
+        if cara == "porton":
+            CARAS3[cara] = (Vector((CX, PORTON.y, 0)), Vector((0, -1, 0)), (math.pi / 2, 0, 0))
+        else:
+            s = 1 if cara == "der" else -1
+            h = rayo((CX + s * 3.0, -1.5, 1.35), (-s, 0, 0))
+            x = h.x if h else CX + s * 0.84
+            print("CARA3", cara, "x", round(x - CX, 3))
+            # Z by ±90° after X: the grid's +x runs to +y on the right side (the viewer's right, seen from outside), -y on the left
+            CARAS3[cara] = (Vector((x, 0, 0)), Vector((s, 0, 0)), (math.pi / 2, 0, s * math.pi / 2))
+    return CARAS3[cara]
 
 
 def mat3(id, acabado):
@@ -1007,18 +1030,23 @@ def mat3(id, acabado):
 ESQ = {"bi": (-1, -1), "bd": (1, -1), "si": (-1, 1), "sd": (1, 1)}
 
 
-def calca3(id, x, z, rot, orden=0, rizo="auto", largo=0.025, R=0.015):
+def calca3(id, x, z, rot, orden=0, rizo="auto", largo=0.025, R=0.015, cara="porton", escala=1.0):
     """One sticker at (CX + x, z), turned `rot` in its plane, 0.6 mm + orden × 0.3 mm off the tailgate surface under each vertex.
+    cara: the face (cara3; on a bed side x is the world y), escala: its size over the art's own (META3 w, h).
     rizo: the curled corner ("bi" bottom-left … "sd", "auto" = the corner farthest from the glyph slot, None = flat). The fold
     sits `largo` in from the sticker's own edge along the corner's diagonal; past it a vertex rolls on radius R:
     lift R(1 − cos(d/R)), pulled back d − R·sin(d/R). The handoff's 5 cm rolled ~190° and hid lettering at the close-up
     (SÍ of SÍGUENOS, the MT of the oval): 2.5 cm by default (~95°), 3.5 cm on the oldest pieces."""
     me = META3[id]
-    w, h, gl = me["w"], me["h"], me["glifo"]
+    w, h, gl = me["w"] * escala, me["h"] * escala, me["glifo"]
+    if gl and cara != "porton":
+        raise RuntimeError(f"calca3 {id}: the glyph quad stands on the tailgate only")
+    O, nrm, eul = cara3(cara)
     nx, ny = max(24, math.ceil(w / 0.004)), max(24, math.ceil(h / 0.004))
-    bpy.ops.mesh.primitive_grid_add(x_subdivisions=nx, y_subdivisions=ny, size=1, location=(CX + x, PORTON.y, z), rotation=(math.pi / 2, rot, 0))
+    loc = O + Vector((x, 0, z)) if cara == "porton" else O + Vector((0, x, z))
+    bpy.ops.mesh.primitive_grid_add(x_subdivisions=nx, y_subdivisions=ny, size=1, location=loc, rotation=(eul[0], rot, eul[2]))
     o = bpy.context.object
-    o.name, o["c3"] = "c3_" + id, id
+    o.name, o["c3"], o["w"], o["h"], o["esc"] = "c3_" + id, id, w, h, escala
     for v in o.data.vertices:
         v.co.x *= w
         v.co.y *= h
@@ -1037,7 +1065,7 @@ def calca3(id, x, z, rot, orden=0, rizo="auto", largo=0.025, R=0.015):
         borde = max(((c * 4 / W - 0.5) * w) * dr.x + ((f * 4 / H - 0.5) * h) * dr.y for f, c in zip(fil, col))
         pliegue = borde - largo
         if gl:  # the slot (clear space, 2× the glyph) must stay flat
-            k = gl["mm"] / 1000
+            k = gl["mm"] / 1000 * escala
             g = Vector(((gl["u"] - 0.5) * w, (gl["v"] - 0.5) * h))
             if max((g + Vector((sx * k, sy * k))).dot(dr) for sx in (-1, 1) for sy in (-1, 1)) > pliegue:
                 raise RuntimeError(f"calca3 {id}: glyph slot inside the curl ({rizo})")
@@ -1045,8 +1073,8 @@ def calca3(id, x, z, rot, orden=0, rizo="auto", largo=0.025, R=0.015):
     zs = np.empty(len(vs))
     for k, v in enumerate(vs):
         p = mw @ Vector((v.co.x, v.co.y, 0))
-        y = pared3(p.x, p.z)
-        zs[k] = PORTON.y - ((PORTON.y if y is None else y) - off)  # local +Z = world −y (towards the camera)
+        d = pared3(p, nrm)
+        zs[k] = (d or 0.0) + off  # local +Z = the face's outward normal (world −y on the tailgate, towards the camera)
     # stiff over the body lines: following every vertex into the gate's 8 mm steps (z 1.22, 1.05) sliced the stickers that cross
     # them. A max over ~1.5 cm, then a box blur of the same size, never below the paint: the sticker tents over a step
     cx_, cy_ = np.array([v.co.x for v in vs]), np.array([v.co.y for v in vs])
@@ -1078,7 +1106,7 @@ def calca3(id, x, z, rot, orden=0, rizo="auto", largo=0.025, R=0.015):
     plat = id.split("-", 1)[1]
     if gl:  # the glyph on its own upright quad, 1 mm in front of the sticker at the slot
         bpy.context.view_layer.update()
-        k = gl["mm"] / 1000
+        k = gl["mm"] / 1000 * escala
         gx, gy = (gl["u"] - 0.5) * w, (gl["v"] - 0.5) * h
         z0 = T3[np.searchsorted(uy, gy).clip(0, len(uy) - 1), np.searchsorted(ux, gx).clip(0, len(ux) - 1)]
         c = o.matrix_world @ Vector((gx, gy, z0)) - Vector((0, 0.001, 0))  # on the sticker's own surface at the slot
@@ -1101,17 +1129,17 @@ def ranuras_libres(calcas):
         gl = META3[a["c3"]]["glifo"]
         if not gl:
             continue
-        ma, wa, ha, k = a.matrix_world, META3[a["c3"]]["w"], META3[a["c3"]]["h"], gl["mm"] / 1000
+        ma, wa, ha, k = a.matrix_world, a["w"], a["h"], gl["mm"] / 1000 * a["esc"]
         g = Vector(((gl["u"] - 0.5) * wa, (gl["v"] - 0.5) * ha))
         for b in calcas[i + 1:]:
-            mb, wb, hb = b.matrix_world.inverted(), META3[b["c3"]]["w"], META3[b["c3"]]["h"]
+            mb, wb, hb = b.matrix_world.inverted(), b["w"], b["h"]
             al = alfa3(b["c3"])
             for sx in np.linspace(-k, k, 9):
                 for sy in np.linspace(-k, k, 9):
                     p = ma @ Vector((g.x + sx, g.y + sy, 0))
                     q = mb @ p
                     u, v = q.x / wb + 0.5, q.y / hb + 0.5
-                    if 0 <= u < 1 and 0 <= v < 1 and al[int(v * al.shape[0]), int(u * al.shape[1])] > 0.1:
+                    if abs(q.z) < 0.03 and 0 <= u < 1 and 0 <= v < 1 and al[int(v * al.shape[0]), int(u * al.shape[1])] > 0.1:  # same face only
                         raise RuntimeError(f"calcas3: {b.name} covers the glyph slot of {a.name}")
     print("CALCAS3 ranuras libres", [o.name for o in calcas])
 
