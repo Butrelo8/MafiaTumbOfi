@@ -38,9 +38,9 @@ mw = cables.matrix_world.copy()
 cables.parent = postes
 cables.matrix_world = mw
 for o in s["mundo_b"]:
-    o.hide_viewport = False
-    for m in o.modifiers:  # crowns and shrubs in the viewport for context; the grass stays render-only (too heavy)
-        m.show_viewport = o.name.startswith(("w_copa", "w_arbusto"))
+    o.hide_viewport = o.name == "w_niebla"  # the fog box would be a grey ceiling 81 m up in the solid view
+    for m in o.modifiers:  # crowns in the viewport for context; grass and shrubs render-only (thousands of heavy instances)
+        m.show_viewport = o.name.startswith("w_copa")
 for o in bpy.data.objects:
     o.hide_select = o != postes
 ys = [(o.matrix_world @ Vector(c)).y for o in s["camion"].children_recursive if o.type == "MESH" for c in o.bound_box]
