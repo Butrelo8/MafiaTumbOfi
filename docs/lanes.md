@@ -66,7 +66,7 @@ Each file has one owner. `utileria.py` is the exception: it is split by function
 | **Layout / cameras** | `blender/transicion.py` (`CAMINO`, the camera rail and the seating poses), `blender/storyboard.py`, `blender/colocar.py`, and in `utileria.py` the scene-hold block from `def v(lens)` to `esc6_flash` (the `toma(...)` tuples, `luz_costado`) | Cameras `cam_*`, `cam_transicion` | Check that each hold still frames its subject at the cast's heights (1.25 / 1.20 m, Findings › Seat clearance). Scene 6's camera currently lives in `montaje.py`'s `m_esc6` (from pp6-b); move it into a `esc6` hold in `utileria.py` so layout owns it |
 | **World** (yeehawdrone's line) | `blender/mundo.py`, `escena.py`'s `mundo_render` world part, the `noche` values in `src/lib/escena.json`, `docs/mundo-noche-b.md`, `docs/licencias/mundo-polyhaven.md` | `mundo`, every `w_*`, poles, lamps, plants, fog | Loop check: frame 192 must equal frame 0 for each hold (`eagle.sh` on a short clip). The raw sheet checked stills only. The lane needs no change (Findings › Lane) |
 | **Characters** (apedrone, Tripo cast) | `blender/tripo-v5/`, `docs/tripo-reparto-v5.md`, `blender/partes/`, `blender/partes2/`, `blender/reparto.py`, `blender/personaje.py`, `blender/assets/reparto*` (untracked) | The contents of `reparto/reparto_<who>` | Deliver the four Tripo figures as seated clip .blends: Mixamo rig, metres, facing −Y, scaled to `alto_m` (1.25 m Diego and Alexandro, 1.20 m Héctor and the manager). Name each rig after its figure: `cast_alturas/cast.blend` has `Armature`…`Armature.003`, in `cast.json`'s order (diego, hector, alexandro, manager). apedrone's `alexandro` is the chain's `alejandro`; the chain keeps its name, because other code finds `alejandro_rig`. Integration places each one on its `asiento_<who>` through one root empty, the way `montaje.py`'s `diego_interino` does. Measure the seated head against the ceiling (Findings › Seat clearance) |
-| **Props** | `utileria.py` (everything outside layout's hold block), `caja3.py`, `caja4.py`, `caja5.py`, `props_placement.py`, `calcas_arte.py`, `etiquetas.py`, `pantalla_tablero.py`, `placa_veracruz.py`, `fresa_charm.py`, `blender/props/`, `blender/fuentes/`, `docs/design/props-placement/`, `docs/design/escenas/utileria/` | Everything built into `GRUPO` by an option: the bed load, the stickers, the cab dressing, the roof lamps, the MT emblem, the plate, the screen truck | **(1) The dashboard screen** (below). **(2) The seven sticker decals** (below) |
+| **Props** (teadrone, `cc/teadrone`) | `utileria.py` (everything outside layout's hold block), `caja3.py`, `caja4.py`, `caja5.py`, `props_placement.py`, `calcas_arte.py`, `etiquetas.py`, `pantalla_tablero.py`, `placa_veracruz.py`, `fresa_charm.py`, `blender/props/`, `blender/fuentes/`, `docs/design/props-placement/`, `docs/design/escenas/utileria/` | Everything built into `GRUPO` by an option: the bed load, the stickers, the cab dressing, the roof lamps, the MT emblem, the plate, the screen truck | **(1) The dashboard screen** (below). **(2) The seven sticker decals** (below) |
 | **Animation** (parked) | `blender/temblor.py`, `blender/vivo.py`; the clips' motion | none yet | Parked until the cast and props are in. Then the v3 transition re-render with all four in the cab (escenas-plan §0 item 4) |
 
 ### Props lane, first task
@@ -137,7 +137,7 @@ on every build:
 - The screen truck overtakes on the left, at CX − 4.0.
 - The Night B sheet (`~/cc-out/mto-world/build/hoja-noche-b.jpg`) shows the same thing: in scenes 2, 5 and 6 the white
   edge is on the truck's right.
-- Open question for the owner: which render looked like the wrong lane?
+- The owner's "right lane" was a confirmation, not a report of a wrong render (mothership, 05:36).
 
 **Seat clearance: the cast fits at the owner's truck convention (1.25 / 1.20 m).** The owner confirmed the heights at
 04:34 (apedrone, `docs/tripo-reparto-v5.md` › Heights): the tallest figure is 1.25 m, as the truck build's figures always
@@ -171,17 +171,17 @@ objects it hid. `montaje.py` asserts this on every build.
 
 ## Open questions (for the owner, through the mothership)
 
-1. **Is the bed final?** The build uses caja5 'elegida' (nerddrone dafaa18), the latest committed bed. nerddrone also
+1. **Is the bed final?** With the owner. The build uses caja5 'elegida' (nerddrone dafaa18), the latest committed bed. nerddrone also
    has uncommitted work (`tmp/caja6`, `tmp/caja7`, the caja5 console redo). It changes the cab drinks, not the bed load. The decisions file asks to reconcile uncdrone's strawberry B and Pirata
    One MT into caja5. The build already does that: `props_placement.py`'s body puts both on the truck in every scene.
-2. **The lane.** The truck is already in the right lane (Findings › Lane). Which render looked wrong?
+2. **Answered: the lane.** No render looked wrong. The owner's "right lane" confirmed where the truck already drives
+   (mothership, 05:36), so it stays where it is.
 3. **Answered: the cast's heights.** The owner confirmed 1.25 / 1.20 m at 04:34. They fit the seats
    (Findings › Seat clearance), and the build uses them.
-4. **Do the roll-bar bulbs (P9) come back on caja5?** The pp B scenes had them on the older bed; montaje leaves them out.
+4. **Do the roll-bar bulbs (P9) come back on caja5?** With the owner. The pp B scenes had them on the older bed; montaje leaves them out.
 5. **Which interim Diego?** colddrone's TRELLIS.2 clip is in the build, and skibididrone's partes2 is merged as code only.
    Both give way to apedrone's Tripo Diego.
-6. **Who places the stickers?** The owner's decisions file says "place them in the integration step", and so does the
-   picks' README. The 04:18 brief gave them to the props lane, and this file follows the brief. Nobody has placed them
-   yet.
+6. **Answered: the stickers.** The props lane places them (mothership, 05:36). teadrone (`cc/teadrone`, branched from
+   this branch) owns the dashboard screen and the seven stickers; integration merges it when it hands back.
 7. **Housekeeping.** colddrone committed `blender/partes/__pycache__/inspect.cpython-314.pyc`, and
    `blender/__pycache__/` shows up untracked after any run. `.gitignore` has no `__pycache__/` line. It was left as it is.
