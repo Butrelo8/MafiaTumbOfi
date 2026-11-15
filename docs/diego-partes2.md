@@ -113,9 +113,11 @@ uv run ... python -I hand_fit.py $A/hand_s22.glb $A/body.glb $F/body.json $F/han
 $B -b --factory-startup --python assemble.py -- "$(w $F)" "$(w $A)" head_s7 hand_s22 "$(w $A)\\diego_partes2_skin.blend"
 $B -b "$(w $A/diego_partes2_skin.blend)" --python export_mx.py -- <out.blend> <dir> diego_partes2 $F/hand.json   # markers + full FBX
 $B -b "$(w $A/diego_partes2_skin.blend)" --python make_proxy.py -- "$(w $A/mixamo)" diego_partes2_proxy3 0.003 90000
-uv run ... --with networkx python -I fit_body.py shirt|pants|shoes <garment.glb> $F/<g>.json $A/body.glb $F/body.json $A/head_s7.glb $F/head_s7.json $F/<g>_body.npz
+uv run ... --with networkx python -I fit_body.py shirt|pants <garment.glb> $F/<g>.json $A/body.glb $F/body.json $A/head_s7.glb $F/head_s7.json $F/<g>_body.npz
 uv run ... python -I hair_fused.py $F/target.npz $A/head_s7.glb $F/head_s7.json $F/fused_body.npz
+uv run ... python -I shoes_box.py $A/shoes.glb $F/shoes.json $F/target.npz $F/pants_body.npz $F/shoes_body.npz   # after pants; no zscale
 $B -b "$(w $A/diego_partes2_skin.blend)" --python dress.py -- "$(w $F)" "$(w $A)" "$(w $A/diego_partes2_dressed.blend)" shirt=shirt_s22 pants=pants shoes=shoes hair=fused
+./rebuild_tail.sh                                    # bind, look.py, 4 clips, lids (~2 min)
 ```
 
 gotchas:
@@ -143,8 +145,8 @@ gotchas:
   uniform scale only, so the toe lined up and the heel hung 8.6 cm behind the leg. Its push-out against the bare toes
   also crumpled the toe box. Not the shoe_L/R split, not the hem length.
   - Fix: `shoes_box.py`, a per-axis box fit of each shoe onto the fused Diego's shoe region (the rerig Diego's shoes,
-    19.4 cm), height kept, no push-out.
-  - Variant a (height scaled ×0.78 to the label's z < 0.10 cutoff) flattened the laces and was dropped.
+    19.4 cm), no push-out. (Superseded at 00:41: the reference height is right, and each shoe also slides under the leg.)
+  - Variant a (height scaled ×0.78) was dropped here at first, wrongly: see 00:41.
   - Sheet: `render/.../model/feet/shoes_ab.jpg`.
 - **`bind.py` shoe split:** the vertex selection was not flushed to the faces, so with the new shoes all faces went to
   shoe_L and shoe_R was empty. Fixed (world x, edges and faces selected from their vertices).
