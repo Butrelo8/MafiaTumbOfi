@@ -48,11 +48,10 @@ def golpe(o, d):
     return loc, ob.name, (m.name if m else "")
 
 
-for o in FIGURAS:
+_SONDA_OCULTOS = [o for o in bpy.data.objects if (o in FIGURAS or o.name.split(".")[0].startswith(("estuche_", "guitarra_")))
+                  and not o.hide_viewport]  # only these come back: Night B's fog and plants stay hidden from the rays
+for o in _SONDA_OCULTOS:
     o.hide_viewport = True
-for o in bpy.data.objects:
-    if o.name.split(".")[0].startswith(("estuche_", "guitarra_")):
-        o.hide_viewport = True
 bpy.context.view_layer.update()
 dg = bpy.context.evaluated_depsgraph_get()
 
@@ -130,11 +129,11 @@ for n_, v_ in (("TECHO_Z", TECHO_Z), ("YT", YT), ("YR", YR), ("WT", WT), ("CIELO
                ("PORTON", PORTON), ("FRENTE", FRENTE), ("COLA", COLA),
                ("BOLSAS", BOLSAS), ("CAPO", CAPO[:3] + CAPO[-3:])):
     print("PP", n_, v_)
-for o in bpy.data.objects:
+for o in _SONDA_OCULTOS:
     o.hide_viewport = False
 bpy.context.view_layer.update()
 dg = bpy.context.evaluated_depsgraph_get()
-ESP = Vector((CX, ESPEJO[0].y, (ESPEJO[3] + ESPEJO[4]) / 2)) if ESPEJO else Vector((CX, PB_ARRIBA.y - 0.12, PB_ARRIBA.z - 0.1))
+ESP =Vector((CX, ESPEJO[0].y, (ESPEJO[3] + ESPEJO[4]) / 2)) if ESPEJO else Vector((CX, PB_ARRIBA.y - 0.12, PB_ARRIBA.z - 0.1))
 
 # ---------------------------------------------------------------- new props: each one's objects are tagged with its id
 PROP = {}      # id -> [objects]
