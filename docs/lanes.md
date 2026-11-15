@@ -51,8 +51,8 @@ change goes into the script that owns it, and then the build is run again.
 | Input | What to do |
 |---|---|
 | `blender/assets/camion` and `blender/assets/reparto` | Junction them to the main checkout. Windows Blender does not follow WSL symlinks, so use PowerShell: `New-Item -ItemType Junction -Path 'E:\...\MTO-<drone>\blender\assets\camion' -Target 'E:\Cursor Projects\MTO\blender\assets\camion'`. Remove one with `cmd /c rmdir`, which leaves the target alone |
-| `blender/assets/utileria` (caja5's alien) | Junction it to `MTO-nerddrone/blender/assets/utileria`, or to wherever the props lane keeps it |
-| `tmp/utileria` | Regenerate it with the repo's own scripts. Run `uv run -q --with numpy --with pillow python -I blender/calcas_arte.py`, then `uv run -q --with pillow python -I blender/etiquetas.py`, then `uv run -q --with pillow --with qrcode python -I blender/placa_veracruz.py`, then `uv run -q --with pillow --with fonttools --with brotli python -I blender/pantalla_tablero.py`. The last one needs `tmp/fuentes/saira*.ttf`; copy them from `MTO-nerddrone/tmp/fuentes`. Also copy `tmp/utileria/calcas3/spotify-icon.png` from the same worktree, because no script makes it |
+| `blender/assets/utileria/alien/` (caja5's alien) | Copy it from `~/cc-out/mto-integracion/assets/utileria/alien/`. A junction can't point at a `\\wsl.localhost` path |
+| `tmp/utileria` | Copy `~/cc-out/mto-integracion/assets/fuentes/*.ttf` into `tmp/fuentes/`. Then regenerate the rest with the repo's own scripts: `uv run -q --with numpy --with pillow python -I blender/calcas_arte.py`, then `uv run -q --with pillow python -I blender/etiquetas.py`, then `uv run -q --with pillow --with qrcode python -I blender/placa_veracruz.py`, then `uv run -q --with pillow --with fonttools --with brotli python -I blender/pantalla_tablero.py`. Finally copy `~/cc-out/mto-integracion/assets/calcas3/spotify-icon.png` into `tmp/utileria/calcas3/`, because no script makes it |
 | The Night B assets | Nothing to do: `mundo.py` reads them from `~/cc-out/mto-world/assets/polyhaven-2026-11-14` |
 | The interim Diego | Nothing to do: `~/cc-out/mto-integracion/assets/diego_clip_sitting_drinking_sip.blend`, a copy of colddrone's untracked blend. `MONTAJE_DIEGO=<path>` (through WSLENV) overrides it |
 
@@ -80,8 +80,16 @@ where they put the drinks".
 - No scene in the caja5 line calls either one. nerddrone's last commit says "sin consola".
 - The task is to put the screen on the middle console, where caja5's `bebidas_consola` put the drinks: the cupholders at
   y 0.47 and 0.57, top z ≈ 1.37, between the front seats.
-- Call it from `montaje.py`'s scene 1, and in any other scene where the cab shows. Show it to the owner as a still
-  before you lock it.
+- Build the screen as a function in a props file, `utileria.py` or `caja5.py`. Name the scenes it belongs in. At the
+  merge, integration wires it into `montaje.py` for scene 1 and any other scene where the cab shows.
+- Show it to the owner as a still before you lock it.
+- Start from nerddrone's **uncommitted** console redo: `MTO-nerddrone`, the `git diff blender/caja5.py` there, and
+  `docs/handoffs/2026-11-14-caja5-console-redo.md` (downbaddrone, 21:10).
+  - It moves the console drink to the only clear patch: in front of the shifter, x −0.03..+0.095 from the centre line,
+    y 0.945..1.031.
+  - It found that the old cupholder spot intersected the armrest lid.
+  - It is not on any branch. Have it committed on `cc/nerddrone` first, then merged here, before the screen goes in
+    beside it.
 
 **2. The seven sticker decals.** The owner approved the picks in `/mnt/e/Cursor Projects/MTO/comfy-out/stickers-r1/picks/`
 (that folder exists only in the main checkout).
@@ -108,6 +116,8 @@ Other props items from the raw sheet (`~/cc-out/mto-world/crudo/hallazgos.md`):
   reproduced this in an empty file.
 - The fix is to parent the clip's top-level objects to one empty and move only that empty. With it, the clip stays live,
   so it can animate.
+- The regression test is `blender/montaje_rig_test.sh [clip]`. It exits 1 if the root-empty placement leaves a bone
+  child more than 1 cm off. It passes on both Diego clips (0.000 m), and the old loop measures 1.14–1.22 m off.
 
 ```
 empty file, sitting_drinking f1, 1.25 scale, hips on the rear-right seat   skin z from hips   bone child z from hips
@@ -155,4 +165,19 @@ to `calcas_arte.py`, or track it.
 
 **A merge interaction, fixed (1339acc).** `props_placement.py`'s probe ended with `hide_viewport = False` on every
 object. That unhid the Night B fog box and plants, which the world keeps hidden from ray casts. It now restores only the
-objects it hid.
+objects it hid. `montaje.py` asserts this on every build.
+
+## Open questions (for the owner, through the mothership)
+
+1. **Is the bed final?** The build uses caja5 'elegida' (nerddrone dafaa18), the latest committed bed. nerddrone also
+   has uncommitted work (`tmp/caja6`, `tmp/caja7`, the caja5 console redo). It changes the cab drinks, not the bed load.
+2. **The lane.** The truck is already in the right lane (Findings › Lane). Which render looked wrong?
+3. **The cast at 1.74 / 1.67 m doesn't fit seated with cartoon proportions.** The rear seats fit at most 1.30 m and the
+   front seats 1.46 m (Findings › Seat clearance). The choices are shorter figures, lower seat points, or a slouch.
+4. **Do the roll-bar bulbs (P9) come back on caja5?** The pp B scenes had them on the older bed; montaje leaves them out.
+5. **Which interim Diego?** colddrone's TRELLIS.2 clip is in the build, and skibididrone's partes2 is merged as code only.
+   Both give way to apedrone's Tripo Diego.
+6. **Who places the stickers?** The picks' README says the integration branch merges them; the brief gives them to the
+   props lane, and this file follows the brief.
+7. **Housekeeping.** colddrone committed `blender/partes/__pycache__/inspect.cpython-314.pyc`, and
+   `blender/__pycache__/` shows up untracked after any run. `.gitignore` has no `__pycache__/` line. It was left as it is.
