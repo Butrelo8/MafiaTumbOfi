@@ -424,11 +424,12 @@ def cama_a():
     revisar_carga("A")
 
 
-def cama_b():
+def cama_b(extra=None, nombre="B", dona_xy=None):
     """B, flat stacks under a net: the full cooler and the amp case side by side against the cab; behind the amp the bass,
     12-string and requinto cases lie flat and lengthwise, three high; the keyboard case on its edge beside them; behind the
     cooler the cable crate, the snare case and the folded blankets; the donut on the case deck. One cargo net over everything,
-    hooked to the same six rings."""
+    hooked to the same six rings. extra / dona_xy: caja5.py adds its props on top here, before the
+    donut (which it may move) and the net."""
     vaciar4()
     h = carga("hielera", hielera3, 25, (0, 0, -math.pi / 2), x1=XR - 0.005, y1=YF, z0=PZ)
     w = caja_de(h)[0].x - XL - 0.05
@@ -440,9 +441,11 @@ def cama_b():
     c = carga("cables", caja_cables, 9, x1=XR - 0.02, y1=atras(h), z0=PZ)
     ta = carga("tarola", lambda: caso_tambor(0.36, 0.18, "TAROLA"), 6, x1=XR - 0.01, y1=atras(c), z0=PZ)
     carga("cobijas", lambda: cobijas_dobladas(XR - der(t) - 0.04, min(0.36, atras(ta) - YT - 0.01), 4), 9, x1=XR - 0.01, y1=atras(ta), z0=PZ)
-    dona_encima(CX, -2.30)
+    if extra:
+        extra()
+    dona_encima(*(dona_xy or (CX, -2.30)))
     red()
-    revisar_carga("B")
+    revisar_carga(nombre)
 
 
 CAMAS = {"a": cama_a, "b": cama_b}

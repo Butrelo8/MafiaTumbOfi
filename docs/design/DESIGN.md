@@ -114,7 +114,8 @@ transfer, over the 150 KB cap, `web/site-reading-fichas/landonorris-com/speed-39
   The scene plate's QR (`blender/placa_veracruz.py`, `WA`) points at the counted route `https://mafiatumbada.com/wa/5212283538827`,
   pending the band's confirmation. To swap it: edit `WA`, run `uv run -q --with pillow --with qrcode python -I blender/placa_veracruz.py`,
   then re-render `placa3` with `blender/utileria.py`. The site's live WhatsApp buttons need the same swap.
-- Scene props (radio + cassette + dash key, glovebox junk, stickers, pantalla móvil, sign gantries, plate, bed props; the bed is now `caja4` A or B, 2026-11-14): three
+- Scene props (radio + cassette + dash key, glovebox junk, stickers, pantalla móvil, sign gantries, plate, bed props; the bed is `caja4` B, picked 2026-11-14, dressed in `caja5` with the speaker, the beer crate and the
+  inflatable alien; drinks in the cab still open, console or hand): three
   options each, waiting on the owner's pick (`docs/design/escenas/utileria/index.html`; sources in `references.md` › Scene props,
   phase 1). Each picked element joins Components with its source row; none is a rule yet.
 - Lead release: Putifresa (catalog order); "POR EL BLOC" is not in the catalog.
