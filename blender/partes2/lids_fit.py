@@ -33,7 +33,7 @@ for side, sd in (("R", -1), ("L", 1)):
             for j, t in enumerate(np.linspace(0, 1, NJ)):
                 z = z_hi[i] + t * (z_lo[i] - z_hi[i]); d, k = tree.query([x, z], 12)
                 G[i, j] = (x, P[k, 1].min(), z)           # front-most of 12 (a mean mixes TRELLIS's back shell in)
-        for _ in range(6):                                        # 3 x 3 box smoothing of the depth only, 6 passes
+        for _ in range(20):                                       # 3 x 3 box smoothing of the depth only, 20 passes (6 left column ripples)
             Y = np.pad(G[:, :, 1], 1, mode="edge")
             G[:, :, 1] = sum(Y[1 + di:1 + di + NI, 1 + dj:1 + dj + NJ] for di in (-1, 0, 1) for dj in (-1, 0, 1)) / 9
         G[:, :, 1] -= OFF

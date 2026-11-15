@@ -67,7 +67,9 @@ def bone_parent(o, bone):
 bone_parent(bpy.data.objects["hair"], "mixamorig:Head")
 bpy.ops.object.select_all(action="DESELECT"); bpy.context.view_layer.objects.active = shoes; shoes.select_set(True)
 bpy.ops.object.mode_set(mode="EDIT"); bm = bmesh.from_edit_mesh(shoes.data)
-for v in bm.verts: v.select = v.co.x > 0
+for v in bm.verts: v.select = (shoes.matrix_world @ v.co).x > 0     # world x: the object may carry a transform
+for e in bm.edges: e.select = all(v.select for v in e.verts)          # faces keep a stale selection otherwise
+for f in bm.faces: f.select = all(v.select for v in f.verts)
 bmesh.update_edit_mesh(shoes.data); bpy.ops.mesh.separate(type="SELECTED"); bpy.ops.object.mode_set(mode="OBJECT")
 left = next(o for o in sc.objects if o.name.startswith("shoes.")); left.name = "shoe_L"; shoes.name = "shoe_R"
 bone_parent(left, "mixamorig:LeftFoot"); bone_parent(shoes, "mixamorig:RightFoot")

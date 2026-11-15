@@ -138,8 +138,41 @@ gotchas:
 - The owner paused clip fixes (23:56). The work is model quality: seams, lids, hands, shoes, skin, hair, chain.
 - Owner's picks (00:13): pale peach skin, soft dark-brown matte hair without the fringe notches, and the silver
   chain, all as in `diego.png`.
-- Wrist seams, two tries, both worse, reverted. Decimating before the joints didn't help. Clamping the body column
-  inside the hand's per-angle radius made spikes. Next is a piece-coloured render to find which shell the teeth
-  belong to.
-- Stills: `stills.py` now adds a face front and 3/4, and frames the hand from outside the body. Rest-pose stills use a
-  pre-script that sets `pose_position = "REST"`. Seam close-ups: `seam_view.py`.
+- **Shoes (owner: "not lined up with the pants").** Cause: TRELLIS made the shoes 1.45× too long (28 cm against an
+  18.5 cm foot; it guessed the depth axis from a front-view image, like the hair). `fit_body.py` fits shoes with
+  uniform scale only, so the toe lined up and the heel hung 8.6 cm behind the leg. Its push-out against the bare toes
+  also crumpled the toe box. Not the shoe_L/R split, not the hem length.
+  - Fix: `shoes_box.py`, a per-axis box fit of each shoe onto the fused Diego's shoe region (the rerig Diego's shoes,
+    19.4 cm), height kept, no push-out.
+  - Variant a (height scaled ×0.78 to the label's z < 0.10 cutoff) flattened the laces and was dropped.
+  - Sheet: `render/.../model/feet/shoes_ab.jpg`.
+- **`bind.py` shoe split:** the vertex selection was not flushed to the faces, so with the new shoes all faces went to
+  shoe_L and shoe_R was empty. Fixed (world x, edges and faces selected from their vertices).
+- **Look (`look.py`, after bind):**
+  - Skin texture: the skin cluster's median goes to the source's peach, sRGB (226, 192, 170).
+  - Hair: flat dark brown (64, 55, 51) and matte (the texture was near black).
+  - A silver chain: a 1.1 mm curve 1.5 mm off the shirt, dipping 4.5 cm in front, on Spine2.
+  - Rendered hue matches the source: cheek R/G 1.16 against 1.18, G/B 1.14 against 1.13. Workbench studio light
+    renders every albedo at ~0.64 brightness, so it reads darker than `diego.png`.
+- **Lids:**
+  - Smooth shading and a level-2 subdivision; depth smoothing up from 6 to 20 passes.
+  - Column banding, as the RMS of the second difference of the closed lid's column-mean luminance (8-bit levels):
+    1.75 / 2.43 before, 1.23 / 1.62 now.
+  - Lid colour against the skin around it: within (3, 6, 7) levels.
+  - Open: a white crescent at the outer side of the left eye when closed (1,389 white pixels at a 500 px face, as
+    before). A full-width grid reduced it to 984 but put a winged flap on the half key. A real fix wants the eye's own
+    surface offset outward as the lid.
+- **Open (tried, not fixed):**
+  - **Fringe notches** are sculpted steps at the edges of the raised fringe block in the TRELLIS hair. These all left
+    them: Laplacian smoothing (the shell collapses into the scalp), voxel remesh (the open sheet vanishes), pushing
+    groove vertices out to a smoothed envelope, and zipping boundary vertices within 2–4.5 mm. A fix needs new hair
+    (a Klein 3/4-view hair image to TRELLIS, or a modelled bowl cut).
+  - **Wrist seams:** two tries, both worse, reverted. Decimating before the joints didn't help. Clamping the body
+    column inside the hand's per-angle radius made spikes. The teeth's owner shell is not found yet (next: a
+    piece-coloured render).
+  - **Thin pale lines over the brows** (texture or brow geometry, not checked).
+  - **Pants crotch patch.**
+  - The idle pose sinks the hands into the shirt hem at the hip (a pose issue; clips are parked).
+- Rebuild from the dressed blend: `rebuild_tail.sh` (bind, look, 4 clips, lids; ~2 min). The clip blends changed, so
+  their 11-14 eagle results are stale.
+- Stills: `render/.../model/v2/model_v2.jpg` (rest, beside the source).
