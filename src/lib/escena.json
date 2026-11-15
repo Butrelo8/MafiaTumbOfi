@@ -81,6 +81,17 @@
         "color": "#0b0c12",
         "densidad": 0.012
       },
+      "cycles": {
+        "_doc": "Cycles only (blender/mundo.py, Night B): the page keeps hdri and niebla above. Fog in Cycles units, not FogExp2's.",
+        "hdri": "kloppenheim_07_puresky",
+        "cielo_intensidad": 0.25,
+        "luna_angulo": 18,
+        "niebla": {
+          "color": [0.6, 0.58, 0.55],
+          "densidad": 0.0028,
+          "anisotropia": 0.45
+        }
+      },
       "luna": {
         "color": "#9fb3d9",
         "intensidad": 0.12,
