@@ -12,8 +12,9 @@ loop:
 Options: caja5-estudio-<prop> (one per candidate; render them 1:1), caja5-<variant> (the close-up) and caja5-<variant>-esc2
 (scene 2's hold, measured: CAJA5 MEDIDA lines), variant in ligera, media, llena. Through WSLENV: CAJA5_SONDA=1 prints the roll-bar probe; CAJA5_CPU=1 renders on the CPU.
 """
-import bpy, math, os, json
-from mathutils import Vector
+import bpy, bmesh, math, os, json
+from mathutils import Matrix, Quaternion, Vector
+from mathutils.bvhtree import BVHTree
 
 C4 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "caja4.py")
 _c4 = open(C4, encoding="utf8").read().rsplit("# ---------------------------------------------------------------- utileria.py's render loop", 1)[0]  # rsplit: caja4 quotes the marker
@@ -497,8 +498,9 @@ ALU5 = mat("k5_alu", (0.75, 0.75, 0.77), 0.25, 1.0)
 PET = mat("k5_pet", (0.85, 0.93, 0.98), 0.04, trans=0.95)
 
 
-def mat_envuelta(nombre, png, rough=0.3, metal=0.0):
-    """A label wrapped round a cylinder: u = the angle round the object's own z (Generated coordinates), v = its height."""
+def mat_envuelta(nombre, png, rough=0.3, metal=0.0, dorso=None):
+    """A label wrapped round a cylinder: u = the angle round the object's own z (Generated coordinates), v = its height.
+    dorso: the colour of the label's inside face (a paper back, seen through a clear bottle)."""
     if nombre in MATS:
         return MATS[nombre]
     m = bpy.data.materials.new(nombre)
@@ -522,7 +524,15 @@ def mat_envuelta(nombre, png, rough=0.3, metal=0.0):
     tx = nt.nodes.new("ShaderNodeTexImage")
     tx.image = bpy.data.images.load(os.path.join(ETIQ, png), check_existing=True)
     nt.links.new(uv.outputs[0], tx.inputs["Vector"])
-    nt.links.new(tx.outputs["Color"], b.inputs["Base Color"])
+    col = tx.outputs["Color"]
+    if dorso:
+        geo, mx = nt.nodes.new("ShaderNodeNewGeometry"), nt.nodes.new("ShaderNodeMix")
+        mx.data_type = "RGBA"
+        nt.links.new(geo.outputs["Backfacing"], mx.inputs[0])
+        nt.links.new(col, mx.inputs[6])
+        mx.inputs[7].default_value = (*dorso, 1)
+        col = mx.outputs[2]
+    nt.links.new(col, b.inputs["Base Color"])
     MATS[nombre] = m
     return m
 
@@ -534,37 +544,199 @@ def bebida(tipo, nombre):
     sc.collection.objects.link(raiz)
     GRUPO.append(raiz)
     if tipo == "agua":
-        cil(0.033, 0.17, (0, 0, 0.085), PET, verts=32, parent=raiz)
-        cil(0.0335, 0.06, (0, 0, 0.095), mat_envuelta("k5_et_agua", "agua.png", 0.5), verts=48, parent=raiz)
+        cil(0.033, 0.158, (0, 0, 0.091), PET, verts=32, parent=raiz)
+        cono(0.027, 0.033, 0.012, (0, 0, 0.006), PET, verts=32, parent=raiz)  # the base tapers to its feet, Ø 54 mm
+        # an open tube: with end caps, the Generated mapping painted both caps with the label's gold band, two gold discs inside
+        # the clear bottle that tinted the water amber (caja5-bebidas-consola, -mano, 11-14)
+        et = cil(0.0335, 0.06, (0, 0, 0.095), mat_envuelta("k5_et_agua", "agua.png", 0.5, dorso=(0.8, 0.8, 0.78)), verts=48, parent=raiz)
+        bm = bmesh.new()
+        bm.from_mesh(et.data)
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if abs(f.normal.z) > 0.9], context="FACES")
+        bm.to_mesh(et.data)
+        bm.free()
         cono(0.033, 0.014, 0.04, (0, 0, 0.19), PET, verts=32, parent=raiz)
         cil(0.015, 0.02, (0, 0, 0.22), NEGRO5, verts=24, parent=raiz)
     else:
         cil(0.033, 0.104, (0, 0, 0.061), mat_envuelta("k5_et_" + tipo, tipo + ".png", 0.25, 0.6), verts=48, parent=raiz)
-        cono(0.031, 0.033, 0.009, (0, 0, 0.0045), ALU5, verts=48, parent=raiz)
+        cono(0.026, 0.033, 0.009, (0, 0, 0.0045), ALU5, verts=48, parent=raiz)  # the standing ring, Ø 52 mm
         cono(0.033, 0.027, 0.01, (0, 0, 0.118), ALU5, verts=48, parent=raiz)
         caja((0.02, 0.012, 0.002), (0.008, 0, 0.123), ALU5, parent=raiz)  # the tab
     return raiz
 
 
-def bebidas_consola():
-    """(a) A can and a water bottle in the front console's two cupholders, between the seats (console top probed z ~1.37 at
-    y 0.40-0.65, x -0.1..0 from the centre line, probed 11-14 with rays down, figures hidden); a black cupholder ring round each."""
-    for ob in sc.objects:  # an earlier option's cans are hidden from render only: the rays must not land on them
+MEDIDA_BEBIDA = {"agua": (0.0335, 0.23), "lata": (0.033, 0.122)}  # radius and height (the label tube is the widest part)
+PIE = {"agua": 0.027, "lata": 0.026}  # the radius each one stands on (bottle feet, can standing ring)
+
+
+def choques(raiz, R, H, fuera=()):
+    """Does a drink cross anything? BVH overlap (triangle pairs) between the drink's parts and every other mesh near it (the
+    G63's interior is low-poly: a big lid face can pass through a can with no vertex inside it), plus the count of those meshes'
+    vertices inside the drink's cylinder (R, H, in the drink's own frame: it may stand tilted). `fuera`: objects not counted."""
+    dg = bpy.context.evaluated_depsgraph_get()
+    L = raiz.matrix_world.inverted()
+    partes = [o for o in raiz.children_recursive if o.type == "MESH"]
+    def malla(o, lo=None, hi=None):
+        ev = o.evaluated_get(dg)
+        me = ev.to_mesh()
+        vs = [ev.matrix_world @ v.co for v in me.vertices]
+        ps = []
+        for p in me.polygons:
+            q = [vs[i] for i in p.vertices]
+            if lo is None or all(min(c[k] for c in q) <= hi[k] and max(c[k] for c in q) >= lo[k] for k in range(3)):
+                ps.append(list(p.vertices))
+        ev.to_mesh_clear()
+        return vs, ps
+    vs, ps = [], []
+    for o in partes:
+        v, p = malla(o)
+        ps += [[i + len(vs) for i in f] for f in p]
+        vs += v
+    yo = BVHTree.FromPolygons(vs, ps)
+    lo = Vector((min(v.x for v in vs), min(v.y for v in vs), min(v.z for v in vs))) - Vector((0.01, 0.01, 0.01))
+    hi = Vector((max(v.x for v in vs), max(v.y for v in vs), max(v.z for v in vs))) + Vector((0.01, 0.01, 0.01))
+    pares, dentro, quien = 0, 0, set()
+    for o in sc.objects:
+        if o.type != "MESH" or o in partes or o in fuera or o.hide_render or o.hide_viewport:
+            continue
+        bb = [o.matrix_world @ Vector(c) for c in o.bound_box]
+        if any(min(c[k] for c in bb) > hi[k] or max(c[k] for c in bb) < lo[k] for k in range(3)):
+            continue
+        v, p = malla(o, lo, hi)
+        if not p:
+            continue
+        n = len(yo.overlap(BVHTree.FromPolygons(v, p)))
+        dv = {i for f in p for i in f for q in [L @ v[i]] if 0.001 < q.z < H and math.hypot(q.x, q.y) < R}
+        d = len(dv)
+        if n or d:
+            q = [v[i] for i in dv] or [v[i] for f in p for i in f]
+            quien.add(f"{o.name} x {min(c.x for c in q) - CX:+.3f}..{max(c.x for c in q) - CX:+.3f}"
+                      f" y {min(c.y for c in q):.3f}..{max(c.y for c in q):.3f} z {min(c.z for c in q):.3f}..{max(c.z for c in q):.3f}")
+        pares += n
+        dentro += d
+    return pares, dentro, sorted(quien)
+
+
+# The console (probed 11-14, tmp/caja7/cubierta.log, rays down from 1.6 m with the riders hidden): the armrest lid's top is a
+# 10 cm wide crown (z 1.38 at y 0.45 falling to 1.34 at y 0.65) with flanks that drop 9 cm; the G63's mesh has no cupholder
+# well. Ahead of the controller panel (y 0.80) the console steps down to a flat deck, z 1.236-1.241, x -0.03..+0.095 from the
+# centre line, from y 0.81 to the centre stack (y ~1.04); the shifter stands on it at x +0.02..+0.06, y 0.88-0.945.
+# The shifter boot's back lip (y 0.875-0.882, z 1.26-1.28), the controller step (y 0.80-0.81) and the centre stack's lower lip
+# (y 1.031, z 1.33) are near-vertical faces the rays down miss; apoyo's BVH test found them (11-14). Behind the shifter every spot
+# crossed the step or the boot (12-70 triangle pairs, upright or tilted); ahead of it the clear patch is x -0.03..+0.095 by
+# y 0.945..1.031, room for one Ø 66 mm drink (centres x 0.003-0.062, y 0.978-0.998). So the console holds one drink.
+CONSOLA = {  # variant: (drink, x from the centre line, y), the spot to start the support search from
+    "lata": (("lata-tumba", 0.032, 0.988),),  # the can alone, ahead of the shifter
+    "agua": (("agua", 0.032, 0.988),),        # the bottle alone, ahead of the shifter
+}
+# Kept (11-14 previews, 16 spp): the bottle. Its clear body and pale label read at luma 92 against the console's 14; the
+# black can reads at 43 (its lower tenth at 0, merged with the console) and its silver lid reads as a second shift knob.
+CONSOLA_VAR = os.environ.get("CAJA5_CONSOLA", "agua")
+
+
+def entorno(lo, hi):
+    """One BVH of every visible mesh's faces that reach into the box lo..hi (world), for the support search's overlap test."""
+    dg = bpy.context.evaluated_depsgraph_get()
+    vs, ps = [], []
+    for o in sc.objects:
+        if o.type != "MESH" or o.hide_render or o.hide_viewport or o.name.startswith("k5_"):
+            continue
+        bb = [o.matrix_world @ Vector(c) for c in o.bound_box]
+        if any(min(c[k] for c in bb) > hi[k] or max(c[k] for c in bb) < lo[k] for k in range(3)):
+            continue
+        ev = o.evaluated_get(dg)
+        me = ev.to_mesh()
+        v = [ev.matrix_world @ w.co for w in me.vertices]
+        for f in me.polygons:
+            q = [v[i] for i in f.vertices]
+            if all(min(c[k] for c in q) <= hi[k] and max(c[k] for c in q) >= lo[k] for k in range(3)):
+                ps.append([len(vs) + i for i in range(len(q))])
+                vs += q
+        ev.to_mesh_clear()
+    return BVHTree.FromPolygons(vs, ps)
+
+
+def perfil(R, H, pie, M):
+    """A drink's outline as a closed 24-sided mesh (feet ring at pie, full radius R from 12 mm up to H) under matrix M: a BVH."""
+    anillos = [(pie, 0.0), (R, 0.012), (R, H)]
+    vs = [M @ Vector((r * math.cos(2 * math.pi * k / 24), r * math.sin(2 * math.pi * k / 24), z)) for r, z in anillos for k in range(24)]
+    ps = [[a * 24 + k, a * 24 + (k + 1) % 24, (a + 1) * 24 + (k + 1) % 24, (a + 1) * 24 + k] for a in range(2) for k in range(24)]
+    ps += [list(range(24))[::-1], [48 + k for k in range(24)]]
+    return BVHTree.FromPolygons(vs, ps)
+
+
+def apoyo(x, y, R, busca=0.012, paso=0.001, libre=None):
+    """Where a drink standing on radius R rests near (x, y): rays straight down from 1.6 m on a 5 mm grid over its base disc, a
+    plane fitted to the hits; the drink stands square to it (the deck falls ~4° towards the dash: a level base would hang off
+    the low side), tilt ≤ 6°. The base touches the highest hit + 0.5 mm, lifted in 0.5 mm steps while the contact gap stays
+    ≤ 3 mm until `libre` says its outline crosses nothing. Keeps the clear spot with the shallowest hollow under the base (the
+    deck's 2-5 mm relief, reported apart from the gap), then the nearest. Returns (x, y, z, hollow, normal, gap) or None."""
+    import numpy as np
+    disco = [(i * 0.005, j * 0.005) for i in range(-7, 8) for j in range(-7, 8) if math.hypot(i, j) * 0.005 <= R]
+    n = int(round(busca / paso))
+    mejor = None
+    for i in range(-n, n + 1):
+        for j in range(-n, n + 1):
+            cx, cy = x + i * paso, y + j * paso
+            P = []
+            for u, v in disco:
+                h = rayo((cx + u, cy + v, 1.6), (0, 0, -1))
+                P.append((u, v, h.z if h else -9.0))
+            P = np.array(P)
+            A = np.c_[P[:, 0], P[:, 1], np.ones(len(P))]
+            (a, b, c), *_ = np.linalg.lstsq(A, P[:, 2], rcond=None)
+            res = P[:, 2] - A @ np.array([a, b, c])
+            hueco = float(res.max() - res.min())
+            nrm = Vector((-a, -b, 1)).normalized()
+            clave = (round(hueco, 4), math.hypot(i, j))
+            if nrm.z < math.cos(math.radians(6)) or (mejor is not None and clave >= mejor[0]):
+                continue
+            for k in range(1, 7):
+                if libre is None or libre(cx, cy, float(c + res.max()) + k * 0.0005, nrm):
+                    mejor = (clave, cx, cy, float(c + res.max()) + k * 0.0005, hueco, nrm, k * 0.0005)
+                    break
+    return mejor[1:] if mejor else None
+
+
+def bebidas_consola(var=CONSOLA_VAR):
+    """(a) The console drink: standing on the lower deck ahead of the shifter, on a measured support (apoyo), checked for
+    crossings (choques). Prints CAJA5 CONSOLA: the contact gap (the base over the highest support point; the gate, as CAJA5
+    MANO's gap), the hollow under the base (the deck's relief, reported, not gated), pairs and vertices inside."""
+    if ALZADA:
+        raise RuntimeError("the console still needs Héctor's hands at rest: render it in a run without the hand options")
+    for ob in sc.objects:  # an earlier option's drinks are hidden from render only: the rays must not land on them
         if ob.hide_render and not ob.hide_viewport:
             ob.hide_viewport = True
     for o in FIGURAS:
         o.hide_viewport = True
     _g["dg"] = bpy.context.evaluated_depsgraph_get()
-    for tipo, y in (("lata-tumba", 0.47), ("agua", 0.57)):
-        h = rayo((CX - 0.05, y, 2.0), (0, 0, -1))
-        z = h.z if h else 1.37
+    zona = entorno(Vector((CX - 0.10, 0.76, 1.15)), Vector((CX + 0.16, 1.12, 1.50)))  # the deck, shifter and centre stack
+    hechos = []
+    for tipo, x, y in CONSOLA[var]:
+        R, H = MEDIDA_BEBIDA["agua" if tipo == "agua" else "lata"]
+        pie = PIE["agua" if tipo == "agua" else "lata"]
+
+        def libre(cx, cy, z, nrm, R=R, H=H, pie=pie):  # the drink's outline crosses no face of the cab there
+            M = Matrix.Translation((cx, cy, z)) @ Vector((0, 0, 1)).rotation_difference(nrm).to_matrix().to_4x4()
+            return not zona.overlap(perfil(R, H, pie, M))
+        a = apoyo(CX + x, y, pie, libre=libre)
+        if a is None:
+            print(f"CAJA5 CONSOLA {var} {tipo} no flat support near ({x}, {y}) -> FAIL")
+            continue
         r = bebida(tipo, "k5_bebida_" + tipo)
-        r.location = (CX - 0.05, y, z + 0.001)
-        toro(0.038, 0.006, (CX - 0.05, y, z + 0.006), NEGRO5, parent=False)
-        print(f"CAJA5 consola {tipo} z {z:.3f}")
+        r.location = (a[0], a[1], a[2])
+        r.rotation_mode = "QUATERNION"
+        r.rotation_quaternion = Vector((0, 0, 1)).rotation_difference(a[4])
+        hechos.append((tipo, r, R, H, a))
     for o in FIGURAS:
         o.hide_viewport = False
+    bpy.context.view_layer.update()
     _g["dg"] = bpy.context.evaluated_depsgraph_get()
+    for tipo, r, R, H, a in hechos:
+        pares, dentro, quien = choques(r, R, H)
+        gap, tilt = a[5], math.degrees(a[4].angle(Vector((0, 0, 1))))
+        ok = gap <= 0.003 and not pares and not dentro and tilt <= 6
+        print(f"CAJA5 CONSOLA {var} {tipo} at x {a[0] - CX:+.3f} y {a[1]:.3f} z {r.location.z:.4f} tilt {tilt:.1f}° contact gap"
+              f" {gap * 1000:.1f} mm hollow {a[3] * 1000:.1f} mm pairs {pares} inside {dentro} {quien} -> {'PASS' if ok else 'FAIL'}")
 
 
 MANO_POSE = os.environ.get("CAJA5_POSE", "ventana")
@@ -598,49 +770,192 @@ def alzar_mano(fig="hector", lado=1, objetivo=(0.0, -0.22, -0.10), polo=(1.0, 0.
     bpy.context.view_layer.update()
 
 
-def bebida_en_mano(fig="hector", hueso=POSES[MANO_POSE][0], tipo="agua"):
-    """(b) A drink in a rider's hand (owner 11-14: drinks in the hand only; Héctor holds the water bottle, his console-side hand).
-    The figures have one bone per hand and no fingers, so the drink stands against the hand, never through it: a search round
-    the hand keeps the spot where no body vertex is inside the drink and the gap to the hand's own vertices (its vertex group)
-    is smallest, the hand partway up a bottle; then it parents the drink to the hand bone (it follows the pose). Prints CAJA5
-    MANO with the vertices inside (a fail if > 0) and the gap."""
+AGARRE = os.environ.get("CAJA5_AGARRE")  # where the fist sits up the bottle (share of its height from the base); unset: searched
+GIRO = os.environ.get("CAJA5_GIRO")      # the fist's yaw about the wrist, degrees; unset: searched
+VISTA_MANO = Vector((0.95, -0.20, 0.12)).normalized()  # from the hand towards the close-up camera (outside his window); scene 4's
+# camera sees the hand from (0.97, -0.18, 0.18), the same side
+GIROS, BANDAS = (0, 20, 35, 50, 65), (0.5, 0.6)
+PUNO = {}
+
+
+def puno(fig="hector", hueso="mano_n"):
+    """A wrist bone at the hand mesh's own wrist (the centroid of the vertices half-weighted to the hand), child of the hand bone,
+    the hand's vertex group moved onto it: turning it turns the fist about the wrist. Turning the hand bone itself would swing
+    the mesh round a pivot ~12 cm away. Once per run; returns the bone's name (also the hand's vertex group now)."""
+    nombre = "puno_" + hueso[-1]
+    if nombre in PUNO:
+        return nombre
+    rig, cuerpo = bpy.data.objects[fig + "_rig"], bpy.data.objects[fig]
+    bpy.context.view_layer.update()
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = cuerpo.evaluated_get(dg)
+    me = ev.to_mesh()
+    gi = cuerpo.vertex_groups[hueso].index
+
+    def peso(v):
+        return max((g.weight for g in v.groups if g.group == gi), default=0.0)
+    anillo = [ev.matrix_world @ v.co for v in me.vertices if 0.2 <= peso(v) <= 0.8]
+    mano = [ev.matrix_world @ v.co for v in me.vertices if peso(v) >= 0.5]
+    ev.to_mesh_clear()
+    muneca, centro = sum(anillo, Vector()) / len(anillo), sum(mano, Vector()) / len(mano)
+    pb = rig.pose.bones[hueso]
+    a_reposo = rig.data.bones[hueso].matrix_local @ pb.matrix.inverted() @ rig.matrix_world.inverted()
+    bpy.context.view_layer.objects.active = rig
+    rig.hide_viewport = False
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = rig.data.edit_bones.new(nombre)
+    eb.head, eb.tail = a_reposo @ muneca, a_reposo @ centro
+    eb.parent, eb.use_connect, eb.use_deform = rig.data.edit_bones[hueso], False, True
+    bpy.ops.object.mode_set(mode="OBJECT")
+    cuerpo.vertex_groups[hueso].name = nombre
+    rig.pose.bones[nombre].rotation_mode = "QUATERNION"
+    bpy.context.view_layer.update()
+    PUNO[nombre] = muneca
+    print(f"CAJA5 PUNO {fig} wrist {tuple(round(c, 3) for c in muneca)} hand centroid {tuple(round(c, 3) for c in centro)}")
+    return nombre
+
+
+def girar_puno(fig, nombre, grados):
+    """Yaw the fist about the world vertical through its wrist (negative: the fingers turn from inboard towards the front)."""
+    rig = bpy.data.objects[fig + "_rig"]
+    pb = rig.pose.bones[nombre]
+    pb.rotation_quaternion = Quaternion()
+    bpy.context.view_layer.update()
+    B = (rig.matrix_world @ pb.matrix).to_quaternion()
+    pb.rotation_quaternion = B.inverted() @ Quaternion((0, 0, 1), math.radians(grados)) @ B
+    bpy.context.view_layer.update()
+
+
+def _cuerpo(fig, grupo):
+    import numpy as np
+    cuerpo = bpy.data.objects[fig]
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = cuerpo.evaluated_get(dg)
+    me = ev.to_mesh()
+    gi = cuerpo.vertex_groups[grupo].index
+    V = np.array([tuple(ev.matrix_world @ v.co) for v in me.vertices])
+    peso = np.array([max((g.weight for g in v.groups if g.group == gi), default=0.0) for v in me.vertices])
+    ev.to_mesh_clear()
+    return V, peso
+
+
+def _sitio(V, peso, R, H, banda):
+    """The bottle's base for a fist at `banda` of its height: no body vertex inside the upright cylinder, gap ≤ 3 mm to the hand,
+    the axis farther from the camera than the fist's centroid, the smallest offset across the view. ((offset, gap), base).
+    The hand, for the gap, is its group at any weight plus every vertex within 6 cm of its centroid: the thumb stands up on the
+    palm side, partly outside the group, and the bottle can only pass behind the fist against it."""
+    import numpy as np
+    hc = V[peso >= 0.5].mean(axis=0)
+    dist = np.linalg.norm(V - hc, axis=1)
+    cerca = dist < H + 0.15
+    V, es_mano, pes = V[cerca], ((peso >= 0.1) | (dist < 0.06))[cerca], peso[cerca]
+    vh = np.array([VISTA_MANO.x, VISTA_MANO.y])
+    vh /= np.linalg.norm(vh)
+    bz = hc[2] - banda * H
+    enz = (V[:, 2] >= bz) & (V[:, 2] <= bz + H)
+    mejor = None
+    for i in range(-16, 17):
+        for j in range(-16, 17):
+            bx, by = hc[0] + i * 0.005, hc[1] + j * 0.005
+            w = np.array([bx - hc[0], by - hc[1]])
+            if w @ vh > -0.01:
+                continue
+            rr = np.hypot(V[:, 0] - bx, V[:, 1] - by)
+            if np.any(enz & (rr < R)):
+                continue
+            m = enz & es_mano
+            if not m.any():
+                continue
+            k = int(np.argmin(rr[m]))
+            gap = float(rr[m][k] - R)
+            if gap > 0.003:
+                continue
+            lat = float(np.linalg.norm(w - (w @ vh) * vh))
+            if mejor is None or (lat, gap) < mejor[0]:
+                mejor = ((lat, gap), Vector((bx, by, bz)), float(pes[m][k]))  # the nearest vertex's weight to the hand
+    return mejor
+
+
+def _tapa(cam, base, H, R, fig):
+    """cubre() without the bottle built: a ray to a point of the bottle's silhouette that hits the figure first is covered."""
+    dg = bpy.context.evaluated_depsgraph_get()
+    c = base + Vector((0, 0, H / 2))
+    lado = (c - cam).cross(Vector((0, 0, 1))).normalized()
+    filas = []
+    for j in range(23):
+        f = (j + 0.5) / 23
+        n = [0, 0]
+        for i in range(9):
+            p = base + Vector((0, 0, f * H)) + lado * (((i + 0.5) / 9 * 2 - 1) * R * 0.9)
+            d = p - cam
+            o, dd, tapa = cam.copy(), d.normalized(), False
+            for _ in range(12):  # through the window glass, as cubre()
+                hit, loc, _n, idx, ob, _m = sc.ray_cast(dg, o, dd, distance=(p - o).length - 0.002)
+                if not hit:
+                    break
+                if ob.type == "MESH" and idx < len(ob.data.polygons) and ob.material_slots and \
+                        ob.material_slots[ob.data.polygons[idx].material_index].material.name.startswith(("vidrio", "mica")):
+                    o = loc + dd * 0.001
+                    continue
+                tapa = ob.name.split(".")[0] == fig
+                break
+            n[0 if tapa else 1] += 1
+        filas.append((f, n))
+
+    def parte(a, b, k):
+        t = [n for f, n in filas if a <= f < b]
+        return sum(n[k] for n in t) / sum(sum(n) for n in t)
+    return parte(0.35, 0.65, 0), parte(0.85, 1.01, 1), parte(0.0, 0.15, 1)
+
+
+def bebida_en_mano(fig="hector", hueso=POSES[MANO_POSE][0], tipo="agua", banda=None, giro=None):
+    """(b) A drink in a rider's fist (owner 11-14: Héctor's water bottle in his grip, not beside his hand). The hands are
+    thumbs-up paddles with no finger bones, so the grip is what the camera reads: the bottle stands against the palm on the
+    side away from the window camera (VISTA_MANO), the fist over its middle. As posed (ventana) the fingers point inboard, so
+    the window camera looks along the hand from the wrist and the bottle could only sit at the fingertips (11-14 previews:
+    the middle 11-25 % covered); the fist turns about its own wrist (puno) to show its back to the window. For each yaw in
+    GIROS and fist height in BANDAS: the search centred on the hand's vertex-group centroid (the hand bone sits ~12 cm outboard
+    of the mesh; centring on the bone, the 19:50 round, only reached spots beside the hand), no body vertex inside the bottle,
+    gap ≤ 3 mm, then the coverage from the window camera (_tapa); keeps the smallest turn that passes cubre's threshold, else
+    the best middle coverage. Parents the drink to the wrist bone. Prints CAJA5 GIRO per try and CAJA5 MANO."""
     asientos_traseros()
     if fig == "hector" and POSES[MANO_POSE][1] and not ALZADA:
         lado = -1 if hueso.endswith("_n") else 1
         alzar_mano(lado=lado, objetivo=POSES[MANO_POSE][1], polo=(lado * 1.0, 0.2, -1.0))
         ALZADA.append(1)
     bpy.context.view_layer.update()
-    rig, cuerpo = bpy.data.objects[fig + "_rig"], bpy.data.objects[fig]
-    b = rig.pose.bones[hueso]
-    centro = rig.matrix_world @ ((b.head + b.tail) / 2)
-    R, H = (0.0335, 0.23) if tipo == "agua" else (0.033, 0.122)
-    dg = bpy.context.evaluated_depsgraph_get()
-    ev = cuerpo.evaluated_get(dg)
-    me = ev.to_mesh()
-    gi = cuerpo.vertex_groups[hueso].index
-    vs = [(ev.matrix_world @ v.co, any(g.group == gi and g.weight >= 0.5 for g in v.groups)) for v in me.vertices]
-    ev.to_mesh_clear()
-    cerca = [p for p in vs if (p[0] - centro).length < H + 0.12]
-    bajo = range(-16, 3) if tipo == "agua" else range(-8, 3)
-    mejor = None
-    for dz in [k * 0.01 for k in bajo]:
-        for dx in [k * 0.01 for k in range(-9, 10)]:
-            for dy in [k * 0.01 for k in range(-9, 10)]:
-                base = centro + Vector((dx, dy, dz))
-                dentro, gap = 0, 9.0
-                for v, mano in cerca:
-                    if base.z <= v.z <= base.z + H:
-                        rr = math.hypot(v.x - base.x, v.y - base.y)
-                        if rr < R:
-                            dentro += 1
-                            break
-                        if mano:
-                            gap = min(gap, rr - R)
-                if dentro == 0 and gap < 9:
-                    clave = (round(gap, 3), abs(dz + 0.4 * H) if tipo == "agua" else abs(dz), math.hypot(dx, dy))
-                    if mejor is None or clave < mejor[0]:
-                        mejor = (clave, base)
-    base = mejor[1] if mejor else centro
+    rig = bpy.data.objects[fig + "_rig"]
+    R, H = MEDIDA_BEBIDA["agua" if tipo == "agua" else "lata"]
+    grupo = puno(fig, hueso)
+    giros = [float(giro if giro is not None else GIRO)] if (giro is not None or GIRO) else GIROS
+    bandas = [float(banda if banda is not None else AGARRE)] if (banda is not None or AGARRE) else BANDAS
+    pruebas = []
+    for g in giros:
+        girar_puno(fig, grupo, g)
+        V, peso = _cuerpo(fig, grupo)
+        hc = Vector(V[peso >= 0.5].mean(axis=0))
+        for b in bandas:
+            s = _sitio(V, peso, R, H, b)
+            if s is None:
+                print(f"CAJA5 GIRO {g:+.0f} banda {b}: no spot with 0 inside and gap <= 3 mm")
+                continue
+            medio, tapa, pie = _tapa(hc + VISTA_MANO * 1.0, s[1], H, R, fig)
+            ok = medio >= 0.5 and tapa >= 0.5
+            print(f"CAJA5 GIRO {g:+.0f} banda {b}: offset {s[0][0] * 1000:.0f} mm gap {s[0][1] * 1000:.1f} mm, middle covered"
+                  f" {medio * 100:.0f} % cap visible {tapa * 100:.0f} % base visible {pie * 100:.0f} %{' ok' if ok else ''}")
+            pruebas.append(((not ok, abs(g) if ok else -medio, abs(b - 0.5)), g, b, s))
+    if pruebas:
+        _k, g, banda, mejor = min(pruebas, key=lambda t: t[0])
+    else:
+        g, banda, mejor = giros[0], bandas[0], None
+    girar_puno(fig, grupo, g)
+    if mejor is None:
+        print(f"CAJA5 MANO {fig} {hueso} {tipo}: no spot with 0 inside and gap <= 3 mm -> FAIL")
+        V, peso = _cuerpo(fig, grupo)
+        hc = V[peso >= 0.5].mean(axis=0)
+        mejor = ((9.0, 9.0), Vector((hc[0], hc[1], hc[2] - banda * H)), 0.0)
+    hueso = grupo
+    base = mejor[1]
     raiz = bebida(tipo, "k5_bebida_mano")
     raiz.location = base
     bpy.context.view_layer.update()
@@ -648,10 +963,63 @@ def bebida_en_mano(fig="hector", hueso=POSES[MANO_POSE][0], tipo="agua"):
     raiz.parent, raiz.parent_type, raiz.parent_bone = rig, "BONE", hueso
     raiz.matrix_world = M
     bpy.context.view_layer.update()
-    dentro = sum(1 for v, _m in cerca if base.z <= v.z <= base.z + H and math.hypot(v.x - base.x, v.y - base.y) < R)
-    print(f"CAJA5 MANO {fig} {hueso} {tipo} pose {MANO_POSE} base {tuple(round(x, 3) for x in base)} dentro {dentro} gap {mejor[0][0] if mejor else 'nan'} m"
-          f" -> {'PASS' if dentro == 0 and mejor else 'FAIL'}")
+    pares, dentro, quien = choques(raiz, R, H)
+    lat, gap = mejor[0]
+    ok = gap <= 0.003 and not pares and not dentro
+    print(f"CAJA5 MANO {fig} {hueso} {tipo} pose {MANO_POSE} giro {g:+.0f} banda {banda} base {tuple(round(x, 3) for x in base)} gap {gap * 1000:.1f} mm"
+          f" (to a vertex of hand weight {mejor[2]:.2f}) axis-to-fist {lat * 1000:.0f} mm pairs {pares} inside {dentro} {quien} -> {'PASS' if ok else 'FAIL'}")
     return base
+
+
+def cubre(nombre, cam, base, H=0.23, R=0.033, fig="hector"):
+    """What a camera sees of the hand-held bottle: rays from `cam` to a 9 × 23 grid on the bottle's silhouette (the plane through
+    its axis, square to the view), stepping through glass. Per height band, the share whose first hit is the figure (the fist in
+    front) vs the bottle. Prints CAJA5 AGARRE; my threshold (not the owner's): the middle band (35-65 % of the height) at least
+    half covered, the cap band (85-100 %) and the base band (0-15 %) at least half visible: a fist round the middle."""
+    for ob in sc.objects:
+        if ob.hide_render and not ob.hide_viewport:
+            ob.hide_viewport = True
+    bpy.context.view_layer.update()
+    dg = bpy.context.evaluated_depsgraph_get()
+    cam = Vector(cam)
+    c = base + Vector((0, 0, H / 2))
+    lado = (c - cam).cross(Vector((0, 0, 1))).normalized()
+    botella = {o.name for o in GRUPO if o.name.startswith("k5_bebida_mano") or (o.parent and o.parent.name.startswith("k5_bebida_mano"))}
+    filas = []
+    for j in range(23):
+        f = (j + 0.5) / 23
+        n = {"mano": 0, "botella": 0, "otro": 0}
+        for i in range(9):
+            p = base + Vector((0, 0, f * H)) + lado * (((i + 0.5) / 9 * 2 - 1) * R * 0.9)
+            o, d = cam.copy(), (p - cam).normalized()
+            que = "otro"
+            for _ in range(12):
+                hit, loc, nrm, idx, ob, _m = sc.ray_cast(dg, o, d)
+                if not hit:
+                    break
+                if ob.name in botella:
+                    que = "botella"
+                    break
+                if ob.name.split(".")[0] == fig:
+                    que = "mano"
+                    break
+                if ob.type == "MESH" and idx < len(ob.data.polygons) and ob.material_slots and \
+                        (ob.material_slots[ob.data.polygons[idx].material_index].material.name.startswith(("vidrio", "mica"))):
+                    o = loc + d * 0.001
+                    continue
+                break
+            n[que] += 1
+        filas.append((f, n))
+    def parte(a, b, k):
+        t = [n for f, n in filas if a <= f < b]
+        tot = sum(n["mano"] + n["botella"] for n in t)
+        return sum(n[k] for n in t) / tot if tot else float("nan")
+    medio, tapa, pie = parte(0.35, 0.65, "mano"), parte(0.85, 1.01, "botella"), parte(0.0, 0.15, "botella")
+    otro = sum(n["otro"] for f, n in filas) / (23 * 9)
+    ok = medio >= 0.5 and not tapa < 0.5 and not pie < 0.5  # a band the cab hides entirely (nan) is not a fail
+    print(f"CAJA5 AGARRE {nombre} middle covered {medio * 100:.0f} % cap visible {tapa * 100:.0f} % base visible {pie * 100:.0f} %"
+          f" (cab in front {otro * 100:.0f} %) -> {'PASS' if ok else 'FAIL'}")
+    print("CAJA5 AGARRE " + nombre + " bands " + " ".join(f"{n['mano']}/{n['botella']}" for f, n in filas))
 
 
 def medir1(nombre, pos, mira, lens, pasa_vidrio=False, paso=5):
@@ -714,40 +1082,83 @@ def bebidas_esc4():
     """Scene 4B's hold (passenger side, the lit cab) with the drink in the hand."""
     cama_elegida()
     t4 = esc4_cabina()
-    bebida_en_mano()
+    p = bebida_en_mano()
     medir1("caja5-bebidas-esc4", *t4, pasa_vidrio=True, paso=2)
+    cubre("caja5-bebidas-esc4", t4[0], p)
     return t4
+
+
+CAM_CONSOLA = {  # (position, target, lens); "cabeceras" hides the drink's base behind the shifter (11-14 previews). Kept:
+    # "alta", the bottle's rounded base shows on the left of the shifter knob; "lado" hides more of it (tmp/caja7/lado-base.png)
+    "cabeceras": ((CX + 0.03, 0.28, 1.80), (CX + 0.03, 0.97, 1.30), 35),  # between the headrests, down over the lid onto the deck
+    "alta": ((CX + 0.03, 0.58, 1.86), (CX + 0.02, 0.99, 1.27), 30),       # forward over the lid, steep enough to clear the shifter
+    "lado": ((CX + 0.14, 0.50, 1.82), (CX + 0.02, 0.99, 1.27), 30),       # from the passenger side of the lid, past the shifter
+}
+
+
+def cerca_consola(var, cam="alta"):
+    """(a) close: the console's lower deck from over the armrest, lit by scene 4B's own cab lamps (luz_costado "cabina") and a
+    soft fill from behind the camera; the 11-14 still's 6 W lamp straight over the drinks made a hot spot on the can and left
+    the cab black round it."""
+    cama_elegida()
+    base_escena()
+    bebidas_consola(var)
+    luz_costado("cabina", 1)
+    luz("AREA", (CX + 0.05, 0.05, 1.95), 1.5, (1.0, 0.9, 0.8), mira=(CX + 0.03, 0.9, 1.3), size=0.8, parent=False)
+    sin_camara()
+    return CAM_CONSOLA[cam]
+
+
+for _v in CONSOLA:
+    opcion(f"caja5-bebidas-consola-{_v}")(lambda _v=_v: cerca_consola(_v))
+for _c in CAM_CONSOLA:
+    opcion(f"caja5-bebidas-consola-cam-{_c}")(lambda _c=_c: cerca_consola(CONSOLA_VAR, _c))
 
 
 @opcion("caja5-bebidas-consola")
 def bebidas_cerca_consola():
-    """(a) close: the console from over the rear armrest. Dropped by the owner 11-14 (kept as a text link on the page)."""
+    """(a) close, the kept variant (CONSOLA_VAR)."""
+    return cerca_consola(CONSOLA_VAR)
+
+
+@opcion("caja5-bebidas-consola-esc1")
+def bebidas_consola_esc1():
+    """Scene 1's hold with the console drinks: do they enter the road band through the windshield (rule 1)?"""
+    cama_elegida()
     base_escena()
     bebidas_consola()
-    luz("AREA", (CX - 0.05, 0.5, 2.05), 6, (1.0, 0.85, 0.65), mira=(CX - 0.05, 0.52, 1.4), size=0.4, parent=False)
-    sin_camara()
-    return ((CX + 0.12, -0.15, 1.78), (CX - 0.05, 0.52, 1.42), 30)
+    t1 = toma((T.CAMINO[0][1], T.CAMINO[0][2], T.CAMINO[0][3]), (T.CAMINO[0][1], T.CAMINO[0][2], v(T.CAMINO[0][3])))
+    medir1("caja5-bebidas-consola-esc1", *t1)
+    return t1
 
 
 def cama_elegida():
     _g["caja2_b"] = lambda: vestir("elegida")  # base_escena() dresses bed B with the owner's picks, whatever ran before
 
 
-def cerca_mano(cam):
+def cerca_mano(cam, giro=None, nombre="caja5-bebidas-mano"):
     cama_elegida()
     base_escena()
-    p = bebida_en_mano()
+    p = bebida_en_mano(giro=giro)
     c = p + Vector((0, 0, 0.11))
     luz("AREA", c + Vector((-0.25, 0.25, 0.45)), 5, (1.0, 0.85, 0.65), mira=c, size=0.4, parent=False)
     sin_camara()
     m = c + Vector((0, 0, 0.12))  # between the bottle and his face: both in frame, the door below kept to a strip
-    return (m + Vector(cam), m, 32)
+    pos = m + Vector(cam)
+    print(f"CAJA5 CAMARA {nombre} x {pos.x - CX:+.2f} from the centre line (the door's outside face is at +0.78) ->"
+          f" {'outside' if pos.x - CX > 0.80 else 'INSIDE'}")
+    cubre(nombre, pos, p)
+    return (pos, m, 32)
 
 
 @opcion("caja5-bebidas-mano")
 def bebidas_cerca_mano():
-    """(b) close: Héctor's water bottle, from outside his window (scene 4B's side), closer."""
-    return cerca_mano((0.95, -0.20, 0.12))
+    """(b) close: Héctor's water bottle in his fist, from outside his window (scene 4B's side), closer."""
+    return cerca_mano(VISTA_MANO * math.hypot(0.95, 0.20, 0.12))
+
+
+for _gr in GIROS:  # the fist's turn about the wrist: the variants compared 11-14 (the fist height is searched for each)
+    opcion(f"caja5-bebidas-mano-g{_gr}")(lambda _gr=_gr: cerca_mano(VISTA_MANO * math.hypot(0.95, 0.20, 0.12), _gr, f"caja5-bebidas-mano-g{_gr}"))
 
 
 # Studio: each candidate alone in a closed grey box far above the set, key / fill / rim, 1:1 (render at 1080x1080).
