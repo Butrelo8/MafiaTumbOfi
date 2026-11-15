@@ -701,8 +701,8 @@ def bebidas_consola(var=CONSOLA_VAR):
     """(a) The console drink: standing on the lower deck ahead of the shifter, on a measured support (apoyo), checked for
     crossings (choques). Prints CAJA5 CONSOLA: the contact gap (the base over the highest support point; the gate, as CAJA5
     MANO's gap), the hollow under the base (the deck's relief, reported, not gated), pairs and vertices inside."""
-    if ALZADA:
-        raise RuntimeError("the console still needs Héctor's hands at rest: render it in a run without the hand options")
+    # Héctor's raised hand (ALZADA) used to stop this: the montaje scenes hold both drinks (mothership 05:43), and choques() below
+    # tests the drink against his posed mesh too, so a crossing still prints FAIL
     for ob in sc.objects:  # an earlier option's drinks are hidden from render only: the rays must not land on them
         if ob.hide_render and not ob.hide_viewport:
             ob.hide_viewport = True
@@ -737,6 +737,9 @@ def bebidas_consola(var=CONSOLA_VAR):
         ok = gap <= 0.003 and not pares and not dentro and tilt <= 6
         print(f"CAJA5 CONSOLA {var} {tipo} at x {a[0] - CX:+.3f} y {a[1]:.3f} z {r.location.z:.4f} tilt {tilt:.1f}° contact gap"
               f" {gap * 1000:.1f} mm hollow {a[3] * 1000:.1f} mm pairs {pares} inside {dentro} {quien} -> {'PASS' if ok else 'FAIL'}")
+
+
+CAMION_EXTRA.append(bebidas_consola)  # the montaje scenes carry the console bottle under the screen (mothership 05:43)
 
 
 MANO_POSE = os.environ.get("CAJA5_POSE", "ventana")
