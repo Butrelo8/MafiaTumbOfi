@@ -10,7 +10,7 @@ left empty in the art (clear space = half the glyph each side, §2); utileria.py
 
   uv run -q --with numpy --with pillow python -I blender/calcas_arte.py
 """
-import json, math, os, random
+import json, math, os, random, shutil
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
@@ -453,6 +453,15 @@ if __name__ == "__main__":
         normal(img).save(os.path.join(OUT, nombre + "-n.png"))
         meta[nombre] = {"w": img.size[0] / PX / 1000, "h": img.size[1] / PX / 1000, "acabado": acabado, "glifo": glifo}
         print(nombre, img.size, acabado)
+    # the owner's seven r1 picks (2026-11-15), cut from generated art in the main checkout's comfy-out/stickers-r1 (its README is in
+    # the folder): tracked as finished PNGs in blender/props/calcas-r1, copied and merged here so every worktree gets them
+    R1 = os.path.join(REPO, "blender", "props", "calcas-r1")
+    r1 = json.load(open(os.path.join(R1, "calcas3.json"), encoding="utf8"))
+    for nombre in r1:
+        for suf in ("", "-n"):
+            shutil.copyfile(os.path.join(R1, nombre + suf + ".png"), os.path.join(OUT, nombre + suf + ".png"))
+        print(nombre, "(r1 pick)", r1[nombre]["acabado"])
+    meta.update(r1)
     json.dump(meta, open(os.path.join(OUT, "calcas3.json"), "w"), indent=1)
     hoja([fn.__name__.replace("_", "-") for fn in PRIMERAS], "hoja-arte.jpg")
     hoja([fn.__name__.replace("_", "-") for fn in NUEVAS], "hoja-arte-2.jpg")

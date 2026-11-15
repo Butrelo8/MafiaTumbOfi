@@ -1,0 +1,51 @@
+{
+ "r1-slogan": {
+  "fuente": "gemini/G01-a.png",
+  "nota": "S01 Gemini G01 (owner); chrome is printed, mat3 cromo would make the white rim metal",
+  "px_por_mm_fuente": 7.07,
+  "escala": 0.566,
+  "piezas_arte": 1
+ },
+ "r1-arriba": {
+  "fuente": "krea/stk_S02_s22_00001_.png",
+  "nota": "S02 Krea s22 (report's first choice; s11's X reads as a P)",
+  "px_por_mm_fuente": 3.25,
+  "escala": 1.231,
+  "piezas_arte": 1
+ },
+ "r1-x-holo": {
+  "fuente": "krea/stk_S03_s22_00001_.png",
+  "nota": "S03 Krea s22 (owner); rainbow is baked in, thin film adds more",
+  "px_por_mm_fuente": 3.32,
+  "escala": 1.206,
+  "piezas_arte": 1
+ },
+ "r1-gallo": {
+  "fuente": "gemini/G06-a.png",
+  "nota": "S06 Gemini G06 (report's first choice for the gallo)",
+  "px_por_mm_fuente": 5.21,
+  "escala": 0.768,
+  "piezas_arte": 1
+ },
+ "r1-corazon": {
+  "fuente": "gemini/G09-a.png",
+  "nota": "S09 Gemini G09 (owner)",
+  "px_por_mm_fuente": 5.75,
+  "escala": 0.695,
+  "piezas_arte": 1
+ },
+ "r1-bubu": {
+  "fuente": "krea-fix/stk_S13_s11fix_00001_.png",
+  "nota": "S13 Krea s11 + FLUX 3 fix (dot removed); s11fix vs s22fix: more source px on the art",
+  "px_por_mm_fuente": 3.16,
+  "escala": 1.265,
+  "piezas_arte": 2
+ },
+ "r1-placa": {
+  "fuente": "vector (Saira Condensed); look from krea/stk_S18_s22_00001_.png",
+  "nota": "S18 rebuilt",
+  "px_por_mm_fuente": null,
+  "escala": null,
+  "piezas_arte": null
+ }
+}
