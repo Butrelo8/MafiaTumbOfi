@@ -85,3 +85,17 @@ This section is a reading of the stills by eye. No tool measured it.
   on. Grep the log for `OIDN error` and render that frame again.
 - A Windows `blender.exe` started from WSL survives a WSL crash, and then hangs with nothing written: one core busy and
   a working set of 70 MB. Check `tasklist` before rerunning.
+
+## Road pass road1 (2026-11-16)
+
+`MONTAJE_CAMINO=1` (with `MONTAJE_PANTALLA=b MONTAJE_PANTALLA_LUZ=ancha`) runs `blender/camino_mx140.py`: the road as México 140 in the
+owner's Street View refs (`~/cc-out/mto-pantalla/refs/road/`, reference only). Stills (`p3-b-ancha-esc3`, `-esc3-adelante`, `-esc5`,
+960×540, 16 samples) and the warm1-vs-road1 sheet: `~/cc-out/mto-pantalla/3d/road1/before-after.jpg`.
+- Layout in x (m): our 2 lanes ±3.55 (mundo.py's lines), shoulder, NJ barrier −4.65..−5.25, oncoming 2 lanes −6.05..−13.05 with
+  yellow/dashed/white lines, worn-asphalt shoulders with dirt, poles (wood right, concrete left) with sagging wires, straw clumps among the green.
+- The brief implied, not named: night became overcast day (procedural sky), the road lamps are off, and the right guardrail, the
+  night delineators and the cat's eyes were removed from the render.
+- revisar.sh exit 0 on all three: banding 0.3 / 0.8 / 0.0 %, highlight clipping at most 0.57 %.
+- Missing: gas-station canopy, pedestrian bridge, oncoming traffic; near tree crowns are lumpy icospheres, not the refs' trees; less
+  dry pasture than refs 2 and 5. In daylight the `ancha` lamp barely reads. The new noise (ground, barrier, shoulders) does not repeat
+  over the 192 m loop: fine for stills, breaks mundo.py's loop rule for a loop clip.
