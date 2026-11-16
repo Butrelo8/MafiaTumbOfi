@@ -52,6 +52,31 @@ These are in `~/cc-out/mto-pantalla/3d/`:
 
 The set is A/B/C with the `led` light × 3 views, plus B with `tira` and `ancha` × 3 views.
 
+revisar.sh found no FAIL on any of the 15 stills. Banding is at most 0.3% (threshold 5%). Highlight clipping is at most
+1.47%, in `p3-c-led-esc3-adelante`, from the bulbs. The per-still table is `revisar/resumen.tsv`.
+
+The `ancha` stills went through a second pass at 192 samples. Even so, the fog that the lamp bar lights shows blotchy
+denoiser patches. With adaptive sampling on, the time per frame did not change from 48 samples, so raising the count
+did nothing. If `ancha` is picked, it needs a fog or sampling fix.
+
+### What the renders show
+
+This section is a reading of the stills by eye. No tool measured it.
+
+- **C reads in all three views.** At the 3→4 beat, the bulbs outline the rear screen. At the scene 5 hold they still
+  show as separate dots at 960×540, not as a lit line, which is better than rizzdrone predicted.
+- **B: the gold frame reads at the scene 5 hold**, because the G63's headlights light it. At the 3→4 beat it is a dim
+  line. The rear MAFIA TUMBADA band reads at the 3→4 beat and at scene 5.
+- **A's box disappears.** At the 3→4 beat it is a black slab, and at scene 5 it is a flat grey one.
+- **Box light:**
+  - `tira` draws the box's silhouette at the 3→4 beat and at scene 5, and leaves the night alone.
+  - `ancha` washes the road and the G63 grey and flattens the night, and it brings the fog blotches described above.
+- **Open questions:**
+  - Question 1 (scene 3 crop): the scene 3 hold sees only the front part of the side screen, cut at the top. B's side
+    header shows only as "…TUMBADA" at the top edge, while C's bulb rows read along both edges.
+  - Question 4 (cab): only a sliver of the cab shows, beside the box at the scene 3 hold. The cab colour barely matters
+    in these views.
+
 ## Gotchas met here
 
 - A Cycles frame whose OIDN denoise runs out of memory is still saved, but undenoised and grainy, and the run carries
