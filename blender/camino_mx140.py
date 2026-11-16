@@ -29,7 +29,8 @@ from mathutils import Matrix
 import mundo as M
 
 MODO = os.environ.get("MONTAJE_CAMINO", "1").lower()
-NOCHE = MODO == "noche"                      # road2: the same road at night (dia() is skipped), plus the roadside (camino_edificios.py)
+NOCHE = MODO in ("noche", "road3")           # road2: the same road at night (dia() is skipped), plus the roadside (camino_edificios.py)
+ROAD3 = MODO == "road3"                      # road3: road2 + denser fog (camino_niebla.py), signs and lamps, the curve (camino_curva.py)
 PER = float(json.load(open(os.path.join(REPO, "src", "lib", "escena.json"), encoding="utf8"))["mundo"]["recorrido_loop"])  # escena.RECORRIDO
 Y0, Y1 = -2 * PER, 4 * PER
 MUNDO_ROOT = bpy.data.objects["mundo"]
@@ -337,7 +338,13 @@ if NOCHE:
     farolas_fuera()
     exec(compile(open(os.path.join(AQUI, "camino_edificios.py"), encoding="utf8").read(), os.path.join(AQUI, "camino_edificios.py"), "exec"), globals())
     nuevo += edificios()
+    if ROAD3:
+        for _f in ("camino_niebla.py", "camino_letreros.py"):
+            exec(compile(open(os.path.join(AQUI, _f), encoding="utf8").read(), os.path.join(AQUI, _f), "exec"), globals())
+        nuevo += letreros()
 else:
     dia()
 _ocultar([o for o in nuevo if not o.name.startswith(("w_carretera_op", "w_acot", "w_grava"))])
 print("CAMINO MX140: carriles 2+2, barrera NJ x", X_BARRERA, "oncoming yellow", X_OP["amarilla"], "objetos nuevos", len(nuevo), flush=True)
+if ROAD3 and os.environ.get("CURVA_PRUEBA") != "recta":   # "recta" renders road3 without the bend (to judge the signs and fog alone)
+    exec(compile(open(os.path.join(AQUI, "camino_curva.py"), encoding="utf8").read(), os.path.join(AQUI, "camino_curva.py"), "exec"), globals())

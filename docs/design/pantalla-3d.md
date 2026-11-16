@@ -114,3 +114,46 @@ Signs and windows have `visible_volume_scatter` off. Stills and sheet: `~/cc-out
 - revisar.sh exit 0 on the three stills: banding 0.0 %, highlight clipping at most 0.57 %. No OIDN errors in the log.
 - Missing: the curve (road3), the footbridge, vegetation work, seamless tiling; the shop windows in esc5 read near white (emission 1.3);
   the right shoulder's dirt strip is still orange under the warm lights; no traffic besides the one oncoming car.
+
+## Road pass road3 (2026-11-16): the curve, the fog back, highway signs
+
+`MONTAJE_CAMINO=road3` = road2 + three modules, all exec'd by `camino_mx140.py` in its namespace (road2 stays reproducible as `noche`):
+- `blender/camino_curva.py`: ref 2's left bend as one post-build pass, only beyond S0 = 40 m ahead of the truck, so the truck, the cameras, the
+  lane and `escena.json` do not change (y < 40 maps to itself bit for bit). An arc of R = 220 m from y 40 to 260 (57 degrees), straight after;
+  x stays the offset along the normal, so lanes keep their width. Long strips are cut to 4 m along y and their vertices mapped; the shaders read
+  Object-space x and y, so every bent mesh carries its straight position in a `p0` attribute and its materials read that instead; wires map
+  their points; buildings, signs and lamp empties move and take the heading as yaw; the geometry-nodes scatters get a rotate-then-move node
+  group after their join, and drop instances on the inside of the bend beyond 0.45 R. Check, CPU only: `blender.exe -b --python
+  blender/camino_curva_test.py` (maps y < S0 to itself, keeps lane width, continuous at S1, and the node group agrees with the mapping; it
+  caught a first version that rotated the instances about the world origin). Holds for stills: `mundo` scrolls 192 m over a loop, so a clip
+  would need the bend to scroll with it (not done).
+- `blender/camino_letreros.py` (everything is `e3_*`, built straight, bent with the rest): an overhead sign over our lanes at y 44 (up arrow,
+  "La X we") and a roadside two-post guide sign at (8.6, 33) ("La X we", "12 km"), SCT style (green, white border and letters, Blender's
+  built-in font, no logos, weak emission as retroreflection, no fog scatter); yellow chevron squares with a black "<" on the outside of the
+  bend from y 58 every 12 m (1.7 m, oversized so they read at 100 m); the road lamp collection instanced again 32 m after each existing lamp
+  (every 32 m from y 104) with a glowing ball on each far lamp head; a plain footbridge at y 128. Everything built here is hidden in the
+  viewport like road1/2's objects (the placement ray probes skip it).
+- `blender/camino_niebla.py`: the fog's density and every Cycles setting that was tried, overridable for one still with
+  `NIEBLA_PRUEBA="dens=0.006;pasadas=RGB"`; a render_pre handler prints the settings in force before each render (the log line `CAMINO render:`).
+
+Fog (esc3, one still per variant, `~/cc-out/mto-pantalla/3d/road3/`): the blotches are the denoiser's, not sampling noise. Kept: fog density
+0.0028 → 0.005, the `ancha` areas scatter in the fog again (glow back, no twin lights needed), and `denoising_input_passes = RGB` (no
+albedo/normal guides: in fog they are the surface behind it and mislead the denoiser).
+- Tried and did nothing: volume sampling MIS → equiangular, clamp indirect 10, 16 → 64 spp with the guides (the blotches stayed). A fog-only twin
+  spot instead of the areas had less blotching and a weaker glow.
+- Raw (no denoise) the fog is sparse fireflies, so RGB-only works from a clean input. Its cost: at 16 spp it smears the road's cracks and the
+  Mercedes; at 64 spp it is sharp (a still takes 25-31 s either way, the time is the scene build). 64 spp is the recommended quality (`road3/final-64spp/`, `road2-vs-road3-64spp.jpg`; the 16 spp like-for-like set is `final-16spp/`,
+`road2-vs-road3.jpg`; the variants side by side: `fog-variantes-esc3.jpg`).
+- OptiX with all guides (`dnr=OPTIX;pasadas=RGB_ALBEDO_NORMAL`) keeps the detail and the glow but leaves mottling on the Mercedes in esc3
+  (road3/t2-optix); OptiX RGB_ALBEDO adds fireflies; OptiX RGB smears like the OIDN one.
+- Two Blender "hangs" (one of 30+ min) were Blender and ComfyUI sharing the GPU, not the scene: run `~/.claude/scripts/gpu-busy` first.
+
+Reading the three views (not measured; the sheet is `~/cc-out/mto-pantalla/3d/road3/road2-vs-road3.jpg`): the overhead sign and the guide sign
+read at 16 spp (computed from the lens, not measured on the image: "La X we" caps are about 13 px on the gantry in esc3 at 46 m and about 14 px on
+the guide sign in esc5 at 32 m); the chevrons read as a yellow
+row in esc3 and esc3-adelante; in esc5 the truck hides the road beyond 40 m, so the bend shows only as the median and the left lines turning
+away and the lamp balls. The lamp row and chevrons beyond 120 m sit behind the truck in every hold: the curve is a background cue, as the
+holds are framed.
+- revisar.sh exit 0 on the three stills: banding at most 0.2 %, highlight clipping at most 0.58 %; no OIDN errors in the log.
+- Missing: the curve in a clip (the bend does not scroll with `mundo`); vegetation along the outside of the bend is the old scatter; the footbridge
+  is a box silhouette at 128 m that none of the three views shows; fog-lit shop windows in esc5 still read near white.
