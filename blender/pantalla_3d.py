@@ -82,15 +82,16 @@ def pantalla_3d(x=PM_X, y=PM_Y, librea=None, luz_=None):
     GRUPO.append(o)
     # the LED box: black (DESIGN.md --cap), on the chassis floor
     yc = yb + P3_L / 2
-    caja((P3_W, P3_L, P3_Z1 - P3_Z0), (x, yc, (P3_Z0 + P3_Z1) / 2), CAP, bevel=0.02, parent=False)
+    # matte: at scene 5 the G63's headlights sit beside the lens, and a glossy black back face (CAP, rough 0.4) came out washed white
+    caja((P3_W, P3_L, P3_Z1 - P3_Z0), (x, yc, (P3_Z0 + P3_Z1) / 2), mat("p3_caja", (0.0056, 0.0048, 0.0031), 0.9), bevel=0.02, parent=False)
     xs = x + P3_W / 2 + 0.006
     w, h, zc = P3_LADO
-    panel_led(w, h, (xs, yc, zc), LADO_ROT, P3_MINI, 96)
+    panel_led(w, h, (xs, yc, zc), LADO_ROT, P3_MINI, 320)  # ~11 mm pitch (outdoor truck panels: P6-P10); 96 read as coarse dots
     wa, ha, za = P3_ATRAS
     ya = yb - 0.008
     # the empty state (plan §5, no invented dates), as utileria's pantalla_vacia but fitted to the screen's width: its h-scaled
     # lettering ran past a 2.0 m screen. Cap heights from pantalla-movil.md (0.20 m reads 16 px at scene 5)
-    plano(wa, ha, (x, yb - 0.006, za), mat("u_led_negro", (0.01, 0.01, 0.01), 0.3), rot=ATRAS_ROT, parent=False)
+    plano(wa, ha, (x, yb - 0.006, za), mat("p3_led_negro", (0.008, 0.008, 0.008), 0.9), rot=ATRAS_ROT, parent=False)
     _p3_rotulo("PRÓXIMAS FECHAS", 0.20, (x, ya - 0.002, za + 0.35), ATRAS_ROT, mat("u_led_oro", (1.0, 0.7, 0.25), emit=6), wa - 0.2)
     _p3_rotulo("MUY PRONTO", 0.14, (x, ya - 0.002, za - 0.05), ATRAS_ROT, mat("u_led_blanco", (1, 1, 1), emit=4), wa - 0.4)
     if lib == "a":  # Renta: the band only on the screens; amber beacon bar on the cab roof (tile 09)
