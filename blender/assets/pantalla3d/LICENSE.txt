@@ -1,0 +1,10 @@
+pantalla3d/fuso-canter-raedalmaharmah6.glb (and canter-base.blend, made from it by blender/pantalla_3d_prep.py)
+
+"Mitsubishi Fuso Canter" by Raed Almaharmah (raedalmaharmah6)
+https://sketchfab.com/3d-models/mitsubishi-fuso-canter-2b58376d6aaf4641adf30d4c9044de74
+Licence: CC Attribution 4.0 (CC-BY-4.0), http://creativecommons.org/licenses/by/4.0/
+Fetched 2026-11-15 from the Objaverse mirror of the Sketchfab upload:
+https://huggingface.co/datasets/allenai/objaverse/resolve/main/glbs/000-063/2b58376d6aaf4641adf30d4c9044de74.glb
+(129,583 triangles, the same as the Sketchfab API's faceCount for this uid).
+Changes: the cargo box removed, the rest recoloured; an LED box, screens and livery built on it (blender/pantalla_3d.py).
+Credit line for the site: "Mitsubishi Fuso Canter" de Raed Almaharmah, CC BY 4.0, modificado.
