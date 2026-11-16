@@ -98,7 +98,19 @@ def guia(x=8.6, y=33.0):
     gris = _mat_fijo("e3_gris_b", POSTE_GRIS, rough=0.7)
     w = 3.9
     out = [_pilar("e3_guia_p1", x - w / 2 + 0.5, y, 0, 3.6, gris, 0.16), _pilar("e3_guia_p2", x + w / 2 - 0.5, y, 0, 3.6, gris, 0.16)]
-    out += _panel("e3_letrero_B", x, y - 0.12, 1.9, w, 1.9, [("La X we", 0.55, 0.38, 0.0), ("12 km", 0.42, -0.4, 0.0)])
+    out += _panel("e3_letrero_B", x, y - 0.12, 1.9, w, 1.9, [("La X we", 0.55, 0.38, 0.0), ("26 km", 0.42, -0.4, 0.0)])  # Xalapa: 26 km by road from Cerro Gordo (OSRM, 2026-11-16)
+    return out
+
+
+def tablero(x=8.6, y=270.0):
+    """SCT distance board, right shoulder, for the westbound road from Cerro Gordo (19.438 N, 96.690 W) to Xalapa (owner 2026-11-16:
+    only the signs to Xalapa say "La X we"; the rest name real places). Road distances from OSRM on OSM data: Dos Ríos 12.5 km,
+    El Lencero 16.0 km, Xalapa 26.1 km (the city's first exit). At y 270 it passes during ruta.py's caja section; the stills do not see it."""
+    gris = _mat_fijo("e3_gris_t", POSTE_GRIS, rough=0.7)
+    w = 4.6
+    out = [_pilar("e3_tablero_p1", x - w / 2 + 0.6, y, 0, 4.2, gris, 0.16), _pilar("e3_tablero_p2", x + w / 2 - 0.6, y, 0, 4.2, gris, 0.16)]
+    out += _panel("e3_tablero", x, y - 0.12, 1.9, w, 2.3, [("Dos Ríos  12 km", 0.36, 0.62, 0.0), ("El Lencero  16 km", 0.36, 0.0, 0.0),
+                                                       ("La X we  26 km", 0.36, -0.62, 0.0)])
     return out
 
 
@@ -162,6 +174,6 @@ def destellos(y_desde=70.0, y_hasta=280.0):
 
 
 def letreros():
-    out = portico() + guia() + chevrones() + farolas_extra() + destellos() + puente()
+    out = portico() + guia() + tablero() + chevrones() + farolas_extra() + destellos() + puente()
     print("CAMINO letreros:", len(out), "objetos (portico y=44, guia (8.6, 33), chevrones desde y 70, farolas extra desde y 104)", flush=True)
     return out

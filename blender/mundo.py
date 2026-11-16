@@ -464,10 +464,11 @@ def construir(mundo, ciclo, P, recorrido, farol):
     """Build the Night B world under `mundo` (the empty that moves -Y over the loop). `ciclo` = escena.json preset's
     `cycles` block; P = the preset; farol = the tramo's lamp objects (escena.tramo_props). Returns every new object."""
     sc = _sc()
-    y0, y1 = -2 * recorrido, 4 * recorrido     # the view during the whole loop (mundo moves -recorrido), both directions
-    copias = range(-2, 4)
+    n = int(os.environ.get("RUTA_PERIODOS", "4"))  # ruta.py's long run needs more road ahead than one loop
+    y0, y1 = -2 * recorrido, n * recorrido     # the view during the whole loop (mundo moves -recorrido), both directions
+    copias = range(-2, n)
     suelo, pintura = carretera(mundo, y0, y1, recorrido)
-    tierra = _plano("w_terreno", -1500, 1500, -5 * recorrido, 7 * recorrido, 0.0,
+    tierra = _plano("w_terreno", -1500, 1500, -5 * recorrido, (n + 3) * recorrido, 0.0,
                     mat_textura("w_suelo", "sparse_grass", 4.0, (0.22, 0.25, 0.18)), mundo)  # plan fix 9: green verge ground
     flora = plantas(mundo, recorrido, copias)
     linea = tendido(mundo, y0, y1) + farolas(farol, mundo, y0, y1)

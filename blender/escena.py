@@ -366,7 +366,7 @@ def mundo_render(s, preset):
     """Road, ground, instances of the tramo, lights, world; animated over one loop."""
     sc = bpy.context.scene
     P = CFG["presets"][preset]
-    largo_total = 760
+    largo_total = 760 + 192 * max(0, int(os.environ.get("RUTA_PERIODOS", "4")) - 4)  # ruta.py's long run: the road ahead, in loop periods
     mundo = bpy.data.objects.new("mundo", None)
     sc.collection.objects.link(mundo)
     losa = MUNDO["losa"]

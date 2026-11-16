@@ -32,7 +32,8 @@ MODO = os.environ.get("MONTAJE_CAMINO", "1").lower()
 NOCHE = MODO in ("noche", "road3")           # road2: the same road at night (dia() is skipped), plus the roadside (camino_edificios.py)
 ROAD3 = MODO == "road3"                      # road3: road2 + denser fog (camino_niebla.py), signs and lamps, the curve (camino_curva.py)
 PER = float(json.load(open(os.path.join(REPO, "src", "lib", "escena.json"), encoding="utf8"))["mundo"]["recorrido_loop"])  # escena.RECORRIDO
-Y0, Y1 = -2 * PER, 4 * PER
+N_PER = int(os.environ.get("RUTA_PERIODOS", "4"))  # ruta.py's long run needs more road ahead than one loop
+Y0, Y1 = -2 * PER, N_PER * PER
 MUNDO_ROOT = bpy.data.objects["mundo"]
 X_BARRERA = (-5.25, -4.65)
 X_OP = dict(amarilla=-6.05, centro=-9.55, blanca=-13.05)
@@ -190,8 +191,9 @@ def postes(nombre, x, alto, mat, paso, fase, flecha, madera):
     bm = bmesh.new()
     ys = [float(y) for y in np.arange(Y0 + fase % paso, Y1 + 1, paso)]
     rnd = random.Random(int(abs(x) * 10))
-    for y in ys:
-        incl = rnd.uniform(-0.03, 0.03)
+    inclinas = [rnd.uniform(-0.03, 0.03) for _ in range(int(round(PER / paso)))]  # one period's tilts, repeated: the world loops
+    for j, y in enumerate(ys):
+        incl = inclinas[j % len(inclinas)]
         r1, r2 = (0.15, 0.09) if madera else (0.19, 0.11)
         g = bmesh.ops.create_cone(bm, cap_ends=True, segments=8, radius1=r1, radius2=r2, depth=alto,
                                   matrix=Matrix.Translation((x, y, alto / 2)) @ Matrix.Rotation(incl, 4, "Y"))
@@ -269,7 +271,7 @@ def plantas():
                 ("seco_lejos", seco, 12, 34, 0.35, (2.0, 3.4), s + 5),
                 ("copa_cerca", copas, 12, 55, 0.003, (1.8, 3.2), s + 6),
                 ("copa", copa, 22, 260, 0.006, (3.0, 6.5), s + 3))
-    out, copias = [], range(-2, 4)
+    out, copias = [], range(-2, N_PER)
     for lado, x_in, s in ((1, 7.6, 10), (-1, 16.6, 20)):
         for g in grupos(s, lado):
             if g is None:

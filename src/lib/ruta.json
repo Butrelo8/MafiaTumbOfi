@@ -1,0 +1,721 @@
+{
+ "_doc": "The camera path of the whole run, read by blender/ruta.py (keys and renders it) and src/lib/ruta.ts (the page). Axes and units as escena.json (three.js: Y up, the truck faces -Z; metres). Frames at fps. The camera, the pantalla actor and the flash are sampled with ruta.ts muestra(): cubic Hermite through the points over frame time with monotone tangents (the Bessel slope, zero where a component turns back, capped at 3x the slower neighbouring slope); the camera looks at `mira` with world up, then `vibra` (sums of sines, degrees, cycles per 240 frames) turns it in its own axes. mm: lens on a 36 mm horizontal sensor. The world slides at escena.json mundo.recorrido_loop / loop_s; signs stand `adelante_m` ahead at frame 0 and slide with it.",
+ "fps": 24,
+ "secciones": [
+  {
+   "id": "inicio",
+   "parada": "cabina",
+   "fr": [
+    0,
+    72
+   ]
+  },
+  {
+   "id": "musica",
+   "parada": "caja",
+   "fr": [
+    263,
+    335
+   ]
+  },
+  {
+   "id": "video",
+   "parada": "pantalla",
+   "fr": [
+    455,
+    527
+   ]
+  },
+  {
+   "id": "integrantes",
+   "parada": "capo",
+   "fr": [
+    647,
+    743
+   ]
+  },
+  {
+   "id": "contacto",
+   "parada": "placa",
+   "fr": [
+    1031,
+    1103
+   ]
+  }
+ ],
+ "camara": [
+  {
+   "fr": 0,
+   "pos": [
+    1.72,
+    1.88,
+    0.75
+   ],
+   "mira": [
+    1.72,
+    1.45,
+    -6.0
+   ],
+   "mm": 20,
+   "nota": "cabina: CAMINO[0]"
+  },
+  {
+   "fr": 72,
+   "pos": [
+    1.72,
+    1.86,
+    0.62
+   ],
+   "mira": [
+    1.72,
+    1.47,
+    -6.0
+   ],
+   "mm": 20
+  },
+  {
+   "fr": 112,
+   "pos": [
+    1.6,
+    1.8,
+    -0.45
+   ],
+   "mira": [
+    1.72,
+    1.55,
+    -8.0
+   ],
+   "mm": 18,
+   "nota": "12 cm left of v3: passes beside the hanging strawberry (pp_fresa)"
+  },
+  {
+   "fr": 144,
+   "pos": [
+    1.6,
+    1.95,
+    -1.55
+   ],
+   "mira": [
+    1.72,
+    1.3,
+    -9.0
+   ],
+   "mm": 20
+  },
+  {
+   "fr": 172,
+   "pos": [
+    1.72,
+    3.0,
+    -2.3
+   ],
+   "mira": [
+    1.72,
+    1.0,
+    -7.0
+   ],
+   "mm": 22
+  },
+  {
+   "fr": 212,
+   "pos": [
+    1.42,
+    5.2,
+    1.2
+   ],
+   "mira": [
+    1.72,
+    1.2,
+    0.3
+   ],
+   "mm": 24
+  },
+  {
+   "fr": 263,
+   "pos": [
+    0.92,
+    3.6,
+    6.8
+   ],
+   "mira": [
+    1.72,
+    1.35,
+    0.6
+   ],
+   "mm": 28,
+   "nota": "caja: esc2-abre (CAMINO[-1])"
+  },
+  {
+   "fr": 335,
+   "pos": [
+    0.82,
+    3.35,
+    6.5
+   ],
+   "mira": [
+    1.72,
+    1.35,
+    0.4
+   ],
+   "mm": 28
+  },
+  {
+   "fr": 405,
+   "pos": [
+    -0.23,
+    2.0,
+    2.8
+   ],
+   "mira": [
+    0.02,
+    4.4,
+    -9.0
+   ],
+   "mm": 24,
+   "nota": "esc2-fin"
+  },
+  {
+   "fr": 455,
+   "pos": [
+    0.22,
+    2.0,
+    1.9
+   ],
+   "mira": [
+    -1.02,
+    2.0,
+    -2.4
+   ],
+   "mm": 24,
+   "nota": "pantalla: esc3-hombro"
+  },
+  {
+   "fr": 527,
+   "pos": [
+    0.17,
+    2.02,
+    1.5
+   ],
+   "mira": [
+    -1.02,
+    2.02,
+    -2.8
+   ],
+   "mm": 24
+  },
+  {
+   "fr": 567,
+   "pos": [
+    0.02,
+    2.1,
+    -0.2
+   ],
+   "mira": [
+    -0.28,
+    2.2,
+    -8.0
+   ],
+   "mm": 24
+  },
+  {
+   "fr": 607,
+   "pos": [
+    0.62,
+    2.0,
+    -3.6375
+   ],
+   "mira": [
+    1.72,
+    1.7,
+    -0.0
+   ],
+   "mm": 22
+  },
+  {
+   "fr": 647,
+   "pos": [
+    1.57,
+    1.8,
+    -2.4
+   ],
+   "mira": [
+    1.72,
+    1.55,
+    0.4
+   ],
+   "mm": 20,
+   "nota": "integrantes: on the hood, looking in through the windshield (owner 06:40)"
+  },
+  {
+   "fr": 695,
+   "pos": [
+    1.72,
+    1.79,
+    -2.35
+   ],
+   "mira": [
+    1.72,
+    1.55,
+    0.45
+   ],
+   "mm": 20
+  },
+  {
+   "fr": 743,
+   "pos": [
+    1.87,
+    1.78,
+    -2.3
+   ],
+   "mira": [
+    1.72,
+    1.55,
+    0.5
+   ],
+   "mm": 19
+  },
+  {
+   "fr": 791,
+   "pos": [
+    2.02,
+    2.75,
+    -2.2
+   ],
+   "mira": [
+    7.72,
+    1.9,
+    -2.0
+   ],
+   "mm": 24,
+   "nota": "turns right, toward the lit shops"
+  },
+  {
+   "fr": 827,
+   "pos": [
+    1.92,
+    2.6,
+    -1.3
+   ],
+   "mira": [
+    3.72,
+    1.6,
+    -10.0
+   ],
+   "mm": 28
+  },
+  {
+   "fr": 863,
+   "pos": [
+    1.42,
+    2.45,
+    -0.9
+   ],
+   "mira": [
+    1.72,
+    1.25,
+    -10.9375
+   ],
+   "mm": 30,
+   "nota": "gira: esc5-abre"
+  },
+  {
+   "fr": 911,
+   "pos": [
+    1.47,
+    2.45,
+    -1.15
+   ],
+   "mira": [
+    1.72,
+    1.25,
+    -10.9375
+   ],
+   "mm": 30
+  },
+  {
+   "fr": 947,
+   "pos": [
+    2.42,
+    4.6,
+    -10.9375
+   ],
+   "mira": [
+    9.72,
+    1.6,
+    -12.9375
+   ],
+   "mm": 30
+  },
+  {
+   "fr": 983,
+   "pos": [
+    2.52,
+    6.0,
+    -17.9375
+   ],
+   "mira": [
+    1.72,
+    1.2,
+    -0.4375
+   ],
+   "mm": 30,
+   "nota": "esc5-fin"
+  },
+  {
+   "fr": 1031,
+   "pos": [
+    3.12,
+    0.95,
+    -9.4375
+   ],
+   "mira": [
+    1.82,
+    1.2,
+    -1.4375
+   ],
+   "mm": 32,
+   "nota": "contacto: esc6-abre"
+  },
+  {
+   "fr": 1103,
+   "pos": [
+    2.62,
+    0.85,
+    -7.1375
+   ],
+   "mira": [
+    1.72,
+    0.98,
+    -2.4375
+   ],
+   "mm": 32,
+   "nota": "esc6-flash"
+  }
+ ],
+ "vibra": {
+  "cabeceo": [
+   [
+    0.1,
+    29
+   ],
+   [
+    0.05,
+    47
+   ]
+  ],
+  "giro": [
+   [
+    0.05,
+    23
+   ]
+  ],
+  "alabeo": [
+   [
+    0.08,
+    37
+   ],
+   [
+    0.04,
+    61
+   ]
+  ]
+ },
+ "pantalla": [
+  {
+   "fr": 0,
+   "pos": [
+    -2.28,
+    0.0,
+    40.0
+   ]
+  },
+  {
+   "fr": 335,
+   "pos": [
+    -2.28,
+    0.0,
+    30.0
+   ]
+  },
+  {
+   "fr": 405,
+   "pos": [
+    -2.28,
+    0.0,
+    -0.0
+   ]
+  },
+  {
+   "fr": 455,
+   "pos": [
+    -2.28,
+    0.0,
+    -1.6
+   ]
+  },
+  {
+   "fr": 527,
+   "pos": [
+    -2.28,
+    0.0,
+    -2.2
+   ]
+  },
+  {
+   "fr": 600,
+   "pos": [
+    -2.28,
+    0.0,
+    -10.0
+   ]
+  },
+  {
+   "fr": 647,
+   "pos": [
+    -2.28,
+    0.0,
+    -22.0
+   ]
+  },
+  {
+   "fr": 700,
+   "pos": [
+    -2.28,
+    0.0,
+    -40.0
+   ]
+  },
+  {
+   "fr": 760,
+   "pos": [
+    1.72,
+    0.0,
+    -40.0
+   ]
+  },
+  {
+   "fr": 863,
+   "pos": [
+    1.72,
+    0.0,
+    -14.3375
+   ]
+  },
+  {
+   "fr": 911,
+   "pos": [
+    1.72,
+    0.0,
+    -14.8375
+   ]
+  },
+  {
+   "fr": 964,
+   "pos": [
+    4.72,
+    0.0,
+    -40.0
+   ]
+  },
+  {
+   "fr": 1014,
+   "pos": [
+    8.72,
+    0.0,
+    -90.0
+   ]
+  },
+  {
+   "fr": 1103,
+   "pos": [
+    8.72,
+    0.0,
+    -160.0
+   ]
+  }
+ ],
+ "letreros": [
+  {
+   "id": "musica",
+   "titulo": "MÚSICA",
+   "sub": "Cerro Gordo  1 km",
+   "adelante_m": 206.0,
+   "nota": "at y 6.0 on frame 250"
+  },
+  {
+   "id": "video",
+   "titulo": "VIDEOS",
+   "sub": "Dos Ríos  12 km",
+   "adelante_m": 333.0,
+   "nota": "at y 9.0 on frame 405"
+  },
+  {
+   "id": "integrantes",
+   "titulo": "LA BANDA",
+   "sub": "El Lencero  16 km",
+   "adelante_m": 472.0,
+   "nota": "at y 12.0 on frame 575"
+  }
+ ],
+ "flash": [
+  [
+   1070,
+   0.0
+  ],
+  [
+   1076,
+   1.0
+  ],
+  [
+   1088,
+   0.0
+  ]
+ ],
+ "bucles": [
+  {
+   "seccion": "integrantes",
+   "desde": 647,
+   "hasta": 743,
+   "largo": 240,
+   "clip": 1127,
+   "nota": "The band station's camera loop (owner 2026-11-16 08:45). Loop frame t: 0..96 is the run's own 647..743 (move 1, the hood slide); the points below run from 743's pose back to 647's (t 240). Move 2, t 96-176: out wide past the front-right corner, back along the passenger side, then forward along the cab past the rear door window (the rear pair, three-quarter; ref Collateral 007, the side window at night), to the hood. Move 3, t 176-240: in through the windshield right of the strawberry, a slow push between the front heads at x 1.69 (the head-height gap is x 1.54-1.84) looking back at the rear pair (ref Collateral 014, the back-seat passenger past a front-seat shoulder), then out through the windshield left of the strawberry to the hood. largo is a multiple of 240 so vibra loops; clip: where ruta.py keys the loop for its own render, 647 + 2x240, so the world's and vibra's phase match the run's at 647.",
+   "camara": [
+    {
+     "t": 124,
+     "pos": [
+      3.7,
+      2.15,
+      -0.9
+     ],
+     "mira": [
+      2.2,
+      1.7,
+      0.2
+     ],
+     "mm": 22,
+     "nota": "swinging out wide on the passenger side"
+    },
+    {
+     "t": 140,
+     "pos": [
+      3.45,
+      1.95,
+      0.85
+     ],
+     "mira": [
+      2.1,
+      1.8,
+      0.3
+     ],
+     "mm": 24,
+     "nota": "beside the rear quarter, looking forward-in"
+    },
+    {
+     "t": 156,
+     "pos": [
+      3.3,
+      1.95,
+      -0.25
+     ],
+     "mira": [
+      2.0,
+      1.85,
+      0.5
+     ],
+     "mm": 24,
+     "nota": "the rear pair through the rear door window (variant n2a)"
+    },
+    {
+     "t": 170,
+     "pos": [
+      2.95,
+      1.95,
+      -1.75
+     ],
+     "mira": [
+      1.9,
+      1.8,
+      -0.6
+     ],
+     "mm": 22,
+     "nota": "front-right corner, turning in"
+    },
+    {
+     "t": 178,
+     "pos": [
+      2.3,
+      1.8,
+      -1.75
+     ],
+     "mira": [
+      1.75,
+      1.75,
+      0.6
+     ],
+     "mm": 18,
+     "nota": "on the hood right of the strawberry, facing in"
+    },
+    {
+     "t": 184,
+     "pos": [
+      1.9,
+      1.74,
+      -1.1
+     ],
+     "mira": [
+      1.72,
+      1.7,
+      0.6
+     ],
+     "mm": 17,
+     "nota": "through the windshield right of and below the strawberry (it hangs at y 1.88), ahead of Héctor's face"
+    },
+    {
+     "t": 188,
+     "pos": [
+      1.71,
+      1.85,
+      -0.78
+     ],
+     "mira": [
+      1.7,
+      1.65,
+      0.6
+     ],
+     "mm": 16,
+     "nota": "inside, between the front heads (variant n3-inicio)"
+    },
+    {
+     "t": 214,
+     "pos": [
+      1.68,
+      1.84,
+      -0.42
+     ],
+     "mira": [
+      1.7,
+      1.62,
+      0.6
+     ],
+     "mm": 16,
+     "nota": "end of the push (variant n3-fin)"
+    },
+    {
+     "t": 229,
+     "pos": [
+      1.55,
+      1.82,
+      -1.3
+     ],
+     "mira": [
+      1.7,
+      1.6,
+      0.5
+     ],
+     "mm": 18,
+     "nota": "out through the windshield, driver half, left of the strawberry"
+    }
+   ]
+  }
+ ]
+}

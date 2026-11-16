@@ -1,6 +1,6 @@
 """road2's roadside at night, exec'd by camino_mx140.py in its namespace (MONTAJE_CAMINO=noche). No Geometry Nodes, no textures.
 
-A seeded Python instancer over the whole Y0..Y1, no period: kits are shared meshes, each instance its own object with its own
+A seeded Python instancer over one period, copied along Y0..Y1 (see edificios()): kits are shared meshes, each instance its own object with its own
 colour and lit/dark in Object Color (RGB = colour, A = lit), a mirrored or not, a setback jitter and gaps between them.
   right  (x +11..+17)  a lit shop (one or two storeys), a barda wall as filler, ONE generic gas-station canopy: the only new real light
   left   (x -24..-34)  dark silhouettes with a few lit windows; one oncoming car beyond the barrier (one pair of headlights)
@@ -134,17 +134,22 @@ def _auto_opuesto(y):
 
 
 def edificios():
+    """Periodic (movimiento-plan §5.1): one period y in [0, PER) of the roadside, copied at k·PER for k in -2..N_PER-1 like the
+    plants (mundo.dispersar), so a 240-frame loop clip wraps clean (the world slides PER per loop). No item crosses the period's
+    end. The canopy and the oncoming car stay one-offs: scene 5's composition, hundreds of metres behind the band loop."""
     rnd = random.Random(SEMILLA)
     k = _tienda(rnd)
     barda = _barda(rnd)
     sil, sil_v = _silueta()
-    out = []
-    # ---- right: shops, barda as filler, gaps; clear of the canopy
-    y = Y0 + rnd.uniform(0, 10)
+    per = []  # (name, mesh, x, yc, rot_z, scale, colour, volume) in one period
+    # ---- right: shops, barda as filler, gaps; clear of the canopy (its period-local y)
+    y = rnd.uniform(0, 10)
     i = 0
-    while y < Y1:
+    while True:
         tipo = rnd.choices(("tienda", "barda", "nada"), (0.5, 0.35, 0.15))[0]
         largo = rnd.uniform(10, 14) if tipo == "tienda" else rnd.uniform(10, 28) if tipo == "barda" else rnd.uniform(8, 25)
+        if y + largo > PER:
+            break
         yc = y + largo / 2
         if tipo != "nada" and abs(yc - LUGAR_DOSEL[1]) > 24:
             esp = rnd.choice((-1, 1))
@@ -152,29 +157,33 @@ def edificios():
                 x = 11.0 + rnd.uniform(0, 6)
                 esc = (rnd.uniform(0.85, 1.15), largo / 10.0 * esp, 1)
                 alto = rnd.choice(("pared1", "pared1", "pared2"))
-                out.append(_obj(f"e_tienda_{i}", k[alto], (x, yc, 0), 0.0, esc, (*rnd.choice(PAREDES), 1)))
+                per.append((f"e_tienda_{i}", k[alto], x, yc, 0.0, esc, (*rnd.choice(PAREDES), 1), True))
                 lit = lambda p: 1.0 if rnd.random() < p else 0.0
-                out.append(_obj(f"e_letrero_{i}", k["letrero"], (x, yc, 0), 0.0, esc, (*rnd.choice(LETREROS), lit(0.75)), vol=False))
-                out.append(_obj(f"e_vitrina_{i}", k["vitrina"], (x, yc, 0), 0.0, esc, (*rnd.choice(VENTANAS), lit(0.65)), vol=False))
+                per.append((f"e_letrero_{i}", k["letrero"], x, yc, 0.0, esc, (*rnd.choice(LETREROS), lit(0.75)), False))
+                per.append((f"e_vitrina_{i}", k["vitrina"], x, yc, 0.0, esc, (*rnd.choice(VENTANAS), lit(0.65)), False))
                 if alto == "pared2":
-                    out.append(_obj(f"e_altas_{i}", k["altas"], (x, yc, 0), 0.0, esc, (*rnd.choice(VENTANAS), lit(0.4)), vol=False))
+                    per.append((f"e_altas_{i}", k["altas"], x, yc, 0.0, esc, (*rnd.choice(VENTANAS), lit(0.4)), False))
             else:
                 x = 8.5 + rnd.uniform(0, 2.5)
-                out.append(_obj(f"e_barda_{i}", barda, (x, yc, 0), 0.0, (1, largo, 1), (*rnd.choice(PAREDES), 1)))
+                per.append((f"e_barda_{i}", barda, x, yc, 0.0, (1, largo, 1), (*rnd.choice(PAREDES), 1), True))
         y += largo + rnd.uniform(2, 16) * (rnd.random() < 0.7) + (rnd.uniform(15, 60) if rnd.random() < 0.15 else 0.0)
         i += 1
-    out += _dosel(*LUGAR_DOSEL)
     # ---- left: dark silhouettes, a few lit windows
-    y, i = Y0 + rnd.uniform(0, 20), 0
-    while y < Y1:
+    y, i = rnd.uniform(0, 20), 0
+    while True:
         largo = rnd.uniform(12, 26)
+        if y + largo > PER:
+            break
         x = -(24.0 + rnd.uniform(0, 10))
         esc = (1, largo / 10.0, rnd.uniform(0.7, 1.5))
-        out.append(_obj(f"e_sil_{i}", sil, (x, y + largo / 2, 0), math.pi, esc))
+        per.append((f"e_sil_{i}", sil, x, y + largo / 2, math.pi, esc, None, True))
         if rnd.random() < 0.55:
-            out.append(_obj(f"e_sil_v_{i}", sil_v, (x, y + largo / 2, 0), math.pi, (1, esc[1], 1), (1.0, 0.8, 0.45, 1.0), vol=False))
+            per.append((f"e_sil_v_{i}", sil_v, x, y + largo / 2, math.pi, (1, esc[1], 1), (1.0, 0.8, 0.45, 1.0), False))
         y += largo + rnd.uniform(6, 40)
         i += 1
+    out = [_obj(f"{n}_p{c + 2}", me, (x, yc + c * PER, 0), rz, esc, col, vol=v)
+           for c in range(-2, N_PER) for n, me, x, yc, rz, esc, col, v in per]
+    out += _dosel(*LUGAR_DOSEL)
     out += _auto_opuesto(70.0)
-    print("CAMINO edificios:", len(out), "objetos; dosel en", LUGAR_DOSEL, flush=True)
+    print("CAMINO edificios:", len(out), "objetos,", len(per), "por periodo de", PER, "m; dosel en", LUGAR_DOSEL, flush=True)
     return out
