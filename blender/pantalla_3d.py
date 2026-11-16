@@ -149,14 +149,7 @@ def luz_caja(x, yb, xs, modo):
         if os.environ.get("MONTAJE_CAMINO", "").lower() == "noche":  # road2 fog test B (kept): these two areas do not scatter in the fog,
             o.visible_volume_scatter = False                         # which removes the blotches; adaptive sampling off (test A) changed nothing
         elif os.environ.get("MONTAJE_CAMINO", "").lower() == "road3":  # road3: camino_niebla.py's NIEBLA_CFG decides (camino_niebla.py)
-            o.visible_volume_scatter = bool(NIEBLA_CFG["scatter"]) and not NIEBLA_CFG["gemela"]
-            if NIEBLA_CFG["gemela"]:  # fog-only twin: spots under the bar, invisible to every surface, scatter in the fog only
-                for k in (-1, 0, 1) if largo > 1.0 and w_ == 518 else (0,):
-                    off = Vector((0, k * largo / 3, 0)) if w_ == 518 else Vector((k * largo / 3, 0, 0))
-                    t = luz("SPOT", Vector(pos) + off, w_ / (3 if w_ == 518 else 1) * NIEBLA_CFG["gemela"], (1.0, 0.86, 0.66), mira=Vector(mira_) + off, parent=False)
-                    t.data.spot_size, t.data.spot_blend, t.data.shadow_soft_size = 2.0, 1.0, 0.05
-                    t.visible_diffuse = t.visible_glossy = t.visible_transmission = False
-                    t.visible_volume_scatter = True
+            o.visible_volume_scatter = bool(NIEBLA_CFG["scatter"])
 
 
 _g["pantalla_c"] = pantalla_3d

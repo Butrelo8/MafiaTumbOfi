@@ -4,7 +4,6 @@ NIEBLA_PRUEBA="clave=valor;clave=valor" (WSLENV must carry it); the defaults bel
 
   dens      fog density (Principled Volume, mundo.niebla's own 0.0028 before)
   scatter   1 = the 'ancha' areas light the fog (luz_caja reads NIEBLA_CFG)      0 = road2's fix, no glow
-  gemela    1 = the areas stay out of the fog and a fog-only twin (diffuse/glossy/transmission off) lights it instead
   muestreo  fog material volume sampling: DISTANCE | EQUIANGULAR | MULTIPLE_IMPORTANCE
   clamp     sample_clamp_indirect (0 = off)         arbol  1/0 light tree         spp  samples (default: the command line's)
   pasadas   denoiser input passes RGB | RGB_ALBEDO | RGB_ALBEDO_NORMAL   pre  prefilter NONE|FAST|ACCURATE   cdirecto  clamp direct   dn  1/0 denoise
@@ -12,7 +11,7 @@ NIEBLA_PRUEBA="clave=valor;clave=valor" (WSLENV must carry it); the defaults bel
 """
 import os
 
-NIEBLA_CFG = dict(dens=0.005, scatter=1, gemela=0.0, muestreo="EQUIANGULAR", clamp=0.0, arbol=1, spp=0, paso=0.0, adapt=1, vol_rebotes=-1, pasadas="RGB", pre="", cdirecto=0.0, dn=1, dnr="")
+NIEBLA_CFG = dict(dens=0.005, scatter=1, muestreo="EQUIANGULAR", clamp=0.0, arbol=1, spp=0, paso=0.0, adapt=1, vol_rebotes=-1, pasadas="RGB", pre="", cdirecto=0.0, dn=1, dnr="")
 for _kv in filter(None, os.environ.get("NIEBLA_PRUEBA", "").split(";")):
     _k, _v = _kv.split("=")
     NIEBLA_CFG[_k] = type(NIEBLA_CFG[_k])(float(_v)) if isinstance(NIEBLA_CFG[_k], (int, float)) else _v

@@ -140,10 +140,11 @@ Fog (esc3, one still per variant, `~/cc-out/mto-pantalla/3d/road3/`): the blotch
 0.0028 → 0.005, the `ancha` areas scatter in the fog again (glow back, no twin lights needed), and `denoising_input_passes = RGB` (no
 albedo/normal guides: in fog they are the surface behind it and mislead the denoiser).
 - Tried and did nothing: volume sampling MIS → equiangular, clamp indirect 10, 16 → 64 spp with the guides (the blotches stayed). A fog-only twin
-  spot instead of the areas had less blotching and a weaker glow.
+  spot instead of the areas had less blotching and a weaker glow (that branch is removed from the code).
 - Raw (no denoise) the fog is sparse fireflies, so RGB-only works from a clean input. Its cost: at 16 spp it smears the road's cracks and the
-  Mercedes; at 64 spp it is sharp (a still takes 25-31 s either way, the time is the scene build). 64 spp is the recommended quality (`road3/final-64spp/`, `road2-vs-road3-64spp.jpg`; the 16 spp like-for-like set is `final-16spp/`,
-`road2-vs-road3.jpg`; the variants side by side: `fog-variantes-esc3.jpg`).
+  Mercedes; at 64 spp it is sharp (a still takes 25-31 s either way, the time is the scene build). 64 spp is the recommended quality (`road3/final-64spp/`; the 16 spp like-for-like set is `final-16spp/`; the sheet
+`road2-vs-road3.jpg` has road2 16 spp, road3 16 spp and road3 64 spp; the variants side by side: `fog-variantes-esc3.jpg`, whose panels 2 and 6
+are the older scene at density 0.0075, before the signs).
 - OptiX with all guides (`dnr=OPTIX;pasadas=RGB_ALBEDO_NORMAL`) keeps the detail and the glow but leaves mottling on the Mercedes in esc3
   (road3/t2-optix); OptiX RGB_ALBEDO adds fireflies; OptiX RGB smears like the OIDN one.
 - Two Blender "hangs" (one of 30+ min) were Blender and ComfyUI sharing the GPU, not the scene: run `~/.claude/scripts/gpu-busy` first.
@@ -155,5 +156,16 @@ row in esc3 and esc3-adelante; in esc5 the truck hides the road beyond 40 m, so 
 away and the lamp balls. The lamp row and chevrons beyond 120 m sit behind the truck in every hold: the curve is a background cue, as the
 holds are framed.
 - revisar.sh exit 0 on the three stills: banding at most 0.2 %, highlight clipping at most 0.58 %; no OIDN errors in the log.
+
+To render road3 (one Blender at a time; run `~/.claude/scripts/gpu-busy` first, ComfyUI shares the card):
+
+```bash
+MONTAJE_PANTALLA=b MONTAJE_PANTALLA_LUZ=ancha MONTAJE_CAMINO=road3 WSLENV=MONTAJE_PANTALLA:MONTAJE_PANTALLA_LUZ:MONTAJE_CAMINO \
+  /mnt/e/Blender/blender.exe -b --factory-startup --python-exit-code 1 --python "$(wslpath -w blender/montaje.py)" -- \
+  "$(wslpath -w blender/escena.py)" <out_dir (Windows)> 64 p3-b-ancha-esc3,p3-b-ancha-esc3-adelante,p3-b-ancha-esc5 960x540
+```
+
+Add `CURVA_PRUEBA=recta` (and to WSLENV) for the straight road, `CURVA_PRUEBA=vista` + the option `curva-arriba` + `wb` for a top-down layout
+check (not used for the final: Workbench takes the GPU too).
 - Missing: the curve in a clip (the bend does not scroll with `mundo`); vegetation along the outside of the bend is the old scatter; the footbridge
   is a box silhouette at 128 m that none of the three views shows; fog-lit shop windows in esc5 still read near white.
