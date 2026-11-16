@@ -137,13 +137,13 @@ def luz_caja(x, yb, xs, modo):
         for yy in (yb + 0.03, yb + P3_L - 0.03):
             caja((0.02, 0.025, P3_Z1 - P3_Z0), (xs + 0.008, yy, (P3_Z0 + P3_Z1) / 2), m, parent=False)
         return
-    m = mat("p3_lampara", (1.0, 0.92, 0.8), 0.3, emit=6.0)
+    m = mat("p3_lampara", (1.0, 0.92, 0.8), 0.3, emit=4.8)  # owner 2026-11-16: 'ancha' too bright, all three values x0.8 (6.0, 900 W, 400 W)
     caja((0.30, P3_L - 0.2, 0.12), (xs + 0.15, yc, P3_Z1 + 0.04), NEGRO, parent=False)  # the lamp housing over the side
     caja((0.22, P3_L - 0.3, 0.02), (xs + 0.15, yc, P3_Z1 - 0.025), m, parent=False)  # its face, looking down
     caja((P3_W - 0.2, 0.30, 0.12), (x, yb - 0.15, P3_Z1 + 0.04), NEGRO, parent=False)
     caja((P3_W - 0.3, 0.22, 0.02), (x, yb - 0.15, P3_Z1 - 0.025), m, parent=False)
-    for pos, mira_, largo, w_ in (((xs + 0.25, yc, P3_Z1 - 0.05), (xs + 1.2, yc, 0.0), P3_L - 0.3, 900),
-                                  ((x, yb - 0.25, P3_Z1 - 0.05), (x, yb - 1.2, 0.0), P3_W - 0.3, 400)):
+    for pos, mira_, largo, w_ in (((xs + 0.25, yc, P3_Z1 - 0.05), (xs + 1.2, yc, 0.0), P3_L - 0.3, 720),
+                                  ((x, yb - 0.25, P3_Z1 - 0.05), (x, yb - 1.2, 0.0), P3_W - 0.3, 320)):
         o = luz("AREA", pos, w_, (1.0, 0.9, 0.78), mira=mira_, parent=False)
         o.data.shape, o.data.size, o.data.size_y = "RECTANGLE", largo, 0.25  # aimed in a vertical plane: local X is horizontal
 
