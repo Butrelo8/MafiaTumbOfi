@@ -281,6 +281,8 @@ for _n, _f in ESCENAS:
     opcion(_n)(_op)
 if _g["SOLO"] is None:
     _g["SOLO"] = [n for n, _ in ESCENAS]
+if os.environ.get("MONTAJE_PANTALLA"):  # oopdrone: the 3D screen truck, livery a|b|c (docs/design/pantalla-3d.md)
+    exec(compile(open(os.path.join(AQUI, "pantalla_3d.py"), encoding="utf8").read(), os.path.join(AQUI, "pantalla_3d.py"), "exec"), globals())
 
 # ---------------------------------------------------------------- utileria.py's render loop, over the options above
 exec(compile(MARCA + _cola, U, "exec"), _g)
