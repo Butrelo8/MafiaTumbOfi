@@ -56,15 +56,17 @@ revisar.sh found no FAIL on any of the 15 stills. Banding is at most 0.3% (thres
 1.47%, in `p3-c-led-esc3-adelante`, from the bulbs. The per-still table is `revisar/resumen.tsv`.
 
 The `ancha` stills went through a second pass at 192 samples. Even so, the fog that the lamp bar lights shows blotchy
-denoiser patches. With adaptive sampling on, the time per frame did not change from 48 samples, so raising the count
-did nothing. If `ancha` is picked, it needs a fog or sampling fix.
+denoiser patches. The time per frame did not change from the 48-sample run. Adaptive sampling stopping early would
+explain it, but that cause is not verified. If `ancha` is picked, it needs a fog or sampling fix.
 
 ### What the renders show
 
 This section is a reading of the stills by eye. No tool measured it.
 
 - **C reads in all three views.** At the 3→4 beat, the bulbs outline the rear screen. At the scene 5 hold they still
-  show as separate dots at 960×540, not as a lit line, which is better than rizzdrone predicted.
+  show as separate dots at 960×540, not as a lit line, which is better than rizzdrone predicted. This one is measured:
+  in `p3-c-led-esc5` (y 121, x 386–572), the top rear row resolves into 12 bulbs, one per expected position, at about
+  15 px pitch, with luma falling from 254 to about 66 between them.
 - **B: the gold frame reads at the scene 5 hold**, because the G63's headlights light it. At the 3→4 beat it is a dim
   line. The rear MAFIA TUMBADA band reads at the 3→4 beat and at scene 5.
 - **A's box disappears.** At the 3→4 beat it is a black slab, and at scene 5 it is a flat grey one.
