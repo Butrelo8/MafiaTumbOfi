@@ -10,3 +10,4 @@ vitral-southwark: "Stained Glass Window, Southwark Cathedral" por Thomas Flynn (
 rosa-roja: "Red rose" por Lassi Kaukonen (thesidekick) — CC Attribution — https://sketchfab.com/3d-models/none-74520e87c3ed46898668c83356dd9cfa
 rosal: "rose flower" por SCANIMAT (scanimat) — CC Attribution — https://sketchfab.com/3d-models/none-65df7c2d34ca47d4ae0c0e2b91850ee7
 sahumerio: "Incense Burner" por Sophie (Sofi_EX) — CC Attribution — https://sketchfab.com/3d-models/none-b52925a8b4bd4307a8bf34bca26dd0e7
+pantalla3d: "Mitsubishi Fuso Canter" por Raed Almaharmah (raedalmaharmah6) — CC Attribution — https://sketchfab.com/3d-models/mitsubishi-fuso-canter-2b58376d6aaf4641adf30d4c9044de74 (vía Objaverse; caja quitada, caja LED y librea propias)
