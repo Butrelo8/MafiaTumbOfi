@@ -151,6 +151,9 @@ def luz_caja(x, yb, xs, modo):
 _g["pantalla_c"] = pantalla_3d
 pantalla_c = pantalla_3d
 
+if os.environ.get("MONTAJE_CAMINO"):  # the road as México 140 in daylight (camino_mx140.py; docs/design/pantalla-3d.md)
+    exec(compile(open(os.path.join(AQUI, "camino_mx140.py"), encoding="utf8").read(), os.path.join(AQUI, "camino_mx140.py"), "exec"), globals())
+
 
 # one option per livery x box light x view, "p3-<a|b|c>-<led|tira|ancha>-<esc3|esc3-adelante|esc5>"; esc3-adelante is scene 3's
 # hold with the truck 3.5 m further ahead, rizzdrone's stand-in for the start of the 3→4 move
