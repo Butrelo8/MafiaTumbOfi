@@ -99,3 +99,18 @@ owner's Street View refs (`~/cc-out/mto-pantalla/refs/road/`, reference only). S
 - Missing: gas-station canopy, pedestrian bridge, oncoming traffic; near tree crowns are lumpy icospheres, not the refs' trees; less
   dry pasture than refs 2 and 5. In daylight the `ancha` lamp barely reads. The new noise (ground, barrier, shoulders) does not repeat
   over the 192 m loop: fine for stills, breaks mundo.py's loop rule for a loop clip.
+
+## Road pass road2 (2026-11-16): night, with a roadside
+
+`MONTAJE_CAMINO=noche` (same other variables) keeps road1's road but skips `dia()`: the night HDRI, moon, fog and road lamps stay, the
+cat's eyes come back, and the lamp poles move 1 m out of the new shoulder. The right guardrail and the left delineators stay removed.
+`blender/camino_edificios.py` adds, in a seeded Python instancer with no period (kits are shared meshes; colour and lit/dark per
+instance in Object Color): lit shops of one or two storeys, barda walls, one generic gas-station canopy at (15.5, 62) with the only new
+area light, dark silhouettes with a few lit windows on the left, and one oncoming car with one pair of headlights beyond the barrier.
+Signs and windows have `visible_volume_scatter` off. Stills and sheet: `~/cc-out/mto-pantalla/3d/road2/warm1-road1-road2.jpg`.
+- Fog blotches, one still each (esc3, 16 spp): A, adaptive sampling off, changed nothing (mean pixel difference 0.011 of 255).
+  B, `visible_volume_scatter` off on the two `ancha` areas, removed the blotches; it is kept, and it also drops the lamp's fog glow
+  near the truck (mean luma of the sky/fog crop 69 → 59). The lamp's energy is unchanged.
+- revisar.sh exit 0 on the three stills: banding 0.0 %, highlight clipping at most 0.57 %. No OIDN errors in the log.
+- Missing: the curve (road3), the footbridge, vegetation work, seamless tiling; the shop windows in esc5 read near white (emission 1.3);
+  the right shoulder's dirt strip is still orange under the warm lights; no traffic besides the one oncoming car.

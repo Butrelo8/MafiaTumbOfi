@@ -28,6 +28,8 @@ from mathutils import Matrix
 
 import mundo as M
 
+MODO = os.environ.get("MONTAJE_CAMINO", "1").lower()
+NOCHE = MODO == "noche"                      # road2: the same road at night (dia() is skipped), plus the roadside (camino_edificios.py)
 PER = float(json.load(open(os.path.join(REPO, "src", "lib", "escena.json"), encoding="utf8"))["mundo"]["recorrido_loop"])  # escena.RECORRIDO
 Y0, Y1 = -2 * PER, 4 * PER
 MUNDO_ROOT = bpy.data.objects["mundo"]
@@ -111,11 +113,13 @@ def _ocultar(objs):
 
 # ---------------------------------------------------------------- surfaces
 def superficies():
-    tinte = 0.80
-    asf = bpy.data.materials["w_asfalto"]
-    asf.node_tree.nodes["tinte"].inputs[7].default_value = (tinte, tinte, tinte + 0.02, 1)   # day: the night tint is too dark
-    hombro = lambda nombre, ini, fin: M.mat_textura(nombre, "asphalt_02", 3.0, (0.95, 0.93, 0.90), extra=_tierra_borde(ini, fin))
-    grava = M.mat_textura("w_grava_dia", "gravelly_sand", 1.5, (0.62, 0.68, 0.72))
+    tinte = 0.62 if NOCHE else 0.80
+    if not NOCHE:
+        asf = bpy.data.materials["w_asfalto"]
+        asf.node_tree.nodes["tinte"].inputs[7].default_value = (tinte, tinte, tinte + 0.02, 1)   # day: the night tint is too dark
+    th = (0.75, 0.74, 0.72) if NOCHE else (0.95, 0.93, 0.90)                                       # mundo.py's own night tints
+    hombro = lambda nombre, ini, fin: M.mat_textura(nombre, "asphalt_02", 3.0, th, extra=_tierra_borde(ini, fin))
+    grava = M.mat_textura("w_grava_dia", "gravelly_sand", 1.5, (0.55, 0.52, 0.48) if NOCHE else (0.62, 0.68, 0.72))
     op = M.mat_textura("w_asfalto_op", "asphalt_02", 3.0, (tinte, tinte, tinte + 0.02), extra=_suciedad(PER))
     _quitar(exactos={"w_acot_der", "w_acot_izq", "w_grava_der", "w_grava_izq"})
     return [
@@ -147,7 +151,8 @@ def rayas():
     out = [tira("w_op_amarilla", [(xa - 0.075, xa + 0.075, Y0, Y1)], amarilla),
            tira("w_op_blanca", [(xb - 0.075, xb + 0.075, Y0, Y1)], blanca),
            tira("w_op_carril", [(xc - 0.075, xc + 0.075, Y0 + k * paso, Y0 + k * paso + paso / 3) for k in range(n)], blanca)]
-    _quitar(prefijos=("w_boton",))                                     # no cat's eyes in the refs
+    if not NOCHE:
+        _quitar(prefijos=("w_boton",))                                 # day: no cat's eyes in the refs
     return out
 
 
@@ -240,16 +245,21 @@ def _col_seca():
 
 def plantas():
     _quitar(exactos={f"w_{n}{l:+d}" for n in ("corte", "pasto", "arbusto", "pasto_lejos", "copa") for l in (1, -1)})   # mundo.plantas' scatters
-    seco = _col_seca()
     pasto, arbusto, copa = (bpy.data.collections[n] for n in ("w_pasto", "w_arbusto", "w_copa"))
-    copas = M._col_oculta("w_copa_cerca")
-    cc = M.copa_lejana(); cc.name = "w_copa_cerca"; copas.objects.link(cc)
-    mc = bpy.data.materials["w_copa_verde"]; nt = mc.node_tree
-    azar = _nodo(nt, "ShaderNodeObjectInfo").outputs["Random"]
-    nt.links.new(_mezcla(nt, (0.07, 0.13, 0.04), (0.16, 0.20, 0.06), azar), nt.nodes["Principled BSDF"].inputs["Base Color"])
-    out, copias = [], range(-2, 4)
-    for lado, x_in, s in ((1, 7.6, 10), (-1, 16.6, 20)):
-        for nombre, col, a, b, dens, esc, sd in (
+    if NOCHE:   # mundo.plantas' layout moved to the new edges; no straw, no near crowns; the right side stops where the buildings start
+        grupos = lambda s, lado: (("corte", pasto, 0.0, 2.5, 2.5, (0.8, 1.4), s + 8),
+                                  ("pasto", pasto, 2.5, 9 if lado < 0 else 3.5, 2.2, (2.2, 4.0), s),
+                                  ("arbusto", arbusto, 1.5, 34 if lado < 0 else 3.5, 0.06, (1.2, 2.6), s + 1),
+                                  ("pasto_lejos", pasto, 9, 34, 0.5, (2.5, 4.0), s + 2) if lado < 0 else None,
+                                  ("copa", copa, 22, 260, 0.006, (3.0, 6.5), s + 3))
+    else:
+        seco = _col_seca()
+        copas = M._col_oculta("w_copa_cerca")
+        cc = M.copa_lejana(); cc.name = "w_copa_cerca"; copas.objects.link(cc)
+        mc = bpy.data.materials["w_copa_verde"]; nt = mc.node_tree
+        azar = _nodo(nt, "ShaderNodeObjectInfo").outputs["Random"]
+        nt.links.new(_mezcla(nt, (0.07, 0.13, 0.04), (0.16, 0.20, 0.06), azar), nt.nodes["Principled BSDF"].inputs["Base Color"])
+        grupos = lambda s, lado: (
                 ("corte", seco, 0.0, 2.5, 1.6, (0.5, 0.9), s + 8),
                 ("pasto", pasto, 2.5, 9, 2.0, (1.4, 2.6), s),
                 ("seco", seco, 1.0, 12, 2.2, (1.3, 2.5), s + 4),
@@ -257,7 +267,13 @@ def plantas():
                 ("pasto_lejos", pasto, 9, 34, 0.5, (2.2, 3.6), s + 2),
                 ("seco_lejos", seco, 12, 34, 0.35, (2.0, 3.4), s + 5),
                 ("copa_cerca", copas, 12, 55, 0.003, (1.8, 3.2), s + 6),
-                ("copa", copa, 22, 260, 0.006, (3.0, 6.5), s + 3)):
+                ("copa", copa, 22, 260, 0.006, (3.0, 6.5), s + 3))
+    out, copias = [], range(-2, 4)
+    for lado, x_in, s in ((1, 7.6, 10), (-1, 16.6, 20)):
+        for g in grupos(s, lado):
+            if g is None:
+                continue
+            nombre, col, a, b, dens, esc, sd = g
             out.append(M.dispersar(f"w_{nombre}{lado:+d}", col, lado * (x_in + a), lado * (x_in + b), dens, esc, sd, MUNDO_ROOT, PER, copias))
     return out
 
@@ -298,13 +314,30 @@ def dia():
     co = next(n for n in nt.nodes if n.type == "TEX_COORD").outputs["Object"]
     nt.nodes["tinte"].inputs[7].default_value = (1, 1, 1, 1)
     nt.links.new(_mezcla(nt, (1.7, 1.4, 0.85), (0.9, 1.15, 0.55), _rango(nt, _ruido(nt, co, 1 / 22, 4), 0.50, 0.66)), nt.nodes["tinte"].inputs[7])
-    # the far lamps' road-side guardrail and the night delineators give way to the barrier and the open shoulder
+
+
+def tramo():
+    """The night tramo props that the new road replaces: the right guardrail (refs 5 and 6 have none) and the left delineators
+    (the barrier stands where they were). Both modes."""
     n = _quitar(prefijos=("fantasma_", "poste_riel_", "reflejante_riel_"), exactos={"riel"})
     n += _quitar(prefijos=tuple(f"reflejante_{i}" for i in range(0, 10)))
     print("CAMINO tramo: quitados", n, "objetos (guardarriel derecho, delineadores)", flush=True)
 
 
+def farolas_fuera():
+    """The road lamps' poles stood at x 6.4 (the new shoulder's outer edge) with the arm over the lane: 1 m further out."""
+    for o in bpy.data.objects:
+        if o.name.startswith("w_farola_"):
+            o.location.x = 1.0
+
+
 nuevo = superficies() + rayas() + barrera() + tendidos() + plantas()
-dia()
+tramo()
+if NOCHE:
+    farolas_fuera()
+    exec(compile(open(os.path.join(AQUI, "camino_edificios.py"), encoding="utf8").read(), os.path.join(AQUI, "camino_edificios.py"), "exec"), globals())
+    nuevo += edificios()
+else:
+    dia()
 _ocultar([o for o in nuevo if not o.name.startswith(("w_carretera_op", "w_acot", "w_grava"))])
 print("CAMINO MX140: carriles 2+2, barrera NJ x", X_BARRERA, "oncoming yellow", X_OP["amarilla"], "objetos nuevos", len(nuevo), flush=True)

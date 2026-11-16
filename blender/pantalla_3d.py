@@ -146,6 +146,8 @@ def luz_caja(x, yb, xs, modo):
                                   ((x, yb - 0.25, P3_Z1 - 0.05), (x, yb - 1.2, 0.0), P3_W - 0.3, 230)):
         o = luz("AREA", pos, w_, (1.0, 0.86, 0.66), mira=mira_, parent=False)
         o.data.shape, o.data.size, o.data.size_y = "RECTANGLE", largo, 0.25  # aimed in a vertical plane: local X is horizontal
+        if os.environ.get("MONTAJE_CAMINO", "").lower() == "noche":  # road2 fog test B (kept): these two areas do not scatter in the fog,
+            o.visible_volume_scatter = False                         # which removes the blotches; adaptive sampling off (test A) changed nothing
 
 
 _g["pantalla_c"] = pantalla_3d
