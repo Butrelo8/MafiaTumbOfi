@@ -438,3 +438,16 @@ Outputs are in `~/cc-out/mto-pantalla/3d/ruta/bucle480/`:
 Render commands:
 - Use `RUTA_PERIODOS` ≥ last world frame / 240 + 2: 9 for the clip, 11 for the preview.
 - The clip renders with `RUTA_DESDE=1127 RUTA_HASTA=1607`.
+
+### Cycles pass of the run and the 480 f loop (2026-11-16 22:00, meltingdrone)
+
+`scripts/render-ruta-cycles.sh <out>` renders both clips in Cycles (night, road3, straight road, OptiX) at 640×360 and writes
+`public/prototipo/{ruta,bucle}.mp4` and the two `-f0.jpg` posters. The 9:16 `alta` loop was not rendered: its poses do not exist.
+
+- **64 spp, not 16.** On the same 24 frames (loop frames 1127–1150), error against the 64 spp render was 2.43 at 16 spp and
+  1.96 at 32 spp (0–255, mean abs), and the brows and glasses of the front figures smear behind the windshield at 16 and 32.
+  Render time per frame (build excluded) was 1.6 s at 16, 1.5 s at 32 and 2.9 s at 64; the full run was shorter than that (2.0 s).
+- **Encode:** x264 crf 26, keyframe every 4 (loop) and 3 (run) frames, as the page scrubs them. The run is 3.9 MB and the loop 1.6 MB
+  (the Workbench pair was 2.9 MB and 1.8 MB).
+- **The windshield crossings are now at loop frames 301 and 442** (the eased path moved them from 182 and 230). Each is a one-frame
+  step bump (step 31 against 21 before it, and 25 against 18): the glass veils or doubles one frame. revisar lists them as `jump`.
