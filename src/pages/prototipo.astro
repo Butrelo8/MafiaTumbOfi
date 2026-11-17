@@ -24,6 +24,10 @@ const plataformas = [
   { n: 'YouTube', h: redes.youtube },
 ]
 const pie = [...plataformas, { n: 'Instagram', h: redes.instagram }, { n: 'TikTok', h: redes.tiktok }, { n: 'Facebook', h: redes.facebook }]
+const idVideo = (href: string) => new URL(href).searchParams.get('v')
+const mostrados = new Set(videos.map((v) => v.id))
+const masVideos = catalog.videos.filter((v) => !mostrados.has(idVideo(v.href) ?? ''))
+const numero = redes.whatsapp.match(/wa\.me\/521?(\d{3})(\d{3})(\d{4})/)?.slice(1).join(' ')
 const foto = (img: string) => img.replace(/\.jpg$/, '.webp')
 const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
 ---
@@ -110,7 +114,6 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
         <div class="plat margen">
           {plataformas.map((p) => <Boton href={p.h} flecha={false}>{p.n}</Boton>)}
         </div>
-        <p class="margen pendiente"><b>Render pendiente</b> Las redes como calcomanías en la caja de la camioneta (escena 2). Hoy: la tira y los botones.</p>
       </section>
 
       <div class="viaje" style="--f:120" aria-hidden="true"></div>
@@ -127,7 +130,10 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
             </li>
           ))}
         </ul>
-        <p class="pendiente"><b>Render pendiente</b> Los videos en la pantalla móvil (escena 3): hoy son miniaturas que abren YouTube. Faltan los 9 videos restantes del catálogo (14 en total).</p>
+        <h3 class="mas">Más en YouTube</h3>
+        <ul class="mas-lista" role="list">
+          {masVideos.map((v) => <li><a href={v.href}>{v.title}</a></li>)}
+        </ul>
       </section>
 
       <div class="viaje" style="--f:120" aria-hidden="true"></div>
@@ -148,14 +154,18 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
           ))}
         </ul>
         <div class="pausa"><Boton id="pausa" icono="pausa" oculto discreto>Pausar video</Boton></div>
-        <p class="pendiente"><b>Render pendiente</b> Los cuatro en las ventanas de la cabina; la banda tiene tres integrantes en el catálogo. Aquí corre el bucle de 3 movimientos (placeholder en Workbench hasta el render Cycles).</p>
+        <p class="pendiente"><b>Texto pendiente</b> Cuarto integrante: la foto de la banda muestra cinco personas y el catálogo lista tres. Faltan nombre, rol e Instagram de quien la banda confirme.</p>
        </div>
       </section>
 
       <div class="viaje gira" style="--f:288">
         <section class="velo margen" id="gira" aria-labelledby="h-gira">
           <h2 id="h-gira">Gira</h2>
-          <p class="pendiente"><b>Texto pendiente</b> El brief no muestra fechas. Si el dueño quiere la sección: va en la pantalla trasera de la pantalla móvil, hoy con «Próximas fechas · Muy pronto» (escenas plan §5).</p>
+          <p class="gira-texto">Las próximas fechas salen primero en nuestro Instagram.</p>
+          <div class="plat">
+            <Boton href={redes.instagram} flecha={false}>Instagram</Boton>
+            <Boton href="https://www.youtube.com/watch?v=XxhXFo-hm-I" flecha={false}>En vivo: Plaza Lerdo, Xalapa</Boton>
+          </div>
         </section>
       </div>
 
@@ -164,14 +174,14 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
           <h2 id="h-contacto">Contratación</h2>
           <p>Canciones propias, covers con actitud y cuatro años de tarima.</p>
           <Boton href={redes.whatsapp} lleno>Escribir por WhatsApp</Boton>
-          <p class="pendiente"><b>Render pendiente</b> El botón sobre la placa de la camioneta (escena 6). El número de WhatsApp espera confirmación de la banda.</p>
+          {numero && <p class="numero">WhatsApp {numero}</p>}
         </div>
       </section>
     </main>
 
     <footer class="pie">
       {pie.map((p) => <a href={p.h}>{p.n}</a>)}
-      <p>Prototipo. Imagen: vista previa de 640×360 (carretera en Cycles 16 muestras; bucle de la banda en Workbench). Encuadre vertical 9:16 pendiente.</p>
+      <p>Prototipo. Imagen: vista previa de 640×360 (carretera en Cycles 16 muestras; bucle de la banda en Workbench). Encuadre vertical 9:16 pendiente. Sin renderizar todavía: redes como calcomanías en la caja (escena 2), videos en la pantalla móvil (3), los cuatro en las ventanas de la cabina (4), fechas en la pantalla trasera (5), botón en la placa (6).</p>
     </footer>
 
     <p class="hud" id="hud" hidden></p>
@@ -235,6 +245,11 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
       .vid span { display: flex; gap: 10px; align-items: center; padding: 12px 0; font-weight: 600; }
       .vid :global(.icono) { flex: none; width: 28px; height: 28px; color: var(--gold); }
       .vid:hover span { color: var(--gold); }
+      .mas { font-size: 32px; margin: 40px 0 8px; }
+      .mas-lista { display: grid; gap: 0 32px; grid-template-columns: 1fr; max-width: 1100px; }
+      @media (min-width: 900px) { .mas-lista { grid-template-columns: 1fr 1fr; } }
+      .mas-lista a { display: flex; min-height: 44px; align-items: center; padding-block: 6px; color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line); }
+      .mas-lista a:hover { color: var(--gold); }
 
       /* La banda: the loop is this section's picture, so the panel is a column and the cab stays visible beside it */
       .lateral { padding-inline: var(--gutter); }
@@ -248,11 +263,14 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
       .pausa { margin-top: 20px; }
 
       .gira .velo { padding-block: clamp(32px, 5vw, 56px); }
-      .gira h2 { margin-bottom: 0; }
+      .gira h2 { margin-bottom: 12px; }
+      .gira-texto { font-size: 20px; color: var(--muted); max-width: 40ch; }
+      .gira .plat { margin-top: 20px; }
 
       .contacto { min-height: 100svh; display: grid; align-items: center; padding-inline: var(--gutter); }
       .panel { max-width: 640px; padding: clamp(24px, 4vw, 48px); background: var(--veil); }
-      .panel > p:not(.pendiente) { margin: 0 0 24px; font-size: 20px; color: var(--muted); }
+      .panel > p { margin: 0 0 24px; font-size: 20px; color: var(--muted); }
+      .panel > .numero { margin: 20px 0 0; font-size: 17px; }
 
       .pie { display: flex; flex-wrap: wrap; gap: 0 18px; padding: 32px var(--gutter); border-top: 1px solid var(--line); color: var(--muted); background: var(--bg); }
       .pie a { display: inline-flex; min-height: 44px; align-items: center; }
