@@ -53,11 +53,25 @@ describe('band loop', () => {
     expect(lejos(vWrap[0], vWrap[1])).toBeLessThan(1e-3)
   })
 
+  // `t` places a point on the approved curve; `reloj` is when the eased loop (scripts/bucle-suave.py) reaches it
   test('the loop passes through its points', () => {
     for (const p of ruta.bucles[0].camara) {
-      bucle(p.t).pos.forEach((v, j) => expect(v).toBeCloseTo(p.pos[j], 9))
-      expect(bucle(p.t).mm).toBeCloseTo(p.mm, 9)
+      bucle(p.reloj).pos.forEach((v, j) => expect(v).toBeCloseTo(p.pos[j], 9))
+      expect(bucle(p.reloj).mm).toBeCloseTo(p.mm, 9)
     }
+  })
+
+  // owner 2026-11-16 16:25: moves 2-3 jerked; the old monotone Hermite's acceleration jumped 0.013-0.079 m/frame² at its knots
+  test('moves 2-3 are eased: the acceleration never jumps (knots and both handovers)', () => {
+    const acc = (t: number, lado: 1 | -1, h = 1e-2) => {
+      const p = [0, 1, 2].map((k) => pb(t + lado * k * h))
+      return p[0].map((x, j) => (p[2][j] - 2 * p[1][j] + x) / (h * h))
+    }
+    let peor = 0
+    for (const [t] of ruta.bucles[0].suave.slice(1, -1)) peor = Math.max(peor, lejos(acc(t, 1), acc(t, -1)))
+    // handovers: run -> move 2 at L1, move 3 -> run at the wrap
+    peor = Math.max(peor, lejos(acc(L1, 1), acc(L1, -1)), lejos(acc(0, 1), acc(B.largo, -1)))
+    expect(peor).toBeLessThan(5e-4) // m/frame²; the old knots jumped 0.013-0.079
   })
 
   test('parity with the Blender bake of the loop clip', () => {
@@ -75,11 +89,11 @@ describe('band loop', () => {
     // holding at 680 starts the loop where the run stands
     let e: Estado = { f: 680, t: null }
     expect(lejos(poseEstado(paso(e, 0, 0)).m, muestra(680).m)).toBe(0)
-    e = ir(e, 0, 1, 340) // into move 2 of the second cycle
-    expect(e.t).toBe(680 - B.desde + 340 - 240)
+    e = ir(e, 0, 1, B.largo + 100) // into move 2 of the second cycle
+    expect(e.t).toBe(680 - B.desde + 100)
     // forward scroll in move 2 finishes the loop and comes out on the run: every step moves the camera a little, never a jump
     let prev = poseEstado(e).pos as number[], salto = 0
-    for (let i = 0; i < 200 && (e.t !== null || e.f < B.hasta + 30); i++) {
+    for (let i = 0; i < 400 && (e.t !== null || e.f < B.hasta + 30); i++) {
       e = paso(e, 2, 1)
       const p = poseEstado(e).pos as number[]
       salto = Math.max(salto, Math.hypot(...p.map((x, j) => x - prev[j])))
@@ -89,8 +103,8 @@ describe('band loop', () => {
     expect(e.f).toBeGreaterThan(B.hasta)
     expect(salto).toBeLessThan(0.5) // m per tick at 2 frames per tick: the fastest stretch of move 2
     // backward scroll from move 3 plays the loop back to hasta, then the run backwards
-    e = { f: 700, t: 200 }
-    e = ir(e, -2, 1, 60)
+    e = { f: 700, t: 400 }
+    e = ir(e, -2, 1, 200)
     expect(e.t).toBeNull()
     expect(e.f).toBeLessThan(B.hasta)
   })

@@ -25,13 +25,32 @@ function tangentes<T extends Punto>(ps: T[], val: (p: T) => number[], ext?: numb
   }
 }
 
-function hermite<T extends Punto>(ps: T[], val: (p: T) => number[], f: number, ext?: number[][]): number[] {
+// clamped cubic spline: the knot tangents that make the curve C2 (no acceleration jump at any knot), with the end tangents e0 and e1
+// given (Thomas algorithm). blender/ruta.py tangentes_c2 and scripts/bucle-suave.py c2 do the same.
+function tangentesC2(T: number[], Y: number[][], e0: number[], e1: number[]): number[][] {
+  const n = T.length, h = T.slice(1).map((t, i) => t - T[i])
+  const d = h.map((hi, i) => Y[i + 1].map((y, j) => (y - Y[i][j]) / hi))
+  const a = T.map((_, i) => (i > 0 && i < n - 1 ? h[i] : 0)), c = T.map((_, i) => (i > 0 && i < n - 1 ? h[i - 1] : 0))
+  const b = T.map((_, i) => (i > 0 && i < n - 1 ? 2 * (h[i - 1] + h[i]) : 1))
+  const r = T.map((_, i) => (i === 0 ? e0.slice() : i === n - 1 ? e1.slice() : d[i].map((x, j) => 3 * (h[i] * d[i - 1][j] + h[i - 1] * x))))
+  for (let i = 1; i < n; i++) {
+    const w = a[i] / b[i - 1]
+    b[i] -= w * c[i - 1]
+    r[i] = r[i].map((x, j) => x - w * r[i - 1][j])
+  }
+  const m = new Array<number[]>(n)
+  m[n - 1] = r[n - 1].map((x) => x / b[n - 1])
+  for (let i = n - 2; i >= 0; i--) m[i] = r[i].map((x, j) => (x - c[i] * m[i + 1][j]) / b[i])
+  return m
+}
+
+function hermite<T extends Punto>(ps: T[], val: (p: T) => number[], f: number, ext?: number[][], tanFija?: (i: number) => number[]): number[] {
   const n = ps.length
   if (f <= ps[0].fr) return val(ps[0])
   if (f >= ps[n - 1].fr) return val(ps[n - 1])
   let k = 0
   while (ps[k + 1].fr < f) k++
-  const tan = tangentes(ps, val, ext)
+  const tan = tanFija ?? tangentes(ps, val, ext)
   const h = ps[k + 1].fr - ps[k].fr, s = (f - ps[k].fr) / h
   const s2 = s * s, s3 = s2 * s
   const h00 = 2 * s3 - 3 * s2 + 1, h10 = s3 - 2 * s2 + s, h01 = -2 * s3 + 3 * s2, h11 = s3 - s2
@@ -75,21 +94,25 @@ function orientar([px, py, pz, mx, my, mz, mm]: number[], f: number): Pose {
 }
 
 // The band station's loop (owner 2026-11-16 08:45): `largo` frames, three moves. Loop frame t in [0, hasta - desde] is the run's own
-// stretch desde..hasta (move 1, the hood slide), so the loop and the run share every pose there. The rest is a Hermite from the run's
-// pose at `hasta` through ruta.json's loop points back to its pose at `desde`, with the run's own tangents at both ends, so the
-// handovers and the wrap are continuous in position and velocity. `largo` is a multiple of 240, so vibra (phase desde + t) loops too.
+// stretch desde..hasta (move 1, the hood slide), so the loop and the run share every pose there. The rest is a C2 spline from the run's
+// pose at `hasta` through ruta.json's loop points back to its pose at `desde`, with the run's own velocity and acceleration at both
+// ends, so the handovers and the wrap have no jump in position, velocity or acceleration. `largo` is a multiple of 240, so vibra
+// (phase desde + t), the world and the cast loop too.
 const B = ruta.bucles[0]
 const L1 = B.hasta - B.desde
 const corrida = (fr: number) => ruta.camara.find((p) => p.fr === fr)!
 const tanCorrida = tangentes(ruta.camara, camVal)
-const ptsBucle: PuntoCam[] = [{ ...corrida(B.hasta), fr: L1 }, ...B.camara.map((p) => ({ ...p, fr: p.t })), { ...corrida(B.desde), fr: B.largo }]
 const extBucle = [tanCorrida(ruta.camara.indexOf(corrida(B.hasta))), tanCorrida(ruta.camara.indexOf(corrida(B.desde)))]
+// Moves 2-3 as eased (owner 2026-11-16 16:25): scripts/bucle-suave.py writes `suave`, points on the approved curve through the loop
+// points with the loop frame the camera reaches each one; a C2 spline through them, so the acceleration never jumps
+const ptsSuave = B.suave.map((r) => ({ fr: r[0], v: r.slice(1) }))
+const tanSuave = tangentesC2(ptsSuave.map((p) => p.fr), ptsSuave.map((p) => p.v), extBucle[0], extBucle[1])
 export const bucleInfo = { seccion: B.seccion, desde: B.desde, hasta: B.hasta, largo: B.largo, clip: B.clip }
 
 export function bucle(t: number): Pose {
   const u = ((t % B.largo) + B.largo) % B.largo
   if (u <= L1) return muestra(B.desde + u)
-  return orientar(hermite(ptsBucle, camVal, u, extBucle), B.desde + u)
+  return orientar(hermite(ptsSuave, (p) => p.v, u, undefined, (i) => tanSuave[i]), B.desde + u)
 }
 
 // One page tick. `f` is the run frame the scroll has carried the camera to; `t` is the loop frame while the camera is in the loop.

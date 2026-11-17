@@ -10,10 +10,10 @@ rendered, for the parity test `bun test src/lib/ruta.test.ts`) and renders the f
 
 RUTA_RENDER=0 keys and bakes only. RUTA_PASO=n renders every n-th frame; RUTA_DESDE / RUTA_HASTA bound the range;
 RUTA_CUADROS="36,647" renders only those frames (add it to WSLENV).
-The band loop (ruta.json bucles) is keyed at its `clip` frame (1127..1366) after the run: render it alone with RUTA_DESDE=1127
-RUTA_HASTA=1366. RUTA_PREVIA=<ticks.json, Windows path> (+ RUTA_PREVIA_DESDE, the world frame of tick 0) renders the page's own
-stepping instead, one still per tick into <out>/previa/: the ticks come from ruta.ts paso() (a bun script writes [[f, t|null], ...]).
-The loop clip and the preview reach frame ~1400: use RUTA_PERIODOS=8.
+The band loop (ruta.json bucles, 480 frames) is keyed at its `clip` frame (1127..1606) after the run: render it alone with
+RUTA_DESDE=1127 RUTA_HASTA=1606. RUTA_PREVIA=<ticks.json, Windows path> (+ RUTA_PREVIA_DESDE, the world frame of tick 0) renders the
+page's own stepping instead, one still per tick into <out>/previa/: the ticks come from ruta.ts paso() (a bun script writes
+[[f, t|null], ...]). RUTA_PERIODOS must be at least the last world frame / 240 + 2: 9 for the loop clip.
 The road is straight in the clips (owner 2026-11-16, option A: road3's bend does not scroll with `mundo`); RUTA_PERIODOS=7 builds
 the road 7 loop periods ahead, because the run slides about 980 m and never wraps.
 """
@@ -59,7 +59,7 @@ def tangentes(ps, val, ext=None):
     return tan
 
 
-def hermite(ps, val, f, ext=None):
+def hermite(ps, val, f, ext=None, tan=None):
     if f <= ps[0]["fr"]:
         return val(ps[0])
     if f >= ps[-1]["fr"]:
@@ -67,7 +67,7 @@ def hermite(ps, val, f, ext=None):
     k = 0
     while ps[k + 1]["fr"] < f:
         k += 1
-    tan = tangentes(ps, val, ext)
+    tan = tan or tangentes(ps, val, ext)
     h = ps[k + 1]["fr"] - ps[k]["fr"]
     s = (f - ps[k]["fr"]) / h
     s2, s3 = s * s, s * s * s
@@ -113,16 +113,39 @@ BUC = RUTA["bucles"][0]
 L1 = BUC["hasta"] - BUC["desde"]
 _corr = {p["fr"]: i for i, p in enumerate(RUTA["camara"])}
 _tan_c = tangentes(RUTA["camara"], cam_val)
-PTS_B = [dict(RUTA["camara"][_corr[BUC["hasta"]]], fr=L1)] + [dict(p, fr=p["t"]) for p in BUC["camara"]] + \
-    [dict(RUTA["camara"][_corr[BUC["desde"]]], fr=BUC["largo"])]
 EXT_B = [_tan_c(_corr[BUC["hasta"]]), _tan_c(_corr[BUC["desde"]])]
+
+
+def tangentes_c2(T, Y, e0, e1):  # ruta.ts tangentesC2: the clamped cubic spline's knot tangents (C2), Thomas algorithm
+    n = len(T)
+    h = [T[i + 1] - T[i] for i in range(n - 1)]
+    d = [[(y - x) / h[i] for x, y in zip(Y[i], Y[i + 1])] for i in range(n - 1)]
+    a = [h[i] if 0 < i < n - 1 else 0 for i in range(n)]
+    c = [h[i - 1] if 0 < i < n - 1 else 0 for i in range(n)]
+    b = [2 * (h[i - 1] + h[i]) if 0 < i < n - 1 else 1 for i in range(n)]
+    r = [list(e0) if i == 0 else list(e1) if i == n - 1 else [3 * (h[i] * p + h[i - 1] * q) for p, q in zip(d[i - 1], d[i])]
+         for i in range(n)]
+    for i in range(1, n):
+        w = a[i] / b[i - 1]
+        b[i] -= w * c[i - 1]
+        r[i] = [x - w * y for x, y in zip(r[i], r[i - 1])]
+    m = [None] * n
+    m[n - 1] = [x / b[n - 1] for x in r[n - 1]]
+    for i in range(n - 2, -1, -1):
+        m[i] = [(x - c[i] * y) / b[i] for x, y in zip(r[i], m[i + 1])]
+    return m
+
+
+# moves 2-3 as eased: scripts/bucle-suave.py's `suave` rows [t, pos, mira, mm], a C2 spline through them (no acceleration jump)
+PTS_S = [{"fr": r[0], "v": r[1:]} for r in BUC["suave"]]
+TAN_S = tangentes_c2([p["fr"] for p in PTS_S], [p["v"] for p in PTS_S], EXT_B[0], EXT_B[1])
 
 
 def bucle(t):
     u = t % BUC["largo"]
     if u <= L1:
         return muestra(BUC["desde"] + u)
-    return orientar(hermite(PTS_B, cam_val, u, EXT_B), BUC["desde"] + u)
+    return orientar(hermite(PTS_S, lambda p: p["v"], u, tan=lambda i: TAN_S[i]), BUC["desde"] + u)
 
 
 def orientar(v, f):
@@ -195,7 +218,7 @@ def tira(tr, nombre, inicio, act, a0, a1, slot, reversa=False):
 
 
 DIEGO_A = 210  # Diego's clip: seated from about 120 on; 210-330 is the sip (the right hand rises 26 cm and comes back)
-FIN_CAST = 2400  # past the loop clip (1127 + 240) and the preview
+FIN_CAST = 2400  # past the loop clip (1127 + 480) and the preview
 
 
 def reparto_en_bucle():
