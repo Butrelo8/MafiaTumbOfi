@@ -28,6 +28,8 @@ const idVideo = (href: string) => new URL(href).searchParams.get('v')
 const mostrados = new Set(videos.map((v) => v.id))
 const masVideos = catalog.videos.filter((v) => !mostrados.has(idVideo(v.href) ?? ''))
 const numero = redes.whatsapp.match(/wa\.me\/521?(\d{3})(\d{3})(\d{4})/)?.slice(1).join(' ')
+// The 4th member (owner, 2026-11-16): the band's manager; the public profile's display name is its handle.
+const manager = { name: 'elmanco420', role: 'Mánager', instagram: 'https://www.instagram.com/elmanco420/' }
 const foto = (img: string) => img.replace(/\.jpg$/, '.webp')
 const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
 ---
@@ -152,9 +154,15 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
               </div>
             </li>
           ))}
+          <li class="m sin-foto">
+            <div>
+              <h3>{manager.name}</h3>
+              <p>{manager.role}</p>
+              <a href={manager.instagram}>@{usuario(manager.instagram)}</a>
+            </div>
+          </li>
         </ul>
         <div class="pausa"><Boton id="pausa" icono="pausa" oculto discreto>Pausar video</Boton></div>
-        <p class="pendiente"><b>Texto pendiente</b> Cuarto integrante: la foto de la banda muestra cinco personas y el catálogo lista tres. Faltan nombre, rol e Instagram de quien la banda confirme.</p>
        </div>
       </section>
 
@@ -225,9 +233,6 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
       h2 { font-size: clamp(44px, 7vw, 96px); margin-bottom: 28px; }
       :where(ul[role='list']) { list-style: none; padding: 0; }
 
-      /* a clay placeholder: dashed edge, hatch, a bold label first. The only thing on the page that is not real material. */
-      .pendiente { margin-top: 28px; padding: 14px 16px; border: 1px dashed oklch(70% 0 0 / 0.6); background: repeating-linear-gradient(135deg, oklch(30% 0 0 / 0.5) 0 8px, oklch(22% 0 0 / 0.5) 8px 16px); color: var(--ink); font-size: 15px; max-width: 72ch; }
-      .pendiente b { display: block; margin-bottom: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; font-size: 14px; }
 
       .tira { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter); padding: 8px var(--gutter) 16px; scrollbar-color: var(--gold-deep) transparent; }
       .tira li { flex: 0 0 clamp(210px, 22vw, 280px); scroll-snap-align: start; }
@@ -256,6 +261,7 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
       .columna { max-width: 560px; padding: clamp(24px, 4vw, 48px); background: var(--veil); }
       .banda { display: grid; gap: 14px; }
       .m { display: grid; grid-template-columns: 96px 1fr; gap: 16px; align-items: center; }
+      .m.sin-foto div { grid-column: 2; }
       .m img { display: block; width: 96px; height: 120px; object-fit: cover; filter: saturate(0.75) contrast(1.05); }
       .m h3 { font-size: 32px; }
       .m p { color: var(--muted); }
