@@ -1,0 +1,221 @@
+{
+ "motor": "chromium",
+ "url": "http://127.0.0.1:4411/prototipo/",
+ "version": "153.0.8010.12",
+ "movil": {
+  "ruta": {
+   "readyState": 4,
+   "w": 640,
+   "h": 360,
+   "dur": 46,
+   "err": null
+  },
+  "bucle": {
+   "readyState": 4,
+   "w": 640,
+   "h": 360,
+   "dur": 20,
+   "err": null
+  },
+  "scrollW": 390,
+  "innerW": 390,
+  "heroH": 844,
+  "innerH": 844,
+  "masLinks": 9,
+  "pendientes": 1,
+  "numero": "WhatsApp 228 353 8827",
+  "pausaOculto": false,
+  "tapPequenos": [],
+  "fuentes": [
+   "Saira 400",
+   "Saira 600",
+   "Saira Condensed 800"
+  ],
+  "errores": []
+ },
+ "escrubeo": [
+  {
+   "f": 135.3,
+   "t": null,
+   "rutaT": 135.3,
+   "buclePausado": true,
+   "rutaOn": true,
+   "bucleOn": false
+  },
+  {
+   "f": 346.8,
+   "t": null,
+   "rutaT": 346.8,
+   "buclePausado": true,
+   "rutaOn": true,
+   "bucleOn": false
+  },
+  {
+   "f": 474.4,
+   "t": null,
+   "rutaT": 474.4,
+   "buclePausado": true,
+   "rutaOn": true,
+   "bucleOn": false
+  },
+  {
+   "f": 518.3,
+   "t": null,
+   "rutaT": 518.3,
+   "buclePausado": true,
+   "rutaOn": true,
+   "bucleOn": false
+  },
+  {
+   "f": 683.3,
+   "t": 51,
+   "rutaT": 518.3,
+   "buclePausado": false,
+   "rutaOn": false,
+   "bucleOn": true
+  },
+  {
+   "f": 923.1,
+   "t": null,
+   "rutaT": 923.1,
+   "buclePausado": true,
+   "rutaOn": true,
+   "bucleOn": false
+  },
+  {
+   "f": 1049.5,
+   "t": null,
+   "rutaT": 1049.5,
+   "buclePausado": true,
+   "rutaOn": true,
+   "bucleOn": false
+  },
+  {
+   "f": 411.4,
+   "t": null,
+   "rutaT": 411.4,
+   "buclePausado": true,
+   "rutaOn": true,
+   "bucleOn": false
+  }
+ ],
+ "movil2": {
+  "ruta": {
+   "readyState": 4,
+   "w": 640,
+   "h": 360,
+   "dur": 46,
+   "err": null
+  },
+  "bucle": {
+   "readyState": 4,
+   "w": 640,
+   "h": 360,
+   "dur": 20,
+   "err": null
+  },
+  "scrollW": 390,
+  "innerW": 390,
+  "heroH": 844,
+  "innerH": 844,
+  "masLinks": 9,
+  "pendientes": 1,
+  "numero": "WhatsApp 228 353 8827",
+  "pausaOculto": false,
+  "tapPequenos": [],
+  "fuentes": [
+   "Saira 400",
+   "Saira 600",
+   "Saira Condensed 800"
+  ],
+  "errores": []
+ },
+ "bucle": {
+  "inicio": {
+   "t": 2.441214,
+   "pausado": false
+  },
+  "despues2s": {
+   "t": 4.447468,
+   "pausado": false,
+   "enBucle": true,
+   "on": true
+  },
+  "avanzo": 2.01,
+  "etiquetaAntes": "Pausar video",
+  "pausa": {
+   "et": "Reproducir video",
+   "pausado": true
+  }
+ },
+ "escritorio": {
+  "ruta": {
+   "readyState": 4,
+   "w": 640,
+   "h": 360,
+   "dur": 46,
+   "err": null
+  },
+  "bucle": {
+   "readyState": 4,
+   "w": 640,
+   "h": 360,
+   "dur": 20,
+   "err": null
+  },
+  "scrollW": 1440,
+  "innerW": 1440,
+  "heroH": 900,
+  "innerH": 900,
+  "masLinks": 9,
+  "pendientes": 1,
+  "numero": "WhatsApp 228 353 8827",
+  "pausaOculto": false,
+  "tapPequenos": [],
+  "fuentes": [
+   "Saira 400",
+   "Saira 600",
+   "Saira Condensed 800"
+  ],
+  "errores": []
+ },
+ "reducido": {
+  "ruta": {
+   "readyState": 4,
+   "w": 640,
+   "h": 360,
+   "dur": 46,
+   "err": null
+  },
+  "bucle": {
+   "readyState": 4,
+   "w": 640,
+   "h": 360,
+   "dur": 20,
+   "err": null
+  },
+  "scrollW": 390,
+  "innerW": 390,
+  "heroH": 844,
+  "innerH": 844,
+  "masLinks": 9,
+  "pendientes": 1,
+  "numero": "WhatsApp 228 353 8827",
+  "pausaOculto": true,
+  "tapPequenos": [],
+  "fuentes": [
+   "Saira 400",
+   "Saira 600",
+   "Saira Condensed 800"
+  ],
+  "errores": []
+ },
+ "reducidoBucle": {
+  "pausado": true,
+  "enBucle": false
+ },
+ "tacto": {
+  "scrollY": 600,
+  "error": null
+ }
+}
