@@ -374,3 +374,67 @@ t ≈ 230 out) show no tint or reflection change. Cycles will show them.
   - the pantalla's wheels;
   - the run's frame 96 head wipe;
   - the dark frames 785–809.
+
+### Moves 2–3 eased and lengthened: `largo` 480 (2026-11-16 18:40, spaghettidrone)
+
+The owner (16:25) asked for moves 2 and 3 to be "smooth like 1", with the shots eased out. At 16:46 the owner added: "it's the
+duration of the shots ... the other 2 are really fast".
+
+**Diagnosis:** the roughness was in the path, not the encode.
+- The old moves 2 and 3 covered 7.4 m / 202° and 3.7 m in 80 f and 64 f. Move 1 covers 0.32 m in 96 f.
+- The monotone Hermite's acceleration jumped 0.013–0.079 m/f² at every knot.
+- The render's frame-to-frame jump had a median of 11–12.5, against 1.7 in move 1.
+
+**What changed:**
+- `largo` is now 480, the next multiple of 240. Vibra, the world and the cast all loop at 240, so 288 would not close the
+  loop. Moves 2 and 3 now last 8 s each; move 1 stays 4 s. `clip` is still 1127, and the loop is keyed at 1126–1607.
+- `scripts/bucle-suave.py` writes `bucles[0].suave`. Those are points on the approved curve:
+  - every authored pose;
+  - a point about every 4 of its frames;
+  - a point every frame in the first and last stretch.
+- The script also sets each pose's `reloj`, the loop frame when the camera reaches that pose. Each point's `t` still places
+  it on the approved, 240-frame curve.
+- `ruta.ts` and `ruta.py` sample `suave` with a clamped C2 spline (`tangentesC2` / `tangentes_c2`). So the acceleration
+  never jumps, including at both handovers: the 2nd and 2nd-to-last points are solved so that the spline matches the run's
+  acceleration there.
+- The generator chose the knot times for the lowest combined acceleration, under these constraints:
+  - the hood pose fixed at t 288, the move 2/3 split;
+  - the push between the front heads at about 80 f, its old share of move 3;
+  - at most 2 cm off the approved path (5 cm for the look target).
+- New test: no acceleration jump at any knot or handover (under 5e-4 m/f²; the old code fails it).
+- The points test now checks `reloj`. The scroll test was rescaled to 480.
+
+**Measured:**
+
+```
+path (scratchpad medir.ts; interior peaks)    old 240 f             eased 480 f
+  move 2  peak a / a·T²/D                     0.0305 / 26.4         0.0041 / 19.8
+  move 3  peak a / a·T²/D                     0.0570 / 62.5         0.0052 / 53.6     (move 1: 0.0005 / 14.8)
+  peak speed m/f (2, 3)                       0.149, 0.155          0.065, 0.056
+  handovers, max a ±1 f                       0.035                 0.006
+render (revisar jump per frame)               median · max step-change
+  move 2                                      11.0 · 2.9            6.7 · 1.1          (move 1: 1.7 · 1.1)
+  move 3                                      12.5 · 5.3            5.3 · 1.9
+bun test src/lib/ruta.test.ts  8 pass
+RUTA CHOQUES 0 · CHOQUES BUCLE 0 · HOLGURA BUCLE min 0.104 m (frame 1427 = t 300, past the manager), 0 < 0.10 · ASOMADOS 0
+eagle.sh bucle480/bucle-clip.mp4 --loop  exit 0 · seam 4.44 <= 19.91 pass · strobe pass · 0 events (old: 2)
+frame 1607 vs 1127  mean abs 0.005 (0–255) · 0.012 % px > 8
+eagle.sh bucle480/bucle-previa.mp4  exit 0 · strobe pass · 5 events, all in the 3× scroll-outs (ticks 736–875, 1222)
+```
+
+**The a·T²/D bar is not met for moves 2 and 3.**
+- The approved path has two hard corners, and keeping the poses and the path means they stay. One is the front-right
+  turn-in; the other is the turn onto the hood at run speed, just before the wrap.
+- Move 3's slow push sits between faster stretches, which inflates that move's a·T²/D.
+- Rounding the corners is the owner's call, together with a tighter move 2 (option B, held by buggyship).
+
+Outputs are in `~/cc-out/mto-pantalla/3d/ruta/bucle480/`:
+- `bucle-previa-rotulada.mp4`: 1341 ticks, the same scenario as the 240-frame preview, with the hold points scaled.
+- `bucle-previa-lado-a-lado.mp4`: the old and new previews side by side.
+- `bucle-clip.mp4`: the 480 f loop.
+- `velocidad-viejo-vs-nuevo.png`: the speed and acceleration plot, old vs new.
+- `scripts/`: the render chain, ticks, labels, measure and plot.
+
+Render commands:
+- Use `RUTA_PERIODOS` ≥ last world frame / 240 + 2: 9 for the clip, 11 for the preview.
+- The clip renders with `RUTA_DESDE=1127 RUTA_HASTA=1607`.
