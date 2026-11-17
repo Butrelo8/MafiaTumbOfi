@@ -237,3 +237,20 @@ Gate: `refs-check.py <this section> --sections caja5`.
 | caja5 | user: owner 11-14 picked bed B: "Need to see if we keep adding more props, they can be irrelevant to the genre but must look good" (via mothership) | Twelve candidates alone in studio light for one-by-one picks, three amounts on B, the piñata, balloons, papel picado and flag back as candidates, packed to survive the drive | M |
 | caja5 | ai-mesh-to-rig · image → mesh with local TRELLIS.2, then cleanup in Blender · `blender/ai-mesh-to-rig.md` | The alien: TRELLIS.2 through StableGen's graph (`MTO-colddrone/blender/partes/trellis2.sh`, seed 33, 203 s) from the owner's photo cropped to the alien by hue (`tmp/caja5/recorte.py`; the photo and the crop stay local), scaled to 1.5 m, its texture kept, roughness 0.12 plus a clear coat for blown vinyl. Mirroring the crop to remove the person's fingers merged the legs (the toy leans), so the first mesh stays, with a small bump on one shoulder | M |
 | caja5 | user: owner 11-14 picks from the studio sheet (via mothership): "let's keep the 5 speaker and 7 the beer box, also if we can add the alien to our props", his photo of a 1.5 m green inflatable alien; then "also if you can add soda cans, water props to the middle in the van or give them to the characters" | One dressed B (speaker, beer crate, alien standing on the amp case strapped to the sport bar); drinks with made-up labels (`blender/etiquetas.py`) in the front console's cupholders and against Diego's hand on the rear armrest, parented to the hand bone, 0 hand vertices inside the can | M |
+
+## Prototype `/prototipo` (2026-11-16, run `cryingdrone`; mothership queue 2026-11-16-mto-site-prototype)
+
+The look is already picked (A, DESIGN.md), so no new direction: these rows say where each piece of the prototype comes from. The
+client material supplies content and facts only.
+
+| section | library entry | borrow | cost |
+|---|---|---|---|
+| escenario | teamusa · all-intra video that advances with scroll · `web/visuales-fichas/video-que-avanza.md#recipe` | One fixed stage; the scroll sets `currentTime`. The ficha's all-intra wants a 3-5 s clip; ours is 46 s, so a keyframe every 3 frames (run, 2.9 MB) and every 4 (loop, 1.8 MB) | M |
+| escenario | kage · fixed camera anchors per section, damped move · `web/visuales-fichas/kage-scroll-world.md` | Each section holds its run-frame range over its own height; the travel between two sections interpolates linearly (`ruta.json` `secciones`) | M |
+| hero | arraisballet · smooth video hero, poster = first frame · `web/visuales.md#recipe-smooth-video-hero` | The stage's first paint is run frame 0 as a still, swapped for the video once it can seek | B |
+| musica | landonorris.com · horizontal gallery · `web/visuales-fichas/galeria-horizontal.md#visual-reading` | The 9 covers as one strip over a veil band; platforms as three Teclas | B |
+| video | dfm.mt · rendition sized to its box · `web/site-reading-fichas/dfm-mt.md#look` | Five YouTube thumbs at hqdefault, links out, no embedded player | B |
+| integrantes | kage · fixed camera anchors per section · `web/visuales-fichas/kage-scroll-world.md` | The band loop is this section's picture, so the members go in one 520 px column and the cab stays visible beside it | M |
+| contacto | MTO's own note · veil under text over a rendered scene · `web/visuales.md#technique-text-over-a-rendered-scene` | The contact panel on `--veil` over the last frames of the run | B |
+| contacto | teamusa · reduced-motion start, visible motion toggle · `web/visuales.md#dissection-sports-withgoogle-com-teamusa` | Under reduced motion the stage changes pose in steps and the loop never plays; a visible Pausar video toggle in La banda | B |
+| pendiente | ai-slop-tells · tell 6, a labelled clay placeholder · `web/ai-slop-tells.md#1-the-tells-ranked` | Missing renders and copy are dashed grey frames with a bold "Render pendiente" or "Texto pendiente" label and what each waits on; never styled to pass as finished | B |
