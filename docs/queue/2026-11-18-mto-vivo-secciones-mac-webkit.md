@@ -49,3 +49,11 @@
 
 ## Report
 Verdict first: does the live scene run in WebKit at iPhone size, yes or no. Then the six numbers.
+
+## Build update (rizzdrone, 2026-11-18 14:30): the "swift" build
+The preview now serves the optimized build (commit after 5e55752). First frame waits on escena.glb (1.55 MB) + mundo.glb
+(0.48 MB) only. The cast (reparto.glb 1.39 MB), cars, signs and the video stream in after it; `window.__vivo.cargado`
+turns true when everything is in, so wait on that instead of `ttff` before timing. Also read `__vivo.dpr` and `__vivo.sondeo`:
+a phone gets DPR ≤ 1.25, and if the median frame over the first 60 frames after load is above 20 ms, the page drops to
+DPR 1 and turns the pole lights off. Report whether that probe fired on the iPhone. The Chromium numbers to compare against
+are in `docs/handoffs/2026-11-18-vivo-swift.md`.

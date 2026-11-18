@@ -41,6 +41,9 @@ async function terminar(doc, nombre) {
 const leer = async () => {
   const doc = await io.read(join(ent, 'escena.glb'))
   const camion = nodo(doc, 'camion')
+  // the export left each _v5 rig with a local translation that cancels its parent's: the cast sat at the world origin (the
+  // figure on the road at stop 2) and only the old stand-ins filled the seats. Zeroed, each rig sits on its old rig's origin.
+  for (const n of doc.getRoot().listNodes()) if (REPARTO.test(n.getName())) n.setTranslation([0, 0, 0])
   for (const n of doc.getRoot().listNodes()) if (REPARTO.test(n.getName()) && n.getParentNode() !== camion && VIEJOS.test(n.getParentNode()?.getName() ?? '')) {
     // child of an old rig that itself sits under camion: fold the old rig's local transform in, then hang it from camion
     const viejo = n.getParentNode()
