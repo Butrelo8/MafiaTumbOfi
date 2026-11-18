@@ -5,9 +5,10 @@ Spec: mothership `docs/queue/2026-11-18-mto-full-site-preview.md`. The prototype
 screen, Plausible gated on `PUBLIC_PLAUSIBLE_DOMAIN`, fan list still parked).
 
 ## What the preview shows
-- Lists: `research/contenido/catalog.json` is byte-identical to main's `src/data/catalog.json`, and CI builds without Spotify
-  credentials and with YouTube's feed 404, so it also falls back to that snapshot. The preview therefore shows the same
-  9 releases and 14 videos that CI would build. The page reads the snapshot directly, not `loadCatalog()`.
+- Lists: `research/contenido/catalog.json` is byte-identical to main's `src/data/catalog.json`. CI does pass Spotify secrets,
+  but Spotify answers 403 and YouTube's feed 404 (`deploy.yml` header), so its build also falls back to that snapshot: the
+  preview shows the same 9 releases and 14 videos. The new `/` imports the snapshot directly and never calls `loadCatalog()`,
+  so a future prod merge will not pick up fresh lists unless that changes.
 - Build env: none of `PUBLIC_ALLOW_INDEXING`, `PUBLIC_PLAUSIBLE_DOMAIN`, `PUBLIC_SITE_URL` was set: `noindex`, no Plausible.
 - Scene: the run and the loop are the picture at every stop; `public/prototipo/parada-1..6.webp` (montaje-esc1..6) show
   only while the run cannot show a frame. The vertical 9:16 framing is still pending: at 390 the 16:9 render is cropped to its
@@ -16,10 +17,11 @@ screen, Plausible gated on `PUBLIC_PLAUSIBLE_DOMAIN`, fan list still parked).
 ## Build and deploy
 ```bash
 # build on ext4 (a build on /mnt/e takes minutes), then upload a version, never a deploy:
-rsync -a --delete --exclude node_modules --exclude blender --exclude dist --exclude .git --exclude .astro ./ ~/.cache/mto-sitio-completo/
+rsync -a --delete --exclude node_modules --exclude blender --exclude dist --exclude .git --exclude research/tmp --exclude research/lighthouse --exclude .astro --exclude revisar --exclude docs/prototipo-camion --exclude effectcraft --exclude lab ./ ~/.cache/mto-sitio-completo/
 cd ~/.cache/mto-sitio-completo && bun install && bunx astro build && bun test
 bunx wrangler versions upload --preview-alias sitio-completo --message "full site preview"
 ```
+A test click on a preview writes to prod's `mto_events` and `WA_CLICKS` (the preview shares the Worker's bindings).
 `versions upload` does not make the version live; the alias URL is printed by the command. `run_worker_first` now includes
 `/prototipo/*`: Workers Static Assets ignores Range and iOS Safari refuses a `<video>` without a 206 (`src/lib/rangoVideo.test.ts`
 fails for any `.mp4` outside a worker-first route; `wrangler dev`: `Range: bytes=0-1` on `/prototipo/ruta.mp4` was 200, is now 206).
@@ -34,7 +36,8 @@ click event                     tap "Escribir por WhatsApp": POST /e {"event":"w
                                 204; GET /wa/5212283538827?text=... 302 -> wa.me
 revisar web (dist, videos emptied) overflow 0 at 320/390/768/1440, tap<44 0, contrast 0, cls 0.000 / 0.032, reduced-motion 0,
                                 weight 0.63 MB at 390 (videos excluded), FAIL img-upscaled (below)
-slop-check src                  0 FAIL, 2 REVIEW (index.astro:123 the Gira line, accepted in DESIGN.md; loop.ts:76 is /anterior)
+slop-check src                  0 FAIL, 2 REVIEW (index.astro:123, tell 17 muted subtitle; I take it to be the Gira line at 191 that
+                                DESIGN.md accepts, not verified; loop.ts:76 is /anterior)
 ```
 `revisar.sh` never reaches network idle with the real videos (`ruta.mp4` stays pending in its Chromium), so its numbers come
 from a copy of `dist/` with the two `.mp4` emptied: layout, tap, contrast and overflow do not depend on the video.

@@ -1,5 +1,5 @@
-/contratacion      /#contratacion   301
-/contratacion/     /#contratacion   301
-/booking           /#contratacion   301
+/contratacion      /#contacto   301
+/contratacion/     /#contacto   301
+/booking           /#contacto   301
 /booking/gracias   /                301
 /booking/*         /                301
