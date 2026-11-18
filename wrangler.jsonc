@@ -7,6 +7,10 @@
     { "pattern": "mafiatumbada.com", "custom_domain": true },
     { "pattern": "www.mafiatumbada.com", "custom_domain": true }
   ],
+  // /wa/* cuenta toques de WhatsApp (wa.js). Sin id: wrangler crea el namespace en el primer deploy.
+  "kv_namespaces": [{ "binding": "WA_CLICKS" }],
+  // POST /e escribe los clics a Analytics Engine (e.js). El dataset se crea solo en la primera escritura.
+  "analytics_engine_datasets": [{ "binding": "MTO_EVENTS", "dataset": "mto_events" }],
   "assets": {
     "directory": "./dist/",
     "binding": "ASSETS",
@@ -14,6 +18,6 @@
     "html_handling": "auto-trailing-slash",
     // Workers Static Assets ignora Range; worker.js lo resuelve para el video del hero. Todo lo
     // demás (HTML, JS, CSS, imágenes) se sirve directo desde los assets sin invocar al Worker.
-    "run_worker_first": ["/video/*"]
+    "run_worker_first": ["/video/*", "/wa/*", "/e"]
   }
 }

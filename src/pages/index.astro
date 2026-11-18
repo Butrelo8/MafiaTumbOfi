@@ -1,31 +1,35 @@
 ---
-// A Carretera (owner's pick 2026-11-12; settings: A's defaults). Look and trace: docs/design/DESIGN.md.
+// Prototype of the whole site as it stands (2026-11-16): every section DESIGN.md and the plans name, in order, over one fixed
+// stage that the scroll drives (run preview + the band loop). Not the page: /prototipo stays out of the index. Trace: DESIGN.md › Prototype.
 import '@fontsource/saira-condensed/latin-800.css'
 import '@fontsource/saira/latin-400.css'
 import '@fontsource/saira/latin-600.css'
 import Boton from '../components/Boton.astro'
 import Icono from '../components/Icono.astro'
-import { homeCanonical } from '../lib/publicSiteUrl'
 import { members } from '../../research/contenido/members'
 import { bandSocialUrls as redes } from '../../research/contenido/socials'
 import catalog from '../../research/contenido/catalog.json'
 
-const canonical = homeCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)
 const releases = catalog.releases
-// Videos: live first, then the official videos (brief.md › video). Ids from catalog.videos; titles as in the prototype.
 const videos = [
   { id: 'XxhXFo-hm-I', t: 'En vivo en Plaza Lerdo, Xalapa' },
   { id: 'CDO9iJdIkQk', t: 'L.V. (video oficial)' },
   { id: 'I9BXC3LPlx8', t: 'Corazón (video oficial)' },
   { id: '7Sx0yDjGoq0', t: 'Tal Vez, Good Luck Sessions' },
   { id: 'h8ZPVsgpAfo', t: 'La Bubu (video oficial)' },
-].filter((v) => catalog.videos.some((c) => c.href.endsWith(v.id)))
+]
 const plataformas = [
   { n: 'Spotify', h: redes.spotify },
   { n: 'Apple Music', h: redes.appleMusic },
   { n: 'YouTube', h: redes.youtube },
 ]
 const pie = [...plataformas, { n: 'Instagram', h: redes.instagram }, { n: 'TikTok', h: redes.tiktok }, { n: 'Facebook', h: redes.facebook }]
+const idVideo = (href: string) => new URL(href).searchParams.get('v')
+const mostrados = new Set(videos.map((v) => v.id))
+const masVideos = catalog.videos.filter((v) => !mostrados.has(idVideo(v.href) ?? ''))
+const numero = redes.whatsapp.match(/wa\.me\/521?(\d{3})(\d{3})(\d{4})/)?.slice(1).join(' ')
+// The 4th member (owner, 2026-11-16): the band's manager; the public profile's display name is its handle.
+const manager = { name: 'elmanco420', role: 'Mánager', instagram: 'https://www.instagram.com/elmanco420/' }
 const foto = (img: string) => img.replace(/\.jpg$/, '.webp')
 const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
 ---
@@ -35,16 +39,13 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>La Mafia Tumbada · Corridos tumbados desde Xalapa</title>
-    <meta name="description" content="La Mafia Tumbada: corridos tumbados desde Xalapa, Veracruz. Música, videos, la banda y contratación por WhatsApp." />
-    <link rel="canonical" href={canonical} />
-    <meta property="og:title" content="La Mafia Tumbada" />
-    <meta property="og:image" content={new URL('/og/og-default.jpg', canonical).href} />
-    <link rel="icon" href="/favicon.ico" sizes="48x48" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="robots" content="noindex" />
+    <title>La Mafia Tumbada · Prototipo</title>
     <meta name="theme-color" content="#000000" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="preload" as="image" href="/prototipo/ruta-f0.jpg" />
     <style is:global>
-      /* Ground #000 and gold come from the logo (public/icon/mafiatumbada.webp): black faces, bronze-gold bevel. */
+      /* Same tokens as index.astro and DESIGN.md › Colors. */
       :root {
         --bg: #000;
         --ink: oklch(95% 0.008 85);
@@ -55,24 +56,28 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
         --veil: rgb(0 0 0 / 0.62);
         --line: oklch(100% 0 0 / 0.14);
         --gutter: clamp(16px, 4vw, 64px);
-        /* one motion language for every button and icon (DESIGN.md › Motion); inside the 40-80, 150-250, 350-500 ms bands */
         --dur-press: 80ms;
         --dur-state: 250ms;
         --dur-fill: 500ms;
         --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
       }
       * { box-sizing: border-box; margin: 0; }
-      html { scroll-behavior: smooth; }
       body { background: var(--bg); color: var(--ink); font: 400 17px/1.55 Saira, system-ui, sans-serif; }
       a { color: inherit; }
       :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
-      /* Saira Condensed has no italic file; the slant is the browser's oblique, as in the picked prototype. */
       h1, h2, h3 { font-family: 'Saira Condensed', sans-serif; font-weight: 800; font-style: italic; text-transform: uppercase; letter-spacing: 0.005em; line-height: 0.9; }
-      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
     </style>
   </head>
   <body>
     <a class="saltar" href="#musica">Saltar al contenido</a>
+
+    <!-- The stage: the page's only picture, fixed behind everything. The scroll chooses the frame (src/scripts/prototipo.ts). -->
+    <div class="escena" aria-hidden="true">
+      <img class="cubre" id="escena-f0" src="/prototipo/ruta-f0.jpg" alt="" width="640" height="360" />
+      <video class="cubre" id="ruta" muted playsinline preload="auto" poster="/prototipo/ruta-f0.jpg" src="/prototipo/ruta.mp4"></video>
+      <video class="cubre" id="bucle" muted playsinline loop preload="auto" poster="/prototipo/bucle-f0.jpg" src="/prototipo/bucle.mp4"></video>
+    </div>
+
     <header class="barra">
       <a class="logo" href="#inicio"><img src="/icon/mafiatumbada.webp" alt="La Mafia Tumbada, inicio" width="794" height="530" /></a>
       <nav aria-label="Secciones">
@@ -83,14 +88,6 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
 
     <main>
       <section class="hero" id="inicio" aria-labelledby="h-inicio">
-        <picture>
-          <source media="(max-width: 700px)" srcset="/escena/poster-720x1280.jpg" width="720" height="1280" />
-          <img class="cubre" src="/escena/poster-1600x900.jpg" alt="" width="1600" height="900" fetchpriority="high" />
-        </picture>
-        <video class="cubre" id="loop" muted playsinline loop preload="none" aria-hidden="true">
-          <source media="(max-width: 700px)" src="/escena/loop-720x1280.mp4" type="video/mp4" />
-          <source src="/escena/loop-1600x900.mp4" type="video/mp4" />
-        </video>
         <div class="copia">
           <h1 id="h-inicio">La Mafia <span>Tumbada</span></h1>
           <p>Corridos tumbados desde Xalapa, Veracruz.</p>
@@ -99,10 +96,11 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
             <Boton href="#contacto">Contratar</Boton>
           </div>
         </div>
-        <div class="pausa"><Boton id="pausa" icono="pausa" oculto discreto>Pausar video</Boton></div>
       </section>
 
-      <section class="s" id="musica" aria-labelledby="h-musica">
+      <div class="viaje" style="--f:191" aria-hidden="true"></div>
+
+      <section class="velo" id="musica" aria-labelledby="h-musica">
         <h2 class="margen" id="h-musica">Música</h2>
         <ul class="tira" role="list">
           {releases.map((r) => (
@@ -120,7 +118,9 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
         </div>
       </section>
 
-      <section class="s margen" id="video" aria-labelledby="h-video">
+      <div class="viaje" style="--f:120" aria-hidden="true"></div>
+
+      <section class="velo margen" id="video" aria-labelledby="h-video">
         <h2 id="h-video">Videos</h2>
         <ul class="vids" role="list">
           {videos.map((v) => (
@@ -132,43 +132,70 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
             </li>
           ))}
         </ul>
+        <h3 class="mas">Más en YouTube</h3>
+        <ul class="mas-lista" role="list">
+          {masVideos.map((v) => <li><a href={v.href}>{v.title}</a></li>)}
+        </ul>
       </section>
 
-      <section class="s margen" id="integrantes" aria-labelledby="h-banda">
+      <div class="viaje" style="--f:120" aria-hidden="true"></div>
+
+      <section class="lateral" id="integrantes" aria-labelledby="h-banda">
+       <div class="columna">
         <h2 id="h-banda">La banda</h2>
-        <div class="banda">
+        <ul class="banda" role="list">
           {members.map((m) => (
-            <article class="m">
+            <li class="m">
               <img src={foto(m.image)} alt={m.name} width="1440" height="1081" loading="lazy" decoding="async" />
-              <h3>{m.name}</h3>
-              <p>{m.role}</p>
-              <a href={m.instagram}>@{usuario(m.instagram)}</a>
-            </article>
+              <div>
+                <h3>{m.name}</h3>
+                <p>{m.role}</p>
+                <a href={m.instagram}>@{usuario(m.instagram)}</a>
+              </div>
+            </li>
           ))}
-        </div>
+          <li class="m sin-foto">
+            <div>
+              <h3>{manager.name}</h3>
+              <p>{manager.role}</p>
+              <a href={manager.instagram}>@{usuario(manager.instagram)}</a>
+            </div>
+          </li>
+        </ul>
+        <div class="pausa"><Boton id="pausa" icono="pausa" oculto discreto>Pausar video</Boton></div>
+       </div>
       </section>
 
-      <section class="contacto margen" id="contacto" aria-labelledby="h-contacto">
-        <img class="cubre" src="/escena/poster-1600x900.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async" />
+      <div class="viaje gira" style="--f:288">
+        <section class="velo margen" id="gira" aria-labelledby="h-gira">
+          <h2 id="h-gira">Gira</h2>
+          <p class="gira-texto">Las próximas fechas salen primero en nuestro Instagram.</p>
+          <div class="plat">
+            <Boton href={redes.instagram} flecha={false}>Instagram</Boton>
+            <Boton href="https://www.youtube.com/watch?v=XxhXFo-hm-I" flecha={false}>En vivo: Plaza Lerdo, Xalapa</Boton>
+          </div>
+        </section>
+      </div>
+
+      <section class="contacto" id="contacto" aria-labelledby="h-contacto">
         <div class="panel">
           <h2 id="h-contacto">Contratación</h2>
           <p>Canciones propias, covers con actitud y cuatro años de tarima.</p>
           <Boton href={redes.whatsapp} lleno>Escribir por WhatsApp</Boton>
+          {numero && <p class="numero">WhatsApp {numero}</p>}
         </div>
       </section>
     </main>
 
     <footer class="pie">
       {pie.map((p) => <a href={p.h}>{p.n}</a>)}
+      <p>Prototipo. Imagen: vista previa de 640×360 (carretera en Cycles 16 muestras; bucle de la banda en Workbench). Encuadre vertical 9:16 pendiente. Sin renderizar todavía: redes como calcomanías en la caja (escena 2), videos en la pantalla móvil (3), los cuatro en las ventanas de la cabina (4), fechas en la pantalla trasera (5), botón en la placa (6).</p>
     </footer>
 
-    <script>
-      import '../scripts/loop'
+    <p class="hud" id="hud" hidden></p>
 
-      const barra = document.querySelector('.barra') as HTMLElement
-      const marcar = () => barra.classList.toggle('solida', scrollY > 8)
-      addEventListener('scroll', marcar, { passive: true })
-      marcar()
+    <script>
+      import '../scripts/prototipo'
     </script>
 
     <style>
@@ -176,8 +203,13 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
       .saltar:focus { left: 16px; }
       .margen { padding-inline: var(--gutter); }
 
+      .escena { position: fixed; inset: 0; z-index: 0; background: var(--bg); overflow: hidden; }
+      .cubre { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      #ruta, #bucle { opacity: 0; transition: opacity 0.2s; }
+      #ruta.on, #bucle.on { opacity: 1; }
+      main, .pie { position: relative; z-index: 1; }
+
       .barra { position: fixed; inset: 0 0 auto; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px var(--gutter); background: linear-gradient(rgb(0 0 0 / 0.8), transparent); }
-      /* past the top the header is solid, so the hero's copy and buttons never show through it (Mac WebKit pass) */
       .barra.solida { background: var(--bg); box-shadow: 0 1px 0 var(--line); }
       .logo { display: inline-flex; min-height: 44px; align-items: center; }
       .logo img { height: 44px; width: auto; }
@@ -186,21 +218,21 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
       .barra nav a:hover { color: var(--ink); }
       @media (min-width: 900px) { .barra nav a { display: inline-flex; } }
 
-      .hero { position: relative; min-height: 100svh; display: grid; align-items: end; overflow: hidden; }
-      .cubre { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-      #loop { opacity: 0; transition: opacity 0.4s; }
-      #loop.on { opacity: 1; }
-      .copia { position: relative; padding: 0 var(--gutter) clamp(32px, 7vh, 80px); background: linear-gradient(transparent, var(--veil) 40%); }
+      .hero { min-height: 100svh; display: grid; align-items: end; }
+      .copia { padding: 0 var(--gutter) clamp(32px, 7vh, 80px); background: linear-gradient(transparent, var(--veil) 40%); }
       .hero h1 { font-size: clamp(64px, 13vw, 200px); }
       .hero h1 span { display: block; }
       .hero p { font-size: clamp(18px, 1.6vw, 22px); margin: 14px 0 22px; max-width: 30ch; color: var(--muted); }
       .acciones { display: flex; gap: 12px; flex-wrap: wrap; }
-      .pausa { position: absolute; right: var(--gutter); bottom: clamp(32px, 7vh, 80px); }
-      @media (max-width: 700px) { .pausa { top: 76px; bottom: auto; } }
 
-      .s { padding-block: clamp(64px, 10vw, 140px); border-top: 1px solid var(--line); }
+      /* travel: the scene alone, so the move reads. Height = frames x 4 px (the pacing knob). */
+      .viaje { position: relative; height: calc(var(--f) * 4px); }
+      .viaje.gira { display: grid; align-items: center; }
+
+      .velo { background: var(--veil); padding-block: clamp(48px, 7vw, 96px); border-block: 1px solid var(--line); }
       h2 { font-size: clamp(44px, 7vw, 96px); margin-bottom: 28px; }
       :where(ul[role='list']) { list-style: none; padding: 0; }
+
 
       .tira { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter); padding: 8px var(--gutter) 16px; scrollbar-color: var(--gold-deep) transparent; }
       .tira li { flex: 0 0 clamp(210px, 22vw, 280px); scroll-snap-align: start; }
@@ -218,21 +250,40 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
       .vid span { display: flex; gap: 10px; align-items: center; padding: 12px 0; font-weight: 600; }
       .vid :global(.icono) { flex: none; width: 28px; height: 28px; color: var(--gold); }
       .vid:hover span { color: var(--gold); }
+      .mas { font-size: 32px; margin: 40px 0 8px; }
+      .mas-lista { display: grid; gap: 0 32px; grid-template-columns: 1fr; max-width: 1100px; }
+      @media (min-width: 900px) { .mas-lista { grid-template-columns: 1fr 1fr; } }
+      .mas-lista a { display: flex; min-height: 44px; align-items: center; padding-block: 6px; color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line); }
+      .mas-lista a:hover { color: var(--gold); }
 
-      .banda { display: grid; gap: 18px; grid-template-columns: 1fr; }
-      @media (min-width: 900px) { .banda { grid-template-columns: repeat(3, 1fr); } }
-      .m img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; filter: saturate(0.75) contrast(1.05); }
-      .m h3 { margin-top: 14px; font-size: 32px; }
+      /* La banda: the loop is this section's picture, so the panel is a column and the cab stays visible beside it */
+      .lateral { padding-inline: var(--gutter); }
+      .columna { max-width: 560px; padding: clamp(24px, 4vw, 48px); background: var(--veil); }
+      .banda { display: grid; gap: 14px; }
+      .m { display: grid; grid-template-columns: 96px 1fr; gap: 16px; align-items: center; }
+      .m.sin-foto div { grid-column: 2; }
+      .m img { display: block; width: 96px; height: 120px; object-fit: cover; filter: saturate(0.75) contrast(1.05); }
+      .m h3 { font-size: 32px; }
       .m p { color: var(--muted); }
       .m a { display: inline-flex; min-height: 44px; align-items: center; color: var(--gold); }
+      .pausa { margin-top: 20px; }
 
-      .contacto { position: relative; min-height: 80svh; display: grid; align-items: center; overflow: hidden; }
-      .contacto .cubre { opacity: 0.55; }
-      .panel { position: relative; max-width: 640px; padding: clamp(24px, 4vw, 48px); background: var(--veil); }
-      .panel p { margin: 0 0 24px; font-size: 20px; color: var(--muted); }
+      .gira .velo { padding-block: clamp(32px, 5vw, 56px); }
+      .gira h2 { margin-bottom: 12px; }
+      .gira-texto { font-size: 20px; color: var(--muted); max-width: 40ch; }
+      .gira .plat { margin-top: 20px; }
 
-      .pie { display: flex; flex-wrap: wrap; gap: 0 18px; padding: 32px var(--gutter); border-top: 1px solid var(--line); color: var(--muted); }
+      .contacto { min-height: 100svh; display: grid; align-items: center; padding-inline: var(--gutter); }
+      .panel { max-width: 640px; padding: clamp(24px, 4vw, 48px); background: var(--veil); }
+      .panel > p { margin: 0 0 24px; font-size: 20px; color: var(--muted); }
+      .panel > .numero { margin: 20px 0 0; font-size: 17px; }
+
+      .pie { display: flex; flex-wrap: wrap; gap: 0 18px; padding: 32px var(--gutter); border-top: 1px solid var(--line); color: var(--muted); background: var(--bg); }
       .pie a { display: inline-flex; min-height: 44px; align-items: center; }
+      .pie p { flex-basis: 100%; font-size: 15px; margin-top: 8px; }
+
+      .hud { position: fixed; left: 8px; bottom: 8px; z-index: 9; margin: 0; padding: 4px 8px; background: #000; color: var(--gold); font-size: 14px; }
+      @media (prefers-reduced-motion: reduce) { #ruta, #bucle { transition: none; } }
     </style>
   </body>
 </html>

@@ -244,6 +244,12 @@ Each lives in `src/components/` and must respect the tokens above.
 
 The header and hero are inline in `src/pages/index.astro`, not components.
 
+**Conversion additions (2026-11-18)** — nothing new in the visual language, each element traces to an existing rule:
+
+- Hero follow buttons (Spotify, Instagram): the existing `.btn-secondary` (outlined, sharp: `--radius-card: 0`, Archivo
+  caps) so the gold pill stays the single primary action. `--gold-shadow` as a non-text border, 44px min height,
+  `oklch(7% 0 0 / 0.55)` fill so the label stays legible over the video (same dark as the hero scrim).
+
 ## Decoration
 
 - **Film grain:** SVG `feTurbulence` overlay, `opacity: 0.16`,
@@ -282,7 +288,7 @@ Single static page. `/contratacion` and `/prensa` were removed in the static
 rebuild; booking converts through WhatsApp.
 
 1. Header (MTO monogram + nav)
-2. Hero (video + logo + eyebrow + lede + chips + WhatsApp CTA)
+2. Hero (video + logo + eyebrow + lede + chips + WhatsApp CTA + Spotify and Instagram follow buttons)
 3. Marquee strip
 4. Música — release cards, Apple Music link, video row (`#musica`)
 5. BTS film strip

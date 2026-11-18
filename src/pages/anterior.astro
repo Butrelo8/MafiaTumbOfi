@@ -1,0 +1,238 @@
+---
+// A Carretera (owner's pick 2026-11-12; settings: A's defaults). Look and trace: docs/design/DESIGN.md.
+import '@fontsource/saira-condensed/latin-800.css'
+import '@fontsource/saira/latin-400.css'
+import '@fontsource/saira/latin-600.css'
+import Boton from '../components/Boton.astro'
+import Icono from '../components/Icono.astro'
+import { homeCanonical } from '../lib/publicSiteUrl'
+import { members } from '../../research/contenido/members'
+import { bandSocialUrls as redes } from '../../research/contenido/socials'
+import catalog from '../../research/contenido/catalog.json'
+
+const canonical = homeCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)
+const releases = catalog.releases
+// Videos: live first, then the official videos (brief.md › video). Ids from catalog.videos; titles as in the prototype.
+const videos = [
+  { id: 'XxhXFo-hm-I', t: 'En vivo en Plaza Lerdo, Xalapa' },
+  { id: 'CDO9iJdIkQk', t: 'L.V. (video oficial)' },
+  { id: 'I9BXC3LPlx8', t: 'Corazón (video oficial)' },
+  { id: '7Sx0yDjGoq0', t: 'Tal Vez, Good Luck Sessions' },
+  { id: 'h8ZPVsgpAfo', t: 'La Bubu (video oficial)' },
+].filter((v) => catalog.videos.some((c) => c.href.endsWith(v.id)))
+const plataformas = [
+  { n: 'Spotify', h: redes.spotify },
+  { n: 'Apple Music', h: redes.appleMusic },
+  { n: 'YouTube', h: redes.youtube },
+]
+const pie = [...plataformas, { n: 'Instagram', h: redes.instagram }, { n: 'TikTok', h: redes.tiktok }, { n: 'Facebook', h: redes.facebook }]
+const foto = (img: string) => img.replace(/\.jpg$/, '.webp')
+const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>La Mafia Tumbada · Corridos tumbados desde Xalapa</title>
+    <meta name="description" content="La Mafia Tumbada: corridos tumbados desde Xalapa, Veracruz. Música, videos, la banda y contratación por WhatsApp." />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content="La Mafia Tumbada" />
+    <meta property="og:image" content={new URL('/og/og-default.jpg', canonical).href} />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#000000" />
+    <style is:global>
+      /* Ground #000 and gold come from the logo (public/icon/mafiatumbada.webp): black faces, bronze-gold bevel. */
+      :root {
+        --bg: #000;
+        --ink: oklch(95% 0.008 85);
+        --muted: oklch(80% 0.01 85);
+        --gold: oklch(80% 0.13 82);
+        --cap: oklch(17% 0.01 85);
+        --gold-deep: oklch(62% 0.11 70);
+        --veil: rgb(0 0 0 / 0.62);
+        --line: oklch(100% 0 0 / 0.14);
+        --gutter: clamp(16px, 4vw, 64px);
+        /* one motion language for every button and icon (DESIGN.md › Motion); inside the 40-80, 150-250, 350-500 ms bands */
+        --dur-press: 80ms;
+        --dur-state: 250ms;
+        --dur-fill: 500ms;
+        --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      * { box-sizing: border-box; margin: 0; }
+      html { scroll-behavior: smooth; }
+      body { background: var(--bg); color: var(--ink); font: 400 17px/1.55 Saira, system-ui, sans-serif; }
+      a { color: inherit; }
+      :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+      /* Saira Condensed has no italic file; the slant is the browser's oblique, as in the picked prototype. */
+      h1, h2, h3 { font-family: 'Saira Condensed', sans-serif; font-weight: 800; font-style: italic; text-transform: uppercase; letter-spacing: 0.005em; line-height: 0.9; }
+      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    </style>
+  </head>
+  <body>
+    <a class="saltar" href="#musica">Saltar al contenido</a>
+    <header class="barra">
+      <a class="logo" href="#inicio"><img src="/icon/mafiatumbada.webp" alt="La Mafia Tumbada, inicio" width="794" height="530" /></a>
+      <nav aria-label="Secciones">
+        <a href="#musica">Música</a><a href="#video">Videos</a><a href="#integrantes">La banda</a>
+      </nav>
+      <Boton href="#contacto">Contratar</Boton>
+    </header>
+
+    <main>
+      <section class="hero" id="inicio" aria-labelledby="h-inicio">
+        <picture>
+          <source media="(max-width: 700px)" srcset="/escena/poster-720x1280.jpg" width="720" height="1280" />
+          <img class="cubre" src="/escena/poster-1600x900.jpg" alt="" width="1600" height="900" fetchpriority="high" />
+        </picture>
+        <video class="cubre" id="loop" muted playsinline loop preload="none" aria-hidden="true">
+          <source media="(max-width: 700px)" src="/escena/loop-720x1280.mp4" type="video/mp4" />
+          <source src="/escena/loop-1600x900.mp4" type="video/mp4" />
+        </video>
+        <div class="copia">
+          <h1 id="h-inicio">La Mafia <span>Tumbada</span></h1>
+          <p>Corridos tumbados desde Xalapa, Veracruz.</p>
+          <div class="acciones">
+            <Boton href={releases[0].href} lleno icono="play">Escuchar en Spotify</Boton>
+            <Boton href="#contacto">Contratar</Boton>
+          </div>
+        </div>
+        <div class="pausa"><Boton id="pausa" icono="pausa" oculto discreto>Pausar video</Boton></div>
+      </section>
+
+      <section class="s" id="musica" aria-labelledby="h-musica">
+        <h2 class="margen" id="h-musica">Música</h2>
+        <ul class="tira" role="list">
+          {releases.map((r) => (
+            <li>
+              <a class="lanz" href={r.href}>
+                <img src={r.cover} alt="" width="160" height="160" loading="lazy" decoding="async" />
+                <b>{r.title}</b>
+                <small>{r.subtitle}, en {r.label}</small>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div class="plat margen">
+          {plataformas.map((p) => <Boton href={p.h} flecha={false}>{p.n}</Boton>)}
+        </div>
+      </section>
+
+      <section class="s margen" id="video" aria-labelledby="h-video">
+        <h2 id="h-video">Videos</h2>
+        <ul class="vids" role="list">
+          {videos.map((v) => (
+            <li>
+              <a class="vid" href={`https://www.youtube.com/watch?v=${v.id}`}>
+                <img src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`} alt="" width="480" height="360" loading="lazy" decoding="async" />
+                <span><Icono nombre="play" />{v.t}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="s margen" id="integrantes" aria-labelledby="h-banda">
+        <h2 id="h-banda">La banda</h2>
+        <div class="banda">
+          {members.map((m) => (
+            <article class="m">
+              <img src={foto(m.image)} alt={m.name} width="1440" height="1081" loading="lazy" decoding="async" />
+              <h3>{m.name}</h3>
+              <p>{m.role}</p>
+              <a href={m.instagram}>@{usuario(m.instagram)}</a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="contacto margen" id="contacto" aria-labelledby="h-contacto">
+        <img class="cubre" src="/escena/poster-1600x900.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async" />
+        <div class="panel">
+          <h2 id="h-contacto">Contratación</h2>
+          <p>Canciones propias, covers con actitud y cuatro años de tarima.</p>
+          <Boton href={redes.whatsapp} lleno>Escribir por WhatsApp</Boton>
+        </div>
+      </section>
+    </main>
+
+    <footer class="pie">
+      {pie.map((p) => <a href={p.h}>{p.n}</a>)}
+    </footer>
+
+    <script>
+      import '../scripts/loop'
+
+      const barra = document.querySelector('.barra') as HTMLElement
+      const marcar = () => barra.classList.toggle('solida', scrollY > 8)
+      addEventListener('scroll', marcar, { passive: true })
+      marcar()
+    </script>
+
+    <style>
+      .saltar { position: absolute; left: -999px; top: 16px; z-index: 9; min-height: 44px; display: inline-flex; align-items: center; padding: 0 12px; background: var(--gold); color: var(--bg); }
+      .saltar:focus { left: 16px; }
+      .margen { padding-inline: var(--gutter); }
+
+      .barra { position: fixed; inset: 0 0 auto; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px var(--gutter); background: linear-gradient(rgb(0 0 0 / 0.8), transparent); }
+      /* past the top the header is solid, so the hero's copy and buttons never show through it (Mac WebKit pass) */
+      .barra.solida { background: var(--bg); box-shadow: 0 1px 0 var(--line); }
+      .logo { display: inline-flex; min-height: 44px; align-items: center; }
+      .logo img { height: 44px; width: auto; }
+      .barra nav { display: flex; gap: 4px; }
+      .barra nav a { display: none; min-height: 44px; align-items: center; padding: 0 12px; text-decoration: none; color: var(--muted); font-weight: 600; }
+      .barra nav a:hover { color: var(--ink); }
+      @media (min-width: 900px) { .barra nav a { display: inline-flex; } }
+
+      .hero { position: relative; min-height: 100svh; display: grid; align-items: end; overflow: hidden; }
+      .cubre { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      #loop { opacity: 0; transition: opacity 0.4s; }
+      #loop.on { opacity: 1; }
+      .copia { position: relative; padding: 0 var(--gutter) clamp(32px, 7vh, 80px); background: linear-gradient(transparent, var(--veil) 40%); }
+      .hero h1 { font-size: clamp(64px, 13vw, 200px); }
+      .hero h1 span { display: block; }
+      .hero p { font-size: clamp(18px, 1.6vw, 22px); margin: 14px 0 22px; max-width: 30ch; color: var(--muted); }
+      .acciones { display: flex; gap: 12px; flex-wrap: wrap; }
+      .pausa { position: absolute; right: var(--gutter); bottom: clamp(32px, 7vh, 80px); }
+      @media (max-width: 700px) { .pausa { top: 76px; bottom: auto; } }
+
+      .s { padding-block: clamp(64px, 10vw, 140px); border-top: 1px solid var(--line); }
+      h2 { font-size: clamp(44px, 7vw, 96px); margin-bottom: 28px; }
+      :where(ul[role='list']) { list-style: none; padding: 0; }
+
+      .tira { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter); padding: 8px var(--gutter) 16px; scrollbar-color: var(--gold-deep) transparent; }
+      .tira li { flex: 0 0 clamp(210px, 22vw, 280px); scroll-snap-align: start; }
+      .lanz { display: block; text-decoration: none; }
+      .lanz img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--line); }
+      .lanz b { display: block; margin-top: 12px; font: italic 800 26px/1 'Saira Condensed', sans-serif; text-transform: uppercase; }
+      .lanz small { color: var(--muted); font-size: 15px; }
+      .lanz:hover b, .lanz:focus-visible b { color: var(--gold); }
+      .plat { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+
+      .vids { display: grid; gap: 18px; grid-template-columns: 1fr; }
+      @media (min-width: 900px) { .vids { grid-template-columns: 2fr 1fr 1fr; } .vids li:first-child { grid-row: span 2; } }
+      .vid { display: block; text-decoration: none; }
+      .vid img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; background: var(--line); }
+      .vid span { display: flex; gap: 10px; align-items: center; padding: 12px 0; font-weight: 600; }
+      .vid :global(.icono) { flex: none; width: 28px; height: 28px; color: var(--gold); }
+      .vid:hover span { color: var(--gold); }
+
+      .banda { display: grid; gap: 18px; grid-template-columns: 1fr; }
+      @media (min-width: 900px) { .banda { grid-template-columns: repeat(3, 1fr); } }
+      .m img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; filter: saturate(0.75) contrast(1.05); }
+      .m h3 { margin-top: 14px; font-size: 32px; }
+      .m p { color: var(--muted); }
+      .m a { display: inline-flex; min-height: 44px; align-items: center; color: var(--gold); }
+
+      .contacto { position: relative; min-height: 80svh; display: grid; align-items: center; overflow: hidden; }
+      .contacto .cubre { opacity: 0.55; }
+      .panel { position: relative; max-width: 640px; padding: clamp(24px, 4vw, 48px); background: var(--veil); }
+      .panel p { margin: 0 0 24px; font-size: 20px; color: var(--muted); }
+
+      .pie { display: flex; flex-wrap: wrap; gap: 0 18px; padding: 32px var(--gutter); border-top: 1px solid var(--line); color: var(--muted); }
+      .pie a { display: inline-flex; min-height: 44px; align-items: center; }
+    </style>
+  </body>
+</html>
