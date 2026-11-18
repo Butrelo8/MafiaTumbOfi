@@ -1,7 +1,7 @@
 // Workers Static Assets ignora Range: contesta 200 con el archivo entero. iOS Safari pide
 // bytes=0-1 antes de reproducir un <video> y sin 206 se niega; el hero queda en opacity 0
 // (se revela con `loadeddata`) y la portada se ve vacía. El rango se resuelve aquí.
-// Solo corre para /video/*, /prototipo/* (la ruta y el bucle de la escena son <video> con rango), /wa/* (toques de WhatsApp, wa.js) y /e (eventos de clic, e.js) (run_worker_first en wrangler.jsonc); el resto lo sirven los assets.
+// Solo corre para /video/*, /prototipo/* (la ruta y el bucle de la escena son <video> con rango), /vivo/*.mp4 (la pantalla de /vivo-secciones, VideoTexture), /wa/* (toques de WhatsApp, wa.js) y /e (eventos de clic, e.js) (run_worker_first en wrangler.jsonc); el resto lo sirven los assets.
 // ponytail: carga el archivo completo en memoria. El hero pesa 10 MB contra un límite de 128 MB;
 // si entra un video grande, pasarlo a R2.
 import { wa } from './wa.js'
