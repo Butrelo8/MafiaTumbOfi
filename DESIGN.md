@@ -242,6 +242,17 @@ Each lives in `src/components/` and must respect the tokens above.
 
 The header and hero are inline in `src/pages/index.astro`, not components.
 
+**Conversion additions (2026-11-18)** — nothing new in the visual language, each element traces to an existing rule:
+
+- Hero follow buttons (Spotify, Instagram): the existing `.btn-secondary` (outlined, sharp: `--radius-card: 0`, Archivo
+  caps) so the gold pill stays the single primary action. `--gold-shadow` as a non-text border, 44px min height,
+  `oklch(7% 0 0 / 0.55)` fill so the label stays legible over the video (same dark as the hero scrim).
+- `#lista` form: labels and fields in Archivo, never blackletter (Accessibility); sharp fields on `--bg-raised` with a
+  `--gold-shadow` border (non-text), `--focus-ring` 2px focus, 44px targets, the primary gold CTA, links in `--red-link`,
+  heading `.section-heading.gold-text` with an `<Eyebrow>` like every other section. The honeypot field is off-screen
+  and `aria-hidden`; the status line is `role="status"`.
+- `/aviso-de-privacidad/`: plain text page on the same layout (`.container`, `.section-heading`), no new tokens.
+
 ## Decoration
 
 - **Film grain:** SVG `feTurbulence` overlay, `opacity: 0.16`,
@@ -280,14 +291,15 @@ Single static page. `/contratacion` and `/prensa` were removed in the static
 rebuild; booking converts through WhatsApp.
 
 1. Header (MTO monogram + nav)
-2. Hero (video + logo + eyebrow + lede + chips + WhatsApp CTA)
+2. Hero (video + logo + eyebrow + lede + chips + WhatsApp CTA + Spotify and Instagram follow buttons)
 3. Marquee strip
 4. Música — release cards, Apple Music link, video row (`#musica`)
 5. BTS film strip
 6. Bio — "El sonido de Xalapa"
 7. El grupo — integrantes grid (`#grupo`)
 8. Contratación — copy, urgency, WhatsApp CTA, phone (`#contratacion`)
-9. Footer (socials, legal)
+9. Lista de fans — email or WhatsApp, optional city, consent checkbox (`#lista`)
+10. Footer (socials, legal, link to `/aviso-de-privacidad/`)
 
 No tour or fechas section: deliberately excluded, 2026-09-09. The band does play
 dated shows, but a hand-maintained list goes stale and an empty one reads worse

@@ -1,0 +1,50 @@
+---
+import MarketingLayout from '../layouts/MarketingLayout.astro'
+import Eyebrow from '../components/Eyebrow.astro'
+import { resolvePublicBaseUrl } from '../lib/publicSiteUrl'
+
+// BORRADOR: los tres [POR COMPLETAR] los llena el titular del proyecto antes de producción (ver docs/aviso-de-privacidad.md).
+const responsable = '[POR COMPLETAR: nombre completo o razón social]'
+const domicilio = '[POR COMPLETAR: domicilio]'
+const correoArco = '[POR COMPLETAR: correo para derechos ARCO]'
+const actualizado = '18 de noviembre de 2026'
+const canonicalUrl = `${resolvePublicBaseUrl(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)}/aviso-de-privacidad`
+---
+
+<MarketingLayout title="Aviso de privacidad — Mafia Tumbada" description="Cómo Mafia Tumbada trata los datos de quien se apunta a su lista de fans." canonicalUrl={canonicalUrl}>
+  <section class="section aviso" aria-labelledby="aviso-heading"><div class="container aviso-body">
+    <Eyebrow text="Legal" />
+    <h1 id="aviso-heading" class="section-heading gold-text">Aviso de privacidad</h1>
+    <p class="aviso-date">Última actualización: {actualizado}</p>
+
+    <h2>Quién es el responsable</h2>
+    <p>{responsable}, con domicilio en {domicilio}, es responsable del tratamiento de tus datos personales, que se hace conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares.</p>
+
+    <h2>Qué datos pedimos</h2>
+    <p>Solo los que escribes en la lista de fans: un correo electrónico o un número de WhatsApp, y si quieres, tu ciudad. No pedimos datos sensibles. No guardamos tu dirección IP ni información de tu dispositivo con el registro.</p>
+
+    <h2>Para qué los usamos</h2>
+    <p>Para enviarte avisos de la banda: fechas, estrenos y videos nuevos, por el medio que nos diste. La ciudad nos sirve para saber qué avisos te tocan. No los usamos para nada más ni los vendemos.</p>
+
+    <h2>Con quién se comparten</h2>
+    <p>No los transferimos a terceros. Se guardan en Cloudflare, nuestro proveedor de infraestructura, que los procesa por nuestra cuenta y puede hacerlo en servidores fuera de México.</p>
+
+    <h2>Tus derechos</h2>
+    <p>Puedes acceder a tus datos, rectificarlos, cancelarlos u oponerte a su uso (derechos ARCO), y retirar tu consentimiento cuando quieras. Escribe a {correoArco} con el correo o número con que te apuntaste y lo que pides. Te respondemos en un máximo de 20 días hábiles. Si no recibes respuesta, puedes acudir a la Secretaría Anticorrupción y Buen Gobierno.</p>
+    <p>Conservamos tus datos hasta que pidas darte de baja.</p>
+
+    <h2>Cookies y estadísticas</h2>
+    <p>El sitio no usa cookies propias. Medimos visitas y clics con Plausible y con un contador propio, sin cookies y sin datos que te identifiquen.</p>
+
+    <h2>Cambios a este aviso</h2>
+    <p>Si cambia, publicamos la nueva versión en esta página, con su fecha.</p>
+  </div></section>
+</MarketingLayout>
+
+<style>
+  .aviso { padding-block: var(--space-section); }
+  .aviso-body { max-width: 46rem; }
+  .aviso-body h2 { margin-top: 2rem; font-size: 1.25rem; }
+  .aviso-body p { margin-top: 0.75rem; line-height: 1.6; }
+  .aviso-date { color: var(--text-muted); }
+</style>

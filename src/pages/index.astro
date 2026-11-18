@@ -29,7 +29,10 @@ const releases = catalog.releases.map((release) => ({
       <h1 id="hero-heading" class="hero-title"><img src="/icon/mafiatumbada.webp" alt="Mafia Tumbada" class="hero-logo-img" width="397" height="264" fetchpriority="high" loading="eager" /></h1>
       <div class="hero-meta"><span>Xalapa, Veracruz</span><span>Corridos Tumbados</span><span>Regional Mexicano</span><span>Desde 2021</span></div>
       <p class="hero-blurb">La Mafia Tumbada es un grupo de corridos tumbados y regional mexicano con base en Xalapa, Veracruz. Canciones propias, covers con actitud y cuatro años de tarima.</p>
-      <div class="hero-actions"><a href={bandSocialUrls.whatsapp} target="_blank" rel="noopener noreferrer" class="btn-primary" data-plausible-event="whatsapp_hero">Escríbenos por WhatsApp</a></div>
+      <div class="hero-actions"><a href={bandSocialUrls.whatsapp} target="_blank" rel="noopener noreferrer" class="btn-primary" data-plausible-event="whatsapp_hero">Escríbenos por WhatsApp</a>
+        <a href={bandSocialUrls.spotify} target="_blank" rel="noopener noreferrer" class="btn-secondary hero-follow">Spotify</a>
+        <a href={bandSocialUrls.instagram} target="_blank" rel="noopener noreferrer" class="btn-secondary hero-follow">Instagram</a>
+      </div>
     </div></div>
   </section>
 
@@ -73,12 +76,27 @@ const releases = catalog.releases.map((release) => ({
     </div>
   </div></section>
 
+  <section class="section fan-section" id="lista" aria-labelledby="lista-heading" data-placement="lista"><div class="container fan-grid">
+    <div class="fan-intro"><Eyebrow text="Lista de fans" /><h2 id="lista-heading" class="section-heading gold-text">Entérate <em>primero</em></h2>
+      <p>Fechas, estrenos y videos nuevos directo a tu correo o WhatsApp. Sin spam.</p></div>
+    <form class="fan-form" id="fan-form" action="/signup" method="post" novalidate>
+      <label for="fan-contacto">Correo o WhatsApp</label>
+      <input id="fan-contacto" name="contacto" type="text" inputmode="email" autocomplete="email" maxlength="254" required aria-describedby="fan-msg" />
+      <label for="fan-ciudad">Ciudad <span class="fan-opt">(opcional)</span></label>
+      <input id="fan-ciudad" name="ciudad" type="text" autocomplete="address-level2" maxlength="60" />
+      <div class="fan-hp" aria-hidden="true"><label>No llenar <input name="web" type="text" tabindex="-1" autocomplete="off" /></label></div>
+      <label class="fan-consent"><input type="checkbox" name="consent" required /><span>Acepto que Mafia Tumbada use mis datos para enviarme avisos de la banda. Lee el <a href="/aviso-de-privacidad/">aviso de privacidad</a>.</span></label>
+      <button type="submit" class="btn-primary">Quiero enterarme</button>
+      <p id="fan-msg" class="fan-msg" role="status" aria-live="polite"></p>
+    </form>
+  </div></section>
+
   <footer class="footer-bar" data-placement="footer"><div class="container">
     <span class="footer-brand gold-text">Mafia Tumbada</span>
     <div class="footer-socials">
       <a href={bandSocialUrls.spotify} target="_blank" rel="noopener noreferrer">Spotify</a><a href={bandSocialUrls.appleMusic} target="_blank" rel="noopener noreferrer">Apple Music</a><a href={bandSocialUrls.instagram} target="_blank" rel="noopener noreferrer">Instagram</a><a href={bandSocialUrls.tiktok} target="_blank" rel="noopener noreferrer">TikTok</a><a href={bandSocialUrls.youtube} target="_blank" rel="noopener noreferrer">YouTube</a><a href={bandSocialUrls.whatsapp} target="_blank" rel="noopener noreferrer" data-plausible-event="whatsapp_footer">WhatsApp</a>
     </div>
-    <p class="footer-copy">© {new Date().getFullYear()} · Xalapa, Veracruz · Todos los derechos reservados</p>
+    <p class="footer-copy">© {new Date().getFullYear()} · Xalapa, Veracruz · Todos los derechos reservados · <a href="/aviso-de-privacidad/">Aviso de privacidad</a></p>
   </div></footer>
 </MarketingLayout>
 
@@ -93,6 +111,33 @@ const releases = catalog.releases.map((release) => ({
     element.addEventListener('click', () => trackPlausible(element.getAttribute('data-plausible-event') ?? ''))
   })
   mountHeroVideo(document)
+  const fanForm = document.getElementById('fan-form') as HTMLFormElement | null
+  if (fanForm) {
+    const msg = document.getElementById('fan-msg') as HTMLElement
+    const contact = fanForm.elements.namedItem('contacto') as HTMLInputElement
+    const say = (text: string, bad: boolean) => {
+      msg.textContent = text
+      msg.dataset.state = bad ? 'error' : 'ok'
+      contact.setAttribute('aria-invalid', String(bad && /correo|WhatsApp/.test(text)))
+    }
+    const errors: Record<string, string> = {
+      contacto: 'Revisa tu correo o número de WhatsApp.',
+      consentimiento: 'Marca la casilla para que podamos guardar tus datos.',
+      limite: 'Demasiados intentos. Prueba en un minuto.',
+    }
+    fanForm.addEventListener('submit', async (event) => {
+      event.preventDefault()
+      const button = fanForm.querySelector('button') as HTMLButtonElement
+      button.disabled = true
+      try {
+        const res = await fetch('/signup', { method: 'POST', body: new FormData(fanForm) })
+        const body = (await res.json()) as { ok: boolean; error?: string }
+        if (body.ok) { fanForm.reset(); say('Listo, quedaste en la lista. ¡Gracias!', false) }
+        else say(errors[body.error ?? ''] ?? 'No se pudo guardar. Intenta de nuevo.', true)
+      } catch { say('No se pudo guardar. Intenta de nuevo.', true) }
+      button.disabled = false
+    })
+  }
 </script>
 
 <style>
@@ -101,6 +146,7 @@ const releases = catalog.releases.map((release) => ({
   .bio-section { padding-block: var(--space-lg); }
   .hero-blurb { max-width: 38rem; font-size: clamp(0.95rem, 2vw, 1.1rem); line-height: 1.6; font-weight: 600; opacity: 0.85; margin: 1rem 0 0; }
   .hero-actions, .music-link { margin-top: 2rem; }
+  .hero-follow { min-height: 44px; padding-block: 0.6rem; border-color: var(--gold-shadow); background: oklch(7% 0 0 / 0.55); }
   .music-link, .booking-copy a:not(.btn-primary), .footer-socials a { display: inline-flex; align-items: center; min-height: 44px; padding-block: 0.5rem; }
   .videos-heading { margin-top: var(--space-lg); }
   .video-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; list-style: none; margin: 1rem 0 0; padding: 0; }
@@ -110,7 +156,23 @@ const releases = catalog.releases.map((release) => ({
   .booking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); }
   .booking-copy { display: grid; gap: 1.25rem; align-items: start; justify-items: start; }
   .booking-urgency { font-weight: 600; }
+  .fan-section { padding-block: var(--space-section); }
+  .fan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); }
+  .fan-form { display: grid; gap: 0.5rem; align-items: start; max-width: 28rem; }
+  .fan-form label { font-weight: 600; margin-top: 0.5rem; }
+  .fan-opt { font-weight: 400; color: var(--text-muted); }
+  .fan-form input[type='text'] { width: 100%; min-height: 44px; padding: 0.6rem 0.8rem; font: inherit; font-size: 1rem; color: var(--text); background: var(--bg-raised); border: 1px solid var(--gold-shadow); border-radius: 0; }
+  .fan-form input[type='text']:focus-visible, .fan-consent input:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+  .fan-form input[aria-invalid='true'] { border-color: var(--red-link); }
+  .fan-consent { display: flex; gap: 0.75rem; align-items: flex-start; min-height: 44px; font-weight: 400 !important; font-size: 0.9rem; line-height: 1.5; }
+  .fan-consent input { flex: none; width: 1.4rem; height: 1.4rem; margin-top: 0.1rem; accent-color: var(--gold); }
+  .fan-consent a, .footer-copy a { color: var(--red-link); }
+  .fan-form .btn-primary { margin-top: 0.5rem; justify-self: start; }
+  .fan-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .fan-msg { min-height: 1.5em; margin: 0; font-weight: 600; }
+  .fan-msg[data-state='error'] { color: var(--red-link); }
+  .footer-copy a { display: inline-flex; align-items: center; min-height: 44px; }
   .members-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 2rem; }
   .footer-socials { display: flex; flex-wrap: wrap; gap: 1rem; }
-  @media (max-width: 700px) { .booking-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 700px) { .booking-grid, .fan-grid { grid-template-columns: 1fr; } }
 </style>
