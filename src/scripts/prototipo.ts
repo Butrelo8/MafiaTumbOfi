@@ -1,4 +1,4 @@
-// /prototipo: the scroll drives one fixed stage. Outside the band station it scrubs the run preview (run frame f = currentTime x 24);
+// The scroll drives one fixed stage (/, was /prototipo). Outside the band station it scrubs the run preview (run frame f = currentTime x 24);
 // inside it, the loop clip plays by itself when the visitor holds still, and scrolling leaves the loop the way movimiento-plan.md ›
 // Band loop says (ruta.ts paso()): move 1 is the run's own stretch, so the exit is jump-free. Sources: references.md › Prototype.
 import { FORMAS } from '../lib/formas'
@@ -13,7 +13,11 @@ const quieto = matchMedia('(prefers-reduced-motion: reduce)')
 
 const ruta = document.getElementById('ruta') as HTMLVideoElement
 const bucle = document.getElementById('bucle') as HTMLVideoElement
-const inicial = document.getElementById('escena-f0') as HTMLElement
+const escena = document.querySelector('.escena') as HTMLElement
+// One still per stop (montaje-esc1..6): shown only while the run cannot show a frame (still loading, or a browser without H.264).
+const paradas = [...document.querySelectorAll<HTMLElement>('.parada')]
+const stops = paradas.map((el) => ({ el, sec: document.getElementById(el.dataset.id!) }))
+let listo = false
 const boton = document.getElementById('pausa') as HTMLButtonElement
 const hud = document.getElementById('hud') as HTMLElement
 const barra = document.querySelector('.barra') as HTMLElement
@@ -106,7 +110,14 @@ function tic(ahora: number) {
   }
   const dentroBucle = e.t !== null || (e.f >= bucleInfo.desde && e.f <= bucleInfo.hasta)
   pintar(dentroBucle, e.t ?? Math.max(0, e.f - bucleInfo.desde))
-  inicial.style.visibility = ruta.readyState >= 2 ? 'hidden' : 'visible'
+  if (ruta.readyState >= 2) listo = true
+  escena.classList.toggle('sin-video', !listo)
+  if (!listo) {
+    // the stop in view = the last section whose top has passed 60 % of the viewport
+    let actual = stops[0]
+    for (const st of stops) if (st.sec && st.sec.getBoundingClientRect().top <= 0.6 * innerHeight) actual = st
+    for (const st of stops) st.el.hidden = st !== actual
+  }
   barra.classList.toggle('solida', y > 8)
   if (!hud.hidden) hud.textContent = `F ${F.toFixed(0)} · f ${e.f.toFixed(0)} · ${e.t === null ? 'ruta' : `bucle t ${e.t.toFixed(0)}`}${bucle.paused ? '' : ' ▶'}`
   ;(window as any).__proto = { f: e.f, t: e.t, F }

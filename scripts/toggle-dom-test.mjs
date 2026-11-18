@@ -1,4 +1,4 @@
-// DOM test for the loop toggle on the BUILT page (bun test runs it: src/lib/toggleDom.test.ts). The pure state lives in
+// DOM test for the loop toggle on the BUILT /anterior page (the A Carretera home) (bun test runs it: src/lib/toggleDom.test.ts). The pure state lives in
 // estadoBoton.ts; what only a browser shows is that the toggle really is hidden (a scoped `display` once beat [hidden]).
 // Usage: node scripts/toggle-dom-test.mjs [dist dir]   exit 0 pass, 1 fail
 import { chromium } from '/home/black/projects/visual-lab/web/skills/diseccion/scripts/node_modules/playwright-core/index.mjs'
@@ -14,7 +14,7 @@ const srv = createServer((q, r) => {
   if (!f.startsWith(dist) || !existsSync(f)) { r.statusCode = 404; return r.end() }
   r.setHeader('content-type', tipos[extname(f)] || 'application/octet-stream'); r.end(readFileSync(f))
 }).listen(0)
-const url = `http://127.0.0.1:${srv.address().port}/`
+const url = `http://127.0.0.1:${srv.address().port}/anterior/`
 const b = await chromium.launch(); let fallos = 0
 const caja = async (p) => { const t = p.locator('#pausa'); return { visible: await t.isVisible(), box: await t.boundingBox() } }
 async function caso(nombre, opciones, preparar, espera) {

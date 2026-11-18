@@ -257,3 +257,17 @@ client material supplies content and facts only.
 | gira | user: `docs/design/escenas-plan.md` §5 empty state (owner's plan); the library has no dates-section ficha (paulkalkbrenner has only an index row, not read) | No dates in the repo, so the section shows the plan's line "Las próximas fechas salen primero en nuestro Instagram" and two links (Instagram, the Plaza Lerdo video); no invented dates | B |
 | contacto | user: `docs/design/brief.md` › open (WhatsApp number, `socials.ts`) | The number as plain text under the button, taken from the same `socials.ts` link the button uses; unconfirmed (SPEC §4 says another) | B |
 | pendiente | ai-slop-tells · tell 6, a labelled clay placeholder · `web/ai-slop-tells.md#1-the-tells-ranked` | What the repo cannot fill stays a dashed grey frame with a bold "Texto pendiente" label and what it waits on (2026-11-16: none left on the page; the 4th member, the manager, arrived from the owner); unrendered scenes are listed in the footer note; never styled to pass as finished | B |
+
+## Site `/` (2026-11-18, run `maincharacterdrone`; mothership queue 2026-11-18-mto-full-site-preview)
+
+No new direction: the prototype becomes `/`. These rows say where each piece the merge and the build added comes from.
+
+| section | library entry | borrow | cost |
+|---|---|---|---|
+| escenario | arraisballet · smooth video hero, poster = first frame · `web/visuales.md#recipe-smooth-video-hero` | One still per stop (the Tripo v5 montaje-esc1..6, 960×540 webp) behind the video: shown for the stop in view only while the run cannot show a frame (loading, no H.264); the videos hide (`.sin-video`) so a poster never covers it | B |
+| hero | user: `research/DESIGN.md` › Conversion additions (main, 2026-11-18) | Spotify (gold Tecla, the one primary) and Instagram (plain Tecla) on the first screen, plus Contratar | B |
+| contacto | user: `docs/analytics.md` (main) | `data-placement` on header, hero, musica, video, grupo, gira, contratacion, footer; one delegated listener sends `wa_click` / `follow_click` to `POST /e`; the WhatsApp link is the `/wa/` counter | B |
+| musica | user: `src/lib/plausibleClient.ts` (main) | Plausible page views only when `PUBLIC_PLAUSIBLE_DOMAIN` is set (CI sets it; a preview does not); `whatsapp_contratacion` kept on the contact button | B |
+| video | user: `worker.js` header (iOS Safari refuses a <video> without a 206; main) | The run and the loop are `<video>`s under `/prototipo/`: that path goes through `worker.js` (`run_worker_first`) so a Range request answers 206, which iOS Safari needs | B |
+| integrantes | kage · fixed camera anchors per section · `web/visuales-fichas/kage-scroll-world.md` | Unchanged from the prototype: the loop plays when the visitor holds still in the station | M |
+| gira | user: `docs/design/escenas-plan.md` §5 empty state | Unchanged: no dates in the repo, so the plan's line and two links | B |

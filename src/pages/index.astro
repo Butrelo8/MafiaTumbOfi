@@ -1,6 +1,7 @@
 ---
-// Prototype of the whole site as it stands (2026-11-16): every section DESIGN.md and the plans name, in order, over one fixed
-// stage that the scroll drives (run preview + the band loop). Not the page: /prototipo stays out of the index. Trace: DESIGN.md › Prototype.
+// The site (2026-11-18): every section DESIGN.md and the plans name, in order, over one fixed stage that the scroll drives
+// (the Tripo v5 run + the band loop; one still per stop when the video cannot play). Was /prototipo; the A Carretera home
+// is /anterior. Trace: DESIGN.md › Prototype, › Site.
 import '@fontsource/saira-condensed/latin-800.css'
 import '@fontsource/saira/latin-400.css'
 import '@fontsource/saira/latin-600.css'
@@ -9,6 +10,8 @@ import Icono from '../components/Icono.astro'
 import { members } from '../../research/contenido/members'
 import { bandSocialUrls as redes } from '../../research/contenido/socials'
 import catalog from '../../research/contenido/catalog.json'
+import { homeCanonical } from '../lib/publicSiteUrl'
+import { normalizePlausibleDataDomain } from '../lib/plausibleClient'
 
 const releases = catalog.releases
 const videos = [
@@ -27,7 +30,12 @@ const pie = [...plataformas, { n: 'Instagram', h: redes.instagram }, { n: 'TikTo
 const idVideo = (href: string) => new URL(href).searchParams.get('v')
 const mostrados = new Set(videos.map((v) => v.id))
 const masVideos = catalog.videos.filter((v) => !mostrados.has(idVideo(v.href) ?? ''))
-const numero = redes.whatsapp.match(/wa\.me\/521?(\d{3})(\d{3})(\d{4})/)?.slice(1).join(' ')
+const canonical = homeCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)
+const plausible = normalizePlausibleDataDomain(import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN)
+// Without PUBLIC_ALLOW_INDEXING=true (set by CI, not by a preview) the page asks crawlers to stay out.
+const indexar = import.meta.env.PUBLIC_ALLOW_INDEXING === 'true'
+const paradas = [['inicio', 1], ['musica', 2], ['video', 3], ['integrantes', 4], ['gira', 5], ['contacto', 6]] as const
+const numero = redes.whatsapp.match(/\/wa\/521?(\d{3})(\d{3})(\d{4})/)?.slice(1).join(' ')
 // The 4th member (owner, 2026-11-16): the band's manager; the public profile's display name is its handle.
 const manager = { name: 'elmanco420', role: 'Mánager', instagram: 'https://www.instagram.com/elmanco420/' }
 const foto = (img: string) => img.replace(/\.jpg$/, '.webp')
@@ -39,11 +47,19 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="robots" content="noindex" />
-    <title>La Mafia Tumbada · Prototipo</title>
+    {!indexar && <meta name="robots" content="noindex" />}
+    <title>La Mafia Tumbada · Corridos tumbados desde Xalapa</title>
+    <meta name="description" content="La Mafia Tumbada: corridos tumbados desde Xalapa, Veracruz. Música, videos, la banda y contratación por WhatsApp." />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content="La Mafia Tumbada" />
+    <meta property="og:image" content={new URL('/og/og-default.jpg', canonical).href} />
     <meta name="theme-color" content="#000000" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
-    <link rel="preload" as="image" href="/prototipo/ruta-f0.jpg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" as="image" href="/prototipo/parada-1.webp" />
+    {plausible && <link rel="preconnect" href="https://plausible.io" />}
+    {plausible && <script is:inline>window.plausible = window.plausible || function () { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>}
+    {plausible && <script defer data-domain={plausible} src="https://plausible.io/js/script.js"></script>}
     <style is:global>
       /* Same tokens as index.astro and DESIGN.md › Colors. */
       :root {
@@ -73,12 +89,14 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
 
     <!-- The stage: the page's only picture, fixed behind everything. The scroll chooses the frame (src/scripts/prototipo.ts). -->
     <div class="escena" aria-hidden="true">
-      <img class="cubre" id="escena-f0" src="/prototipo/ruta-f0.jpg" alt="" width="640" height="360" />
+      {paradas.map(([id, n]) => (
+        <img class="cubre parada" data-id={id} src={`/prototipo/parada-${n}.webp`} alt="" width="960" height="540" hidden={n !== 1} loading={n === 1 ? undefined : 'lazy'} decoding="async" />
+      ))}
       <video class="cubre" id="ruta" muted playsinline preload="auto" poster="/prototipo/ruta-f0.jpg" src="/prototipo/ruta.mp4"></video>
       <video class="cubre" id="bucle" muted playsinline loop preload="auto" poster="/prototipo/bucle-f0.jpg" src="/prototipo/bucle.mp4"></video>
     </div>
 
-    <header class="barra">
+    <header class="barra" data-placement="header">
       <a class="logo" href="#inicio"><img src="/icon/mafiatumbada.webp" alt="La Mafia Tumbada, inicio" width="794" height="530" /></a>
       <nav aria-label="Secciones">
         <a href="#musica">Música</a><a href="#video">Videos</a><a href="#integrantes">La banda</a>
@@ -87,12 +105,13 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
     </header>
 
     <main>
-      <section class="hero" id="inicio" aria-labelledby="h-inicio">
+      <section class="hero" id="inicio" aria-labelledby="h-inicio" data-placement="hero">
         <div class="copia">
           <h1 id="h-inicio">La Mafia <span>Tumbada</span></h1>
           <p>Corridos tumbados desde Xalapa, Veracruz.</p>
           <div class="acciones">
             <Boton href={releases[0].href} lleno icono="play">Escuchar en Spotify</Boton>
+            <Boton href={redes.instagram} flecha={false}>Instagram</Boton>
             <Boton href="#contacto">Contratar</Boton>
           </div>
         </div>
@@ -100,7 +119,7 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
 
       <div class="viaje" style="--f:191" aria-hidden="true"></div>
 
-      <section class="velo" id="musica" aria-labelledby="h-musica">
+      <section class="velo" id="musica" aria-labelledby="h-musica" data-placement="musica">
         <h2 class="margen" id="h-musica">Música</h2>
         <ul class="tira" role="list">
           {releases.map((r) => (
@@ -120,7 +139,7 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
 
       <div class="viaje" style="--f:120" aria-hidden="true"></div>
 
-      <section class="velo margen" id="video" aria-labelledby="h-video">
+      <section class="velo margen" id="video" aria-labelledby="h-video" data-placement="video">
         <h2 id="h-video">Videos</h2>
         <ul class="vids" role="list">
           {videos.map((v) => (
@@ -140,7 +159,7 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
 
       <div class="viaje" style="--f:120" aria-hidden="true"></div>
 
-      <section class="lateral" id="integrantes" aria-labelledby="h-banda">
+      <section class="lateral" id="integrantes" aria-labelledby="h-banda" data-placement="grupo">
        <div class="columna">
         <h2 id="h-banda">La banda</h2>
         <ul class="banda" role="list">
@@ -167,7 +186,7 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
       </section>
 
       <div class="viaje gira" style="--f:288">
-        <section class="velo margen" id="gira" aria-labelledby="h-gira">
+        <section class="velo margen" id="gira" aria-labelledby="h-gira" data-placement="gira">
           <h2 id="h-gira">Gira</h2>
           <p class="gira-texto">Las próximas fechas salen primero en nuestro Instagram.</p>
           <div class="plat">
@@ -177,25 +196,27 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
         </section>
       </div>
 
-      <section class="contacto" id="contacto" aria-labelledby="h-contacto">
+      <section class="contacto" id="contacto" aria-labelledby="h-contacto" data-placement="contratacion">
         <div class="panel">
           <h2 id="h-contacto">Contratación</h2>
           <p>Canciones propias, covers con actitud y cuatro años de tarima.</p>
-          <Boton href={redes.whatsapp} lleno>Escribir por WhatsApp</Boton>
+          <Boton href={redes.whatsapp} lleno evento="whatsapp_contratacion">Escribir por WhatsApp</Boton>
           {numero && <p class="numero">WhatsApp {numero}</p>}
         </div>
       </section>
     </main>
 
-    <footer class="pie">
+    <footer class="pie" data-placement="footer">
       {pie.map((p) => <a href={p.h}>{p.n}</a>)}
-      <p>Prototipo. Imagen: vista previa de 640×360 (carretera en Cycles 16 muestras; bucle de la banda en Workbench). Encuadre vertical 9:16 pendiente. Sin renderizar todavía: redes como calcomanías en la caja (escena 2), videos en la pantalla móvil (3), los cuatro en las ventanas de la cabina (4), fechas en la pantalla trasera (5), botón en la placa (6).</p>
+      <p>La Mafia Tumbada · Xalapa, Veracruz</p>
     </footer>
 
     <p class="hud" id="hud" hidden></p>
 
     <script>
+      import { trackClicks } from '../lib/clickEvents'
       import '../scripts/prototipo'
+      trackClicks(document)
     </script>
 
     <style>
@@ -205,6 +226,7 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
 
       .escena { position: fixed; inset: 0; z-index: 0; background: var(--bg); overflow: hidden; }
       .cubre { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .escena.sin-video :is(#ruta, #bucle) { visibility: hidden; }
       #ruta, #bucle { opacity: 0; transition: opacity 0.2s; }
       #ruta.on, #bucle.on { opacity: 1; }
       main, .pie { position: relative; z-index: 1; }

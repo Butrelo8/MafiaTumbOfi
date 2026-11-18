@@ -1,0 +1,222 @@
+{
+ "shots": [
+  {
+   "w": 390,
+   "id": "inicio",
+   "f": 0,
+   "t": null,
+   "F": 0,
+   "sinVideo": false,
+   "rs": 4,
+   "y": 0,
+   "parada": [
+    "inicio"
+   ]
+  },
+  {
+   "w": 390,
+   "id": "musica",
+   "f": 263,
+   "t": null,
+   "F": 263,
+   "sinVideo": false,
+   "rs": 4,
+   "y": 1397,
+   "parada": [
+    "inicio"
+   ]
+  },
+  {
+   "w": 390,
+   "id": "video",
+   "f": 455.0024572330532,
+   "t": null,
+   "F": 455.0024572330532,
+   "sinVideo": false,
+   "rs": 4,
+   "y": 2485,
+   "parada": [
+    "inicio"
+   ]
+  },
+  {
+   "w": 390,
+   "id": "integrantes",
+   "f": 646.9538712011578,
+   "t": null,
+   "F": 646.9538712011578,
+   "sinVideo": false,
+   "rs": 4,
+   "y": 5007,
+   "parada": [
+    "inicio"
+   ]
+  },
+  {
+   "w": 390,
+   "id": "gira",
+   "f": 875.9200293470286,
+   "t": null,
+   "F": 875.9200293470286,
+   "sinVideo": false,
+   "rs": 4,
+   "y": 6116,
+   "parada": [
+    "inicio"
+   ]
+  },
+  {
+   "w": 390,
+   "id": "contacto",
+   "f": 1031.0071090047393,
+   "t": null,
+   "F": 1031.0071090047393,
+   "sinVideo": false,
+   "rs": 4,
+   "y": 6850,
+   "parada": [
+    "inicio"
+   ]
+  },
+  {
+   "w": 1440,
+   "id": "inicio",
+   "f": 0,
+   "t": null,
+   "F": 0,
+   "sinVideo": false,
+   "rs": 4,
+   "y": 0,
+   "parada": [
+    "inicio"
+   ]
+  },
+  {
+   "w": 1440,
+   "id": "musica",
+   "f": 263,
+   "t": null,
+   "F": 263,
+   "sinVideo": false,
+   "rs": 4,
+   "y": 1439,
+   "parada": [
+    "inicio"
+   ]
+  },
+  {
+   "w": 1440,
+   "id": "video",
+   "f": 455.0221186165022,
+   "t": null,
+   "F": 455.0221186165022,
+   "sinVideo": false,
+   "rs": 4,
+   "y": 2676,
+   "parada": [
+    "inicio"
+   ]
+  },
+  {
+   "w": 1440,
+   "id": "integrantes",
+   "f": 646.9335106382979,
+   "t": null,
+   "F": 646.9335106382979,
+   "sinVideo": false,
+   "rs": 4,
+   "y": 4245,
+   "parada": [
+    "inicio"
+   ]
+  },
+  {
+   "w": 1440,
+   "id": "gira",
+   "f": 877.5,
+   "t": null,
+   "F": 877.5,
+   "sinVideo": false,
+   "rs": 4,
+   "y": 5441,
+   "parada": [
+    "inicio"
+   ]
+  },
+  {
+   "w": 1440,
+   "id": "contacto",
+   "f": 1031.0083333333334,
+   "t": null,
+   "F": 1031.0083333333334,
+   "sinVideo": false,
+   "rs": 4,
+   "y": 6175,
+   "parada": [
+    "inicio"
+   ]
+  }
+ ],
+ "clicks": [
+  {
+   "waStatus": 302,
+   "reqs": [
+    {
+     "m": "POST",
+     "body": "{\"event\":\"wa_click\",\"net\":\"\",\"page\":\"/\",\"placement\":\"contratacion\"}"
+    }
+   ]
+  }
+ ],
+ "handover": [
+  {
+   "tag": "quieto-en-la-estacion",
+   "f": 646.9335106382979,
+   "t": null,
+   "F": 646.9335106382979,
+   "bucleT": 0,
+   "bucleParado": true,
+   "bucleOn": false,
+   "rutaOn": true
+  },
+  {
+   "tag": "+600ms",
+   "f": 646.9335106382979,
+   "t": null,
+   "F": 646.9335106382979,
+   "bucleT": 0,
+   "bucleParado": true,
+   "bucleOn": false,
+   "rutaOn": true
+  },
+  {
+   "tag": "scroll +40",
+   "f": 653.8819636898365,
+   "t": null,
+   "F": 653.8819636898365,
+   "bucleT": 0.286748,
+   "bucleParado": true,
+   "bucleOn": true,
+   "rutaOn": false
+  },
+  {
+   "tag": "fuera (arriba)",
+   "f": 561.8271276595744,
+   "t": null,
+   "F": 561.8271276595744,
+   "bucleT": 0.286748,
+   "bucleParado": true,
+   "bucleOn": false,
+   "rutaOn": true
+  }
+ ],
+ "h264": "probably",
+ "errors": {
+  "390": [],
+  "1440": [
+   "The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy.",
+   "Failed to load resource: the server responded with a status of 404 ()",
+   "Manifest fetch from https://api.whatsapp.com/data/manifest.json failed, code 404"
+  ]
+ }
+}

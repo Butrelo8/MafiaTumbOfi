@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { bandSocialUrls } from '../data/socials'
+import { bandSocialUrls } from '../../research/contenido/socials'
 import { classifyLink } from './clickEvents'
 
 const host = 'mafiatumbada.com'

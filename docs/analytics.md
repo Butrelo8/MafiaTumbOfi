@@ -10,7 +10,7 @@ No se guarda IP, user agent, país ni cookie. Se ignoran bots (misma regex que `
 | `follow_click` | enlaces a spotify, instagram, youtube, tiktok, facebook, apple_music | la red |
 
 Columnas: `index1` = evento; `blob1` evento, `blob2` net, `blob3` página, `blob4` placement
-(`header`, `menu`, `hero`, `musica`, `grupo`, `contratacion`, `footer`). El cliente es `src/lib/clickEvents.ts`
+(`header`, `menu`, `hero`, `musica`, `video`, `grupo`, `gira`, `contratacion`, `footer`; `menu` ya no existe en la página de escena). El cliente es `src/lib/clickEvents.ts`
 (un solo listener delegado, `sendBeacon`); el placement sale del `data-placement` más cercano.
 
 ## Consulta: clics por evento y por día

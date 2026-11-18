@@ -15,12 +15,13 @@ interface Props {
   clase?: string
   oculto?: boolean
   discreto?: boolean
+  evento?: string // Plausible custom event (main's whatsapp_* names); the click counter /e reads the href, not this
 }
-const { href, lleno = false, icono, id, flecha = true, clase, oculto = false, discreto = false } = Astro.props
+const { href, lleno = false, icono, id, flecha = true, clase, oculto = false, discreto = false, evento } = Astro.props
 const Etiqueta = href ? 'a' : 'button'
 ---
 
-<Etiqueta class:list={['boton', { lleno, discreto }, clase]} href={href} id={id} type={href ? undefined : 'button'} hidden={oculto}>
+<Etiqueta class:list={['boton', { lleno, discreto }, clase]} href={href} id={id} type={href ? undefined : 'button'} hidden={oculto} data-plausible-event={evento}>
   <span class="tapa">
     {icono && <Icono nombre={icono} />}
     {!href && <span class="anillo" aria-hidden="true" hidden />}
