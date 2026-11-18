@@ -249,8 +249,8 @@ The header and hero are inline in `src/pages/index.astro`, not components.
   `oklch(7% 0 0 / 0.55)` fill so the label stays legible over the video (same dark as the hero scrim).
 - `#lista` form: labels and fields in Archivo, never blackletter (Accessibility); sharp fields on `--bg-raised` with a
   `--gold-shadow` border (non-text), `--focus-ring` 2px focus, 44px targets, the primary gold CTA, links in `--red-link`,
-  heading `.section-heading.gold-text` with an `<Eyebrow>` like every other section. The honeypot field is off-screen
-  and `aria-hidden`; the status line is `role="status"`.
+  heading `.section-heading.gold-text` with an `<Eyebrow>` like every other section. The consent checkbox is 44px (the touch-target rule
+  applies to the control itself); the honeypot is a `hidden` block; the status line is `role="status"`.
 - `/aviso-de-privacidad/`: plain text page on the same layout (`.container`, `.section-heading`), no new tokens.
 
 ## Decoration

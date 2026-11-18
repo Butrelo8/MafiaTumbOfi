@@ -30,8 +30,10 @@ const releases = catalog.releases.map((release) => ({
       <div class="hero-meta"><span>Xalapa, Veracruz</span><span>Corridos Tumbados</span><span>Regional Mexicano</span><span>Desde 2021</span></div>
       <p class="hero-blurb">La Mafia Tumbada es un grupo de corridos tumbados y regional mexicano con base en Xalapa, Veracruz. Canciones propias, covers con actitud y cuatro años de tarima.</p>
       <div class="hero-actions"><a href={bandSocialUrls.whatsapp} target="_blank" rel="noopener noreferrer" class="btn-primary" data-plausible-event="whatsapp_hero">Escríbenos por WhatsApp</a>
-        <a href={bandSocialUrls.spotify} target="_blank" rel="noopener noreferrer" class="btn-secondary hero-follow">Spotify</a>
-        <a href={bandSocialUrls.instagram} target="_blank" rel="noopener noreferrer" class="btn-secondary hero-follow">Instagram</a>
+        <div class="hero-follow-row">
+          <a href={bandSocialUrls.spotify} target="_blank" rel="noopener noreferrer" class="btn-secondary hero-follow">Spotify</a>
+          <a href={bandSocialUrls.instagram} target="_blank" rel="noopener noreferrer" class="btn-secondary hero-follow">Instagram</a>
+        </div>
       </div>
     </div></div>
   </section>
@@ -77,14 +79,14 @@ const releases = catalog.releases.map((release) => ({
   </div></section>
 
   <section class="section fan-section" id="lista" aria-labelledby="lista-heading" data-placement="lista"><div class="container fan-grid">
-    <div class="fan-intro"><Eyebrow text="Lista de fans" /><h2 id="lista-heading" class="section-heading gold-text">Entérate <em>primero</em></h2>
+    <div class="fan-intro"><Eyebrow text="Lista de fans" /><h2 id="lista-heading" class="section-heading gold-text">Entérate primero</h2>
       <p>Fechas, estrenos y videos nuevos directo a tu correo o WhatsApp. Sin spam.</p></div>
     <form class="fan-form" id="fan-form" action="/signup" method="post" novalidate>
       <label for="fan-contacto">Correo o WhatsApp</label>
       <input id="fan-contacto" name="contacto" type="text" inputmode="email" autocomplete="email" maxlength="254" required aria-describedby="fan-msg" />
       <label for="fan-ciudad">Ciudad <span class="fan-opt">(opcional)</span></label>
       <input id="fan-ciudad" name="ciudad" type="text" autocomplete="address-level2" maxlength="60" />
-      <div class="fan-hp" aria-hidden="true"><label>No llenar <input name="web" type="text" tabindex="-1" autocomplete="off" /></label></div>
+      <div class="fan-hp" hidden><label>No llenar <input name="web" type="text" tabindex="-1" autocomplete="off" /></label></div>
       <label class="fan-consent"><input type="checkbox" name="consent" required /><span>Acepto que Mafia Tumbada use mis datos para enviarme avisos de la banda. Lee el <a href="/aviso-de-privacidad/">aviso de privacidad</a>.</span></label>
       <button type="submit" class="btn-primary">Quiero enterarme</button>
       <p id="fan-msg" class="fan-msg" role="status" aria-live="polite"></p>
@@ -146,6 +148,7 @@ const releases = catalog.releases.map((release) => ({
   .bio-section { padding-block: var(--space-lg); }
   .hero-blurb { max-width: 38rem; font-size: clamp(0.95rem, 2vw, 1.1rem); line-height: 1.6; font-weight: 600; opacity: 0.85; margin: 1rem 0 0; }
   .hero-actions, .music-link { margin-top: 2rem; }
+  .hero-follow-row { display: flex; flex-basis: 100%; gap: 0.75rem; }
   .hero-follow { min-height: 44px; padding-block: 0.6rem; border-color: var(--gold-shadow); background: oklch(7% 0 0 / 0.55); }
   .music-link, .booking-copy a:not(.btn-primary), .footer-socials a { display: inline-flex; align-items: center; min-height: 44px; padding-block: 0.5rem; }
   .videos-heading { margin-top: var(--space-lg); }
@@ -164,11 +167,10 @@ const releases = catalog.releases.map((release) => ({
   .fan-form input[type='text'] { width: 100%; min-height: 44px; padding: 0.6rem 0.8rem; font: inherit; font-size: 1rem; color: var(--text); background: var(--bg-raised); border: 1px solid var(--gold-shadow); border-radius: 0; }
   .fan-form input[type='text']:focus-visible, .fan-consent input:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
   .fan-form input[aria-invalid='true'] { border-color: var(--red-link); }
-  .fan-consent { display: flex; gap: 0.75rem; align-items: flex-start; min-height: 44px; font-weight: 400 !important; font-size: 0.9rem; line-height: 1.5; }
-  .fan-consent input { flex: none; width: 1.4rem; height: 1.4rem; margin-top: 0.1rem; accent-color: var(--gold); }
+  .fan-consent { display: flex; gap: 0.75rem; align-items: center; min-height: 44px; font-weight: 400 !important; font-size: 0.9rem; line-height: 1.5; }
+  .fan-consent input { flex: none; width: 44px; height: 44px; margin: 0; accent-color: var(--gold); }
   .fan-consent a, .footer-copy a { color: var(--red-link); }
   .fan-form .btn-primary { margin-top: 0.5rem; justify-self: start; }
-  .fan-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   .fan-msg { min-height: 1.5em; margin: 0; font-weight: 600; }
   .fan-msg[data-state='error'] { color: var(--red-link); }
   .footer-copy a { display: inline-flex; align-items: center; min-height: 44px; }
