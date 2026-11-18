@@ -49,8 +49,15 @@ cast clip seam f0 -> f240 (max bone offset)   manager 0.005 m  alejandro 0.017 m
 Diego's sip clip ping-pongs on a period that isn't 240 frames, and Héctor's caja5 grip search drifts. Give each rig its own
 window from its real period (Diego: read the NLA strip of colddrone's clip), or crossfade the last 12 frames into the first.
 
+**Step 2's first run failed at the glTF export.** Everything up to the export ran: figures 1.9 M -> 38.8 k tris each,
+truck 921,736 -> ratio 0.158. The exporter raised `KeyError: None` in `io_scene_gltf2 .../animation/sampled/sampling_cache.py`
+line 433 (`object_caching`); full log at `tmp/vivo/exportar.log`. No `escena.glb`, `mundo.glb` or `vivo.json` was written.
+Likely cause, not verified: Blender 5's layered actions, where the baked action or a selected object's action has no slot
+the sampler can resolve. Try `export_animation_mode="ACTIVE_ACTIONS"` or "NLA_TRACKS", or push each baked action to an
+NLA track before export. Exporting the static scene with `anim=False` first proves the rest of the pipeline.
+
 ## Next, in order
-1. Read `tmp/vivo/exportar.log` and fix what failed. Check the GLB sizes and the per-rig seam. Set `ruedas` to the real wheel
+1. Fix the export (above). Check the GLB sizes. Check the GLB sizes and the per-rig seam. Set `ruedas` to the real wheel
    names (`escena.py` names them; grep for `rueda`).
 2. Build on an ext4 mirror, following the `scripts/prototipo.sh` pattern (`MIRROR=~/.cache/mto-sweatingdrone-site`), on a
    port other than 3100 or 3109. Copy `node_modules/three/examples/jsm/libs/draco/gltf/*` into `public/vivo/draco/` in the
