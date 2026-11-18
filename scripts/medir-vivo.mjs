@@ -22,7 +22,7 @@ async function abrir(w, q = '') {
   const page = await ctx.newPage()
   page.on('pageerror', (e) => errores.push(`${w}${q}: ${e.message}`))
   await page.goto(url + q, { waitUntil: 'load' })
-  await page.waitForFunction(() => window.__vivo?.ttff > 0, null, { timeout: 120000 })
+  await page.waitForFunction(() => window.__vivo?.cargado, null, { timeout: 120000 }) // streamed parts in: cast, cars, signs, video
   res.renderer ??= await page.evaluate(() => {
     const g = document.createElement('canvas').getContext('webgl2'); const e = g.getExtension('WEBGL_debug_renderer_info')
     return e ? g.getParameter(e.UNMASKED_RENDERER_WEBGL) : g.getParameter(g.RENDERER)
@@ -33,9 +33,9 @@ async function abrir(w, q = '') {
 async function tiempos(page, nombre) {
   await page.evaluate(() => (window.__vivo.frameMs.length = window.__vivo.renderMs.length = 0))
   await page.waitForTimeout(5000)
-  const [ft, rm, calls, tris] = await page.evaluate(() => [[...window.__vivo.frameMs], [...window.__vivo.renderMs], window.__vivo.calls, window.__vivo.tris])
+  const [ft, rm, calls, tris, dpr, sondeo] = await page.evaluate(() => [[...window.__vivo.frameMs], [...window.__vivo.renderMs], window.__vivo.calls, window.__vivo.tris, window.__vivo.dpr, window.__vivo.sondeo])
   const f = pct(ft), r = pct(rm)
-  res.frames[nombre] = { raf_p50: f(0.5), raf_p95: f(0.95), render_p50: r(0.5), render_p95: r(0.95), n: ft.length, calls, tris }
+  res.frames[nombre] = { raf_p50: f(0.5), raf_p95: f(0.95), render_p50: r(0.5), render_p95: r(0.95), n: ft.length, calls, tris, dpr, sondeo }
 }
 
 // 1) behaviour at 1440: nav clicks, keys, traffic, wheels, video
@@ -105,13 +105,15 @@ for (const w of [1440, 390]) {
   await page.goto(url, { waitUntil: 'commit' })
   await page.waitForFunction(() => window.__vivo?.ttff > 0, null, { timeout: 300000, polling: 200 })
   const ttff = await page.evaluate(() => window.__vivo.ttff)
-  await page.waitForTimeout(8000) // let the video's first ranges arrive
+  await page.waitForFunction(() => window.__vivo.cargado, null, { timeout: 300000, polling: 200 })
+  const fases = await page.evaluate(() => ({ ...window.__vivo.fases, dpr: window.__vivo.dpr, telefono: window.__vivo.telefono }))
+  await page.waitForTimeout(3000) // let the video's first ranges arrive
   const porArchivo = {}
   for (const [id, b] of Object.entries(bytes)) {
     const u = (urls[id] || id).replace(/^https?:\/\/[^/]+/, '').replace(/\?.*/, '')
     porArchivo[u] = (porArchivo[u] || 0) + b.n
   }
-  res.ttff4g = { ttff_ms: Math.round(ttff), wall_ms: Date.now() - t0, bytes_total: Object.values(porArchivo).reduce((a, b) => a + b, 0), porArchivo }
+  res.ttff4g = { ttff_ms: Math.round(ttff), fases, wall_ms: Date.now() - t0, bytes_total: Object.values(porArchivo).reduce((a, b) => a + b, 0), porArchivo }
   await ctx.close()
 }
 
