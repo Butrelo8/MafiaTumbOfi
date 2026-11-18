@@ -7,6 +7,8 @@
 ## Evidence
 - URL: https://thiccpc-wsl.tail82d42e.ts.net:4412/vivo-secciones (astro preview on WSL 127.0.0.1:4411 behind tailscale serve;
   2026-11-18 13:2x: page 200, `Range: bytes=0-1` on /vivo/pantalla.mp4 206).
+  The preview stops with the WSL session that started it. Before spawning, start it again with
+  `cd ~/.cache/mto-sweatingdrone-site && bunx astro preview --port 4411 --host 127.0.0.1` (run_in_background), then repeat both curls.
 - Chromium numbers (Windows Chrome headless, ANGLE D3D11 RTX 4070 Ti, `scripts/medir-vivo.mjs`, results
   `~/cc-out/mto-vivo-secciones/run2/medir.json` on WSL):
   rAF p50/p95 at 1440 = 6.1 / 12.2 ms (display cadence 6.1), render p95 12.5 ms; at 390 CPU x4 = 36.3 / 72.8 ms with the video,

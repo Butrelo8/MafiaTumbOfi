@@ -63,6 +63,8 @@ checks (Windows Chrome, RTX 4070 Ti D3D11)  clicks 10/10, keys 6/6, cars both wa
 frame 1440 video / paused                    rAF p50 6.1 p95 12.2 / 6.1 12.2 ms; render p95 12.5 / 12.3; during a move rAF p95 18.1
 frame 390 CPU x4 video / paused              rAF p50 36.3 p95 72.8 / 30.3 78.9 ms; during a move p95 103
 draw calls / triangles                       780 / 3.75 M (world 24 objects incl. scatter, truck 145 k, cast 4 x 38.8 k)
+draw calls per source (GLB primitives x     escena 335, mundo 9, cars 9 x 7 = 63, signs 6 periods x (portico 35 + arco 9) = 264
+instances, upper bound before culling)       -> the signs are a third of the calls: instance or merge them
 bytes                                        escena.glb 9.74 MB, mundo.glb 1.89 MB, pantalla.mp4 0.88 MB, portico_b 0.24, arco_c 0.11,
                                              cars 4 x ~0.11 = 0.45, draco wasm 0.19, js 0.17; total 13.74 MB
 TTFF Fast 4G (165 ms, 9 Mbps), 390           13.1 s
@@ -82,10 +84,13 @@ no lane paint and no headlight pool, and the cab interior is lit beige where Cyc
    and cut the scatter: those are the 780 calls and 3.75 M triangles.
 2. Weight: escena.glb is 9.7 MB. Drop the stop-only props nobody sees, cut the truck below 145 k triangles, and set textures to
    512. Don't preload escena.glb on the fallback path.
-3. Diego's seam: check the ping-pong with a full-frame-rate strip, or re-bake on his own period.
-4. Mac WebKit pass: brief at `docs/queue/2026-11-18-mto-vivo-secciones-mac-webkit.md` (buggyship chains it). The page is
-   served from the mirror on 127.0.0.1:4411 (tailscale :4412).
-5. Upload for the owner: `! cd ~/.cache/mto-sweatingdrone-site && npx wrangler versions upload`.
+3. Leak: escena.glb still carries the old stand-ins (`alejandro`, `hector`, `diego`, `manager`, their `_rig`s, `diego_raiz`);
+   the small figure on the road at stop 2 is likely one. Exclude them in the exporter (bytes and triangles drop with them).
+4. Diego's seam: check the ping-pong with a full-frame-rate strip, or re-bake on his own period.
+5. Mac WebKit pass: brief at `docs/queue/2026-11-18-mto-vivo-secciones-mac-webkit.md` (buggyship chains it). The preview dies with
+   the session that started it: `cd ~/.cache/mto-sweatingdrone-site && bunx astro preview --port 4411 --host 127.0.0.1`
+   (tailscale :4412 -> 4411 already mapped), then re-run the brief's 200/206 curls before spawning.
+6. Upload for the owner: `! cd ~/.cache/mto-sweatingdrone-site && npx wrangler versions upload`.
 
 ## Decisions taken (assumptions)
 - Endless road: the truck stays fixed and the whole road3 world (12 periods in this blend, y -960..1344 m) moves +Y→ and wraps every 192 m.
