@@ -95,3 +95,7 @@ blender/render/
 revisar/
 /comfy-out/
 lab/scrub/*.mp4
+
+# live sections spike: licensed Tripo cast and third-party models, built locally (blender/vivo_secciones_*.py)
+public/vivo/*.glb
+public/vivo/draco/
