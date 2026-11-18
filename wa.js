@@ -3,7 +3,7 @@
 // no IP, no user agent, no cookie. The redirect never waits on KV and still happens if KV is missing or fails.
 // Not counted: non-GET, prefetch, crawlers, empty user agent.
 // ponytail: read-modify-write, two taps in the same instant may count once; fine at this volume (Durable Object if not).
-const BOT = /bot|crawl|spider|slurp|facebookexternalhit|headless|curl|wget|python/i
+export const BOT = /bot|crawl|spider|slurp|facebookexternalhit|headless|curl|wget|python/i
 
 export function wa(request, env, ctx) {
   const url = new URL(request.url)

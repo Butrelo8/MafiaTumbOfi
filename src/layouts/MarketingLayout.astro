@@ -86,7 +86,7 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
   <body class="marketing-body">
 
     <!-- ─── HEADER ──────────────────────────────────────────── -->
-    <header class="site-header" id="site-header">
+    <header class="site-header" id="site-header" data-placement="header">
       <a href="/" class="header-mark" aria-label="Mafia Tumbada — Inicio">
         <span class="gold-text" aria-hidden="true">M</span>
         <svg class="header-mark-bolt" viewBox="0 0 46 86" aria-hidden="true" focusable="false">
@@ -135,6 +135,7 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
     <div
       class="mobile-menu"
       id="mobile-menu"
+      data-placement="menu"
       aria-hidden="true"
       role="dialog"
       aria-modal="true"
@@ -200,6 +201,9 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
     </dialog>
 
     <script>
+      import { trackClicks } from '../lib/clickEvents'
+      trackClicks(document)
+
       const zoomDialog = document.getElementById('zoom-dialog') as HTMLDialogElement
       const zoomImg = document.getElementById('zoom-dialog-img') as HTMLImageElement
 
