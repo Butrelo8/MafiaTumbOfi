@@ -1,0 +1,139 @@
+{
+  "releases": [
+    {
+      "title": "PUTIFRESA",
+      "subtitle": "Single",
+      "label": "Spotify",
+      "href": "https://open.spotify.com/album/1w8U5GJbRsYoGl52QlBDdQ",
+      "cover": "/music/putifresa.webp"
+    },
+    {
+      "title": "L.V.",
+      "subtitle": "Corrido tumbado",
+      "href": "https://open.spotify.com/intl-es/album/070MvKHW6m7CV17k0EeYjz?go=1&sp_cid=0d6d738c-4142-4435-ae8f-f760b4483f00&utm_source=spotify_web_player&utm_medium=mobile&sp_cid=0d6d738c-4142-4435-ae8f-f760b4483f00&fallback=getapp",
+      "label": "Spotify",
+      "cover": "/music/lv.webp"
+    },
+    {
+      "title": "Besos",
+      "subtitle": "Single",
+      "href": "https://youtu.be/kAdwJ-0F8mU?si=H2Y-8VBsuOdIdtQo",
+      "label": "YouTube",
+      "cover": "/music/besos.webp"
+    },
+    {
+      "title": "Tal Vez",
+      "subtitle": "Corrido tumbado",
+      "href": "https://open.spotify.com/intl-es/track/54nPL89TjXqZ2UYRO1PvBD?si=e276a7b6475d470c",
+      "label": "Spotify",
+      "cover": "/music/tal-vez.webp"
+    },
+    {
+      "title": "L.A. BUBU",
+      "subtitle": "Single",
+      "href": "https://open.spotify.com/intl-es/track/5djRHmBwycYgJbqtpF8FPN",
+      "label": "Spotify",
+      "cover": "/music/la-bubu.webp"
+    },
+    {
+      "title": "No Te He Olvidado",
+      "subtitle": "Regional",
+      "href": "https://music.apple.com/es/song/no-te-he-olvidado/1794933904",
+      "label": "Apple Music",
+      "cover": "/music/no-te-he-olvidado.webp"
+    },
+    {
+      "title": "SD",
+      "subtitle": "Single",
+      "label": "Spotify",
+      "href": "https://open.spotify.com/album/6PDeUBPHPutSjOU7mJCMZC",
+      "cover": "/music/sd.webp"
+    },
+    {
+      "title": "Mírame",
+      "subtitle": "Single",
+      "label": "Spotify",
+      "href": "https://open.spotify.com/album/4ha0Wnd1upezqhIsVmWkQ6",
+      "cover": "/music/mirame.webp"
+    },
+    {
+      "title": "Corazón",
+      "subtitle": "Regional",
+      "href": "https://music.apple.com/es/album/coraz%C3%B3n-single/1779090777",
+      "label": "Apple Music",
+      "cover": "/music/corazon.webp"
+    }
+  ],
+  "videos": [
+    {
+      "title": "MAFIA TUMBADA EN VIVO- PLAZA LERDO  - MUNDIAL 2026 EN XALAPA",
+      "href": "https://www.youtube.com/watch?v=XxhXFo-hm-I",
+      "thumbnail": "https://i.ytimg.com/vi/XxhXFo-hm-I/hqdefault.jpg"
+    },
+    {
+      "title": "PUTIFRESA - Mafia Tumbada x Eddy Tovar (Visualizer)",
+      "href": "https://www.youtube.com/watch?v=OPQp1854ev4",
+      "thumbnail": "https://i.ytimg.com/vi/OPQp1854ev4/hqdefault.jpg"
+    },
+    {
+      "title": "MAFIA TUMBADA - ¿ QUE PIENSAS DE LA MAFIA TUMBADA?",
+      "href": "https://www.youtube.com/watch?v=1IGDS1B7iAc",
+      "thumbnail": "https://i.ytimg.com/vi/1IGDS1B7iAc/hqdefault.jpg"
+    },
+    {
+      "title": "L.V.  -  MAFIA TUMBADA  - VIDEO OFICIAL",
+      "href": "https://www.youtube.com/watch?v=CDO9iJdIkQk",
+      "thumbnail": "https://i.ytimg.com/vi/CDO9iJdIkQk/hqdefault.jpg"
+    },
+    {
+      "title": "BESOS - MAFIA TUMBADA",
+      "href": "https://www.youtube.com/watch?v=kAdwJ-0F8mU",
+      "thumbnail": "https://i.ytimg.com/vi/kAdwJ-0F8mU/hqdefault.jpg"
+    },
+    {
+      "title": "MAFIA TUMBADA: TAL VEZ GOOD LUCK SESSIONS",
+      "href": "https://www.youtube.com/watch?v=7Sx0yDjGoq0",
+      "thumbnail": "https://i.ytimg.com/vi/7Sx0yDjGoq0/hqdefault.jpg"
+    },
+    {
+      "title": "LA BUBU MAFIA TUMBADA  OFICIAL VIDEO",
+      "href": "https://www.youtube.com/watch?v=h8ZPVsgpAfo",
+      "thumbnail": "https://i.ytimg.com/vi/h8ZPVsgpAfo/hqdefault.jpg"
+    },
+    {
+      "title": "DANDO EL ROLL CON ALEX MONTALVO - MAFIA TUMBADA",
+      "href": "https://www.youtube.com/watch?v=nPbXJTlPxhE",
+      "thumbnail": "https://i.ytimg.com/vi/nPbXJTlPxhE/hqdefault.jpg"
+    },
+    {
+      "title": "NO TE HE OLVIDADO - MAFIA TUMBADA",
+      "href": "https://www.youtube.com/watch?v=HTA31yUX41A",
+      "thumbnail": "https://i.ytimg.com/vi/HTA31yUX41A/hqdefault.jpg"
+    },
+    {
+      "title": "SD - MAFIA TUMBADA",
+      "href": "https://www.youtube.com/watch?v=wqrJFAPzeW8",
+      "thumbnail": "https://i.ytimg.com/vi/wqrJFAPzeW8/hqdefault.jpg"
+    },
+    {
+      "title": "MIRAME - MAFIA TUMBADA",
+      "href": "https://www.youtube.com/watch?v=J-rxz99oKeM",
+      "thumbnail": "https://i.ytimg.com/vi/J-rxz99oKeM/hqdefault.jpg"
+    },
+    {
+      "title": "CORAZÓN - MAFIA TUMBADA (VIDEO OFICIAL)",
+      "href": "https://www.youtube.com/watch?v=I9BXC3LPlx8",
+      "thumbnail": "https://i.ytimg.com/vi/I9BXC3LPlx8/hqdefault.jpg"
+    },
+    {
+      "title": "BRILLAROSA  (COVER) MAFIA TUMBADA",
+      "href": "https://www.youtube.com/watch?v=_2gaXoTJaFk",
+      "thumbnail": "https://i.ytimg.com/vi/_2gaXoTJaFk/hqdefault.jpg"
+    },
+    {
+      "title": "MAFIA TUMBADA",
+      "href": "https://www.youtube.com/watch?v=Y1pdXLm4gds",
+      "thumbnail": "https://i.ytimg.com/vi/Y1pdXLm4gds/hqdefault.jpg"
+    }
+  ]
+}

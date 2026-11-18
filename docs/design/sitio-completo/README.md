@@ -1,14 +1,16 @@
 # Site `/` on a preview (2026-11-18, branch `cc/sitio-completo`, run `maincharacterdrone`)
 
-Spec: mothership `docs/queue/2026-11-18-mto-full-site-preview.md`. The prototype is `/`; the A Carretera home is `/anterior`
-(`noindex`, not linked); main's prod features are merged in (click events, `/wa/` counter, Spotify + Instagram on the first
+Spec: mothership `docs/queue/2026-11-18-mto-full-site-preview.md`. The prototype is `/`; main's live Gótico home is `/anterior`
+(restored from main; its own links point at `/anterior/`, `noindex,nofollow`, `hero.mp4` back in `public/video/`; the A Carretera home is in the history, `da918f3`; not linked); main's prod features are merged in (click events, `/wa/` counter, Spotify + Instagram on the first
 screen, Plausible gated on `PUBLIC_PLAUSIBLE_DOMAIN`, fan list still parked).
 
 ## What the preview shows
 - Lists: `research/contenido/catalog.json` is byte-identical to main's `src/data/catalog.json`. CI does pass Spotify secrets,
   but Spotify answers 403 and YouTube's feed 404 (`deploy.yml` header), so its build also falls back to that snapshot: the
-  preview shows the same 9 releases and 14 videos. The new `/` imports the snapshot directly and never calls `loadCatalog()`,
-  so a future prod merge will not pick up fresh lists unless that changes.
+  preview shows the same 9 releases and 14 videos. Update 11:58: from this machine the YouTube feed answers 200 and prod's HTML carries the same 15 ids as a local build,
+  so CI gets the live feed too (the `deploy.yml` comment is out of date). `/anterior` is built with `loadCatalog()` exactly as
+  prod is (live YouTube, Spotify snapshot: no credentials here). On `/` the 9 releases and the 5 featured videos are fixed; the
+  "Más en YouTube" list comes from `loadCatalog()` too (emoji stripped from titles: Saira has none).
 - Build env: none of `PUBLIC_ALLOW_INDEXING`, `PUBLIC_PLAUSIBLE_DOMAIN`, `PUBLIC_SITE_URL` was set: `noindex`, no Plausible.
 - Scene: the run and the loop are the picture at every stop; `public/prototipo/parada-1..6.webp` (montaje-esc1..6) show
   only while the run cannot show a frame. The vertical 9:16 framing is still pending: at 390 the 16:9 render is cropped to its
@@ -37,10 +39,13 @@ click event                     tap "Escribir por WhatsApp": POST /e {"event":"w
 revisar web (dist, videos emptied) overflow 0 at 320/390/768/1440, tap<44 0, contrast 0, cls 0.000 / 0.032, reduced-motion 0,
                                 weight 0.63 MB at 390 (videos excluded), FAIL img-upscaled (below)
 slop-check src                  0 FAIL, 2 REVIEW (index.astro:123, tell 17 muted subtitle; I take it to be the Gira line at 191 that
-                                DESIGN.md accepts, not verified; loop.ts:76 is /anterior)
+                                DESIGN.md accepts, not verified; loop.ts:76 is an orphan script of the old A Carretera page)
 ```
 `revisar.sh` never reaches network idle with the real videos (`ruta.mp4` stays pending in its Chromium), so its numbers come
 from a copy of `dist/` with the two `.mp4` emptied: layout, tap, contrast and overflow do not depend on the video.
-`img-upscaled` FAIL: the 9 cover files in `public/music/` are 160 px and show at 210-280 px; the YouTube thumbs are
-`hqdefault` (480 px) at 644-716; `parada-1.webp` is 960 px at 1440. Covers need larger sources (not verified: where from).
+`img-upscaled` FAIL, after the cover fix (11:58): `besos.webp` 300 px (YouTube-only release, no art source), the YouTube thumbs are
+`hqdefault` (480 px) at 644-716, `parada-1.webp` is 960 px at 1440. Covers: Spotify oEmbed thumbnail with its `...00001e02` id
+swapped for `...0000b273` (640 px), iTunes lookup at 600 px for No Te He Olvidado, the local 600 px jpg for Corazón, all written
+as 480 px webp over `public/music/*.webp` (same artwork as before: mean diff 2.4-4.8 against the old 160 px files). The Spotify
+button on the first screen is the artist link again, as in prod.
 Shots: `capturas/{390,1440}-<stop>.png` (live video) and `capturas/sin-video-{390,1440}-<stop>.png` (the still path), `resultados.json`.

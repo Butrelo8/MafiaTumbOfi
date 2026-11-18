@@ -1,0 +1,117 @@
+---
+// src/components/MemberCard.astro
+const { name, role, image, instagram = "#" } = Astro.props;
+---
+
+<div class="member-card" data-reveal>
+  <button type="button" class="member-image" data-zoom-src={image} data-zoom-alt={name} aria-label={`Ampliar foto de ${name}`}>
+    <picture>
+      <source srcset={image.replace('.jpg', '.webp')} type="image/webp" />
+      <img src={image} alt="" loading="lazy" width="1440" height="1081" decoding="async" />
+    </picture>
+  </button>
+
+  <span class="member-role">{role}</span>
+  <p class="member-name">{name}</p>
+
+  <div class="member-socials">
+    <a href={instagram} target="_blank" rel="noopener noreferrer">IG</a>
+  </div>
+</div>
+
+<style>
+.member-card {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  padding: 1rem 1rem 1.6rem;
+  text-align: center;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.member-card:hover {
+  transform: translateY(-2px);
+}
+
+.member-image {
+  display: block;
+  padding: 0;
+  background: none;
+  cursor: zoom-in;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  margin: 0 auto 1rem;
+  overflow: hidden;
+  filter: grayscale(100%);
+  transition: filter 0.3s;
+  border: 2px solid transparent;
+}
+
+.member-image:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
+}
+
+.member-card:hover .member-image,
+.member-card:focus-within .member-image {
+  filter: grayscale(0%);
+}
+
+.member-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.member-role {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.member-name {
+  font-family: var(--ff-body);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.member-socials {
+  margin-top: 1.2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.member-socials a {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--red-link);
+  text-decoration: none;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.member-socials a:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.member-socials a:focus-visible {
+  outline: 2px solid var(--red-link);
+  outline-offset: 4px;
+}
+</style>

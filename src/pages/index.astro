@@ -11,6 +11,7 @@ import { members } from '../../research/contenido/members'
 import { bandSocialUrls as redes } from '../../research/contenido/socials'
 import catalog from '../../research/contenido/catalog.json'
 import { homeCanonical } from '../lib/publicSiteUrl'
+import { loadCatalog } from '../lib/catalog'
 import { normalizePlausibleDataDomain } from '../lib/plausibleClient'
 
 const releases = catalog.releases
@@ -29,7 +30,10 @@ const plataformas = [
 const pie = [...plataformas, { n: 'Instagram', h: redes.instagram }, { n: 'TikTok', h: redes.tiktok }, { n: 'Facebook', h: redes.facebook }]
 const idVideo = (href: string) => new URL(href).searchParams.get('v')
 const mostrados = new Set(videos.map((v) => v.id))
-const masVideos = catalog.videos.filter((v) => !mostrados.has(idVideo(v.href) ?? ''))
+// The video list is built the way prod's is: the live YouTube feed, the snapshot when it fails. The releases stay on the snapshot (Spotify has no credentials here, and in CI it answers 403).
+// Saira has no emoji glyphs (revisar › glyphs): a live YouTube title like "... 🔥 | VLOG" loses the emoji here.
+const sinEmoji = (t: string) => t.replace(/\p{Extended_Pictographic}\uFE0F?/gu, '').replace(/\s+/g, ' ').trim()
+const masVideos = (await loadCatalog()).videos.filter((v) => !mostrados.has(idVideo(v.href) ?? ''))
 const canonical = homeCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)
 const plausible = normalizePlausibleDataDomain(import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN)
 // Without PUBLIC_ALLOW_INDEXING=true (set by CI, not by a preview) the page asks crawlers to stay out.
@@ -110,7 +114,7 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
           <h1 id="h-inicio">La Mafia <span>Tumbada</span></h1>
           <p>Corridos tumbados desde Xalapa, Veracruz.</p>
           <div class="acciones">
-            <Boton href={releases[0].href} lleno icono="play">Escuchar en Spotify</Boton>
+            <Boton href={redes.spotify} lleno icono="play">Escuchar en Spotify</Boton>
             <Boton href={redes.instagram} flecha={false}>Instagram</Boton>
             <Boton href="#contacto">Contratar</Boton>
           </div>
@@ -125,7 +129,7 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
           {releases.map((r) => (
             <li>
               <a class="lanz" href={r.href}>
-                <img src={r.cover} alt="" width="160" height="160" loading="lazy" decoding="async" />
+                <img src={r.cover} alt="" width="480" height="480" loading="lazy" decoding="async" />
                 <b>{r.title}</b>
                 <small>{r.subtitle}, en {r.label}</small>
               </a>
@@ -153,7 +157,7 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
         </ul>
         <h3 class="mas">Más en YouTube</h3>
         <ul class="mas-lista" role="list">
-          {masVideos.map((v) => <li><a href={v.href}>{v.title}</a></li>)}
+          {masVideos.map((v) => <li><a href={v.href}>{sinEmoji(v.title)}</a></li>)}
         </ul>
       </section>
 

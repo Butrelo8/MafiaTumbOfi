@@ -9,7 +9,9 @@
     "preview": "astro preview"
   },
   "dependencies": {
+    "@fontsource/archivo": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/pirata-one": "^5.3.0",
     "@fontsource/saira": "^5.2.0",
     "@fontsource/saira-condensed": "^5.2.0",
     "@sentry/browser": "^11.6.0",

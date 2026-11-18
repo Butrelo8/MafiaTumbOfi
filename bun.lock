@@ -5,7 +5,9 @@
     "": {
       "name": "mafia-tumbada-ofi-web",
       "dependencies": {
+        "@fontsource/archivo": "^5.3.0",
         "@fontsource/jetbrains-mono": "^5.2.8",
+        "@fontsource/pirata-one": "^5.3.0",
         "@fontsource/saira": "^5.2.0",
         "@fontsource/saira-condensed": "^5.2.0",
         "@sentry/browser": "^11.6.0",
@@ -120,7 +122,11 @@
 
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.28.1", "", { "os": "win32", "cpu": "x64" }, "sha512-bm4Mowrv+GXMlpWX++EcXw/iLyd1o3+bJkC2DkWXYVvgZCqD/bSj9ctZeAMC3cIxgjRVR2Dufaiu4YPxr5gW1A=="],
 
+    "@fontsource/archivo": ["@fontsource/archivo@5.3.0", "", {}, "sha512-5DIMgPVJRi62OqdOVoogCFxP73EkNM/E0YVTSDIQlDEJfDbxqZduwM/YoNZwC9Sx1CDgpKinqf8ckRY1QNIecw=="],
+
     "@fontsource/jetbrains-mono": ["@fontsource/jetbrains-mono@5.2.8", "", {}, "sha512-6w8/SG4kqvIMu7xd7wt6x3idn1Qux3p9N62s6G3rfldOUYHpWcc2FKrqf+Vo44jRvqWj2oAtTHrZXEP23oSKwQ=="],
+
+    "@fontsource/pirata-one": ["@fontsource/pirata-one@5.3.0", "", {}, "sha512-qeaDy+F+TcCVdODaIvD4U0ZoaWPejpkXwHAAHIBtauwP/9mf+Sj8ORX5UYcnBpnyhd7ihYPpW+WWPbz9FryrJQ=="],
 
     "@fontsource/saira": ["@fontsource/saira@5.3.0", "", {}, "sha512-Sbc9SUZsXjULjzjDbBYicL+gQSdLlqwEiyHi6Gs5R9PSsdUWTmTa77jH1a8MalWWHafoq6SK/G3ovyIbGEN5Ww=="],
 
