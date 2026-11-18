@@ -260,6 +260,8 @@ export async function arrancar() {
     }
     requestAnimationFrame(cuadro)
   }
+  // compile every material now, not only the first stop's frustum: the first move to the side stop hitched 346 ms (390 CPU x4)
+  await renderer.compileAsync(scene, cam)
   requestAnimationFrame(cuadro)
 
   // ---- after the first frame: cast, then cars and signs, then the video. Each part compiles its shaders before it shows.
