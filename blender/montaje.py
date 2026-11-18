@@ -40,6 +40,8 @@ from mathutils import Vector, Matrix
 sys.dont_write_bytecode = True
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, AQUI)
+import reparto_v5
 LAZO = "# ---------------------------------------------------------------- utileria.py's render loop"
 WB = len(sys.argv) > sys.argv.index("--") + 6 and sys.argv[sys.argv.index("--") + 6] == "wb"
 DIEGO_CLIP = os.environ.get("MONTAJE_DIEGO") or r"\\wsl.localhost\Ubuntu\home\black\cc-out\mto-integracion\assets\diego_clip_sitting_drinking_sip.blend"
@@ -163,6 +165,14 @@ def montar_reparto():
         fr = giro @ Vector((0, -1, 0))
         print(f"MONTAJE asiento {quien} {asiento} alto {alto} cadera ({cad.x:.3f}, {cad.y:.3f}, {cad.z:.3f}) frente ({fr.x:+.2f}, {fr.y:+.2f}) techo {techo:.3f} "
               f"cabeza {'medida' if cabeza else 'estimada'} {cabeza or estimada:.3f} libre {techo - (cabeza or estimada):+.3f}", flush=True)
+    # the Tripo v5 cast (blender/reparto_v5.py), driven by the stand-ins and Diego's clip, which stay hidden from render
+    dobles = {q: (bpy.data.objects[q + "_rig"], [bpy.data.objects[q]]) for q in ("manager", "hector", "alejandro")}
+    dobles["diego"] = (next(o for o in DIEGO_OBJS if o.type == "ARMATURE"),
+                       [o for o in DIEGO_OBJS if o.type == "MESH" and any(m.type == "ARMATURE" for m in o.modifiers)])
+    reparto_v5.montar(FIGURAS, dobles, {q: bpy.data.collections["reparto_" + q] for q in ASIENTOS})
+    for quien, (bajo, cabeza) in reparto_v5.medir().items():
+        arm = bpy.data.objects[quien + "_v5_rig"]
+        print(f"MONTAJE v5 {quien} cabeza {cabeza:.3f} libre {techo_sobre(arm.matrix_world @ arm.pose.bones['mixamorig:Hips'].head) - cabeza:+.3f}", flush=True)
     viejo_diego()
 
 
@@ -171,6 +181,8 @@ def viejo_diego():
     figure again after each still, so this runs before each one."""
     for o in [bpy.data.objects["diego_rig"]] + list(bpy.data.objects["diego_rig"].children_recursive):
         o.hide_render = True
+    reparto_v5.ocultar_dobles()
+    reparto_v5.medir()
 
 
 def carril():
