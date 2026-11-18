@@ -2,7 +2,6 @@
 // Row: index1 = event; blob1 = event, blob2 = net, blob3 = page, blob4 = placement. Nothing else is stored:
 // no IP, no user agent, no country, no cookie. Always answers 204 so the beacon never retries or errors the page.
 // Not counted: non-POST (405), crawlers or empty user agent, a foreign Origin, a body over 512 bytes, names off the lists.
-// `signup` is never accepted here: it is written by the /signup route.
 import { BOT } from './wa.js'
 
 const EVENTS = new Set(['wa_click', 'contact_click', 'follow_click'])
@@ -10,7 +9,7 @@ const NETS = new Set(['spotify', 'instagram', 'youtube', 'tiktok', 'facebook', '
 const PLACEMENT = /^[a-z_]{1,20}$/
 const PAGE = /^\/[a-z0-9\-/]{0,60}$/
 
-export function record(env, event, { net = '', page = '/', placement = '' } = {}) {
+function record(env, event, { net = '', page = '/', placement = '' } = {}) {
   env.MTO_EVENTS?.writeDataPoint({ indexes: [event], blobs: [event, net, page, placement] })
 }
 

@@ -8,7 +8,6 @@ No se guarda IP, user agent, país ni cookie. Se ignoran bots (misma regex que `
 | `wa_click` | cualquier enlace a `/wa/…` | — |
 | `contact_click` | enlaces `tel:` y `mailto:` | — |
 | `follow_click` | enlaces a spotify, instagram, youtube, tiktok, facebook, apple_music | la red |
-| `signup` | alta en la lista de fans (la escribe `/signup`, nunca `/e`) | — |
 
 Columnas: `index1` = evento; `blob1` evento, `blob2` net, `blob3` página, `blob4` placement
 (`header`, `menu`, `hero`, `musica`, `grupo`, `contratacion`, `footer`). El cliente es `src/lib/clickEvents.ts`

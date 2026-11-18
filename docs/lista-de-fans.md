@@ -1,19 +1,8 @@
-# Lista de fans
+# Lista de fans — aparcada (2026-11-18)
 
-Formulario `#lista` → `POST /signup` (`signup.js`) → D1 `mto_fans` (id `591a5a08-44eb-4269-8c56-47827393aa2b`, esquema en `migrations/0001_mto_fans.sql`).
-Cada alta escribe también un evento `signup` en Analytics Engine, sin el correo ni el número. Ver `docs/analytics.md` y `docs/aviso-de-privacidad.md`.
+Se construyó (formulario `#lista`, `POST /signup`, D1, aviso de privacidad) y el dueño decidió dejarla para después.
+El código sigue en el historial: commits `c1f05f7` y `619c875` (rama `cc/validdrone`). Para retomarla, se restauran
+`signup.js`, `signup.test.mjs`, `migrations/0001_mto_fans.sql`, `src/pages/aviso-de-privacidad.astro` y la sección `#lista`
+de ese commit, más los bindings `DB` (D1) y `SIGNUP_LIMIT` en `wrangler.jsonc`. El aviso quedó en borrador con tres campos por completar.
 
-```bash
-# leer la lista (--remote: sin él lee la base local vacía)
-npx wrangler d1 execute mto_fans --remote --command "SELECT id, contact, kind, city, created_at FROM mto_fans ORDER BY id DESC"
-# cuántos
-npx wrangler d1 execute mto_fans --remote --command "SELECT kind, COUNT(*) AS n FROM mto_fans GROUP BY kind"
-# dar de baja a alguien (derecho de cancelación)
-npx wrangler d1 execute mto_fans --remote --command "DELETE FROM mto_fans WHERE contact = '<correo o 52…>'"
-# migraciones nuevas
-npx wrangler d1 migrations apply mto_fans --remote
-```
-
-Anti-spam: campo oculto `web` (si trae algo, responde ok y no guarda) y límite de 5 altas por minuto por IP y ubicación
-(binding `SIGNUP_LIMIT`, no guarda la IP). Sin Turnstile; si aparece spam, se añade.
-Un correo o número repetido responde ok y no duplica.
+La base D1 `mto_fans` (`591a5a08-44eb-4269-8c56-47827393aa2b`) sigue en la cuenta de Cloudflare, con la tabla creada y vacía, sin uso.
