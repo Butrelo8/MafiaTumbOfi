@@ -18,6 +18,6 @@
     "html_handling": "auto-trailing-slash",
     // Workers Static Assets ignora Range; worker.js lo resuelve para el video del hero. Todo lo
     // demás (HTML, JS, CSS, imágenes) se sirve directo desde los assets sin invocar al Worker.
-    "run_worker_first": ["/video/*", "/prototipo/*", "/vivo/*.mp4", "/wa/*", "/e"]
+    "run_worker_first": ["/video/*", "/prototipo/*", "/vivo/*.mp4", "/escena/*.mp4", "/wa/*", "/e"]
   }
 }
