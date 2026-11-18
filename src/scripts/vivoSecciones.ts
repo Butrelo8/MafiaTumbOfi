@@ -243,7 +243,8 @@ export async function arrancar() {
     }
     // camera
     if (mov) {
-      const u = Math.min(1, (ahora - mov.t0) / mov.dur), e = ease(u)
+      // the rAF stamp can precede the click's performance.now(): clamp at 0 (a negative u read past the curve's points)
+      const u = Math.min(1, Math.max(0, (ahora - mov.t0) / mov.dur)), e = ease(u)
       cam.position.copy(mov.curva.getPointAt(e))
       const j = e * (mov.mira.length - 1), j0 = Math.floor(j), f = j - j0, j1 = Math.min(j0 + 1, mov.mira.length - 1)
       mira.copy(b2t(mov.mira[j0]).lerp(b2t(mov.mira[j1]), f))

@@ -14,7 +14,7 @@ mkdirSync(out, { recursive: true })
 const browser = await chromium.launch({ executablePath: process.env.CHROME, args: ['--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required'] })
 const SIZES = { 390: { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true }, 1440: { viewport: { width: 1440, height: 900 } }, 960: { viewport: { width: 960, height: 540 } } }
 const res = { url, frames: {}, checks: {}, ttff4g: null }
-const pct = (a) => { const s = a.slice(10).sort((x, y) => x - y); return (p) => +s[Math.min(s.length - 1, Math.floor(p * s.length))].toFixed(2) }
+const pct = (a) => { const s = a.slice(10).sort((x, y) => x - y); return (p) => (s.length ? +s[Math.min(s.length - 1, Math.floor(p * s.length))].toFixed(2) : null) }
 const errores = []
 
 async function abrir(w, q = '') {

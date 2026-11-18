@@ -49,34 +49,46 @@ cast clip seam f0 -> f240 (max bone offset)   manager 0.005 m  alejandro 0.017 m
 Diego's sip clip ping-pongs on a period that isn't 240 frames, and Héctor's caja5 grip search drifts. Give each rig its own
 window from its real period (Diego: read the NLA strip of colddrone's clip), or crossfade the last 12 frames into the first.
 
-**Step 2's first run failed at the glTF export.** Everything up to the export ran: figures 1.9 M -> 38.8 k tris each,
-truck 921,736 -> ratio 0.158. The exporter raised `KeyError: None` in `io_scene_gltf2 .../animation/sampled/sampling_cache.py`
-line 433 (`object_caching`); full log at `tmp/vivo/exportar.log`. No `escena.glb`, `mundo.glb` or `vivo.json` was written.
-Likely cause, not verified: Blender 5's layered actions, where the baked action or a selected object's action has no slot
-the sampler can resolve. Try `export_animation_mode="ACTIVE_ACTIONS"` or "NLA_TRACKS", or push each baked action to an
-NLA track before export. Exporting the static scene with `anim=False` first proves the rest of the pipeline.
+## Part 2 (laggingdrone, 2026-11-18 13:00 to 13:45): the page works, the look does not hold yet
+Commits 90aecb3, a51c6df and the one after them. Export fixed (3 runs): objects parented outside the export set are unparented
+with their world transform kept (the sampler's `KeyError: None`), one NLA track per rig (4 clips), the screen truck's 21
+loose parts hang from a `pantalla_camion` empty, and the truck box uses visible meshes only, with min x mirrored about x 1.72.
+Page: one copy of road3 (the GLB already spans y -960..1344 m), signs once per period, wheel pivots, lights in truck-local
+coordinates, the `u_led_N` material plays the video, `?sinpantalla`, `?respaldo`, and Diego ping-pongs (seam not verified with a strip).
+Bug fixed: the move's u went negative on the first frame after a click and `getPointAt` threw, which stopped the loop.
+
+```
+checks (Windows Chrome, RTX 4070 Ti D3D11)  clicks 10/10, keys 6/6, cars both ways (+8..10 m/s overtaking, 46..52 m/s oncoming,
+                                             one held behind the screen truck), wheels spin, world wraps, video plays, 0 page errors
+frame 1440 video / paused                    rAF p50 6.1 p95 12.2 / 6.1 12.2 ms; render p95 12.5 / 12.3; during a move rAF p95 18.1
+frame 390 CPU x4 video / paused              rAF p50 36.3 p95 72.8 / 30.3 78.9 ms; during a move p95 103
+draw calls / triangles                       780 / 3.75 M (world 24 objects incl. scatter, truck 145 k, cast 4 x 38.8 k)
+bytes                                        escena.glb 9.74 MB, mundo.glb 1.89 MB, pantalla.mp4 0.88 MB, portico_b 0.24, arco_c 0.11,
+                                             cars 4 x ~0.11 = 0.45, draco wasm 0.19, js 0.17; total 13.74 MB
+TTFF Fast 4G (165 ms, 9 Mbps), 390           13.1 s
+camera path test                             bun test src/lib/vivoRuta.test.ts 32/32
+gates                                        slop-check 27/27 pass; revisar web (?respaldo, 390+1440) all pass except weight-390
+                                             11.49 MB FAIL (the page preloads escena.glb even on the fallback)
+```
+Sheet `~/cc-out/mto-vivo-secciones/hoja.jpg` (stills in `run2/`): every stop's framing matches the Cycles still, but the night
+look does not hold. The world is flat grey (road3's procedural materials export as flat colours), there's no fog, no treeline,
+no lane paint and no headlight pool, and the cab interior is lit beige where Cycles is dark. The scripts are
+`scripts/medir-vivo.mjs` (Windows node.exe + playwright-core in `E:\tmp\pw-vivo`) and `scripts/hoja-vivo.py`.
 
 ## Next, in order
-1. Fix the export (above). Check the GLB sizes. Check the GLB sizes and the per-rig seam. Set `ruedas` to the real wheel
-   names (`escena.py` names them; grep for `rueda`).
-2. Build on an ext4 mirror, following the `scripts/prototipo.sh` pattern (`MIRROR=~/.cache/mto-sweatingdrone-site`), on a
-   port other than 3100 or 3109. Copy `node_modules/three/examples/jsm/libs/draco/gltf/*` into `public/vivo/draco/` in the
-   mirror. Then run `bun test src/lib/vivoRuta.test.ts`.
-3. World materials. road3's surfaces are procedural, so glTF exports them as flat colours. Bake one COMBINED atlas for the
-   world with the truck lights off and the fog box (`w_niebla`) hidden. Ship it as unlit `MeshBasicMaterial` in the page.
-   Headlight pools: either a baked additive plane fixed to the truck, or the live SpotLights onto a lit road material.
-4. Sheet: `?f=0&parada=N` at 960×540 next to `~/cc-out/mto-tripo-v5/montaje/montaje-escN.png`, one row per stop, saved to
-   `~/cc-out/mto-vivo-secciones/hoja.jpg`.
-5. Numbers: render p50 and p95 plus rAF p50 and p95 in Chromium at 1440 and 390, with the video playing and paused. Also
-   draw calls, triangles and bytes per file (cars and signs as their own rows), and TTFF with Chromium's network throttled
-   to Fast 4G. Take no numbers while any Blender is rendering (`tasklist.exe | grep -i blender`).
-6. Mac WebKit pass. Drones can't run `cc-deck spawn`, so write the brief following `~/projects/mothership/.claude/skills/mac-webkit-pass/SKILL.md`
-   and ask buggyship to chain it. Serve the page on 127.0.0.1:4411 behind tailscale serve on :4412.
-7. Gates: `slop-check.py`, `revisar.sh web` at 390 and 1440, and `refs-check.py` if `references.md` changes. Then the upload
-   command for the owner: `! npx wrangler versions upload` from the mirror, run by the owner.
+1. World bake (old step 3): one COMBINED atlas for road3, with the truck lights off and `w_niebla` hidden. Save it as plain
+   sRGB 8-bit with "Save as Render" off, so AgX isn't applied twice. In the page use MeshBasicMaterial with the map in sRGB.
+   Add a baked additive headlight-pool plane fixed to the truck. Trim the world to about 250 m ahead (the fog hides the rest),
+   and cut the scatter: those are the 780 calls and 3.75 M triangles.
+2. Weight: escena.glb is 9.7 MB. Drop the stop-only props nobody sees, cut the truck below 145 k triangles, and set textures to
+   512. Don't preload escena.glb on the fallback path.
+3. Diego's seam: check the ping-pong with a full-frame-rate strip, or re-bake on his own period.
+4. Mac WebKit pass: brief at `docs/queue/2026-11-18-mto-vivo-secciones-mac-webkit.md` (buggyship chains it). The page is
+   served from the mirror on 127.0.0.1:4411 (tailscale :4412).
+5. Upload for the owner: `! cd ~/.cache/mto-sweatingdrone-site && npx wrangler versions upload`.
 
 ## Decisions taken (assumptions)
-- Endless road: the truck stays fixed and the whole road3 world (4 periods, -384..768 m) moves +Y→ and wraps every 192 m.
+- Endless road: the truck stays fixed and the whole road3 world (12 periods in this blend, y -960..1344 m) moves +Y→ and wraps every 192 m.
   This follows `ruta.py`, and the Cycles run does the same. The camera rides with the truck for free.
 - One dressing for all stops: the set every stop shares, plus scene 6's truck picks and scene 1's pennant and strawberry.
   The stills differ per stop. The screen truck is placed per stop and eased with the camera: 40 m ahead in the left lane,
