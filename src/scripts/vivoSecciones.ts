@@ -2,10 +2,10 @@
 // under it, as the Cycles run does (blender/ruta.py), so the camera rides along for free. Cars pass in both carriageways,
 // the screen truck plays a video, the band idles (clips baked from the Tripo v5 rigs). Section buttons move the camera
 // between the six montaje stops along vivoRuta's path; scroll does nothing.
-// Query: ?f=0 freezes world phase, band pose and video at 0 (for the side-by-side), ?parada=N starts at stop N (0-5).
+// Query: ?respaldo forces the no-WebGL fallback. ?f=0 freezes world phase, band pose and video at 0 (for the side-by-side), ?parada=N starts at stop N (0-5).
 import {
   WebGLRenderer, Scene, PerspectiveCamera, Group, Mesh, Object3D, Vector3, Color, FogExp2, AgXToneMapping, SRGBColorSpace,
-  AnimationMixer, CatmullRomCurve3, VideoTexture, MeshStandardMaterial, MeshBasicMaterial, SpotLight, PointLight, HemisphereLight,
+  AnimationMixer, LoopPingPong, CatmullRomCurve3, VideoTexture, MeshStandardMaterial, MeshBasicMaterial, SpotLight, PointLight, HemisphereLight,
   PMREMGenerator, Box3, type Material, type Texture,
 } from 'three'
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
@@ -28,7 +28,7 @@ export async function arrancar() {
   const canvas = document.getElementById('lienzo') as HTMLCanvasElement
   const botones = [...document.querySelectorAll<HTMLButtonElement>('nav button')]
   const gl2 = document.createElement('canvas').getContext('webgl2')
-  if (!gl2) return respaldo()
+  if (!gl2 || q.has('respaldo')) return respaldo() // ?respaldo: the no-WebGL path on purpose (revisar under SwiftShader)
 
   const t0 = performance.now()
   const renderer = new WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: FIJO })
@@ -56,42 +56,59 @@ export async function arrancar() {
   const raiz = escena.scene
   scene.add(raiz)
   const camion = raiz.getObjectByName('camion')!
-  const ruedas = d.ruedas.map((n) => raiz.getObjectByName(n)).filter(Boolean) as Object3D[]
-  const ejes = ruedas.map((r) => { const b = new Box3().setFromObject(r); return { r, centro: b.getCenter(new Vector3()) } })
+  // GLTFLoader sanitizes names (rueda0.001 -> rueda0001), so match the prefix instead of vivo.json's exact names
   const pantalla = raiz.getObjectByName('pantalla_camion')!
+  raiz.updateMatrixWorld(true)
+  const halladas: Object3D[] = []
+  raiz.traverse((o) => { if (/^rueda\d/i.test(o.name) && !/^rueda\d/i.test(o.parent?.name ?? '')) halladas.push(o) })
+  // spin about the hub: a separated wheel keeps the truck's origin, so each one hangs from a pivot at its own centre
+  const ruedas = halladas.map((r) => {
+    const piv = new Object3D()
+    r.parent!.add(piv)
+    piv.position.copy(r.parent!.worldToLocal(new Box3().setFromObject(r).getCenter(new Vector3())))
+    piv.updateMatrixWorld()
+    piv.attach(r)
+    return piv
+  })
+  const ejes = ruedas.map((r) => ({ r }))
   const pantallaBase = pantalla.position.clone()
   const mezcla = new AnimationMixer(raiz)
-  for (const c of escena.animations) mezcla.clipAction(c).play()
+  for (const c of escena.animations) {
+    const a = mezcla.clipAction(c)
+    if (/diego/i.test(c.name)) a.setLoop(LoopPingPong, Infinity) // his sip clip seams 87 cm at f240 (exportar.log)
+    a.play()
+  }
   vidrios(raiz)
 
-  // live lights that travel with the truck: two headlamps, the cab dome
+  // live lights that travel with the truck: two headlamps, the cab dome (vivo.json gives world positions)
+  raiz.updateMatrixWorld(true)
+  const local = (p: V3) => camion.worldToLocal(b2t(p))
   for (const f of d.faros) {
     const s = new SpotLight(0xffe2b0, 60, 70, 0.42, 0.55, 1.6)
-    s.position.copy(b2t(f.pos)); s.target.position.copy(b2t(f.mira))
+    s.position.copy(local(f.pos)); s.target.position.copy(local(f.mira))
     camion.add(s, s.target)
   }
   const domo = new PointLight(0xffb070, 0.6, 2.5, 2)
-  domo.position.copy(b2t([1.72, 0.2, 2.05]))
+  domo.position.copy(local([1.72, 0.2, 2.05]))
   camion.add(domo)
   scene.add(new HemisphereLight(0x223044, 0x0a0806, 0.25))
 
-  // ---- the world: one road period with its lighting baked (unlit), cloned and wrapped; signs and cars ride in it
-  const tramo = mundo.scene
+  // ---- the world: road3 as built (y -384..768 m, six periods), moved under the truck and wrapped every period as ruta.py
+  // does; the signs repeat once per period so the wrap never shows
   const vias = new Group()
   scene.add(vias)
-  const N = 4 // tiles at -1..2 periods: 192 m behind, 576 m ahead
-  for (let k = -1; k < N - 1; k++) {
-    const t = k === 0 ? tramo : tramo.clone()
-    t.position.z = -k * d.periodo
-    vias.add(t)
-    const s = (k % 2 ? arco : portico).scene.clone()
-    s.position.z = -k * d.periodo - 120
-    vias.add(s)
+  vias.add(mundo.scene)
+  for (let k = -2; k < 4; k++) {
+    for (const [s, y] of [[portico, 120], [arco, 24]] as const) {
+      const c = s.scene.clone()
+      c.position.z = -(y + k * d.periodo)
+      vias.add(c)
+    }
   }
   // pole sweep on the truck: a real light only at the two poles nearest the cab, following the world
-  const postes = [new PointLight(0xffc98a, 40, 26, 2), new PointLight(0xffc98a, 40, 26, 2)]
+  const posPostes = d.postes.map(b2t) // road3 has one real pole light (luz_poste); the other poles are emissive only
+  const postes = posPostes.slice(0, 2).map(() => new PointLight(0xffc98a, 40, 26, 2))
   postes.forEach((p) => scene.add(p))
-  const posPostes = d.postes.map(b2t)
 
   // ---- traffic: a pool of cars per carriageway, recycled along the endless road
   const autos: { o: Object3D; x: number; z: number; v: number; vQuiere: number; mismo: boolean }[] = []
@@ -128,16 +145,21 @@ export async function arrancar() {
   const video = Object.assign(document.createElement('video'), { src: '/vivo/pantalla.mp4', muted: true, loop: true, playsInline: true, preload: 'auto', crossOrigin: 'anonymous' })
   const vt = new VideoTexture(video)
   vt.colorSpace = SRGBColorSpace
+  // ?sinpantalla: a flat dark panel instead of the video (screenshots never show the band footage on the screen)
+  const SIN = q.has('sinpantalla')
+  let pantallas = 0
   raiz.traverse((o) => {
     const m = (o as Mesh).material as MeshStandardMaterial | undefined
-    if (m && /pantalla_lateral|p3_pantalla|led_lado/i.test(m.name)) {
-      (o as Mesh).material = new MeshBasicMaterial({ map: vt, toneMapped: false, color: new Color(0.85, 0.85, 0.85) })
+    if (m && /^u_led_\d|pantalla_lateral|led_lado/i.test(m.name)) {
+      (o as Mesh).material = SIN ? new MeshBasicMaterial({ color: 0x1a1d24 }) : new MeshBasicMaterial({ map: vt, toneMapped: false, color: new Color(0.85, 0.85, 0.85) })
+      pantallas++
     }
   })
 
   // ---- camera moves
   const paradas = d.camaras
   let actual = Math.min(5, Math.max(0, Number(q.get('parada') ?? 0)))
+  botones.forEach((b, k) => b.setAttribute('aria-current', String(k === actual)))
   let mov: { curva: CatmullRomCurve3; mira: V3[]; lens: number[]; t0: number; dur: number; de: number; a: number } | null = null
   const mira = new Vector3()
   let lens = paradas[actual].lens
@@ -175,7 +197,9 @@ export async function arrancar() {
   })
 
   // ---- loop
-  const medida = { frameMs: [] as number[], renderMs: [] as number[], ttff: 0, calls: 0, tris: 0, ir, video: false }
+  const medida = { frameMs: [] as number[], renderMs: [] as number[], ttff: 0, calls: 0, tris: 0, ir, video: false,
+    clips: escena.animations.map((c) => c.name), ruedas: ruedas.length, pantallas, autos: autos.length, el: video,
+    estado: () => ({ cam: cam.position.toArray(), z: autos.map((a) => a.z), rueda: ruedas[0]?.rotation.x ?? 0, vias: vias.position.z }) }
   ;(window as unknown as { __vivo: typeof medida }).__vivo = medida
   let antes = performance.now(), tiempo = 0, primero = true
   const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
@@ -204,7 +228,7 @@ export async function arrancar() {
     }
     mezcla.setTime(FIJO ? 0 : tiempo)
     // the two poles nearest the cab carry a real light
-    const cerca = posPostes.flatMap((p) => [-1, 0, 1, 2].map((k) => p.clone().setZ(p.z - k * d.periodo + z))).sort((a, b) => Math.abs(a.z) - Math.abs(b.z))
+    const cerca = posPostes.map((p) => p.clone().setZ(p.z + z)).sort((a, b) => Math.abs(a.z) - Math.abs(b.z))
     postes.forEach((l, i) => l.position.copy(cerca[i]))
     // traffic
     for (const a of autos) {
@@ -242,7 +266,7 @@ export async function arrancar() {
       canvas.classList.add('listo')
       document.documentElement.dataset.listo = '1'
       console.info('[vivo] first frame', Math.round(medida.ttff), 'ms; load', Math.round(medida.ttff - t0))
-      if (!FIJO && !reducido) video.play().then(() => (medida.video = true)).catch(() => {})
+      if (SIN) { /* no video */ } else if (!FIJO && !reducido) video.play().then(() => (medida.video = true)).catch(() => {})
       else video.load()
     }
     requestAnimationFrame(cuadro)

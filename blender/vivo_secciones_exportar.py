@@ -28,11 +28,44 @@ os.makedirs(OUT, exist_ok=True)
 g = d["grupos"]
 comun = set.intersection(*(set(v) for v in g.values()))
 quiero = set(g["montaje-esc6"]) | {n for n in g["montaje-esc1"] if n.split(".")[0] in ("pp_banderin", "pp_fresa")}
-pantalla = [O[n] for n in g["montaje-esc3"] if n.startswith("p3_")]
-pantalla = list({o for p in pantalla for o in [p, *p.children_recursive]})
 for n in quiero | comun:
-    O[n].hide_render = False
-print("VIVO vestuario", len(quiero | comun), "objetos; pantalla", len(pantalla), flush=True)
+    O[n].hide_render = O[n].hide_viewport = False  # viewport-hidden objects are skipped by visible() and keep stale matrices
+
+
+# the screen truck as built for scene 3: its cab (p3_*) plus the box, LED panels, frames and lettering that pantalla_3d.py
+# builds as loose objects (parent=False). They are render-hidden outside scene 3, so take every scene-3-only object in its
+# footprint (montar.log: PANTALLA3D x -2.28, box y -1.82..3.44, cab ahead; the G-wagon starts at x 0.63) and hang them
+# from one empty the page can move per stop (first run: none of it reached escena.glb)
+cand = [O[n] for n in set(g["montaje-esc3"]) - comun - quiero if O[n].type in ("MESH", "CURVE", "FONT", "EMPTY")]
+for o in cand:
+    o.hide_viewport = False  # hidden in the viewport, their matrices and bounds are stale (all at the origin)
+bpy.context.view_layer.update()
+_dg = bpy.context.evaluated_depsgraph_get()
+
+
+def centro(o):
+    e = o.evaluated_get(_dg)
+    if o.type == "EMPTY":
+        return e.matrix_world.translation
+    return sum((e.matrix_world @ Vector(c) for c in e.bound_box), Vector()) / 8
+
+
+pantalla = [o for o in cand if -4.0 < centro(o).x < -0.9 and -3.0 < centro(o).y < 11.0]
+pantalla = list({o for p in pantalla for o in [p, *p.children_recursive]})
+for o in pantalla:
+    o.hide_render = o.hide_viewport = False
+    o.hide_set(False)
+raiz_p = bpy.data.objects.new("pantalla_camion", None)
+sc.collection.objects.link(raiz_p)
+raiz_p.location = (-2.28, 0.81, 0.0)
+bpy.context.view_layer.update()
+for o in pantalla:
+    if o.parent not in pantalla:
+        mw = o.matrix_world.copy()
+        o.parent = raiz_p
+        o.matrix_world = mw
+pantalla.append(raiz_p)
+print("VIVO vestuario", len(quiero | comun), "objetos; pantalla", len(pantalla), sorted(o.name for o in pantalla)[:40], flush=True)
 
 mundo = O["mundo"]
 del_mundo = set(mundo.children_recursive)
@@ -99,13 +132,42 @@ for im in bpy.data.images:
 # ---------------------------------------------------------------- export
 camion = O["camion"]
 camion.name = "camion"
-pr = pantalla[0]
-while pr.parent in pantalla:
-    pr = pr.parent
-pr.name = "pantalla_camion"
+pr = raiz_p
+
+
+def soltar(objs):
+    """The glTF sampler raises KeyError: None on an object parented to a bone of an armature left out of the export
+    (first run, 2026-11-18): keep its world transform and drop the parent. Parents outside the set go the same way."""
+    s = set(objs)
+    for o in objs:
+        if o.parent and o.parent not in s:
+            print("VIVO soltar", o.name, "de", o.parent.name, o.parent_type, o.parent_bone, flush=True)
+            mw = o.matrix_world.copy()
+            o.parent = None
+            o.matrix_world = mw
+
+
+# one clip per rig: each baked action on its own NLA track named after the rig (exported as NLA_TRACKS, so a rig's clip
+# never lands on another rig that shares its bone names); no other object in escena.glb carries animation
+for rig in RIGS:
+    ad = rig.animation_data
+    act = ad.action
+    ad.action = None
+    for t in list(ad.nla_tracks):
+        ad.nla_tracks.remove(t)
+    tr = ad.nla_tracks.new()
+    tr.name = act.name
+    st = tr.strips.new(act.name, 0, act)
+    st.name = act.name
+for o in escena + pantalla:
+    if o.animation_data and o not in RIGS:
+        o.animation_data_clear()
+print("VIVO pantalla materiales", sorted({s.material.name for o in pantalla if o.type == "MESH" for s in o.material_slots if s.material}), flush=True)
+print("VIVO camion en", [round(v, 3) for v in O["camion"].matrix_world.translation], flush=True)
 
 
 def exportar(nombre, objs, anim=False):
+    soltar(objs)
     bpy.ops.object.select_all(action="DESELECT")
     for o in objs:
         o.hide_set(False)
@@ -113,7 +175,7 @@ def exportar(nombre, objs, anim=False):
     ruta = os.path.join(OUT, nombre)
     bpy.ops.export_scene.gltf(filepath=ruta, export_format="GLB", use_selection=True, export_apply=True, export_yup=True,
                               export_lights=False, export_cameras=False, export_animations=anim, export_skins=anim,
-                              export_animation_mode="ACTIONS", export_force_sampling=True, export_frame_step=2,
+                              export_animation_mode="NLA_TRACKS", export_force_sampling=True, export_frame_step=2,
                               export_image_format="WEBP", export_draco_mesh_compression_enable=True,
                               export_draco_mesh_compression_level=6)
     print("VIVO GLB", nombre, os.path.getsize(ruta), flush=True)
@@ -121,6 +183,8 @@ def exportar(nombre, objs, anim=False):
 
 exportar("escena.glb", escena + pantalla + [O["cerros"]], anim=True)
 exportar("mundo.glb", [o for o in del_mundo if visible(o)])
+_ys = [(o.matrix_world @ Vector(c)).y for o in del_mundo if visible(o) and o.type == "MESH" for c in o.bound_box]
+print("VIVO mundo y", round(min(_ys)), round(max(_ys)), "objetos", sum(visible(o) for o in del_mundo), flush=True)
 
 # ---------------------------------------------------------------- page data (Blender axes)
 ruedas = [o.name for o in escena if o.name.lower().startswith(("rueda", "llanta", "wheel"))]
@@ -131,14 +195,14 @@ def caja(objs):
     return {"min": [min(p[i] for p in ps) for i in range(3)], "max": [max(p[i] for p in ps) for i in range(3)]}
 
 
-cuerpo = [o for o in camion.children_recursive if o.type == "MESH" and o.name not in ruedas]
+cuerpo = [o for o in camion.children_recursive if o.type == "MESH" and o.name not in ruedas and visible(o)]  # a hidden helper cube made x, z min -1.0
 cam = d["camaras"]
 c1 = cam["montaje-esc1"]["pos"]
 p3 = pr.matrix_world.translation
 faros = [o for o in O if o.type == "LIGHT" and o.name.startswith("faro_")]
 datos = {
     "camaras": [cam[k] for k in sorted(cam)],
-    "camion": caja(cuerpo),
+    "camion": caja(cuerpo),  # min x mirrored below: something on the left side reached x -0.23 and swallowed stop 3
     "cabina": {"min": [c1[0] - 0.85, c1[1] - 0.9, 1.0], "max": [c1[0] + 0.85, c1[1] + 1.75, 2.2]},  # refine from the cab mesh
     "parabrisas": c1[1] + 1.6,
     "periodo": 192.0, "velocidad": 19.2,
@@ -150,5 +214,6 @@ datos = {
     "faros": [{"pos": list(o.matrix_world.translation), "mira": list(o.matrix_world @ Vector((0, 0, -10)))} for o in faros],
     "ruedas": ruedas,
 }
+datos["camion"]["min"][0] = 2 * c1[0] - datos["camion"]["max"][0]  # the body is symmetric about the cab stop's x (1.72)
 json.dump(datos, open(os.path.join(OUT, "vivo.json"), "w", encoding="utf8"), indent=1)
 print("VIVO listo", flush=True)

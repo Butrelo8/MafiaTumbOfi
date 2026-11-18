@@ -38,9 +38,10 @@ export function orbita(a: V3, b: V3, c: Caja, margen = 0.35, n = 48): V3[] {
   return base.map((p, i) => [p[0], p[1], p[2] + h * Math.sin((Math.PI * i) / n)])
 }
 
-/** The windshield exit for a stop inside the cab: straight ahead to the glass, then out and up over the hood. */
+/** The windshield exit for a stop inside the cab: straight ahead to the glass, then out and up to clear the truck's top
+ * (`techo`, the body's max z) within half a metre, so it never grazes the hood (the body is one box here). */
 export function salida(p: V3, parabrisas: number, techo: number): V3[] {
-  return [p, [p[0], parabrisas - 0.15, p[2]], [p[0], parabrisas + 0.6, p[2] + 0.15], [p[0], parabrisas + 1.4, techo + 0.6]]
+  return [p, [p[0], parabrisas - 0.15, p[2]], [p[0], parabrisas + 0.5, techo + 0.4]]
 }
 
 export function ruta(a: Parada, b: Parada, camion: Caja, cabina: Caja, parabrisas: number): Ruta {
@@ -48,8 +49,8 @@ export function ruta(a: Parada, b: Parada, camion: Caja, cabina: Caja, parabrisa
   let pos: V3[]
   if (ia && ib) pos = [a.pos, b.pos]
   else {
-    const sa = ia ? salida(a.pos, parabrisas, cabina.max[2]) : [a.pos]
-    const sb = ib ? salida(b.pos, parabrisas, cabina.max[2]).reverse() : [b.pos]
+    const sa = ia ? salida(a.pos, parabrisas, camion.max[2]) : [a.pos]
+    const sb = ib ? salida(b.pos, parabrisas, camion.max[2]).reverse() : [b.pos]
     pos = [...sa.slice(0, -1), ...orbita(sa.at(-1)!, sb[0], camion), ...sb.slice(1)]
   }
   // densify to even steps so the look-at and lens can follow arc length

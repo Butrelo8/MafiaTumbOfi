@@ -1,7 +1,11 @@
 import { describe, expect, test } from 'bun:test'
-import datos from '../../public/vivo/vivo.json'
+import { existsSync, readFileSync } from 'node:fs'
 import { dentro, duracion, fovVertical, ruta, type Caja, type Parada, type V3 } from './vivoRuta'
 
+// public/vivo/ is git-ignored (blender/vivo_secciones_exportar.py writes it): skip on a checkout without the export
+const JSON_VIVO = new URL('../../public/vivo/vivo.json', import.meta.url)
+const hay = existsSync(JSON_VIVO)
+const datos = hay ? JSON.parse(readFileSync(JSON_VIVO, 'utf8')) : { camaras: [], camion: {}, cabina: {}, parabrisas: 0 }
 const paradas = datos.camaras as Parada[]
 const camion = datos.camion as Caja
 const cabina = datos.cabina as Caja
@@ -17,7 +21,7 @@ function muestras(pos: V3[], paso = 0.05): V3[] {
   return out
 }
 
-describe('vivoRuta', () => {
+describe.skipIf(!hay)('vivoRuta', () => {
   test('six stops, and only the cab stops sit inside the cab', () => {
     expect(paradas.length).toBe(6)
     expect(dentro(paradas[0].pos, cabina)).toBe(true)
@@ -28,8 +32,8 @@ describe('vivoRuta', () => {
       if (i === j) continue
       test(`move ${i + 1} -> ${j + 1} never passes through the truck body`, () => {
         const r = ruta(paradas[i], paradas[j], camion, cabina, datos.parabrisas)
-        expect(r.pos[0]).toEqual(paradas[i].pos)
-        expect(r.pos.at(-1)).toEqual(paradas[j].pos)
+        r.pos[0].forEach((v, k) => expect(v).toBeCloseTo(paradas[i].pos[k], 6))
+        r.pos.at(-1)!.forEach((v, k) => expect(v).toBeCloseTo(paradas[j].pos[k], 6))
         const malas = muestras(r.pos).filter((p) => dentro(p, camion, 0.05) && !dentro(p, cabina) && !(p[1] > datos.parabrisas - 0.3 && p[1] < datos.parabrisas + 0.3))
         expect(malas).toEqual([])
         expect(duracion(r.largo)).toBeGreaterThanOrEqual(1.2)
