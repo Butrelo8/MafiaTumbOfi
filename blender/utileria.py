@@ -876,12 +876,12 @@ def caja2_b_esc2():
 @opcion("placa3")
 def placa3():
     FILL_PLACA()
-    p = Vector((CX, DEFENSA.y + 0.016, 0.72))
+    p = Vector((CX, DEFENSA.y + 0.0003, 0.72))  # the backing on the bumper face (it sat 16 mm off it: audit defect 14)
     rect_redondo(0.302, 0.152, 0.015, p, mat("u_placa_alu", (0.75, 0.75, 0.74), 0.35, 1.0))
     m = img_mat("u_placa_vz", os.path.join(PANTALLAS, "placa-veracruz.png"), emit=0.15, rough=0.35)
     nt = m.node_tree
     nt.links.new(nt.nodes["Image Texture"].outputs["Alpha"], nt.nodes["Principled BSDF"].inputs["Alpha"])
-    plano(0.300, 0.150, p + Vector((0, 0.0022, 0)), m, rot=ROT_P)
+    plano(0.300, 0.150, p + Vector((0, 0.0018, 0)), m, rot=ROT_P)  # 0.3 mm over the 1.5 mm backing
     return ((CX + 0.25, DEFENSA.y + 3.5, 0.78), (CX, DEFENSA.y, 0.86), 32)
 
 
@@ -978,9 +978,10 @@ def cara3(cara):
     return CARAS3[cara]
 
 
-def mat3(id, acabado):
+def mat3(id, acabado, valor=1.0):
     """Image → Base Color, alpha → Alpha, the raised-edge normal map (Non-Color, tangent space), the finish; the backing (white,
-    rough) on the back faces, so the curl shows the underside."""
+    rough) on the back faces, so the curl shows the underside. valor < 1 scales the print's value (HSV), contrast kept: the right
+    bed side's stickers read as blank pale rectangles at night (owner 2026-11-18 19:01, option b: tone them down, no emission)."""
     m = bpy.data.materials.new("c3_" + id)
     m.use_nodes = True
     nt = m.node_tree
@@ -988,7 +989,13 @@ def mat3(id, acabado):
     tx = nt.nodes.new("ShaderNodeTexImage")
     tx.image = bpy.data.images.load(os.path.join(CALCAS3, id + ".png"), check_existing=True)
     tx.extension = "CLIP"
-    nt.links.new(tx.outputs["Color"], b.inputs["Base Color"])
+    if valor != 1.0:
+        hs = nt.nodes.new("ShaderNodeHueSaturation")
+        hs.inputs["Value"].default_value = valor
+        nt.links.new(tx.outputs["Color"], hs.inputs["Color"])
+        nt.links.new(hs.outputs["Color"], b.inputs["Base Color"])
+    else:
+        nt.links.new(tx.outputs["Color"], b.inputs["Base Color"])
     nt.links.new(tx.outputs["Alpha"], b.inputs["Alpha"])
     tn = nt.nodes.new("ShaderNodeTexImage")
     tn.image = bpy.data.images.load(os.path.join(CALCAS3, id + "-n.png"), check_existing=True)
@@ -1100,7 +1107,7 @@ def calca3(id, x, z, rot, orden=0, rizo="auto", largo=0.025, R=0.015, cara="port
                 v.co.z += R * (1 - math.cos(ang))
                 v.co.x -= dr.x * (d - R * math.sin(ang))
                 v.co.y -= dr.y * (d - R * math.sin(ang))
-    o.data.materials.append(mat3(id, me["acabado"]))
+    o.data.materials.append(mat3(id, me["acabado"], 0.35 if cara == "der" else 1.0))
     bpy.ops.object.shade_smooth()
     _fin(o, None, None)
     plat = id.split("-", 1)[1]
@@ -1379,9 +1386,23 @@ def luz_costado(modo, lado):
         # inside the shoulder barrier (x ≈ +4.5) and high: at x 4.2, z 3.4 it lit the barrier's face toward the camera
         luz("AREA", (CX + lado * 3.0, -0.3, 4.2), 700, (0.85, 0.9, 1.0), mira=(CX + lado * 1.0, -0.3, 1.7), size=2.0, parent=False)
     else:
-        for x in (CX - 0.4, CX + 0.4):
-            for y in (0.2, -0.6):
-                luz("POINT", (x, y, 1.98), 6, (1.0, 0.75, 0.5), size=0.08, parent=False)
+        # one lamp 0.3 m ahead of each v5 face, just under the roof (the fixed spots at z 1.98 sat inside three of the four heads:
+        # faces L* 1-5). Same spots and colour as the live build (vivoSecciones.ts lamparas: x, y + 0.3, z 2.12, 0xffbf80).
+        # Power from the member stills (L* p75 of each member's silhouette, ~/cc-out/mto-asset-fixes/luces/esc4b/): front 12 W,
+        # rear 300 W gives Alejandro 60 vs Héctor 64 (the live 1 cd / 3.5 cd do not carry over to Cycles watts)
+        import reparto_v5
+        caras = []
+        for _quien, arm, _malla, _o in getattr(reparto_v5, "FIGS", []):
+            if not arm.hide_render:
+                b = arm.pose.bones[reparto_v5.mx("Head")]
+                caras.append(arm.matrix_world @ (b.head + 0.6 * (b.tail - b.head)))
+        for c in caras or [Vector((x, y, 1.98)) for x in (CX - 0.4, CX + 0.4) for y in (0.2, -0.6)]:
+            p = Vector((c.x, c.y + 0.3, 2.12)) if caras else c
+            w = (300 if c.y < 0 else 12) if caras else 6
+            print(f"UTILERIA luz cabina ({p.x:.3f}, {p.y:.3f}, {p.z:.3f}) {w} W", flush=True)
+            o = luz("POINT", tuple(p), w, (1.0, 0.52, 0.22) if caras else (1.0, 0.75, 0.5), size=0.08, parent=False)
+            o.visible_camera = False
+            o.data.shadow_soft_size = 0.08  # luz() sizes AREA lights only: at the 0.25 m default, 7 cm under the roof, Alejandro got half
     sin_camara()
 
 

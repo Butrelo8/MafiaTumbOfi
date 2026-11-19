@@ -1,0 +1,3 @@
+Scans re-coloured by blender/texturas_escena.py (512 px). Sources:
+rocky_terrain_02 1k diff,rough,nor_gl: Poly Haven (polyhaven.com/a/rocky_terrain_02), CC0, via the public API
+corrugated_iron_02 1k diff,rough,nor_gl: Poly Haven (polyhaven.com/a/corrugated_iron_02), CC0, via the public API

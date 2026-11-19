@@ -237,14 +237,16 @@ def flecos(partida, largo=0.06):
     tramos = [(-0.62, -0.13), (0.13, 0.62)] if partida else [(-0.62, 0.62)]
     with prop("P3"):
         for x0, x1 in tramos:
-            caja((x1 - x0, 0.012, 0.07), (CX + (x0 + x1) / 2, y, z), TERCIOPELO, parent=False)
+            # hang the band from the header: its top 0.5 mm under the lowest header point above it (it floated 17 mm: defect 6)
+            techo = [h[0].z for x in (x0 + 0.03, (x0 + x1) / 2, x1 - 0.03) for h in [golpe((CX + x, y, z + 0.036), (0, 0, 1))] if h]
+            zt = min(techo) - 0.0355 if techo and min(techo) - (z + 0.035) < 0.05 else z
+            caja((x1 - x0, 0.012, 0.07), (CX + (x0 + x1) / 2, y, zt), TERCIOPELO, parent=False)
             n = int((x1 - x0) / 0.022)
             for i in range(n):
                 x = CX + x0 + (i + 0.5) * (x1 - x0) / n
-                cil(0.003, largo, (x, y, z - 0.035 - largo / 2), FLECO, verts=4, parent=False)
-        xs = (-0.37, 0.37) if partida else (0.0,)
-        for xt in xs:
-            texto("PURA MT", 0.04, (CX + xt, y - 0.008, z + 0.002), ORO_L(1.5), font="impact.ttf", parent=False)  # faces the cab
+                cil(0.003, largo, (x, y, zt - 0.035 - largo / 2 + 0.001), FLECO, verts=4, parent=False)  # strands 1 mm into the band
+            for xt in ((-0.37,) if x1 < 0 else (0.37,)) if partida else (0.0,):
+                texto("PURA MT", 0.04, (CX + xt, y - 0.008, zt + 0.002), ORO_L(1.5), font="impact.ttf", parent=False)  # faces the cab
 
 
 def banderin_tablero(x):
@@ -465,15 +467,16 @@ def emblema(modo="parado", fuente=None):
             cu.size, cu.extrude, cu.bevel_depth = tam, 0.009 * k, 0.002 * k
             o.location, o.rotation_euler = (CX, y, z + 0.0215), (math.pi / 2, 0, math.pi)  # baseline seated on the plinth
             w = ancho_em * tam * 0.97
-            caja((w, 0.06 * k, 0.02), (CX, y, z + 0.01), NEGRO, bevel=0.005, parent=False)
+            # plinth, bolts and letters are children of the truck (default parent), so they ride its sway on the live page
+            caja((w, 0.06 * k, 0.02), (CX, y, z + 0.01), NEGRO, bevel=0.005)
             for dx in (-1, 1):
-                cil(0.007 * k, 0.006, (CX + dx * (w / 2 - 0.035 * k), y + 0.015 * k, z + 0.021), CROMO, verts=6, parent=False)
+                cil(0.007 * k, 0.006, (CX + dx * (w / 2 - 0.035 * k), y + 0.015 * k, z + 0.021), CROMO, verts=6)
         else:
             y = yb - 0.45
             zh = max((z for yy, z in CAPO if abs(yy - y) < 0.02), default=ztop)
             cu.size, cu.extrude, cu.bevel_depth = tam, 0.002, 0.001
             o.location, o.rotation_euler = (CX, y, zh + 0.003 - pie_em * tam), (0, 0, math.pi)
-        _fin(o, ORO_MARCA, False)
+        _fin(o, ORO_MARCA, None)
 
 
 # ---------------------------------------------------------------- the bed (#34 stays open) and its bar-level re-place in B

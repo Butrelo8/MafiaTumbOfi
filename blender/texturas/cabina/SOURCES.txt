@@ -1,0 +1,5 @@
+Scans re-coloured by blender/texturas_escena.py (512 px). Sources:
+Leather026 1k diff,rough,nor_gl: ambientCG (ambientcg.com/a/Leather026), CC0
+velour_velvet 1k diff,rough,nor_gl: Poly Haven (polyhaven.com/a/velour_velvet), CC0, via the public API
+Fabric004 1k diff,rough,nor_gl: ambientCG (ambientcg.com/a/Fabric004), CC0
+Metal009 1k diff,rough,nor_gl: ambientCG (ambientcg.com/a/Metal009), CC0

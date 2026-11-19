@@ -281,11 +281,59 @@ def pase_wb():
         bpy.data.objects["w_niebla"].hide_render = True
 
 
+# the bed keeps only the instrument cases (k3_bajo, k3_docerola, k3_requinto, k3_teclado, k3_tarola), the donut and the alien
+# (owner's final call 2026-11-19 00:24, via saltyship); the rest of the load goes, the loose Tripo instruments included. The
+# roll-bar bulbs are truck dressing and stay. He adds items later: the gaps stay empty.
+QUITAR_CAJA = ("k3_amp", "k3_bocina", "k3_cables", "k3_cerveza", "k3_cobijas", "k3_hielera", "k4_red",
+               "inst_bajo_sexto", "inst_requinto", "inst_tololoche")
+
+
+def quitar_de_caja():
+    fuera = {c for o in bpy.data.objects if o.name.split(".")[0] in QUITAR_CAJA for c in [o, *o.children_recursive]}
+    print("MONTAJE caja quita", sorted(o.name for o in fuera), flush=True)
+    for o in fuera:  # hidden, not deleted: GRUPO and the builders still hold them
+        o.hide_render = o.hide_viewport = True
+    # what stood on a removed item comes down onto the next surface (the alien stood on the amp, 594 mm up; its strap to the
+    # roll bar no longer reaches, so it goes too); the donut sat 11 mm over the requinto case
+    # every copy by base name: a later stop rebuilds the load as .001
+    for o in [o for o in bpy.data.objects if o.name.split(".")[0] == "k3_correa_alien"]:
+        o.hide_render = o.hide_viewport = True
+    for o in [o for o in bpy.data.objects if o.name.split(".")[0] in ("k3_alien", "k3_dona") and not o.hide_render]:
+        n = o.name
+        dg = bpy.context.evaluated_depsgraph_get()
+        ev = o.evaluated_get(dg)
+        me = ev.to_mesh()
+        vs = [o.matrix_world @ v.co for v in me.vertices]
+        ev.to_mesh_clear()
+        zmin = min(v.z for v in vs)
+        bajos = [v for v in vs if v.z < zmin + 0.01]
+        huecos = []
+        for v in bajos[:: max(1, len(bajos) // 24)]:
+            p = v + Vector((0, 0, 0.002))
+            for _ in range(4):
+                ok, loc, _n, _i, ob, _m = bpy.context.scene.ray_cast(dg, p, Vector((0, 0, -1)))
+                if not ok:
+                    break
+                if ob.name == o.name:
+                    p = loc + Vector((0, 0, -0.0005))
+                    continue
+                huecos.append(v.z - loc.z)
+                break
+        h = min(huecos) if huecos else 0.0
+        if h > 0.003:
+            o.matrix_world = Matrix.Translation((0, 0, -h)) @ o.matrix_world
+        print(f"MONTAJE caja asienta {n}: hueco {h * 1000:.1f} mm -> 0", flush=True)
+
+
 ESCENAS = [("montaje-esc1", m_esc1), ("montaje-esc2", m_esc2), ("montaje-esc3", m_esc3), ("montaje-esc4", m_esc4),
            ("montaje-esc5", m_esc5), ("montaje-esc6", m_esc6)]
 for _n, _f in ESCENAS:
     def _op(f=_f):
         r = f()
+        # tail lenses: at a stop the calaveras at 4 renders pink (tras34 chroma 44; 1.5 -> 77, 1 -> 87), measured on the stop-6
+        # state (/mnt/e/tmp/mto-asset-fixes/tira/ab/parada_fuerza*.png). The pre-stop scene is ~4x darker (open), so montaje only.
+        bpy.data.materials["calaveras"].node_tree.nodes["Principled BSDF"].inputs["Emission Strength"].default_value = 1.0
+        quitar_de_caja()
         viejo_diego()
         if WB:
             pase_wb()
@@ -293,7 +341,9 @@ for _n, _f in ESCENAS:
     opcion(_n)(_op)
 if _g["SOLO"] is None:
     _g["SOLO"] = [n for n, _ in ESCENAS]
-if os.environ.get("MONTAJE_PANTALLA"):  # oopdrone: the 3D screen truck, livery a|b|c (docs/design/pantalla-3d.md)
+os.environ.setdefault("MONTAJE_PANTALLA", "a")  # the 3D Canter is the default: livery A, Renta (owner 2026-11-18 16:42); "caja" = utileria's box
+os.environ.setdefault("MONTAJE_PANTALLA_LUZ", "ancha")  # box light, as the P1 renders (buggyship 2026-11-18 17:01, being confirmed)
+if os.environ["MONTAJE_PANTALLA"] != "caja":  # oopdrone: the 3D screen truck, livery a|b|c (docs/design/pantalla-3d.md)
     exec(compile(open(os.path.join(AQUI, "pantalla_3d.py"), encoding="utf8").read(), os.path.join(AQUI, "pantalla_3d.py"), "exec"), globals())
 
 # ---------------------------------------------------------------- utileria.py's render loop, over the options above

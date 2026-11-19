@@ -284,6 +284,7 @@ def red(paso=0.11):
     B = np.apply_along_axis(lambda c: np.convolve(c, k, "same"), 0, B)[4:-4, 4:-4]
     S = np.maximum(B, H) + 0.012
     gx, gy = int((XR - XL) / paso) + 1, int((YF - YT) / paso) + 1
+    hz = lambda x, y: H[min(ny - 1, max(0, int(round((y - ys[0]) / (ys[1] - ys[0]))))), min(nx - 1, max(0, int(round((x - xs[0]) / (xs[1] - xs[0])))))]
     vs, fs = [], []
     for j in range(gy):
         for i in range(gx):
@@ -291,11 +292,23 @@ def red(paso=0.11):
             y = YT + 0.01 + j * (YF - YT - 0.02) / (gy - 1)
             z = S[min(ny - 1, int(round((y - ys[0]) / (ys[1] - ys[0])))), min(nx - 1, int(round((x - xs[0]) / (xs[1] - xs[0]))))]
             if i in (0, gx - 1) or j in (0, gy - 1):
-                z = min(z, RIEL)
-            vs.append((x, y, max(z, PZ + 0.03)))
+                z = max(min(z, RIEL), hz(x, y) + 0.012)  # down to the rail, unless the load at the edge is higher: then on the load
+            vs.append([x, y, max(z, PZ + 0.03)])
             if i and j:
                 a = j * gx + i
                 fs.append((a - gx - 1, a - gx, a, a - 1))
+    # the cords are the quads' edges, 11 cm long: where the load's top rises between two knots, lift both knots until the cord
+    # clears it by 9 mm (the cord's 3 mm radius + 6 mm); it crossed the amp 80 mm, the speaker 29 mm, the ring 33 mm (defect 12)
+    aristas = [(a, a + 1) for a in range(gx * gy) if (a + 1) % gx] + [(a, a + gx) for a in range(gx * (gy - 1))]
+    for _ in range(6):
+        subio = False
+        for a, b in aristas:
+            (xa, ya, za), (xb, yb, zb) = vs[a], vs[b]
+            falta = max(hz(xa + (xb - xa) * t, ya + (yb - ya) * t) + 0.009 - (za + (zb - za) * t) for t in np.linspace(0, 1, 12))
+            if falta > 0.0005:
+                vs[a][2] += falta; vs[b][2] += falta; subio = True
+        if not subio:
+            break
     me = bpy.data.meshes.new("k4_red")
     me.from_pydata(vs, [], fs)
     o = bpy.data.objects.new("k4_red", me)
@@ -304,7 +317,8 @@ def red(paso=0.11):
     _fin(o, CUERDA, False)
     for x, lado in ((XL, -1), (XR, 1)):
         for y in ANCLAS_Y:
-            cil(0.004, RIEL - ANCLA_Z, (x - lado * 0.02, y, (RIEL + ANCLA_Z) / 2), ACERO, verts=6, parent=False)  # the hook cord
+            arriba = max(RIEL, min(vs, key=lambda v: (v[0] - x) ** 2 + (v[1] - y) ** 2)[2])  # up to the net's edge knot
+            cil(0.004, arriba - ANCLA_Z, (x - lado * 0.02, y, (arriba + ANCLA_Z) / 2), ACERO, verts=6, parent=False)  # the hook cord
     RED.append(o)
     return o
 

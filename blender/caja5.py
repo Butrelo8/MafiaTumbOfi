@@ -13,7 +13,7 @@ Options: caja5-estudio-<prop> (one per candidate; render them 1:1), caja5-<varia
 (scene 2's hold, measured: CAJA5 MEDIDA lines), variant in ligera, media, llena. Through WSLENV: CAJA5_SONDA=1 prints the roll-bar probe; CAJA5_CPU=1 renders on the CPU.
 """
 import bpy, bmesh, math, os, json
-from mathutils import Matrix, Quaternion, Vector
+from mathutils import Euler, Matrix, Quaternion, Vector
 from mathutils.bvhtree import BVHTree
 
 C4 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "caja4.py")
@@ -402,51 +402,87 @@ def vestir(nivel):
     print(f"CAJA5 VARIANTE {nivel} nuevos {len(lista)} ({','.join(lista)})")
 
 
-# ---------------------------------------------------------------- the trio's instruments, out of their cases (owner 11-15 05:41:
-# "he doesn't see the band's instruments in the bed"). blender/assets/guitarra.blend (Blend Swap, no licence file) and tololoche.blend
-# (no source recorded) stay out: licences unchecked (escenas-plan.md asset table). Our own primitives at the sizes of
-# references.md › caja3 (tololoche 1.80 m, lower bout 0.66; bajo sexto 1.05 m, 0.44; requinto 0.98 m, 0.36 for its case, so the
-# instrument ~0.90 m, 0.33). Built face up (+z), neck along +y, the origin under the lower bout's tail on the back; where each sits
-# is blender/props/colocacion.json › instrumentos (the owner places them in the hand-off .blend).
-INSTRUMENTOS = {  # id: (length, lower bout, upper bout, body length, depth, neck width, top colour, side colour, round hole)
-    "tololoche": (1.80, 0.66, 0.50, 1.10, 0.25, 0.07, (0.40, 0.17, 0.05), (0.20, 0.07, 0.02), False),
-    "bajo_sexto": (1.05, 0.44, 0.34, 0.52, 0.12, 0.065, (0.48, 0.24, 0.07), (0.02, 0.02, 0.02), True),  # a sunburst centre: (0.30, 0.10, 0.03) merged with the load in scene 2
-    "requinto": (0.90, 0.33, 0.25, 0.42, 0.09, 0.05, (0.62, 0.42, 0.20), (0.10, 0.05, 0.02), True),
-}
+# ---------------------------------------------------------------- the trio's instruments (owner 11-15 05:41: "he doesn't see the
+# band's instruments in the bed"). Since 2026-11-18 (owner 17:05) they are the owner's own models: a double bass for the tololoche
+# and one acoustic guitar for both the bajo sexto and the requinto (blender/assets/instrumentos/: LICENSE.txt, instrumentos_prep.py
+# made instrumentos.blend). Full resolution in Cycles; a 4k-tri proxy for the placement. Lengths from references.md › caja3.
+# Each lies face up (+z), neck along +y, origin under the tail on the back; colocacion.json › instrumentos is the starting pose and
+# the search below moves it the least it can so it crosses nothing (audit defect 11: the primitives crossed the tailgate 85 mm,
+# each other 50 mm and the bed side 66 mm).
+INSTRUMENTOS = {"tololoche": (1.80, "tololoche"), "bajo_sexto": (1.05, "guitarra"), "requinto": (0.90, "guitarra")}  # id: (length m, model)
+INST_BLEND = os.path.join(REPO, "blender", "assets", "instrumentos", "instrumentos.blend")
+_INST_MALLAS, _INST_POSE = {}, {}
+
+
+def _inst_mallas(modelo):
+    if modelo not in _INST_MALLAS:
+        with bpy.data.libraries.load(INST_BLEND, link=False) as (_s, d):
+            d.meshes = [modelo, modelo + "_proxy"]
+        _INST_MALLAS[modelo] = tuple(d.meshes)
+    return _INST_MALLAS[modelo]
+
+
+def _inst_pose(id, proxy, s):
+    """Where the instrument rests: candidates around colocacion.json's pose (x, y in 5 cm steps, the turn in 0.15 rad steps,
+    nearest first; the neck raised in 0.1 rad steps). Each one is dropped straight down onto the load (rays from 200 bottom
+    points of the proxy into one BVH of the truck, the load, the net and the instruments already placed) and kept if its tail
+    then rests on something (the tail fifth within 3 cm of the first contact: a 1.8 m tololoche does not fit the 1.76 m bed
+    flat, and laid level its neck caught the roll bar and held the whole bass 0.65 m over the load) and it crosses nothing
+    (a 2 mm lift)."""
+    import numpy as np
+    c = COLOCA["instrumentos"][id]
+    amb = entorno(Vector((XL - 0.4, YT - 0.6, PZ - 0.05)), Vector((XR + 0.4, YF + 0.5, PZ + 2.2)))
+    pv = [v.co * s for v in proxy.vertices]
+    ps = [p.vertices[:] for p in proxy.polygons]
+    fondo = max(v.z for v in pv)
+    bajos = [v for v in pv if v.z < 0.35 * fondo]
+    bajos = bajos[:: max(1, len(bajos) // 200)]
+    cola = 0.2 * max(v.y for v in pv)
+    rx, ry, rz = c["rot"]
+    cands = sorted(((dx, dy, dg, dp) for dx in np.arange(-0.35, 0.351, 0.05) for dy in np.arange(-0.5, 0.501, 0.05)
+                    for dg in (0, -0.15, 0.15, -0.3, 0.3, -0.45, 0.45, -0.6, 0.6) for dp in (0, 0.1, 0.2, 0.3, 0.4)),
+                   key=lambda t: abs(t[0]) + abs(t[1]) + 0.3 * abs(t[2]) + 0.5 * t[3])
+    z0 = PZ + 1.6
+    libres = []  # the first 40 free poses; the lowest wins (the first one found stacked the requinto on the bajo sexto on the
+    # tololoche, tail at z 2.105 over a ~1.55 load)
+    for n, (dx, dy, dg, dp) in enumerate(cands):
+        if len(libres) >= 40:
+            break
+        R = Euler((rx + dp, ry, rz + dg)).to_matrix().to_4x4()
+        M = Matrix.Translation((c["loc"][0] + dx, c["loc"][1] + dy, z0)) @ R
+        caidas = [(h[3], p.y < cola, h[0]) for p in bajos for h in [amb.ray_cast(M @ p, Vector((0, 0, -1)), 3.0)] if h[0] is not None]
+        if len(caidas) < 0.9 * len(bajos):
+            continue  # over the edge of the bed
+        d0, _, apoyo = min(caidas, key=lambda t: t[0])
+        if min((d for d, en_cola, _ in caidas if en_cola), default=9.0) - d0 > 0.03:
+            continue  # held up by its neck: the tail hangs in the air
+        M = Matrix.Translation((0, 0, 0.002 - d0)) @ M
+        if amb.overlap(BVHTree.FromPolygons([M @ v for v in pv], ps)):
+            continue
+        libres.append((M.translation.z + 0.2 * (abs(dx) + abs(dy)), n, dx, dy, dg, dp, M, apoyo))
+    if libres:
+        _, n, dx, dy, dg, dp, M, apoyo = min(libres, key=lambda t: t[0])
+        print(f"CAJA5 INSTRUMENTO {id} pose: {n + 1} candidatos ({len(libres)} libres), movido x {dx:+.2f} y {dy:+.2f} giro "
+              f"{dg:+.2f} cuello +{dp:.1f} rad, cola ({M.translation.x:.3f}, {M.translation.y:.3f}, {M.translation.z:.3f}), "
+              f"primer apoyo ({apoyo.x:.3f}, {apoyo.y:.3f}, {apoyo.z:.3f})", flush=True)
+        return M
+    print(f"CAJA5 INSTRUMENTO {id}: ninguna pose libre -> FAIL (queda en la de colocacion.json)", flush=True)
+    return Matrix.Translation(c["loc"]) @ Euler(c["rot"]).to_matrix().to_4x4()
 
 
 def instrumento(id):
-    """One instrument as primitives under an empty `inst_<id>`: two bouts (flat cylinders), the top's hole (round, or a bass's two
-    f-holes), bridge, neck with a dark fingerboard, headstock (a scroll on the bass, its endpin under the tail)."""
-    L, inf, sup, cuerpo, prof, cuello, tapa, aro, redondo = INSTRUMENTOS[id]
-    mt, ma, mo = mat(f"k5_{id}_tapa", tapa, 0.3), mat(f"k5_{id}_aro", aro, 0.35), mat("k5_ebano", (0.012, 0.009, 0.007), 0.4)
-    e = bpy.data.objects.new("inst_" + id, None)
-    sc.collection.objects.link(e)
-    for r, y in ((inf / 2, inf / 2), (sup / 2, cuerpo - sup / 2)):
-        cil(r, prof, (0, y, prof / 2), ma, verts=48, parent=e)
-        cil(r - 0.006, 0.003, (0, y, prof + 0.0015), mt, verts=48, parent=e)  # the top, inset from the sides
-    yb = inf * 0.45  # the bridge, on the lower bout
-    caja((cuello * 1.8, 0.02, 0.012), (0, yb, prof + 0.009), mo, parent=e)
-    if redondo:
-        cil(sup * 0.24, 0.002, (0, cuerpo - sup * 0.62, prof + 0.0035), mo, verts=32, parent=e)
-    else:
-        for s in (-1, 1):
-            caja((0.012, 0.16, 0.002), (s * inf * 0.22, inf * 0.62, prof + 0.0035), mo, rot=(0, 0, s * 0.12), parent=e)
-    largo = L - cuerpo - (0.12 if redondo else 0.16)  # neck from the upper bout's top to the head
-    caja((cuello, largo, 0.03), (0, cuerpo + largo / 2 - 0.02, prof - 0.005), ma, parent=e)
-    caja((cuello, largo + cuerpo * 0.35, 0.006), (0, cuerpo + largo / 2 - cuerpo * 0.175 - 0.02, prof + 0.013), mo, parent=e)
-    yc = cuerpo + largo - 0.02
-    if redondo:
-        caja((cuello * 1.6, 0.17, 0.018), (0, yc + 0.085, prof - 0.01), ma, rot=(-0.2, 0, 0), parent=e)
-    else:
-        caja((cuello, 0.12, 0.05), (0, yc + 0.06, prof - 0.005), ma, parent=e)
-        cil(0.035, cuello * 0.9, (0, yc + 0.13, prof + 0.01), ma, rot=(0, math.pi / 2, 0), verts=24, parent=e)  # the scroll
-        cil(0.008, 0.10, (0, -0.05, prof / 2), mo, rot=(math.pi / 2, 0, 0), verts=12, parent=e)  # the endpin
-    c = COLOCA["instrumentos"][id]
-    e.location, e.rotation_euler, e.scale = c["loc"], c["rot"], (c["escala"],) * 3  # children were built at the identity
-    _fin(e, None, None)
-    print("CAJA5 INSTRUMENTO", id, tuple(round(v, 3) for v in c["loc"]), "largo", L)
-    return e
+    largo, modelo = INSTRUMENTOS[id]
+    malla, proxy = _inst_mallas(modelo)
+    s = largo / max(v.co.y for v in proxy.vertices)
+    if id not in _INST_POSE:  # the bed is the same in every scene: search once
+        bpy.context.view_layer.update()
+        _INST_POSE[id] = _inst_pose(id, proxy, s)
+    o = bpy.data.objects.new("inst_" + id, malla)
+    sc.collection.objects.link(o)
+    o.matrix_world = _INST_POSE[id] @ Matrix.Scale(s, 4)
+    _fin(o, None, None)
+    bpy.context.view_layer.update()
+    return o
 
 
 def instrumentos():
@@ -790,7 +826,76 @@ def bebidas_consola(var=CONSOLA_VAR):
               f" {gap * 1000:.1f} mm hollow {a[3] * 1000:.1f} mm pairs {pares} inside {dentro} {quien} -> {'PASS' if ok else 'FAIL'}")
 
 
-CAMION_EXTRA.append(bebidas_consola)  # the montaje scenes carry the console bottle under the screen (mothership 05:43)
+# ---------------------------------------------------------------- cab pieces the G63 model lacks (asset audit 2026-11-18, defects
+# 4, 7, 8): blender/kiln_cabina.py builds them (kiln-prop), each placed here on the surface a ray finds, the riders hidden.
+PIEZAS_DIR = os.path.join(REPO, "blender", "props", "cabina")
+_PIEZAS = {}
+
+
+def _pieza(nombre):
+    """The meshes of <nombre>_final.glb with their matrices, imported once; every scene links new objects to them."""
+    if nombre not in _PIEZAS:
+        antes = set(bpy.data.objects)
+        bpy.ops.import_scene.gltf(filepath=os.path.join(PIEZAS_DIR, nombre + "_final.glb"))
+        nuevos = [o for o in bpy.data.objects if o not in antes]
+        _PIEZAS[nombre] = [(o.data, o.matrix_world.copy()) for o in nuevos if o.type == "MESH"]
+        for o in nuevos:
+            bpy.data.objects.remove(o)
+    return _PIEZAS[nombre]
+
+
+def _poner(nombre, M):
+    out = []
+    for me, mw in _pieza(nombre):
+        o = bpy.data.objects.new("u_" + nombre, me)
+        sc.collection.objects.link(o)
+        o.matrix_world = M @ mw
+        out.append(_fin(o, None, None))
+    return out
+
+
+def cabina_piezas():
+    """The single cupholder on the deck ahead of the shifter (4: the drink then lands in it, bebidas_consola runs after this),
+    four roof grab handles over the doors and the overhead axle-lock panel (7, ref r04), the four door cards (8, ref r02)."""
+    for ob in sc.objects:  # the previous scene's pieces are hidden from render only: the rays would land on them and stack
+        if ob.hide_render and not ob.hide_viewport:
+            ob.hide_viewport = True
+    jinetes = [o for o in sc.objects if o.name.split("_")[0].split(".")[0] in ("hector", "diego", "alejandro", "manager") and not o.hide_viewport]
+    for o in jinetes:
+        o.hide_viewport = True
+    dg = bpy.context.evaluated_depsgraph_get()
+
+    def r(o, d, dist=1.0):
+        hit, loc, nrm, _i, ob, _m = sc.ray_cast(dg, Vector(o), Vector(d).normalized(), distance=dist)
+        return loc if hit else None
+    x, y = CX + CONSOLA[CONSOLA_VAR][0][1], CONSOLA[CONSOLA_VAR][0][2]  # the drink's spot (caja5 › CONSOLA)
+    piso = [h.z for i in range(12) for rr in (0.0, 0.025, 0.042) for h in [r((x + rr * math.cos(i * math.pi / 6), y + rr * math.sin(i * math.pi / 6), 1.6), (0, 0, -1))] if h]
+    _poner("portavasos", Matrix.Translation((x, y, max(piso))))
+    for dx in (-0.62, 0.62):
+        for yy in (0.35, -0.55):
+            h = r((CX + dx, yy, 1.95), (0, 0, 1))
+            if h:
+                _poner("agarradera", Matrix.Translation(h))
+    h = r((CX, 0.62, 1.95), (0, 0, 1))
+    if h:
+        _poner("consola_techo", Matrix.Translation(h))
+    for lado in (-1, 1):
+        for yc in (0.45, -0.55):
+            xs = [h.x for dy in (-0.15, 0.0, 0.15) for dz in (-0.06, 0.0, 0.06) for h in [r((CX + lado * 0.69, yc + dy, 1.33 + dz), (lado, 0, 0), 0.2)] if h]
+            if len(xs) < 5:
+                print("CAJA5 PUERTA", lado, yc, "sin puerta", xs)
+                continue
+            xp = min(xs) if lado > 0 else max(xs)  # the door's innermost point: the card's back touches there
+            _poner("panel_puerta", Matrix.Translation((xp, yc, 1.33)) @ Matrix.Rotation(0 if lado < 0 else math.pi, 4, "Z"))
+            print(f"CAJA5 PUERTA {lado:+d} y {yc} x {xp - CX:+.3f} (rango {min(xs) - CX:+.3f}..{max(xs) - CX:+.3f})")
+    for o in jinetes:
+        o.hide_viewport = False
+    bpy.context.view_layer.update()
+    _g["dg"] = bpy.context.evaluated_depsgraph_get()
+
+
+CAMION_EXTRA.append(cabina_piezas)
+# the console water bottle is out (owner 2026-11-19 00:04, via saltyship): bebidas_consola() is no longer added to the truck
 CAMION_EXTRA.append(instrumentos)     # and the trio's instruments on the load (owner 05:41)
 
 

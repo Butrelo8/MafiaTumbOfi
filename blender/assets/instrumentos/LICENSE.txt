@@ -1,0 +1,11 @@
+Owner-supplied models (2026-11-18 17:05, relayed by the mothership): licence and source not recorded beyond this.
+They are Tripo generations from the owner's account (tripo_material_* names, 4096 px base colour / normal / rm maps).
+
+- "acoustic guitar 3d model.glb" -> guitarra-fuente.glb (61.6 MB, 1.89 M tris): the bajo sexto and the requinto
+- "double bass 3d model.glb"     -> tololoche-fuente.glb (63.0 MB, 1.92 M tris): the tololoche
+
+Derived here (untracked, rebuilt by the scripts):
+- guitarra.glb, tololoche.glb: blender/tripo/patch.py, metal zeroed, roughness median 0.3 (lacquered wood)
+- instrumentos.blend: blender/instrumentos_prep.py (loose shells > 1 cm away dropped: the guitar's floating music note;
+  aligned neck +Y, top +Z; 4k-tri collision proxies)
+- guitarra_web.glb (289 KB), tololoche_web.glb (337 KB): 30k tris, 1024 WebP, Draco, for the live scene

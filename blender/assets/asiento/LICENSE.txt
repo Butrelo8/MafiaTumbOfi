@@ -1,0 +1,7 @@
+Owner-supplied Tripo generations (2026-11-18 17:33, relayed by the mothership); licence and source not recorded beyond this.
+
+- "car seat 3d model.glb" -> asiento-fuente.glb (49 k tris, one 4096 px base colour). Not used: Tripo rebuilt the input
+  sheet, a 4 x 4 grid of ~16 small seat copies (~3 k tris and ~256 px of texture each), not one seat.
+- "9eee7423-8303-42dd-86ec-a3f6de12adaa.glb" -> consola-fuente.glb (51 parts, 44 k tris, no textures). Not used: two whole
+  cab interiors melted together; no clean console piece.
+Views: ~/cc-out/mto-asset-fixes/asientos/vistas/vistas.jpg. The seat inputs for a new try: ~/cc-out/mto-asset-fixes/asientos/tripo-in/.

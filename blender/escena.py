@@ -13,6 +13,10 @@ The world moves -Y (Blender) by `recorrido_loop` metres per loop; everything per
 import bpy, json, math, os, sys
 from mathutils import Vector, Matrix
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import luces_g63
+import parrilla_g63
+
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CFG = json.load(open(os.path.join(REPO, "src", "lib", "escena.json"), encoding="utf8"))
 ASSETS = os.path.join(REPO, "blender", "assets", "camion")
@@ -20,7 +24,7 @@ MUNDO = CFG["mundo"]
 FPS, LOOP_S, RECORRIDO, TRAMO = MUNDO["loop_fps"], MUNDO["loop_s"], MUNDO["recorrido_loop"], MUNDO["tramo"]
 NFR = FPS * LOOP_S
 # Light power conversions from the preset's page units to Cycles watts (calibrated by measuring renders).
-W_FARO, W_POSTE, W_CALAVERA = 40.0, 2200.0, 6.0
+W_FARO, W_POSTE = 40.0, 2200.0
 
 
 def b(v):  # three.js (Y up, -Z forward) -> Blender (Z up, +Y forward)
@@ -154,6 +158,139 @@ def islas(me):
     return out
 
 
+# ---------------------------------------------------------------- cab interior (audit 2026-11-18, defects 1, 7, 9)
+# The model paints the whole cab with Second_Body_Col, the body's satin: roof, seat backs, dash and console read as painted
+# plastic. Each of its loose parts inside the cab gets a material by zone (refs r01-r04: black nappa, carbon on the centre stack,
+# brushed aluminium on the wheel's spokes, a charcoal headliner); parts outside the cab keep the satin paint. The model has no
+# UVs: a box projection in metres is written into a UV map for those faces, so the same textures reach Cycles and the live GLB.
+CABINA_TEX = os.path.join(REPO, "blender", "texturas", "cabina")  # blender/texturas_escena.py makes them
+CABINA_TECHO = os.environ.get("CABINA_TECHO", "alcantara")  # "alcantara_clara": the reference's light grey headliner
+CABINA_MATS = {  # material: (texture set, tile m, metallic, coat)
+    "cab_piel": ("piel", 0.35, 0.0, 0.0), "cab_techo": (CABINA_TECHO, 0.40, 0.0, 0.0),
+    "cab_carbono": ("carbono", 0.12, 0.0, 1.0), "cab_aluminio": ("aluminio", 0.30, 1.0, 0.0),
+    "cab_alfombra": ("alcantara", 0.25, 0.0, 0.0)}  # the charcoal suede scan reads as the floor's carpet
+VOLANTE = (-0.382, 0.93, 1.56)  # wheel centre from the lane's centre line (transicion's hands at ten and two: x -0.39, y 0.95, z 1.6)
+
+
+def cab_mat(nombre):
+    tex, tile, metal, coat = CABINA_MATS[nombre]
+    return mat_tex(nombre, CABINA_TEX, tex, metal, coat)
+
+
+def mat_tex(nombre, carpeta, tex, metal=0.0, coat=0.0, normal=True):
+    """Principled from blender/texturas/<group>/<tex>_{color,rough,nor}.jpg on the mesh's UVs."""
+    m = bpy.data.materials.new(nombre)
+    m.use_nodes = True
+    nt = m.node_tree
+    p = nt.nodes["Principled BSDF"]
+    p.inputs["Metallic"].default_value = metal
+    p.inputs["Coat Weight"].default_value = coat
+    p.inputs["Coat Roughness"].default_value = 0.03
+
+    def img(kind, dato):
+        n = nt.nodes.new("ShaderNodeTexImage")
+        n.image = bpy.data.images.load(os.path.join(carpeta, f"{tex}_{kind}.jpg"), check_existing=True)
+        if dato:
+            n.image.colorspace_settings.name = "Non-Color"
+        return n
+    nt.links.new(img("color", False).outputs["Color"], p.inputs["Base Color"])
+    nt.links.new(img("rough", True).outputs["Color"], p.inputs["Roughness"])
+    if normal:
+        nm = nt.nodes.new("ShaderNodeNormalMap")
+        nm.inputs["Strength"].default_value = 0.6
+        nt.links.new(img("nor", True).outputs["Color"], nm.inputs["Color"])
+        nt.links.new(nm.outputs["Normal"], p.inputs["Normal"])
+    return m
+
+
+def pintura_negra():
+    """Body paint (defect 15: it read flat grey under the sodium light): a darker base under a glossy clear coat (coat 1.0,
+    rough 0.03) whose normal carries a faint orange peel (noise, ~3 mm cells), so the coat breaks the lamps' reflections up
+    the way real paint does. Was mat("pintura", (0.012, 0.012, 0.014), 0.3, metal=0.2, coat=1.0)."""
+    m = mat("pintura", (0.006, 0.006, 0.007), 0.35, metal=0.2, coat=1.0)
+    nt = m.node_tree
+    p = nt.nodes["Principled BSDF"]
+    p.inputs["Coat Roughness"].default_value = 0.03
+    tc = nt.nodes.new("ShaderNodeTexCoord")
+    ru = nt.nodes.new("ShaderNodeTexNoise")
+    ru.inputs["Scale"].default_value = 300.0
+    ru.inputs["Detail"].default_value = 2.0
+    nt.links.new(tc.outputs["Object"], ru.inputs["Vector"])
+    bu = nt.nodes.new("ShaderNodeBump")
+    bu.inputs["Strength"].default_value = 0.04
+    bu.inputs["Distance"].default_value = 0.0003
+    nt.links.new(ru.outputs["Fac"], bu.inputs["Height"])
+    nt.links.new(bu.outputs["Normal"], p.inputs["Coat Normal"])
+    return m
+
+
+def zona_cabina(c, d):
+    """Material for one loose part of Second_Body_Col, from its box centre c and size d (world m), or None (stays body paint)."""
+    dx, cx = c.x - MUNDO["carril_x"], MUNDO["carril_x"]
+    if abs(dx) > 0.81 or not (-1.13 < c.y < 1.42 and 0.85 < c.z < 2.26) or (c.z > 1.9 and c.y > 1.0):
+        return None  # outside the cab (body sides, the roof visor and its lamp pockets ahead of the windshield top)
+    if c.z > 1.98:
+        return "cab_techo"
+    if c.z < 1.15 and d.z < 0.1 and max(d.x, d.y) > 0.3:
+        return "cab_alfombra"  # the floor pans
+    v = Vector((cx + VOLANTE[0], VOLANTE[1], VOLANTE[2]))
+    if (c - v).length < 0.21:
+        return "cab_piel" if max(d) > 0.18 else "cab_aluminio"  # the rim's halves, else the spokes and the hub trim
+    if c.y > 0.85 and abs(dx) < 0.22 and c.z < 1.62:
+        return "cab_carbono"  # the centre stack (the dash top above it stays leather)
+    return "cab_piel"
+
+
+def cabina(o):
+    """Split o (Second_Body_Col, already in world space) into the cab zones; writes a box-projected UV map in metres / tile."""
+    me = o.data
+    base = me.materials[0]
+    idx = {}
+    vs = me.vertices
+    cuenta = {}
+    for isla in islas(me):
+        pts = [vs[v].co for p in isla for v in me.polygons[p].vertices]
+        lo = Vector([min(q[i] for q in pts) for i in range(3)])
+        hi = Vector([max(q[i] for q in pts) for i in range(3)])
+        z = zona_cabina((lo + hi) / 2, hi - lo)
+        if z is None:
+            continue
+        if z not in idx:
+            me.materials.append(bpy.data.materials.get(z) or cab_mat(z))
+            idx[z] = len(me.materials) - 1
+        for p in isla:
+            me.polygons[p].material_index = idx[z]
+        cuenta[z] = cuenta.get(z, 0) + len(isla)
+    uv = (me.uv_layers.get("UVMap") or me.uv_layers.new(name="UVMap")).data
+    tiles = {i: CABINA_MATS[z][1] for z, i in idx.items()}
+    for p in me.polygons:
+        t = tiles.get(p.material_index)
+        if t is None:
+            continue
+        n = p.normal
+        ax = max(range(3), key=lambda k: abs(n[k]))
+        u_, v_ = [(1, 2), (0, 2), (0, 1)][ax]
+        for li in p.loop_indices:
+            co = vs[me.loops[li].vertex_index].co
+            uv[li].uv = (co[u_] / t, co[v_] / t)
+    print("CABINA zonas", cuenta, "pintura_satin queda en", base.name)
+
+
+def voltear_costados_caja(meshes):
+    """The bed's upper side panels (plastico, |x - CX| 0.80-0.90, over the wheels) face into the bed; the r1 stickers ride on the
+    right one's outside (owner 2026-11-18: "holes or white patches" on the right side of the bed). Turn them outward."""
+    cx, n = MUNDO["carril_x"], 0
+    for o in meshes:
+        me = o.data
+        voltear = [p for p in me.polygons
+                   if 0.80 <= abs(p.center.x - cx) <= 0.90 and -2.9 < p.center.y < -1.1 and 1.15 < p.center.z < 1.5
+                   and p.normal.x * math.copysign(1, p.center.x - cx) < -0.5]
+        for p in voltear:
+            p.flip()
+        n += len(voltear)
+    print("CAJA costados volteados", n)
+
+
 def separar_ruedas(meshes):
     """The model merges its parts by material. Pull out every piece that lies inside a tyre's cylinder: one object per wheel."""
     import bmesh
@@ -239,7 +376,7 @@ def camion():
     M = Matrix.Translation((MUNDO["carril_x"], 0, 0)) @ Matrix.Rotation(math.pi, 4, "Z") @ Matrix.Scale(f, 4) @ Matrix.Translation((-c.x, -c.y, -lo.z))
     pre = CFG["presets"]["noche"]
     mats = {
-        "pintura": mat("pintura", (0.012, 0.012, 0.014), 0.3, metal=0.2, coat=1.0),
+        "pintura": pintura_negra(),
         "pintura_satin": mat("pintura_satin", (0.014, 0.014, 0.016), 0.45, metal=0.2, coat=0.3),
         "plastico": mat("plastico", (0.02, 0.02, 0.021), 0.6),
         "rin": mat("rin", (0.03, 0.03, 0.032), 0.25, metal=1.0),
@@ -258,24 +395,73 @@ def camion():
     for o in meshes:
         o.data.transform(M)
         viejo = o.data.materials[0].name.split(".")[0]
-        if viejo == "Light_Col":  # one material for every lamp: the ones on the nose are the headlights
-            o.data.materials[0] = mats["faros"]
-            o.data.materials.append(mats["cromo"])
+        if viejo == "Light_Col":  # one material for every lamp, split by where it sits (owner 2026-11-18: every G63 lamp lit, at its
+            # real position; until then all but the headlights were chrome, and the chrome over the tail clusters hid their red)
+            G = luces_g63._mats()
+            lamparas = [mats["faros"],   # nose: headlight projectors, the LED strip under each, the bumper lamps (ruta.py's flash keys it)
+                        mats["calaveras"],  # tail clusters: 6 mm behind the calaveras lens, which hides them (its red carries)
+                        mats["plastico"],  # roof: the pockets' back; props_placement.barra_luces puts the lit lamp in front
+                        G["g63_ambar"]]  # what is left: the mirror turn signals
+            o.data.materials[0] = lamparas[0]
+            for m_ in lamparas[1:]:
+                o.data.materials.append(m_)
+            L2 = MUNDO["largo_camion"] / 2
             for p in o.data.polygons:
-                p.material_index = 0 if p.center.y > MUNDO["largo_camion"] / 2 - 0.5 and p.center.z < 1.5 else 1
+                c_ = p.center
+                p.material_index = (0 if c_.y > L2 - 0.5 and c_.z < 1.5 else 1 if c_.y < -L2 + 0.5 else 2 if c_.z > 2.0 else 3)
         elif viejo in REPINTAR:
             o.data.materials[0] = mats[REPINTAR[viejo]]
+            if viejo == "Second_Body_Col":
+                cabina(o)
+    voltear_costados_caja(meshes)
     ruedas, radio = separar_ruedas(meshes)
     camion_e = bpy.data.objects.new("camion", None)
     bpy.context.scene.collection.objects.link(camion_e)
     for o in [*meshes, *ruedas]:
         o.parent = camion_e
+    luces_g63.malla(camion_e, MUNDO["carril_x"])  # every lamp's lens at its real position (blender/luces_g63.py)
+    parrilla_g63.parrilla(camion_e, MUNDO["carril_x"])  # the AMG 6x6 grille over the model's Brabus one (blender/parrilla_g63.py)
     body = max(meshes, key=lambda o: len(o.data.polygons))
     print("RADIO", radio, "RUEDAS", [(round(r.location.x, 2), round(r.location.y, 2)) for r in ruedas])
     return camion_e, body, ruedas, radio
 
 
 # ---------------------------------------------------------------- road, props, hills
+
+MUNDO_TEX = os.path.join(REPO, "blender", "texturas", "mundo")  # blender/texturas_escena.py makes them
+W_ALTO, W_FONDO, W_CHAPA = 0.31, 0.083, 0.003  # W-beam guardrail: 310 mm tall, two ridges 83 mm deep, 3 mm sheet (AASHTO M180)
+W_X = lambda z, x_atras=5.03, zc=0.62: x_atras - W_FONDO * 0.5 * (1 - math.cos(4 * math.pi * ((z - zc) / W_ALTO + 0.5)))
+
+
+def riel_w(nombre, x_atras, zc, m, n=32):
+    """Defect 22 (the rail was a plain 6 cm box): the W-beam's cross-section in x-z, two ridges toward the road (-x), a 3 mm
+    sheet, extruded the tramo's length; UVs in metres (u along the road / 2 m, v down the profile / 0.5 m) for the zinc scan."""
+    import bmesh
+    zs = [zc - W_ALTO / 2 + W_ALTO * k / n for k in range(n + 1)]
+    perfil = [(W_X(z, x_atras, zc), z) for z in zs] + [(W_X(z, x_atras, zc) + W_CHAPA, z) for z in reversed(zs)]
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new("UVMap")
+    a = [bm.verts.new((x, 0.0, z)) for x, z in perfil]
+    b = [bm.verts.new((x, float(TRAMO), z)) for x, z in perfil]
+    largo = [0.0]
+    for (x0, z0), (x1, z1) in zip(perfil, perfil[1:] + perfil[:1]):
+        largo.append(largo[-1] + math.hypot(x1 - x0, z1 - z0))
+    k = len(perfil)
+    for i in range(k):
+        j = (i + 1) % k
+        f = bm.faces.new((a[i], a[j], b[j], b[i]))
+        for lp, (u, v) in zip(f.loops, ((0, largo[i]), (0, largo[i + 1]), (TRAMO, largo[i + 1]), (TRAMO, largo[i]))):
+            lp[uv].uv = (u / 2.0, v / 0.5)
+        f.smooth = True
+    bm.faces.new(a[::-1]); bm.faces.new(b)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new(nombre)
+    bm.to_mesh(me); bm.free()
+    me.materials.append(m)
+    o = bpy.data.objects.new(nombre, me)
+    bpy.context.scene.collection.objects.link(o)
+    return o
+
 
 def tramo_props():
     """One `tramo` of roadside props at y in [0, TRAMO). Exported once, recycled on the page."""
@@ -287,19 +473,21 @@ def tramo_props():
     refl = mat("reflejante", (0.5, 0.03, 0.02), 0.3, emit=lin(CFG["presets"]["noche"]["fantasmas"]["color"]), estr=0.8)
     objs = []
     # light pole, right shoulder
-    objs.append(cil("poste", 0.11, 9.0, (6.4, 8, 4.5), galv))
+    objs.append(cil("poste", 0.11, 9.0, (6.4, 8, 4.5), galv, verts=64))  # 64 sides: ≥ 1 tri per px at scene 2's 184 px
+    for p in objs[-1].data.polygons:
+        p.use_smooth = p.loop_total == 4  # round sides, flat caps
     objs.append(cil("brazo", 0.06, 2.6, (5.15, 8, 8.95), galv, rot=(0, math.pi / 2, 0)))
     objs.append(caja("lampara", (0.75, 0.32, 0.14), (3.95, 8, 8.9), lampara))
     # guardrail, right side: a continuous beam and a post every 4 m
-    objs.append(caja("riel", (0.06, TRAMO, 0.32), (5.0, TRAMO / 2, 0.62), galv))
+    objs.append(riel_w("riel", 5.03, 0.62, mat_tex("galvanizado_riel", MUNDO_TEX, "galvanizado", metal=1.0, normal=False)))
     for i in range(TRAMO // 4):
         objs.append(caja(f"poste_riel_{i}", (0.14, 0.14, 0.8), (5.1, i * 4 + 2, 0.4), galv))
     # delineators ("fantasmas"), left shoulder every 16 m, with a red reflector
     for i in range(TRAMO // 16):
         objs.append(caja(f"fantasma_{i}", (0.12, 0.12, 1.05), (-4.7, i * 16 + 6, 0.52), blanco))
         objs.append(caja(f"reflejante_{i}", (0.13, 0.03, 0.18), (-4.7, i * 16 + 6 - 0.06, 0.88), refl))
-    for i in range(TRAMO // 16):  # reflectors on the guardrail
-        objs.append(caja(f"reflejante_riel_{i}", (0.03, 0.12, 0.1), (4.96, i * 16 + 2, 0.66), refl))
+    for i in range(TRAMO // 16):  # reflectors on the guardrail, on the upper ridge's crest
+        objs.append(caja(f"reflejante_riel_{i}", (0.012, 0.12, 0.05), (W_X(0.62 + 0.0775) - 0.0055, i * 16 + 2, 0.62 + 0.0775), refl))
     for o in objs:
         for c in o.users_collection:
             c.objects.unlink(o)
@@ -331,11 +519,15 @@ def cerros():
     for j in range(rings - 1):
         for i in range(n):
             bm.faces.new((verts[j][i], verts[j][(i + 1) % n], verts[j + 1][(i + 1) % n], verts[j + 1][i]))
+    uv = bm.loops.layers.uv.new("UVMap")  # defect 21 (a flat grey band): the scrub scan, planar in x-y, one tile every 60 m
+    for f in bm.faces:
+        for lp in f.loops:
+            lp[uv].uv = (lp.vert.co.x / 60.0, lp.vert.co.y / 60.0)
     me = bpy.data.meshes.new("cerros")
     bm.to_mesh(me)
     o = bpy.data.objects.new("cerros", me)
     bpy.context.scene.collection.objects.link(o)
-    o.data.materials.append(mat("cerro", (0.012, 0.011, 0.01), 0.95))
+    o.data.materials.append(mat_tex("cerro", MUNDO_TEX, "cerro"))  # was mat("cerro", (0.012, 0.011, 0.01), 0.95)
     return o
 
 
@@ -395,7 +587,7 @@ def mundo_render(s, preset):
     so = bpy.data.objects.new("luna", sol)
     so.rotation_euler = (-b(P["luna"]["dir"])).to_track_quat("-Z", "Y").to_euler()
     sc.collection.objects.link(so)
-    for lado in (-0.78, 0.78):
+    for (fx, _fy, fz), lado in zip(luces_g63.FAROS, (-1, 1)):  # on the headlight centres (were CX +-0.78, z 1.15: off the lamps)
         sp = bpy.data.lights.new(f"faro_{lado}", "SPOT")
         sp.energy = W_FARO * P["faros"]["intensidad"]
         sp.color = lin(P["faros"]["color"])
@@ -403,16 +595,13 @@ def mundo_render(s, preset):
         sp.spot_blend = 0.5
         sp.shadow_soft_size = 0.08
         o = bpy.data.objects.new(f"faro_{lado}", sp)
-        o.location = (MUNDO["carril_x"] + lado, MUNDO["largo_camion"] / 2 + 0.05, 1.15)
+        o.location = (fx, MUNDO["largo_camion"] / 2 + 0.05, fz)
         o.rotation_euler = Vector((0, 1, -0.06)).to_track_quat("-Z", "Y").to_euler()
         o.parent = s["camion"]
         sc.collection.objects.link(o)
-    cl = bpy.data.lights.new("calaveras", "POINT")
-    cl.energy = W_CALAVERA * P["calaveras"]["intensidad"]
-    cl.color = lin(P["calaveras"]["color"])
-    co = bpy.data.objects.new("calaveras", cl)
-    co.location = (MUNDO["carril_x"], -MUNDO["largo_camion"] / 2 - 0.3, 1.0)
-    sc.collection.objects.link(co)
+    # no tail point light: the calaveras lenses carry the red. A red point behind each cluster washed them pink (top-20 % chroma
+    # 87 -> 71, ~/cc-out/mto-asset-fixes/luces/cola/), and the old mid-tail one showed as a glare dot on the tailgate
+    luces_g63.luces_interior(s["camion"], MUNDO["carril_x"])  # reading lamps, dome, dash glow
     # world HDRI
     w = bpy.data.worlds.new("cielo")
     sc.world = w

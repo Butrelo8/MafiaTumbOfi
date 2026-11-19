@@ -382,8 +382,10 @@ def tendido(padre, y0, y1):
     ys = [float(y) for y in np.arange(y0 + fase, y1 + 1, PASO_POSTES)]
     bm = bmesh.new()
     for y in ys:
-        bmesh.ops.create_cone(bm, cap_ends=True, segments=8, radius1=0.2, radius2=0.11, depth=H,
-                              matrix=Matrix.Translation((X, y, H / 2)))
+        cono = bmesh.ops.create_cone(bm, cap_ends=True, segments=64, radius1=0.2, radius2=0.11, depth=H,
+                                     matrix=Matrix.Translation((X, y, H / 2)))  # 64 sides: revisar's detail gate wants ≥ 1 tri per px of the 232 px pole
+        for f in {f for v in cono["verts"] for f in v.link_faces if len(f.verts) == 4}:
+            f.smooth = True  # round sides, flat caps
         bmesh.ops.create_cube(bm, size=1, matrix=Matrix.Translation((X, y, H - 0.5)) @ Matrix.Diagonal((2.4, 0.12, 0.12, 1)))
     me = bpy.data.meshes.new("w_postes"); bm.to_mesh(me); bm.free(); me.materials.append(conc)
     postes = bpy.data.objects.new("w_postes", me); _sc().collection.objects.link(postes); postes.parent = padre

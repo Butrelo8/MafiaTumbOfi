@@ -530,7 +530,11 @@ def choques(co):
 def preparar(s, w, h, islas):
     vidrios(s["camion"], islas)
     luces_interior(s["camion"])
-    sin_cabeceras(s["camion"])
+    if os.environ.get("CABINA_TRIPO") == "1":  # the owner's Tripo seats (with headrests) and console, pending his OK
+        import cabina_tripo
+        cabina_tripo.poner(s["camion"])
+    else:
+        sin_cabeceras(s["camion"])
     reparto(s["camion"])
     co = camara(w, h, s["camion"])
     choques(co)
