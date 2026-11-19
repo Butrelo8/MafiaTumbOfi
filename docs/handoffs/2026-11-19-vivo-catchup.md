@@ -37,7 +37,7 @@ Preview only, nothing merged or deployed.
 draw calls stop 1..6     -                    62 88 45 71 37 81   (cap 90; was 48 82 36 75 33 75 at P1 phase 2)
 calls stop 1 / moving    49 / 68              62 / 71
 bytes total (4G run)     5.74 MB              5.98 MB   escena.glb 1.52 -> 1.86 MB, reparto.glb 1.39 -> 1.29 MB
-TTFF Fast 4G 390         3.46 s               4.01 s    (one run each)
+TTFF Fast 4G 390         3.45 s median        3.75 s median  (3 runs each: 4035/3449/3412 vs 4092/3750/3749; target <= 4 s met)
 clicks / keys / band     -                    10/10, 6/6, 5/5; page errors 0 (vivo-tomas, 36 shots + medir-vivo)
 emblem drift (live)      8.14 px (Blender)    0.43 px max over 90 live frames, 1440, against a hood point
 bun test                 125 pass             125 pass
@@ -45,6 +45,11 @@ bun test                 125 pass             125 pass
 - The flattening rule in `vivo-optimizar.mjs aplanar()` turns five near-black kiln textures into flat colour and saves 5 calls:
   stop 2 went 92 -> 87, then 88 with the full-detail lamps. At most 0.13 % of pixels change by more than 8 levels.
 - The old version's live drift could not be measured: its page doesn't expose the camera.
+
+- **Stop 4 framing**: all four faces are in frame at 1440 and 390 (`tmp/catchup/hoja-390.jpg`). The face L* (mascara.mjs) was
+  not re-measured after the faces moved 0.15-0.25 m toward the fixed cameras; the owner may want to re-pick 4a-4d. El Manco
+  sits 0.245 m forward of the old live spot although his handle moved +0.05 m: his file's start pose already carried the
+  gate-2 seat slide and grip.
 
 ## Not carried / open
 - **Footwell blue lights**: they are Blender AREA lights, and the exporter has `export_lights=False`. The red strips carry, as an
@@ -75,3 +80,12 @@ Check: `PW=E:\tmp\pw-vivo\node_modules\playwright-core CHROME=<chrome.exe> node.
 Sheet: `tmp/catchup/hoja-lote6b-vivo.jpg` (copy at `E:\tmp\mto-live-catchup\hoja-lote6b-vivo.jpg`). Each row puts lote6b Cycles
 on the left and the live preview at 1440 on the right. The last four rows are live only: feet, bottle, rear cab, stop 2. All
 shots are in `E:\tmp\mto-live-catchup\preview\`.
+
+## gotchas (for visual-lab)
+- Window glass turned opaque after gltf-transform -> dedup() merges materials that differ only by name and can keep the other one's name (vidrio_falso became k3_alu); mark glass BLEND/alpha before dedup.
+- Thin lamp rings and LED strips came out as loose fragments live -> one decimate ratio on every truck mesh over 300 tris shreds small lens meshes; exempt lamp, lens and grille materials.
+- A prop parented in Blender still floated under the live sway -> any glTF root outside the swaying node floats; reparent every root whose box sits on the truck, then assert the GLB roots.
+- Reparenting loose props to the truck grew a body box computed from the truck's children (route tests failed) -> keep the props out of that box.
+- A named node could not be found live -> the page's per-parent static merge drops node names; locate the part by its nearest vertex from the GLB.
+- Some dumped matrices sat at the origin -> viewport-hidden objects keep a stale matrix_world in a background dump; take the visible copy.
+- The PreToolUse hook blocked a whole command -> it matches system python3 plus the imaging library's name anywhere in the command line, even in a string; split the commands or use Edit.
