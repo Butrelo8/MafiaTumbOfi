@@ -195,7 +195,12 @@ for f in FIGS:
     print("VIVO figura", f.name, n, "->", len(f.data.polygons), flush=True)
 
 # ---------------------------------------------------------------- the truck: one decimate ratio for its heavy meshes
-pesados = [o for o in escena if o.type == "MESH" and o not in FIGS and not any(m.type == "ARMATURE" for m in o.modifiers)]
+# the lamps, lenses and grille keep their full mesh (~4 k tris): at the common ratio (0.094 on 2026-11-19) the headlight rings,
+# the LED strips and the amber markers (luces_g63 528 tris, Material3.007 2118) came out as loose fragments and the grille
+# (parrilla_g63 360) lost its bars
+LAMPARA = ("faros", "calaveras", "mica", "g63_", "parrilla_", "u_ambar")
+pesados = [o for o in escena if o.type == "MESH" and o not in FIGS and not any(m.type == "ARMATURE" for m in o.modifiers)
+           and not any(m and m.name.startswith(LAMPARA) for m in o.data.materials)]
 total = sum(tris(o) for o in pesados)
 r = min(1.0, TRUCK / total * 0.97)
 for o in pesados:
