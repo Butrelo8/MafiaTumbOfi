@@ -836,7 +836,8 @@ def _pieza(nombre):
     """The meshes of <nombre>_final.glb with their matrices, imported once; every scene links new objects to them."""
     if nombre not in _PIEZAS:
         antes = set(bpy.data.objects)
-        bpy.ops.import_scene.gltf(filepath=os.path.join(PIEZAS_DIR, nombre + "_final.glb"))
+        # PIEZA_<NOMBRE> = another file in the same contract (PIEZA_CONSOLA_TECHO: the Tripo roof pod, tripo/pod_contrato.py)
+        bpy.ops.import_scene.gltf(filepath=os.environ.get("PIEZA_" + nombre.upper()) or os.path.join(PIEZAS_DIR, nombre + "_final.glb"))
         nuevos = [o for o in bpy.data.objects if o not in antes]
         _PIEZAS[nombre] = [(o.data, o.matrix_world.copy()) for o in nuevos if o.type == "MESH"]
         for o in nuevos:

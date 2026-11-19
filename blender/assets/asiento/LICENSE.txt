@@ -5,3 +5,11 @@ Owner-supplied Tripo generations (2026-11-18 17:33, relayed by the mothership); 
 - "9eee7423-8303-42dd-86ec-a3f6de12adaa.glb" -> consola-fuente.glb (51 parts, 44 k tris, no textures). Not used: two whole
   cab interiors melted together; no clean console piece.
 Views: ~/cc-out/mto-asset-fixes/asientos/vistas/vistas.jpg. The seat inputs for a new try: ~/cc-out/mto-asset-fixes/asientos/tripo-in/.
+
+Generated 2026-11-19 by uncdrone on the owner's Tripo account (tripo CLI, image_to_model, model v3.1-20260211,
+texture_quality=detailed, 40 credits each). Inputs: FLUX 3 Klein edits (local) of the cab photos r04 (roof pod) and r01
+(console) in ~/cc-out/mto-asset-audit/refs/; inputs and raw outputs in /mnt/e/tmp/mto-tripo-consola/.
+- pod-tripo-v31-c1-crudo.glb (task f4b1a981, face_limit 2000: 1766 tris) -> pod-tripo-v31-c1.glb via tripo/pod_contrato.py
+  (0 0 -90, incl 40): used (PIEZA_CONSOLA_TECHO). pod-tripo-v31-c2-crudo.glb (task 7203353e): spare, its knobs lost the arrows.
+- consola-tripo-v31-c2.glb (task 30d9a7f5, face_limit 6000: 5572 tris): used (CABINA_TRIPO_CONSOLA).
+  consola-tripo-v31-c1.glb (task 6713f055, 5275 tris): spare, garbled fake lettering on its rear face.

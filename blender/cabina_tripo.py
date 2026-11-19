@@ -121,7 +121,7 @@ def asiento(lado, glb):
 
 
 def consola(kz):
-    o = importar("consola-tripo3.glb", "tripo_consola")
+    o = importar(os.environ.get("CABINA_TRIPO_CONSOLA", "consola-tripo3.glb"), "tripo_consola")  # file in ASSETS
     me = o.data
     v, _, _ = caja(me)
     giro = min(np.radians(np.arange(-90, 90.01, 0.5)), key=lambda t: np.ptp(v[:, 0] * math.cos(t) - v[:, 1] * math.sin(t)))

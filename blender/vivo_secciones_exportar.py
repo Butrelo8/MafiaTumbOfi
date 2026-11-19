@@ -203,8 +203,12 @@ for f in FIGS:
 # the LED strips and the amber markers (luces_g63 528 tris, Material3.007 2118) came out as loose fragments and the grille
 # (parrilla_g63 360) lost its bars
 LAMPARA = ("faros", "calaveras", "mica", "g63_", "parrilla_", "u_ambar")
+# the Tripo console and roof pod come from Tripo at their live budget (face_limit): at the common ratio the 49 k console became
+# 4.6 k tris of shreds (owner 48.png). Only when already light: the old 49 k tripo3 console still takes the common ratio
+LIGEROS = ("tripo_consola", "u_consola_techo")
 pesados = [o for o in escena if o.type == "MESH" and o not in FIGS and not any(m.type == "ARMATURE" for m in o.modifiers)
-           and not any(m and m.name.startswith(LAMPARA) for m in o.data.materials)]
+           and not any(m and m.name.startswith(LAMPARA) for m in o.data.materials)
+           and not (o.name.startswith(LIGEROS) and tris(o) <= 8000)]
 total = sum(tris(o) for o in pesados)
 r = min(1.0, TRUCK / total * 0.97)
 for o in pesados:
