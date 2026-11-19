@@ -38,11 +38,12 @@ Spec: `~/projects/mothership/docs/queue/2026-11-19-mto-tripo-console-lightbar.md
 - **Console: Tripo wins.** At 5.6 k tris and undecimated, it reads as an armrest, an alu deck and a rotary knob, where before
   it was shreds. Its box sits within 1 cm of the old one, under the owner's matrix (`cabina.json` `consola`, applied in the
   exporter).
-- **Pod: Tripo wins on likeness, with one trade-off.**
+- **Pod: it hides the two reading-lamp lenses at stop 1 (the one place where the new part is worse), but Tripo wins on likeness.**
+  - It is 0.129 m tall against the kiln's 0.07. From the stop-1 camera it covers the lenses behind it. Their positions
+    (cookingdrone's) are unchanged.
   - It has r04's rail, gauges, yellow knobs and red levers, where the kiln build had a different layout and no rail.
-  - It is 0.129 m tall against the kiln's 0.07. From the stop-1 camera it hides the two reading-lamp lenses behind it. Their
-    positions are unchanged.
-  - The real cab is the same: in r04 the lamp unit sits behind and above the pod.
+  - In r04 the lamp unit sits forward of the pod, between the pod and the mirror, so a rear-seat view of the real cab loses it
+    behind the pod too.
   - If the owner wants the lenses visible, either squash the pod vertically (about ×0.6, at the cost of oval gauges) or go
     back to the kiln pod (unset `PIEZA_CONSOLA_TECHO`). Either is a 13-minute rebuild.
 - I built no separate procedural console: the old procedural G63 console is the one cabina_tripo removes by volume, and the
@@ -54,13 +55,14 @@ Spec: `~/projects/mothership/docs/queue/2026-11-19-mto-tripo-console-lightbar.md
 draw calls max           88                   85      (vivo-tomas, 36 shots, 1440 + 390; every changed shot -3)
 stop 1 / 2 / 3 (1440)    62 / 88 / 45         59 / 85 / 45
 page errors              0                    0       (vivo-tomas + 3 medir-vivo runs)
-TTFF Fast 4G 390         3.75 s median (cricketdrone)   3.92 s median (3906 / 3920 / 3996), bytes 5.98 MB both
+TTFF Fast 4G 390         3913 (same session, sequential)   3906 / 3920 / 3996, median 3.92 s; bytes 5.98 MB both
 escena.glb               1.862 MB             1.857 MB
 console tris live        4662 (decimated)     5572 (exempt)     pod 686 (5 materials) -> 1766 (1 material)
 bun test                 125 pass             125 pass
 ```
-TTFF moved 170 ms with the same total bytes. My guess is network variance between the two sessions; I did not check it. It is
-still under the 4 s target.
+TTFF: the before version measured in this session gave 3913 ms (one sequential run; two parallel runs gave 4078 and 4139).
+So the new parts cost nothing measurable. Against cricketdrone's 3.75 s median, both are about 0.16 s slower: tonight's
+network, not the build. The new version is under the 4 s target, but only by about 80 ms on its slowest run.
 
 ## Rebuild
 ```
@@ -78,8 +80,11 @@ its long side on Y, and it leans about 15° back, so incl 40 nets about 25° dow
 
 ## Open
 - Reading-lamp lenses hidden by the taller pod at stop 1 (above).
-- The kiln cupholder (`portavasos`) is still placed by a ray onto the console as built, before the owner's console matrix. I
-  have not checked whether it now floats over the new console's deck. Close-up view: `cabina_atras` in vivo-tomas.
+- Close-ups `cabina_atras` and `hector_botella` (before/after: `/mnt/e/tmp/mto-tripo-consola/hoja/cerca.jpg`): Héctor's hand
+  and bottle are unchanged, and no figure crosses the new console.
+- One defect predates this work: a small carbon-textured strip lies on top of the armrest. It sat on the old tripo3 armrest
+  too (`hoja/cerca-apoyabrazos2.png`). It is probably G63 trim that `cabina_tripo.borrar_viejos` keeps on purpose (it skips
+  `cab_carbono` faces inside the console box). Not fixed here.
 
 ## gotchas (for visual-lab)
 - Tripo image_to_model returned its longest side on glTF Z, not X -> read the axes from a four-view render of the raw GLB before scaling; scaling by the x extent made the pod 1.2 m long.
