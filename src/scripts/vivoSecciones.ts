@@ -99,9 +99,10 @@ export async function arrancar() {
   const domo = new PointLight(0xffb070, 0.6, 2.5, 2)
   domo.position.copy(local([1.72, 0.2, 2.05]))
   camion.add(domo)
-  // stop 4's cab lamps (Cycles: utileria.luz_costado 'cabina', moved 0.3 m in front of each face, owner 19:11): live only while
+  // stop 4's cab lamps (Cycles: utileria.luz_costado 'cabina', moved 0.3 m in front of each face, owner 19:11; moved
+  // again with the faces to the owner's placement 2026-11-19): live only while
   // stop 4 is the stop, faded with the move. Intensities in LAMPARAS (front row, rear row)
-  const lamparas = [[1.33, 0.79], [2.08, 0.75], [1.33, -0.26], [2.12, -0.15]].map(([x, y], k) => {
+  const lamparas = [[1.33, 1.035], [2.08, 0.991], [1.33, -0.02], [2.111, -0.002]].map(([x, y], k) => {
     const l = new PointLight(0xffbf80, 0, 1.6, 2)
     l.position.copy(local([x, y, 2.12]))
     l.userData.base = LAMPARAS[k < 2 ? 0 : 1]
@@ -235,7 +236,8 @@ export async function arrancar() {
   // ---- loop
   const medida = { frameMs: [] as number[], renderMs: [] as number[], ttff: 0, calls: 0, tris: 0, ir, video: false, cargado: false,
     fases: {} as Record<string, number>, dpr, telefono: TELEFONO, sondeo: '',
-    clips: [] as string[], ruedas: ruedas.length, pantallas, autos: 0, el: video, escena: scene, lamparas,
+    clips: [] as string[], ruedas: ruedas.length, pantallas, autos: 0, el: video, escena: scene, lamparas, cam, mira, // cam/mira: checks frame views that are not stops
+
     estado: () => ({ cam: cam.position.toArray(), z: autos.map((a) => a.z), rueda: ruedas[0]?.rotation.x ?? 0, vias: vias.position.z, letrero: letreroVisto, sub, lamparas: lamparas.map((l) => l.intensity) }) }
   ;(window as unknown as { __vivo: typeof medida }).__vivo = medida
   let antes = performance.now(), tiempo = 0, primero = true

@@ -3,8 +3,8 @@ road3 world and the screen truck, as the montaje-esc1..6 stills were built, but 
 option's builder once, records its camera (pos, look-at, lens; sensor 36 mm horizontal, as the loop sets it) and the objects it
 added, then saves the file for step 2 (blender/vivo_secciones_exportar.py). Edits no other lane's file.
 
-  MONTAJE_PANTALLA=b MONTAJE_PANTALLA_LUZ=ancha MONTAJE_CAMINO=road3 CURVA_PRUEBA=recta \
-  WSLENV=MONTAJE_PANTALLA:MONTAJE_PANTALLA_LUZ:MONTAJE_CAMINO:CURVA_PRUEBA \
+  CABINA_TRIPO=1 MONTAJE_PANTALLA=a MONTAJE_PANTALLA_LUZ=ancha MONTAJE_CAMINO=road3 CURVA_PRUEBA=recta \
+  WSLENV=CABINA_TRIPO:MONTAJE_PANTALLA:MONTAJE_PANTALLA_LUZ:MONTAJE_CAMINO:CURVA_PRUEBA \
   /mnt/e/Blender/blender.exe -b --factory-startup --python-exit-code 1 --python "$(wslpath -w blender/vivo_secciones_montar.py)" \
     -- "$(wslpath -w blender/escena.py)" <out_dir (Windows)> 1 all 960x540
 

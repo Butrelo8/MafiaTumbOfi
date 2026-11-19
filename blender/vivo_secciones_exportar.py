@@ -5,6 +5,10 @@ licensed; the preview may serve it, buggyship 2026-11-18 12:40).
     --python "$(wslpath -w blender/vivo_secciones_exportar.py)" -- <out_dir (Windows)> <vivo-montado.json (Windows)> \
     [truck_tris=150000] [fig_tris=40000] [tex=1024]
 
+Since 2026-11-19 the live recipe builds step 1 with CABINA_TRIPO=1 (the Tripo seats and console) and runs this step with
+VIVO_POSE=<blender/vivo_reparto_volcar.py's dump of the owner's colocar-reparto-v3.blend> (WSLENV=VIVO_POSE): the cast at his
+placement, held static. Without it the cast keeps the stand-ins' clips.
+
 Dressing (one live scene carries one set; the stills differ per stop): every stop's common set plus scene 6's truck picks and
 scene 1's cab picks (pennant, strawberry); the screen truck as built for scene 3, moved per stop by the page.
 Writes escena.glb (truck, dressing, cast with one baked idle clip each, screen truck), mundo.glb (the whole road3 world, the
@@ -30,6 +34,13 @@ comun = set.intersection(*(set(v) for v in g.values()))
 quiero = set(g["montaje-esc6"]) | {n for n in g["montaje-esc1"] if n.split(".")[0] in ("pp_banderin", "pp_fresa")}
 for n in quiero | comun:
     O[n].hide_render = O[n].hide_viewport = False  # viewport-hidden objects are skipped by visible() and keep stale matrices
+# the bed keeps only the cases, the donut and the alien (montaje.QUITAR_CAJA, owner 2026-11-19 00:24): the unhide above brought
+# the removed load back, and the console water bottle (k5_bebida_agua) left caja5 but older dumps still carry it
+QUITAR = {"k3_amp", "k3_bocina", "k3_cables", "k3_cerveza", "k3_cobijas", "k3_hielera", "k4_red", "inst_bajo_sexto",
+          "inst_requinto", "inst_tololoche", "k3_correa_alien", "k5_bebida_agua"}
+for o in [o for o in O if o.name.split(".")[0] in QUITAR]:
+    for c in [o, *o.children_recursive]:
+        c.hide_render = c.hide_viewport = True
 
 
 # the screen truck as built for scene 3: its cab (p3_*) plus the box, LED panels, frames and lettering that pantalla_3d.py
@@ -110,6 +121,53 @@ def asentar_reparto(rigs, padre):
 
 
 asentar_reparto(RIGS, O["camion"])
+
+
+def poner_pose(js):
+    """The owner's placement (blender/vivo_reparto_volcar.py's dump of colocar-reparto-v3.blend): each rig at his world matrix with his
+    evaluated pose, held static (saltyship 2026-11-19 02:25: no idle clips until gate 3), Héctor's bottle where his hand holds it and
+    the Tripo console as he moved it. The drivers (stand-in constraints, Diego's sip clip) are cut."""
+    p = json.load(open(js, encoding="utf8"))
+    T = O["camion"].matrix_world @ Matrix(p["camion"]).inverted()  # his file's truck to this one's
+    for q, r in p["rigs"].items():
+        rig = O[q + "_v5_rig"]
+        rig.animation_data_clear()
+        for c in list(rig.constraints):
+            rig.constraints.remove(c)
+        for b in rig.pose.bones:
+            for c in list(b.constraints):
+                b.constraints.remove(c)
+            b.location, b.rotation_quaternion, b.rotation_euler, b.scale = (0, 0, 0), (1, 0, 0, 0), (0, 0, 0), (1, 1, 1)
+        rig.matrix_world = T @ Matrix(r["mundo"])
+        bpy.context.view_layer.update()
+        for b in sorted(rig.pose.bones, key=lambda b: len(b.parent_recursive)):  # parents first
+            b.matrix = Matrix(r["huesos"][b.name])
+            bpy.context.view_layer.update()
+        err = max((Matrix(r["huesos"][b.name]).translation - b.matrix.translation).length for b in rig.pose.bones)
+        top = next(b for b in rig.pose.bones if "HeadTop" in b.name)
+        print("VIVO pose", q, "cabeza", [round(v, 4) for v in rig.matrix_world @ top.head], "dueño", r["cabeza"],
+              "error hueso max %.5f m" % err, flush=True)
+    # the bottle: every copy of the k5_bebida_mano tree takes the copy his viewport shows (the others' matrices are stale)
+    vis = [n for n, o in p["objetos"].items() if n.split(".")[0] == "k5_bebida_mano" and o["visible"]]
+    mb = T @ Matrix(p["objetos"][vis[0]]["mundo"])
+    copias = [o for o in O if o.name.split(".")[0] == "k5_bebida_mano"]
+    for o in copias:
+        o.parent = None
+        o.matrix_world = mb
+    for o in [o for o in copias if not o.hide_render][1:]:  # one bottle, not stacked copies
+        for c in [o, *o.children_recursive]:
+            c.hide_render = True
+    con = O.get("tripo_consola")
+    if con:
+        con.matrix_world = T @ Matrix(p["objetos"]["tripo_consola"]["mundo"])
+    print("VIVO pose botella de", vis[0], "consola", bool(con), flush=True)
+    bpy.context.view_layer.update()
+
+
+POSE = os.environ.get("VIVO_POSE")
+if POSE:
+    poner_pose(POSE)
+    NFR = 2  # a static pose: a two-frame clip keeps the page's one-mixer-per-rig path
 sc.frame_start, sc.frame_end = 0, NFR
 for rig in RIGS:
     bpy.ops.object.select_all(action="DESELECT")
@@ -186,8 +244,34 @@ print("VIVO pantalla materiales", sorted({s.material.name for o in pantalla if o
 print("VIVO camion en", [round(v, 3) for v in O["camion"].matrix_world.translation], flush=True)
 
 
+colgados = set()  # what al_camion hung on the truck: props, not the body (vivo.json's truck box stays the body's)
+
+
+def al_camion(objs):
+    """The page sways the truck root (vivoSecciones.ts): a prop on the truck with no parent stays put and floats (cookingdrone measured
+    the MT emblem drifting 8 px). Every root object whose box centre lies on the truck (its body box + 0.3 m) hangs from `camion`."""
+    ps = [o.matrix_world @ Vector(c) for o in camion.children_recursive if o.type == "MESH" and visible(o) for c in o.bound_box]
+    lo = Vector([min(p[i] for p in ps) - 0.3 for i in range(3)])
+    hi = Vector([max(p[i] for p in ps) + 0.3 for i in range(3)])
+    for o in objs:
+        if o.parent or o in (camion, pr, O["cerros"]):
+            continue
+        c = o.matrix_world.translation if o.type == "EMPTY" else sum((o.matrix_world @ Vector(v) for v in o.bound_box), Vector()) / 8
+        if all(lo[i] <= c[i] <= hi[i] for i in range(3)):
+            mw = o.matrix_world.copy()
+            o.parent = camion
+            o.matrix_parent_inverse = Matrix.Identity(4)
+            o.matrix_world = mw
+            colgados.update([o, *o.children_recursive])
+            print("VIVO al camion", o.name, flush=True)
+        else:
+            print("VIVO raiz fuera del camion", o.name, [round(v, 2) for v in c], flush=True)
+
+
 def exportar(nombre, objs, anim=False):
     soltar(objs)
+    if nombre == "escena.glb":
+        al_camion(objs)
     bpy.ops.object.select_all(action="DESELECT")
     for o in objs:
         o.hide_set(False)
@@ -215,7 +299,7 @@ def caja(objs):
     return {"min": [min(p[i] for p in ps) for i in range(3)], "max": [max(p[i] for p in ps) for i in range(3)]}
 
 
-cuerpo = [o for o in camion.children_recursive if o.type == "MESH" and o.name not in ruedas and visible(o)]  # a hidden helper cube made x, z min -1.0
+cuerpo = [o for o in camion.children_recursive if o.type == "MESH" and o.name not in ruedas and visible(o) and o not in colgados]  # a hidden helper cube made x, z min -1.0
 cam = d["camaras"]
 c1 = cam["montaje-esc1"]["pos"]
 p3 = pr.matrix_world.translation
@@ -237,11 +321,13 @@ datos = {
 datos["camion"]["min"][0] = 2 * c1[0] - datos["camion"]["max"][0]  # the body is symmetric about the cab stop's x (1.72)
 # stop 4 = four shots, one per member (owner 2026-11-18 19:11; blender/vivo_p1_stills.py CAM4 4-man-4, 4-hec-3, 4-ale-1, 4-die-3):
 # camera, look-at (the face), lens, and the end of each one's straight exit leg (P1 SALIDA: no surface crossed, >= 0.257 m)
+# look-at moved with each head to the owner's placement (2026-11-19, head tops old -> new: manager +0.245 y -0.013 z, Héctor
+# +0.241 y, Alejandro +0.240 y, Diego -0.009 x +0.148 y +0.052 z); cameras and exit legs unchanged (the truck did not move)
 datos["banda"] = [
-    {"pos": [1.25, 1.45, 2.05], "mira": [1.33, 0.49, 1.84], "lens": 20.0, "salida": [1.25, 3.45, 2.05]},  # manager, windshield
-    {"pos": [2.72, 1.05, 2.0], "mira": [2.08, 0.45, 1.80], "lens": 20.0, "salida": [3.4, 1.05, 2.0]},     # Héctor, his window
-    {"pos": [0.72, -0.15, 2.0], "mira": [1.33, -0.56, 1.94], "lens": 20.0, "salida": [0.04, -0.15, 2.0]},  # Alejandro, rear left
-    {"pos": [2.72, -0.15, 2.0], "mira": [2.12, -0.45, 1.76], "lens": 18.0, "salida": [3.4, -0.15, 2.0]},   # Diego, rear right
+    {"pos": [1.25, 1.45, 2.05], "mira": [1.33, 0.735, 1.827], "lens": 20.0, "salida": [1.25, 3.45, 2.05]},  # manager, windshield
+    {"pos": [2.72, 1.05, 2.0], "mira": [2.08, 0.691, 1.80], "lens": 20.0, "salida": [3.4, 1.05, 2.0]},     # Héctor, his window
+    {"pos": [0.72, -0.15, 2.0], "mira": [1.33, -0.32, 1.94], "lens": 20.0, "salida": [0.04, -0.15, 2.0]},  # Alejandro, rear left
+    {"pos": [2.72, -0.15, 2.0], "mira": [2.111, -0.302, 1.812], "lens": 18.0, "salida": [3.4, -0.15, 2.0]},   # Diego, rear right
 ]
 datos["camaras"][3] = datos["banda"][0]
 # stop 3 sits 0.4 m off the body's left side, inside the orbit's 0.35 m margin band: its moves to 4b / 4d lifted 11.8 / 6.9 m.
