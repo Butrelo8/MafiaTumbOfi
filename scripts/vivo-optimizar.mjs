@@ -31,6 +31,10 @@ const nodo = (doc, n) => doc.getRoot().listNodes().find((x) => x.getName() === n
 const tris = (doc) => doc.getRoot().listMeshes().flatMap((m) => m.listPrimitives()).reduce((a, p) => a + (p.getIndices()?.getCount() ?? 0) / 3, 0)
 
 async function terminar(doc, nombre) {
+  // glass as the page draws it (vivoSecciones.ts vidrios(): same names, opacity 0.15), set here so dedup() can't merge it with an
+  // opaque twin: vidrio_falso exports as plain white like k3_alu, and the merge kept k3_alu's name (windows opaque, 2026-11-19)
+  for (const m of doc.getRoot().listMaterials()) if (/vidrio|mica|glass|pet/i.test(m.getName())) m.setAlphaMode('BLEND').setBaseColorFactor([...m.getBaseColorFactor().slice(0, 3), 0.15])
+  if (nombre === 'escena.glb') await aplanar(doc) // the truck's props only: the road's dark textures stay
   await doc.transform(prune(), dedup(), textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [512, 512] }), draco({ method: 'edgebreaker' }))
   await io.write(join(sal, nombre), doc)
   const r = doc.getRoot()
@@ -86,6 +90,29 @@ await terminar(rep, 'reparto.glb')
 
 const mun = await io.read(join(ent, 'mundo.glb'))
 await terminar(mun, 'mundo.glb')
+
+/** Near-black, near-uniform colour textures (mean < 20/255 and spread <= 8 on every channel: the kiln props' leather and padding,
+ * piel_Baked*, acolchado_Baked) become flat materials: their mean colour, roughness and metalness, no maps. Live they read as flat
+ * black anyway, and a flat material joins the page's one merged mesh (vivoSecciones.ts fusionar) instead of costing a draw
+ * call each: 5 calls, which the 2026-11-19 truck needed to stay under the cap of 90. */
+async function aplanar(doc) {
+  const lin = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
+  for (const m of doc.getRoot().listMaterials()) {
+    const t = m.getBaseColorTexture()
+    if (!t || m.getAlphaMode() !== 'OPAQUE' || m.getEmissiveTexture()) continue
+    const s = (await sharp(Buffer.from(t.getImage())).stats()).channels.slice(0, 3)
+    if (!s.every((c) => c.mean < 20 && c.stdev <= 8)) continue
+    const f = m.getBaseColorFactor()
+    m.setBaseColorFactor([0, 1, 2].map((i) => lin(s[i].mean / 255) * f[i]).concat(f[3]))
+    const mr = m.getMetallicRoughnessTexture()
+    if (mr) {
+      const q = (await sharp(Buffer.from(mr.getImage())).stats()).channels
+      m.setRoughnessFactor(m.getRoughnessFactor() * q[1].mean / 255).setMetallicFactor(m.getMetallicFactor() * q[2].mean / 255)
+    }
+    m.setBaseColorTexture(null).setNormalTexture(null).setMetallicRoughnessTexture(null).setOcclusionTexture(null)
+    console.log('aplanar', m.getName(), s.map((c) => c.mean.toFixed(0)).join(','))
+  }
+}
 
 function esAncestro(a, n) { for (let p = n?.getParentNode(); p; p = p.getParentNode()) if (p === a) return true; return false }
 function multiplicar(a, b) { // column-major 4x4
