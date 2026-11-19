@@ -11,7 +11,7 @@ Writes escena.glb (truck, dressing, cast with one baked idle clip each, screen t
 page moves it and wraps it every period) and vivo.json (stop cameras, boxes, lanes, lamps).
 """
 import bpy, json, os, sys
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 argv = sys.argv[sys.argv.index("--") + 1:]
 OUT, JS = argv[0], argv[1]
@@ -90,6 +90,26 @@ def tris(o):
 
 
 # ---------------------------------------------------------------- the cast: bake one idle clip per rig, then decimate the skin
+def asentar_reparto(rigs, padre):
+    """Hang each cast rig straight from `padre` (the truck), keeping its frame-0 world matrix, with an identity parent inverse.
+    Call it before baking a cast for glTF (any lane's cast export can). Why: the v5 rigs hung from the old stand-in rigs (Diego
+    from mx < diego_raiz, outside the truck) with a non-identity matrix_parent_inverse; the baked object keys and the glTF
+    node then carried the old parent-relative transform, and live the heads sat 0.06-0.22 m low (Diego 0.9 m, out of his
+    seat). vivo-optimizar.mjs zeroed the rigs' translation to hide it."""
+    sc.frame_set(0)
+    bpy.context.view_layer.update()
+    for r in rigs:
+        mw = r.matrix_world.copy()
+        r.parent = padre
+        r.matrix_parent_inverse = Matrix.Identity(4)
+        r.matrix_world = mw
+    bpy.context.view_layer.update()
+    for r in rigs:
+        top = next(b for b in r.pose.bones if "HeadTop" in b.name)
+        print("VIVO reparto", r.name, "cuelga de", padre.name, "cabeza", [round(v, 3) for v in r.matrix_world @ top.head], flush=True)
+
+
+asentar_reparto(RIGS, O["camion"])
 sc.frame_start, sc.frame_end = 0, NFR
 for rig in RIGS:
     bpy.ops.object.select_all(action="DESELECT")
@@ -215,5 +235,17 @@ datos = {
     "ruedas": ruedas,
 }
 datos["camion"]["min"][0] = 2 * c1[0] - datos["camion"]["max"][0]  # the body is symmetric about the cab stop's x (1.72)
+# stop 4 = four shots, one per member (owner 2026-11-18 19:11; blender/vivo_p1_stills.py CAM4 4-man-4, 4-hec-3, 4-ale-1, 4-die-3):
+# camera, look-at (the face), lens, and the end of each one's straight exit leg (P1 SALIDA: no surface crossed, >= 0.257 m)
+datos["banda"] = [
+    {"pos": [1.25, 1.45, 2.05], "mira": [1.33, 0.49, 1.84], "lens": 20.0, "salida": [1.25, 3.45, 2.05]},  # manager, windshield
+    {"pos": [2.72, 1.05, 2.0], "mira": [2.08, 0.45, 1.80], "lens": 20.0, "salida": [3.4, 1.05, 2.0]},     # Héctor, his window
+    {"pos": [0.72, -0.15, 2.0], "mira": [1.33, -0.56, 1.94], "lens": 20.0, "salida": [0.04, -0.15, 2.0]},  # Alejandro, rear left
+    {"pos": [2.72, -0.15, 2.0], "mira": [2.12, -0.45, 1.76], "lens": 18.0, "salida": [3.4, -0.15, 2.0]},   # Diego, rear right
+]
+datos["camaras"][3] = datos["banda"][0]
+# stop 3 sits 0.4 m off the body's left side, inside the orbit's 0.35 m margin band: its moves to 4b / 4d lifted 11.8 / 6.9 m.
+# A 0.42 m leg straight out to the left (away from the body; the screen truck's side stays 0.92 m off) -> 2.77 / 3.05 m
+datos["camaras"][2]["salida"] = [-0.2, -1.9, 2.0]
 json.dump(datos, open(os.path.join(OUT, "vivo.json"), "w", encoding="utf8"), indent=1)
 print("VIVO listo", flush=True)

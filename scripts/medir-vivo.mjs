@@ -70,6 +70,29 @@ async function tiempos(page, nombre) {
     teclas.push(await page.evaluate(() => [document.activeElement.dataset.parada, [...document.querySelectorAll('nav button')].findIndex((b) => b.getAttribute('aria-current') === 'true')].join('/')))
   }
   c.teclas = teclas // expected 3/3 4/4 3/3 5/5 0/0 5/5
+  // stop 4's member shots (owner 19:11): the second row shows only at stop 4; clicks and keys move between the four shots
+  c.banda = { oculta: await page.evaluate(() => document.getElementById('banda').hidden), clics: [], teclas: [] }
+  await page.click('nav button[data-parada="3"]')
+  await page.waitForTimeout(2300)
+  c.banda.visible = await page.evaluate(() => !document.getElementById('banda').hidden)
+  for (const s of [1, 2, 3, 0, 2]) {
+    const antes = await page.evaluate(() => window.__vivo.estado().cam)
+    await page.click(`#banda button[data-toma="${s}"]`)
+    await page.waitForTimeout(2300)
+    const e = await page.evaluate(() => window.__vivo.estado())
+    const cur = await page.evaluate(() => [...document.querySelectorAll('#banda button')].findIndex((b) => b.getAttribute('aria-current') === 'true'))
+    c.banda.clics.push({ a: s, sub: e.sub, current: cur, movio: Math.hypot(...e.cam.map((v, k) => v - antes[k])).toFixed(2), lamparas: e.lamparas.map((x) => +x.toFixed(2)) })
+  }
+  await page.focus('#banda button[data-toma="2"]')
+  for (const k of ['ArrowRight', 'ArrowRight', 'End', 'Home', 'ArrowLeft']) {
+    await page.keyboard.press(k)
+    await page.waitForTimeout(2300)
+    c.banda.teclas.push(await page.evaluate(() => [document.activeElement.dataset.toma, window.__vivo.estado().sub].join('/')))
+  } // expected 3/3 0/0 3/3 0/0 3/3
+  await page.click('nav button[data-parada="4"]')
+  await page.waitForTimeout(2300)
+  c.banda.ocultaFuera = await page.evaluate(() => document.getElementById('banda').hidden)
+  c.banda.lamparasFuera = await page.evaluate(() => window.__vivo.estado().lamparas)
   c.videoTrasClics = await page.evaluate(() => ({ playing: !window.__vivo.el.paused, t: window.__vivo.el.currentTime.toFixed(1) }))
   await ctx.close()
 }

@@ -2,13 +2,17 @@
 // under it, as the Cycles run does (blender/ruta.py), so the camera rides along for free. Cars pass in both carriageways,
 // the screen truck plays a video, the band idles (clips baked from the Tripo v5 rigs). Section buttons move the camera
 // between the six montaje stops along vivoRuta's path; scroll does nothing.
-// Query: ?respaldo forces the no-WebGL fallback. ?f=0 freezes world phase, band pose and video at 0 (for the side-by-side), ?parada=N starts at stop N (0-5).
+// Query: ?respaldo forces the no-WebGL fallback. ?f=0 freezes world phase, band pose and video at 0 (for the side-by-side), ?parada=N starts at stop N (0-5),
+// ?toma=N (0-3) at stop 4's member shot N.
+// Stop 4 (owner 19:11) is four shots, one per member (vivo.json banda: manager, Héctor, Alejandro, Diego): the main nav enters
+// on the first, a second row of four buttons shows while it is the stop.
 // Load order (2026-11-18, "make it swift"): poster at once -> truck + world (first frame) -> cast -> cars and signs -> video.
 // Static meshes are merged per rigid parent at load (scripts/vivo-optimizar.mjs already dropped the heavy parts).
 import {
   WebGLRenderer, Scene, PerspectiveCamera, Group, Mesh, Object3D, Vector3, Color, FogExp2, AgXToneMapping, SRGBColorSpace,
   AnimationMixer, LoopPingPong, CatmullRomCurve3, VideoTexture, MeshStandardMaterial, MeshBasicMaterial, SpotLight, PointLight, HemisphereLight,
   PMREMGenerator, Box3, Matrix4, BufferGeometry, BufferAttribute, InstancedMesh, DataTexture, type Material, type Texture, type SkinnedMesh,
+  TextureLoader, RepeatWrapping, ClampToEdgeWrapping, DoubleSide, AdditiveBlending, Frustum,
   type InterleavedBufferAttribute,
 } from 'three'
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
@@ -18,7 +22,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { ruta, duracion, fovVertical, type Parada, type V3 } from '../lib/vivoRuta'
 
 interface Datos {
-  camaras: Parada[]; camion: { min: V3; max: V3 }; cabina: { min: V3; max: V3 }; parabrisas: number
+  camaras: Parada[]; banda: Parada[]; camion: { min: V3; max: V3 }; cabina: { min: V3; max: V3 }; parabrisas: number
   periodo: number; velocidad: number; postes: V3[]; pantalla: V3[]; carriles: { mismo: number[]; contrario: number[] }
   faros: { pos: V3; mira: V3 }[]; ruedas: string[]
 }
@@ -32,7 +36,9 @@ const TELEFONO = matchMedia('(pointer: coarse)').matches || innerWidth < 700
 
 export async function arrancar() {
   const canvas = document.getElementById('lienzo') as HTMLCanvasElement
-  const botones = [...document.querySelectorAll<HTMLButtonElement>('nav button')]
+  const botones = [...document.querySelectorAll<HTMLButtonElement>('#escenas button')]
+  const botonesBanda = [...document.querySelectorAll<HTMLButtonElement>('#banda button')]
+  const navBanda = document.getElementById('banda')!
   const gl2 = document.createElement('canvas').getContext('webgl2')
   if (!gl2 || q.has('respaldo')) return respaldo() // ?respaldo: the no-WebGL path on purpose (revisar under SwiftShader)
 
@@ -43,8 +49,10 @@ export async function arrancar() {
   renderer.toneMapping = AgXToneMapping
   renderer.outputColorSpace = SRGBColorSpace
   const scene = new Scene()
-  scene.background = new Color(0x05060a)
-  scene.fog = new FogExp2(0x07080c, 0.012)
+  // sky and fog: a warm grey for the lit haze of Cycles' fog volume (scripts/comparar-luz.py, variant B of three: stops 2, 4, 5
+  // L* -10.6, -2.7, -4.5 against Cycles, from -13.4, -6.8, -11.0 with the old near-black)
+  scene.background = new Color(0x3a352e)
+  scene.fog = new FogExp2(0x3a352e, 0.016)
   scene.environment = new PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture
   scene.environmentIntensity = 0.12
   const cam = new PerspectiveCamera(40, 1, 0.03, 320) // the fog leaves e^-9 at 250 m
@@ -52,8 +60,11 @@ export async function arrancar() {
   const draco = new DRACOLoader().setDecoderPath('/vivo/draco/')
   const loader = new GLTFLoader().setDRACOLoader(draco)
   const cargar = (u: string) => loader.loadAsync(u)
-  const [d, escena, mundo] = await Promise.all([
-    fetch('/vivo/vivo.json').then((r) => r.json() as Promise<Datos>), cargar('/vivo/escena.glb'), cargar('/vivo/mundo.glb'),
+  const tex = new TextureLoader()
+  const textura = (u: string) => tex.loadAsync(u).then((t) => { t.colorSpace = SRGBColorSpace; t.anisotropy = 8; return t })
+  const [d, escena, ...horno] = await Promise.all([
+    fetch('/vivo/vivo.json').then((r) => r.json() as Promise<Datos>), cargar('/vivo/escena.glb'),
+    ...['suelo', 'ancho', 'faros', 'arboles_der', 'arboles_izq'].map((n) => textura(`/vivo/${n}.webp`)),
   ])
 
   // ---- truck, dressing, screen truck (escena.glb): held still, the truck sways
@@ -88,14 +99,28 @@ export async function arrancar() {
   const domo = new PointLight(0xffb070, 0.6, 2.5, 2)
   domo.position.copy(local([1.72, 0.2, 2.05]))
   camion.add(domo)
+  // stop 4's cab lamps (Cycles: utileria.luz_costado 'cabina', moved 0.3 m in front of each face, owner 19:11): live only while
+  // stop 4 is the stop, faded with the move. Intensities in LAMPARAS (front row, rear row)
+  const lamparas = [[1.33, 0.79], [2.08, 0.75], [1.33, -0.26], [2.12, -0.15]].map(([x, y], k) => {
+    const l = new PointLight(0xffbf80, 0, 1.6, 2)
+    l.position.copy(local([x, y, 2.12]))
+    l.userData.base = LAMPARAS[k < 2 ? 0 : 1]
+    camion.add(l)
+    return l
+  })
+  let lamparasGan = 0
   scene.add(new HemisphereLight(0x223044, 0x0a0806, 0.25))
 
   // ---- the world: road3 as built, moved under the truck and wrapped every period as ruta.py does
   const vias = new Group()
   scene.add(vias)
-  vias.add(mundo.scene)
+  vias.add(mundoHorneado(horno))
+  scene.add(charcoFaros(horno[2]))
   // pole sweep on the truck: a real light only at the two poles nearest the cab, following the world
-  const posPostes = d.postes.map(b2t) // road3 has one real pole light (luz_poste); the other poles are emissive only
+  // vivo.json's postes is [[0, 0, 0]] (luz_poste lives in the instanced w_farola collection; its matrix is never evaluated), which
+  // put this 40 cd light at road level beside the cab: it was the beige of the seats and roof at stop 1. The lamps sit where
+  // blender/mundo.py farolas() instances them: x 1.0, every 64 m from y -384, plus luz_poste's own (3.95, 8, 8.75).
+  const posPostes = Array.from({ length: 18 }, (_, i) => b2t([4.95, -384 + 64 * i + 8, 8.75]))
   const postes = posPostes.slice(0, 2).map(() => new PointLight(0xffc98a, 40, 26, 2))
   postes.forEach((p) => scene.add(p))
 
@@ -117,59 +142,101 @@ export async function arrancar() {
 
   // merge the static meshes under each rigid parent (wheels spin, the screen truck moves, the truck sways)
   const rigidos = new Set<Object3D>([raiz, camion, pantalla, ...ruedas, vias])
+  // cab light pass: three has no occlusion, so the room environment and the hemisphere fill the cab as if it had no roof (the
+  // beige cab at stop 1, L* 20 against Cycles' 7.8). The truck comes as whole-truck meshes per material and the seats arrive
+  // with the cast, so the occlusion is per fragment (ocluirCabina): inside the cab box the diffuse colour is scaled down. The
+  // dash gets Cycles' cool screen light (luz_tablero, colour 0.55 0.75 1.0).
+  const tablero = new PointLight(new Color(0.55, 0.75, 1), TABLERO, 1.4, 2)
+  tablero.position.copy(local([1.72, 1.0, 1.5]))
+  camion.add(tablero)
+  // the windshield fringe (velvet band, gold strands, PURA MT; props_placement.flecos) hangs across the manager's eyes at stop 4,
+  // where the approved Cycles build has none (owner 20:20): its own merged group under the truck, hidden only there
+  const flecos = new Group()
+  camion.add(flecos)
+  const flecoMats = /^pp_(terciopelo|fleco|oro_luz_1\.5)$/
+  const flecoPartes: Mesh[] = []
+  camion.updateMatrixWorld(true)
+  raiz.traverse((o) => { if (flecoMats.test(((o as Mesh).material as Material | undefined)?.name ?? '')) flecoPartes.push(o as Mesh) })
+  for (const m of flecoPartes) flecos.attach(m)
+  rigidos.add(flecos)
   for (const g of rigidos) fusionar(g, (o) => rigidos.has(o))
+  UNI_CABINA.uOcl.value = OCLUSION
+  ocluirCabina(raiz)
 
   // ---- camera moves
   const paradas = d.camaras
   let actual = Math.min(5, Math.max(0, Number(q.get('parada') ?? 0)))
-  botones.forEach((b, k) => b.setAttribute('aria-current', String(k === actual)))
+  let sub = actual === 3 ? Math.min(3, Math.max(0, Number(q.get('toma') ?? 0))) : 0
+  const toma = (i: number, s: number) => (i === 3 ? d.banda[s] : paradas[i])
+  const marcar = () => {
+    botones.forEach((b, k) => b.setAttribute('aria-current', String(k === actual)))
+    botonesBanda.forEach((b, k) => b.setAttribute('aria-current', String(k === sub)))
+    navBanda.hidden = actual !== 3
+  }
+  marcar()
   let mov: { curva: CatmullRomCurve3; mira: V3[]; lens: number[]; t0: number; dur: number; de: number; a: number } | null = null
   const mira = new Vector3()
-  let lens = paradas[actual].lens
+  let lens = toma(actual, sub).lens
   const pantallaDe = new Vector3(), pantallaA = new Vector3()
   const pantallaEn = (i: number) => b2t(d.pantalla[i]).add(pantallaBase)
   pantalla.position.copy(pantallaEn(actual))
   const colocar = (p: Parada) => { cam.position.copy(b2t(p.pos)); mira.copy(b2t(p.mira)); lens = p.lens }
-  colocar(paradas[actual])
+  colocar(toma(actual, sub))
+  lamparasGan = actual === 3 ? 1 : 0
+  for (const l of lamparas) l.intensity = l.userData.base * lamparasGan
   const status = document.createElement('p')
   status.setAttribute('role', 'status')
   status.style.cssText = 'position:fixed;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)'
   document.body.append(status)
 
-  function ir(i: number) {
-    if (i === actual && !mov) return
-    botones.forEach((b, k) => b.setAttribute('aria-current', String(k === i)))
-    status.textContent = 'Escena: ' + botones[i].textContent
-    const desde: Parada = { pos: t2b(cam.position), mira: t2b(mira), lens }
+  // the shot the camera last left from: a move starting at rest leaves along that shot's own exit leg (mid-move it can't)
+  let origen: Parada | null = toma(actual, sub)
+  function ir(i: number, s = 0) {
+    if (i === actual && s === sub && !mov) return
+    const desde: Parada = { pos: t2b(cam.position), mira: t2b(mira), lens, salida: origen?.salida }
     pantallaDe.copy(pantalla.position); pantallaA.copy(pantallaEn(i))
     const de = actual
-    actual = i
-    if (reducido || FIJO) { colocar(paradas[i]); pantalla.position.copy(pantallaA); mov = null; return }
-    const r = ruta(desde, paradas[i], d.camion, d.cabina, d.parabrisas)
+    actual = i; sub = i === 3 ? s : 0
+    marcar()
+    status.textContent = 'Escena: ' + botones[i].textContent + (i === 3 ? ', ' + botonesBanda[sub].textContent : '')
+    const destino = toma(i, sub)
+    origen = destino
+    if (reducido || FIJO) { colocar(destino); pantalla.position.copy(pantallaA); mov = null; return }
+    origen = null
+    const r = ruta(desde, destino, d.camion, d.cabina, d.parabrisas)
     mov = { curva: new CatmullRomCurve3(r.pos.map(b2t), false, 'centripetal'), mira: r.mira, lens: r.lens, t0: performance.now(), dur: duracion(r.largo) * 1000, de, a: i }
   }
   const t2b = (v: Vector3): V3 => [v.x, -v.z, v.y]
-  botones.forEach((b, i) => b.addEventListener('click', () => ir(i)))
-  document.querySelector('nav')!.addEventListener('keydown', (e) => {
-    const k = botones.indexOf(document.activeElement as HTMLButtonElement)
-    const n = e.key === 'ArrowRight' ? k + 1 : e.key === 'ArrowLeft' ? k - 1 : e.key === 'Home' ? 0 : e.key === 'End' ? 5 : null
-    if (n === null || k < 0) return
-    e.preventDefault()
-    const j = (n + 6) % 6
-    botones[j].focus(); ir(j)
-  })
+  botones.forEach((b, i) => b.addEventListener('click', () => ir(i, i === 3 && actual === 3 ? sub : 0)))
+  botonesBanda.forEach((b, s) => b.addEventListener('click', () => ir(3, s)))
+  for (const [nav, lista, vaA] of [[document.getElementById('escenas')!, botones, (j: number) => ir(j)],
+    [navBanda, botonesBanda, (j: number) => ir(3, j)]] as const) {
+    nav.addEventListener('keydown', (e) => {
+      const k = lista.indexOf(document.activeElement as HTMLButtonElement), n = lista.length
+      const j = e.key === 'ArrowRight' ? k + 1 : e.key === 'ArrowLeft' ? k - 1 : e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : null
+      if (j === null || k < 0) return
+      e.preventDefault()
+      lista[(j + n) % n].focus(); vaA((j + n) % n)
+    })
+  }
 
   // ---- streamed parts, filled in after the first frame
   const mezclas: AnimationMixer[] = []
   const autos: { x: number; z: number; v: number; vQuiere: number; mismo: boolean; modelo: number; hueco: number }[] = []
   const flotas: InstancedMesh[][] = [] // per car model, one InstancedMesh per merged material
   const M = new Matrix4(), GIRO = new Matrix4().makeRotationY(Math.PI)
+  // gantry titles (public/vivo/letreros.png, one 170 px row per stop): the label shows the current stop's row, changed only on a
+  // frame where no label copy is in the view, so a title never changes while you can read it
+  const FILA = 170 / 1024
+  const cajasRotulo: Box3[] = []
+  let texRotulo: Texture | null = null, letreroVisto = actual
+  const frustum = new Frustum(), cajaR = new Box3(), PV = new Matrix4()
 
   // ---- loop
   const medida = { frameMs: [] as number[], renderMs: [] as number[], ttff: 0, calls: 0, tris: 0, ir, video: false, cargado: false,
     fases: {} as Record<string, number>, dpr, telefono: TELEFONO, sondeo: '',
-    clips: [] as string[], ruedas: ruedas.length, pantallas, autos: 0, el: video, escena: scene,
-    estado: () => ({ cam: cam.position.toArray(), z: autos.map((a) => a.z), rueda: ruedas[0]?.rotation.x ?? 0, vias: vias.position.z }) }
+    clips: [] as string[], ruedas: ruedas.length, pantallas, autos: 0, el: video, escena: scene, lamparas,
+    estado: () => ({ cam: cam.position.toArray(), z: autos.map((a) => a.z), rueda: ruedas[0]?.rotation.x ?? 0, vias: vias.position.z, letrero: letreroVisto, sub, lamparas: lamparas.map((l) => l.intensity) }) }
   ;(window as unknown as { __vivo: typeof medida }).__vivo = medida
   let antes = performance.now(), tiempo = 0, primero = true
   const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
@@ -221,20 +288,38 @@ export async function arrancar() {
     }
     for (const f of flotas) for (const im of f) im.instanceMatrix.needsUpdate = true
     // camera
+    let uMov = 1
     if (mov) {
       // the rAF stamp can precede the click's performance.now(): clamp at 0 (a negative u read past the curve's points)
       const u = Math.min(1, Math.max(0, (ahora - mov.t0) / mov.dur)), e = ease(u)
+      uMov = u
       cam.position.copy(mov.curva.getPointAt(e))
       const j = e * (mov.mira.length - 1), j0 = Math.floor(j), f = j - j0, j1 = Math.min(j0 + 1, mov.mira.length - 1)
       mira.copy(b2t(mov.mira[j0]).lerp(b2t(mov.mira[j1]), f))
       lens = mov.lens[j0] + (mov.lens[j1] - mov.lens[j0]) * f
       pantalla.position.lerpVectors(pantallaDe, pantallaA, e)
-      if (u >= 1) mov = null
+      if (u >= 1) { mov = null; origen = toma(actual, sub) }
+    }
+    // the fringe goes at the midpoint of a move into or out of stop 4 (the camera is far from the windshield then)
+    flecos.visible = !(actual === 3 ? !mov || mov.de === 3 || uMov >= 0.5 : mov !== null && mov.de === 3 && uMov < 0.5)
+    // stop 4's cab lamps fade in and out with the move (0.6 s)
+    const ganA = actual === 3 ? 1 : 0
+    if (lamparasGan !== ganA) {
+      lamparasGan = FIJO || reducido ? ganA : ganA > lamparasGan ? Math.min(ganA, lamparasGan + dt / 0.6) : Math.max(ganA, lamparasGan - dt / 0.6)
+      for (const l of lamparas) l.intensity = l.userData.base * lamparasGan
     }
     const aspecto = cam.aspect
     cam.fov = aspecto >= 1 ? fovVertical(lens, aspecto) : (2 * Math.atan(Math.tan(0.75 * Math.atan(18 / lens)) / aspecto) * 180) / Math.PI
     cam.updateProjectionMatrix()
     cam.lookAt(mira)
+    if (texRotulo && letreroVisto !== actual) {
+      cam.updateMatrixWorld()
+      frustum.setFromProjectionMatrix(PV.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse))
+      if (!cajasRotulo.some((b) => frustum.intersectsBox(cajaR.copy(b).translate(vias.position)))) {
+        letreroVisto = actual
+        texRotulo.offset.y = 1 - (actual + 1) * FILA
+      }
+    }
     const r0 = performance.now()
     renderer.render(scene, cam)
     medida.renderMs.push(performance.now() - r0)
@@ -269,6 +354,7 @@ export async function arrancar() {
     const listo = async (o: Object3D) => { await renderer.compileAsync(o, cam, scene) }
     const reparto = await cargar('/vivo/reparto.glb')
     vidrios(reparto.scene)
+    ocluirCabina(reparto.scene) // the seats and the cast arrive here, after the first frame
     for (const c of reparto.animations) { // one mixer per rig: the four rigs share bone names
       const rig = reparto.scene.getObjectByName(`${c.name}_v5_rig`)
       if (!rig) continue
@@ -285,18 +371,47 @@ export async function arrancar() {
     medida.clips = reparto.animations.map((c) => c.name)
     medida.fases.reparto = performance.now()
 
-    const [coches, portico, arco] = await Promise.all([
+    const [coches, portico, arco, atlas] = await Promise.all([
       Promise.all(['basic', 'high', 'short', 'taxi'].map((m) => cargar(`/vivo/coche_${m}.glb`))),
-      cargar('/vivo/portico_b.glb'), cargar('/vivo/arco_c.glb'),
+      cargar('/vivo/portico_b.glb'), cargar('/vivo/arco_c.glb'), textura('/vivo/letreros.png'),
     ])
-    // signs once per period, every copy in one mesh per material (the far plane and fog cover k -1..2)
+    // ickdrone's signs carry REDES (portico_b) and GIRA (arco_c) as text meshes: take them out, and the stop's own title goes
+    // on one label mesh over both title panels (scripts/letreros-atlas.py). The green field of each destination/title board was
+    // exported as a 1 x 1 m square: stretch it to its board (3.8 x 2.2 and 3.2 x 1.2 minus the 0.08 m white border).
+    for (const [s, txt, verde, w, h] of [[portico, 'st_txt', 'Plane004', 3.64, 2.04], [arco, 'st_txt008', 'Plane007', 3.04, 1.04]] as const) {
+      s.scene.getObjectByName(txt)?.removeFromParent()
+      const v = s.scene.getObjectByName(verde) as Mesh | undefined
+      if (v) {
+        const b = new Box3().setFromBufferAttribute(v.geometry.attributes.position as BufferAttribute), c = b.getCenter(new Vector3()), t = b.getSize(new Vector3())
+        v.geometry.translate(-c.x, -c.y, -c.z).scale(w / Math.max(t.x, 1e-3), h / Math.max(t.y, 1e-3), 1).translate(c.x, c.y, c.z)
+      }
+    }
+    // signs once per period, every copy in one mesh per material (the far plane and fog cover k -1..2). The GLBs keep their
+    // export offsets (portico_b at y 100, arco_c at y 200): subtract them, so the gantry sits at y 120 and the arch at y 24.
     const carteles = new Group()
-    for (let k = -1; k < 3; k++) for (const [s, y] of [[portico, 120], [arco, 24]] as const) {
+    const rotulos: BufferGeometry[] = []
+    for (let k = -1; k < 3; k++) for (const [s, y, y0] of [[portico, 120, 100], [arco, 24, 200]] as const) {
       const c = s.scene.clone()
-      c.position.z = -(y + k * d.periodo)
+      c.position.z = -(y - y0 + k * d.periodo)
       carteles.add(c)
+      // title label in front of its green panel: portico_b's at z 7.0, 0.09 m before the sign plane; arco_c's at z 6.2, 0.49 m
+      const [yl, zl, w] = s === portico ? [y + k * d.periodo - 0.09, 7.0, 3.2] : [y + k * d.periodo - 0.49, 6.2, 3.0]
+      const h = w * 170 / 1024 // the atlas row is 1024 x 170 px
+      rotulos.push(quad([[1.72 - w / 2, yl, zl - h / 2], [1.72 + w / 2, yl, zl - h / 2], [1.72 + w / 2, yl, zl + h / 2], [1.72 - w / 2, yl, zl + h / 2]],
+        [[0, 0], [1, 0], [1, FILA], [0, FILA]]))
     }
     fusionar(carteles, () => false)
+    let blanco: MeshStandardMaterial | undefined // the signs' own white lettering material, so the label lights like the rest
+    portico.scene.traverse((o) => { const m = (o as Mesh).material as MeshStandardMaterial | undefined; if (m?.name === 'u_blanco_refl') blanco = m })
+    const mRotulo = (blanco?.clone() ?? new MeshStandardMaterial({ roughness: 0.4 }))
+    Object.assign(mRotulo, { map: atlas, transparent: true, depthWrite: false })
+    mRotulo.color.set(0xffffff)
+    for (const g of rotulos) { g.computeBoundingBox(); cajasRotulo.push(g.boundingBox!) }
+    const rotulo = new Mesh(mergeGeometries(rotulos)!, mRotulo)
+    rotulo.renderOrder = 1
+    atlas.offset.y = 1 - (letreroVisto + 1) * FILA
+    carteles.add(rotulo)
+    texRotulo = atlas
     // traffic: one InstancedMesh per car model and merged material; the tint goes in the instance colour
     const tinte = [0x8a1c1c, 0x1d3f7a, 0xd8d8d8, 0x202020, 0x6b6b6b, 0xc9a227]
     const plan = [...[0, 1, 2, 3].map((i) => ({ mismo: true, i })), ...[0, 1, 2, 3, 4].map((i) => ({ mismo: false, i: i + 4 }))]
@@ -349,6 +464,86 @@ export async function arrancar() {
     }
     a.v = a.vQuiere
   }
+}
+
+// ---- the night bake (blender/vivo_bake.py + scripts/vivo-bake-post.py): one 192 m road period seen from above in Cycles,
+// shown unlit and not tone-mapped (the AgX look is in the pixels), repeated along the road. Blender coordinates below.
+const HORNO = { periodo: 192, ya: -384, yb: 768, suelo: [-17.6, 11.65], ancho: [-69.904, 49.904], cards: [-1.84375, 29.84375] }
+
+/** A quad from four Blender-space corners and their uvs. */
+function quad(c: V3[], uv: number[][]) {
+  const g = new BufferGeometry()
+  g.setAttribute('position', new BufferAttribute(new Float32Array(c.flatMap((p) => b2t(p).toArray())), 3))
+  g.setAttribute('uv', new BufferAttribute(new Float32Array(uv.flat()), 2))
+  g.setIndex([0, 1, 2, 0, 2, 3])
+  g.computeVertexNormals()
+  return g
+}
+
+/** Road tile (repeats along y; v = y / 192, the tile's top row is y 192), the terrain beyond it (its edge columns stretch out
+ * to 300 m) and the two treeline cards (u = -y / 192, the card's first column is y 192). */
+function mundoHorneado([suelo, ancho, , der, izq]: Texture[]) {
+  const { periodo: P, ya, yb } = HORNO
+  for (const t of [suelo, ancho, der, izq]) t.wrapS = t.wrapT = RepeatWrapping
+  ancho.wrapS = ClampToEdgeWrapping
+  const basico = (map: Texture, extra = {}) => new MeshBasicMaterial({ map, toneMapped: false, ...extra })
+  const g = new Group()
+  const [s0, s1] = HORNO.suelo
+  g.add(new Mesh(quad([[s0, ya, 0], [s1, ya, 0], [s1, yb, 0], [s0, yb, 0]], [[0, ya / P], [1, ya / P], [1, yb / P], [0, yb / P]]), basico(suelo)))
+  const [a0, a1] = HORNO.ancho, u = (x: number) => (x - a0) / (a1 - a0)
+  const lados = [[-300, s0], [s1, 300]].map(([x0, x1]) =>
+    quad([[x0, ya, -0.01], [x1, ya, -0.01], [x1, yb, -0.01], [x0, yb, -0.01]], [[u(x0), ya / P], [u(x1), ya / P], [u(x1), yb / P], [u(x0), yb / P]]))
+  g.add(new Mesh(mergeGeometries(lados)!, basico(ancho)))
+  const [z0, z1] = HORNO.cards
+  for (const [x, t] of [[40, der], [-46, izq]] as const) {
+    g.add(new Mesh(quad([[x, ya, z0], [x, yb, z0], [x, yb, z1], [x, ya, z1]], [[-ya / P, 0], [-yb / P, 0], [-yb / P, 1], [-ya / P, 1]]),
+      basico(t, { alphaTest: 0.5, side: DoubleSide })))
+  }
+  g.traverse((o) => (o.userData.solo = true)) // own materials, nothing to merge
+  return g
+}
+
+/** The headlights' pool on the road: the truck's two spots baked on a white ground (Standard view, EV -4), added on top of
+ * the unlit road. It stays with the truck while the road slides under it. */
+function charcoFaros(t: Texture) {
+  const m = new MeshBasicMaterial({ map: t, blending: AdditiveBlending, transparent: true, depthWrite: false, toneMapped: false })
+  m.color.setScalar(CHARCO)
+  const p = new Mesh(quad([[-8.5, -12, 0.02], [12.5, -12, 0.02], [12.5, 44, 0.02], [-8.5, 44, 0.02]], [[0, 0], [1, 0], [1, 1], [0, 1]]), m)
+  p.renderOrder = 1
+  return p
+}
+
+const OCLUSION = 0.3, TABLERO = 0.25
+// stop 4's cab lamps, front row and rear row (candela). Calibrated live at each member's shot (owner 19:11: the rear row as
+// readable as Héctor): L* p75 of the member's silhouette within 110 px of the face, Héctor 35.0 at front 1 cd; the rear row
+// gave 33.3 / 32.8 at 3 cd and 36.6 / 35.7 at 4 (Alejandro / Diego). docs/handoffs/2026-11-18-p1-fase2.md
+const LAMPARAS: [number, number] = [1.0, 3.5]
+const CHARCO = 2.0 // headlight pool gain: stop 5 road (bottom third) L* 41.4 vs Cycles 43.7; 0.9 gave 34.0, 3.5 gave 48.1
+
+/** A hand-set ambient occlusion for the cab: every lit material of the meshes under `g` (skinned too: the cast) scales its diffuse
+ * colour by uOcl where the fragment's world position is inside the cab box, fading over 0.15 m at the box's faces. The box is
+ * world-fixed (the truck's sway is millimetres). vivo.json's cab estimate stops at y 1.0, short of the dash (its screen sits
+ * at y 1.11), so the box comes from escena.glb's parts: body x 0.64..2.81 (the door skins stay out), roof liner up to z ~2.15.
+ * Emissive parts (screens, lamps) are untouched. */
+const CAJA_CABINA = new Box3().setFromPoints([b2t([0.82, -1.7, 0.95]), b2t([2.62, 1.3, 2.25])])
+const UNI_CABINA = { uCabMin: { value: CAJA_CABINA.min }, uCabMax: { value: CAJA_CABINA.max }, uOcl: { value: 0.3 } }
+function ocluirCabina(g: Object3D) {
+  const u = UNI_CABINA
+  g.traverse((o) => {
+    const m = (o as Mesh).material as Material | undefined
+    if (!(o as Mesh).isMesh || !m || Array.isArray(m) || !(m as MeshStandardMaterial).isMeshStandardMaterial) return
+    m.onBeforeCompile = (s) => {
+      Object.assign(s.uniforms, u)
+      s.vertexShader = s.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vCab;')
+        .replace('#include <project_vertex>', '#include <project_vertex>\nvCab = (modelMatrix * vec4(transformed, 1.0)).xyz;')
+      s.fragmentShader = s.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vCab;\nuniform vec3 uCabMin, uCabMax;\nuniform float uOcl;')
+        .replace('#include <color_fragment>', `#include <color_fragment>
+  vec3 qCab = smoothstep(uCabMin, uCabMin + 0.15, vCab) * (1.0 - smoothstep(uCabMax - 0.15, uCabMax, vCab));
+  diffuseColor.rgb *= mix(1.0, uOcl, qCab.x * qCab.y * qCab.z);`)
+    }
+    m.customProgramCacheKey = () => 'cabina'
+    m.userData.cabina = u
+  })
 }
 
 /** Cycles thin glass -> see-through dark sheets (lab/vivo did the same). */

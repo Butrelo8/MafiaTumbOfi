@@ -3,8 +3,10 @@
 // as sections. Nav clicks and keys move the camera; scroll does not. The truck keeps driving the whole time.
 import '@fontsource/archivo/400.css'
 import '@fontsource/archivo/600.css'
+// stop 4 (owner 19:11): one shot per member, a second row of buttons while it is the stop
+const banda = ['Manager', 'Héctor', 'Alejandro', 'Diego']
 const paradas = [
-  ['cabina', 'Cabina'], ['caja', 'Caja'], ['pantalla', 'Pantalla'], ['costado', 'Costado'], ['gira', 'Gira'], ['placa', 'Placa'],
+  ['cabina', 'Cabina'], ['caja', 'Caja'], ['pantalla', 'Pantalla'], ['banda', 'Banda'], ['gira', 'Gira'], ['placa', 'Placa'],
 ]
 ---
 <!doctype html>
@@ -30,6 +32,8 @@ const paradas = [
       color: var(--muted); font: 600 15px/1 'Archivo', system-ui, sans-serif; cursor: pointer; white-space: nowrap; }
     nav button[aria-current='true'] { background: var(--gold); color: oklch(12% 0 0); }
     nav button:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+    nav#banda { bottom: calc(max(16px, env(safe-area-inset-bottom)) + 60px); }
+    nav[hidden] { display: none; }
     h1 { position: fixed; z-index: 2; left: 16px; top: 12px; margin: 0; font-size: 15px; font-weight: 600; color: var(--muted); }
     #creditos { position: fixed; z-index: 2; right: 16px; top: 12px; margin: 0; max-width: 46ch; font-size: 11px; color: var(--muted); text-align: right; }
     #creditos a { color: inherit; }
@@ -41,9 +45,14 @@ const paradas = [
   <h1>Mafia Tumbada · en vivo</h1>
   <img id="respaldo" src="/prototipo/parada-1.webp" alt="" aria-hidden="true" />
   <canvas id="lienzo" role="img" aria-label="La troca de Mafia Tumbada rodando de noche por la carretera, con la banda adentro"></canvas>
-  <nav aria-label="Escenas">
+  <nav id="escenas" aria-label="Escenas">
     {paradas.map(([id, label], i) => (
       <button type="button" data-parada={i} aria-current={i === 0 ? 'true' : 'false'} id={'p-' + id}>{label}</button>
+    ))}
+  </nav>
+  <nav id="banda" aria-label="La banda" hidden>
+    {banda.map((label, i) => (
+      <button type="button" data-toma={i} aria-current={i === 0 ? 'true' : 'false'}>{label}</button>
     ))}
   </nav>
   <p id="creditos">Modelos: «Mercedes Benz G-Wagon 6X6» de DJS (CC BY 4.0, modificado), «Mitsubishi Fuso Canter» de Raed Almaharmah (CC BY 4.0, modificado),

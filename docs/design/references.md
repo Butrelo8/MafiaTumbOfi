@@ -271,3 +271,24 @@ No new direction: the prototype becomes `/`. These rows say where each piece the
 | video | user: `worker.js` header (iOS Safari refuses a <video> without a 206; main) | The run and the loop are `<video>`s under `/prototipo/`: that path goes through `worker.js` (`run_worker_first`) so a Range request answers 206, which iOS Safari needs | B |
 | integrantes | kage · fixed camera anchors per section · `web/visuales-fichas/kage-scroll-world.md` | Unchanged from the prototype: the loop plays when the visitor holds still in the station | M |
 | gira | user: `docs/design/escenas-plan.md` §5 empty state | Unchanged: no dates in the repo, so the plan's line and two links | B |
+
+## P1 "more alive", phase 1 stills (2026-11-18, run `brainrotdrone`; mothership queue 2026-11-18-mto-vivo-p1-phase1)
+
+The P1 package from Fable's audit, mocked in Cycles stills for the owner's pick (`blender/vivo_p1_stills.py`), plus the night
+bake now live. The library is thin for these looks: no ficha covers glare, LED walls, dash screens, drizzle or a headlight
+sweep. So each row names the nearest library entry, and the film frame it matches (frameref, `E:\ComfyUI\references\<film>\NNN.jpg`;
+analysis only, never copied into the repo). Where the library has nothing, the row says so.
+Gate: `refs-check.py <this section> --sections bake,glare,cabina,llovizna,led,rotulos,placa,destello`.
+
+| section | library entry | borrow | cost |
+|---|---|---|---|
+| bake | kage-scroll-world · one live scene, the camera on a rail; the world streams past · `web/visuales-fichas/kage-scroll-world.md` (status: unproven) | The world's look comes from one Cycles render of a 192 m road period, top-down, shown unlit and repeated (`blender/vivo_bake.py`); sodium pools from the instanced pole lamps, treeline as two cards; matches collateral/022 (the freeway between rows of sodium lamps) | M |
+| glare | pmndrs/postprocessing · bloom merged into few passes · `web/visuales.md` (libraries table, Zlib) | Not a full-screen bloom: one sprite per lamp (soft glow + a thin horizontal streak), so its cost is per lamp, not per pixel; the stills fake it in a post pass (`scripts/p1-destellos.py`); matches collateral/010 (oncoming headlights blooming in the haze) and 004 (tail lamps) | M |
+| cabina | todoist.com · a two-layer key, a lighter lip as the pressed look · `web/site-reading-fichas/todoist-com.md#look` (the Tecla, as the radio rows above) | Dash screen on the dash top (radio2-a's place): the latest single's cover, title, Escuchar as the Tecla drawn flat, ‹ › for the 9 releases; the cab stays dark around it, lit by the screen and the oncoming sweep; matches collateral/023 and 029 (the driver lit by the dash, bokeh through the windshield) | M |
+| cabina | user: no library entry for a headlight sweep through a cab (Fable's P1 audit, 2026-11-18) | An oncoming car on the other carriageway (Quaternius, CC0, already in the page) whose two spots rake the cab; two stills at 46 m and 17 m; matches collateral/029 | B |
+| llovizna | user: no library entry for drizzle or insects in headlights (Fable's P1 audit, 2026-11-18) | 2,600 short streaks falling and streaming back past the truck, plus 40 moths near the lamps, lit only where the beams reach (stops 1, 5, 6); live it is one Points draw, off on the phone tier | B |
+| led | nothing.tech · a dot-matrix face used as one brand voice · `web/site-reading-fichas/nothing-tech.md#look` | The rear screen drawn as an LED panel (round-dot cells, 180 x 185 per screen) with the stop-5 copy; the side screen already uses the same mask (pantalla_3d.py) | M |
+| led | badomens · a marquee that runs by itself · `web/visuales-fichas/tarjeta-merch.md` | The rear crawl ("MIRA DÓNDE ANDAMOS · INSTAGRAM ·"): one line on a dark red band, cut on the right; live it scrolls; the bulb chase is the same idea in light (every third bulb dim in the still) | B |
+| rotulos | user: `docs/design/escenas-plan.md` §1 (section titles on green highway signs) and the NOM-034 row above (`portico`) | Each stop's own title on both title panels (ickdrone's portico_b and arco_c), from one atlas (`scripts/letreros-atlas.py`, Saira 600), swapped live only while no label is in view | B |
+| placa | button-states-and-icon-morphs · hover/press states, one reveal per control · `web/visuales-fichas/button-states-and-icon-morphs.md` | The member's name plate (name, role, Instagram in gold) next to the window that lowers; from the hood cameras it faces the camera, not the door | M |
+| destello | interacciones-que-responden · Web Audio horn, a mute toggle stored per visitor · `web/visuales-fichas/interacciones-que-responden.md#recipe` (proven) | Stop 6's plate click: two headlight flashes (lights at 3x, the lens glare 'fuerte'), the horn only with sound on, then `/wa`; matches collateral/028 (head-on headlights at bumper height) | B |

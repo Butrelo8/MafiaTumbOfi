@@ -4,7 +4,9 @@
 // A stop inside the cab leaves or enters through the windshield, as the Cycles cab -> outside move does (transicion.CAMINO).
 export type V3 = [number, number, number]
 export interface Caja { min: V3; max: V3 }
-export interface Parada { pos: V3; mira: V3; lens: number }
+/** salida: for a shot beside the cab (inside the body's box, outside the cab: stop 4's member shots), the end of its straight
+ * exit leg, outside the box; checked against the real body in Blender (blender/vivo_p1_stills.py, P1 SALIDA). */
+export interface Parada { pos: V3; mira: V3; lens: number; salida?: V3 }
 export interface Ruta { pos: V3[]; mira: V3[]; lens: number[]; largo: number }
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
@@ -46,11 +48,14 @@ export function salida(p: V3, parabrisas: number, techo: number): V3[] {
 
 export function ruta(a: Parada, b: Parada, camion: Caja, cabina: Caja, parabrisas: number): Ruta {
   const ia = dentro(a.pos, cabina), ib = dentro(b.pos, cabina)
+  // the way out of a stop: through the windshield from the cab, along its own leg from beside the cab, else none. An orbit end
+  // inside the body's box made the roof lift 13.5-14.8 m tall (P1's 4a), so every orbit starts and ends outside it
+  const fuera = (p: Parada, dentroCab: boolean) => (dentroCab ? salida(p.pos, parabrisas, camion.max[2]) : p.salida ? [p.pos, p.salida] : [p.pos])
   let pos: V3[]
   if (ia && ib) pos = [a.pos, b.pos]
   else {
-    const sa = ia ? salida(a.pos, parabrisas, camion.max[2]) : [a.pos]
-    const sb = ib ? salida(b.pos, parabrisas, camion.max[2]).reverse() : [b.pos]
+    const sa = fuera(a, ia)
+    const sb = fuera(b, ib).reverse()
     pos = [...sa.slice(0, -1), ...orbita(sa.at(-1)!, sb[0], camion), ...sb.slice(1)]
   }
   // densify to even steps so the look-at and lens can follow arc length
