@@ -1,0 +1,313 @@
+---
+// The site (2026-11-18): every section DESIGN.md and the plans name, in order, over one fixed stage that the scroll drives
+// (the Tripo v5 run + the band loop; one still per stop when the video cannot play). Was /prototipo; the A Carretera home
+// is /anterior. Since 2026-11-19 this page is /anterior-home (the live scene is `/`), kept out of search results. Trace: DESIGN.md › Prototype, › Site.
+import '@fontsource/saira-condensed/latin-800.css'
+import '@fontsource/saira/latin-400.css'
+import '@fontsource/saira/latin-600.css'
+import Boton from '../components/Boton.astro'
+import Icono from '../components/Icono.astro'
+import { members } from '../../research/contenido/members'
+import { bandSocialUrls as redes } from '../../research/contenido/socials'
+import catalog from '../../research/contenido/catalog.json'
+import { homeCanonical } from '../lib/publicSiteUrl'
+import { loadCatalog } from '../lib/catalog'
+import { normalizePlausibleDataDomain } from '../lib/plausibleClient'
+
+const releases = catalog.releases
+const videos = [
+  { id: 'XxhXFo-hm-I', t: 'En vivo en Plaza Lerdo, Xalapa' },
+  { id: 'CDO9iJdIkQk', t: 'L.V. (video oficial)' },
+  { id: 'I9BXC3LPlx8', t: 'Corazón (video oficial)' },
+  { id: '7Sx0yDjGoq0', t: 'Tal Vez, Good Luck Sessions' },
+  { id: 'h8ZPVsgpAfo', t: 'La Bubu (video oficial)' },
+]
+const plataformas = [
+  { n: 'Spotify', h: redes.spotify },
+  { n: 'Apple Music', h: redes.appleMusic },
+  { n: 'YouTube', h: redes.youtube },
+]
+const pie = [...plataformas, { n: 'Instagram', h: redes.instagram }, { n: 'TikTok', h: redes.tiktok }, { n: 'Facebook', h: redes.facebook }]
+const idVideo = (href: string) => new URL(href).searchParams.get('v')
+const mostrados = new Set(videos.map((v) => v.id))
+// The video list is built the way prod's is: the live YouTube feed, the snapshot when it fails. The releases stay on the snapshot (Spotify has no credentials here, and in CI it answers 403).
+// Saira has no emoji glyphs (revisar › glyphs): a live YouTube title like "... 🔥 | VLOG" loses the emoji here.
+const sinEmoji = (t: string) => t.replace(/\p{Extended_Pictographic}\uFE0F?/gu, '').replace(/\s+/g, ' ').trim()
+const masVideos = (await loadCatalog()).videos.filter((v) => !mostrados.has(idVideo(v.href) ?? ''))
+const canonical = homeCanonical(import.meta.env.PUBLIC_SITE_URL, Astro.url.origin)
+const plausible = normalizePlausibleDataDomain(import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN)
+const paradas = [['inicio', 1], ['musica', 2], ['video', 3], ['integrantes', 4], ['gira', 5], ['contacto', 6]] as const
+const numero = redes.whatsapp.match(/\/wa\/521?(\d{3})(\d{3})(\d{4})/)?.slice(1).join(' ')
+// The 4th member (owner, 2026-11-16): the band's manager; the public profile's display name is its handle.
+const manager = { name: 'elmanco420', role: 'Mánager', instagram: 'https://www.instagram.com/elmanco420/' }
+const foto = (img: string) => img.replace(/\.jpg$/, '.webp')
+const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>La Mafia Tumbada · Corridos tumbados desde Xalapa</title>
+    <meta name="description" content="La Mafia Tumbada: corridos tumbados desde Xalapa, Veracruz. Música, videos, la banda y contratación por WhatsApp." />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content="La Mafia Tumbada" />
+    <meta property="og:image" content={new URL('/og/og-default.jpg', canonical).href} />
+    <meta name="theme-color" content="#000000" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" as="image" href="/prototipo/parada-1.webp" />
+    {plausible && <link rel="preconnect" href="https://plausible.io" />}
+    {plausible && <script is:inline>window.plausible = window.plausible || function () { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>}
+    {plausible && <script defer data-domain={plausible} src="https://plausible.io/js/script.js"></script>}
+    <style is:global>
+      /* Same tokens as index.astro and DESIGN.md › Colors. */
+      :root {
+        --bg: #000;
+        --ink: oklch(95% 0.008 85);
+        --muted: oklch(80% 0.01 85);
+        --gold: oklch(80% 0.13 82);
+        --cap: oklch(17% 0.01 85);
+        --gold-deep: oklch(62% 0.11 70);
+        --veil: rgb(0 0 0 / 0.62);
+        --line: oklch(100% 0 0 / 0.14);
+        --gutter: clamp(16px, 4vw, 64px);
+        --dur-press: 80ms;
+        --dur-state: 250ms;
+        --dur-fill: 500ms;
+        --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      * { box-sizing: border-box; margin: 0; }
+      body { background: var(--bg); color: var(--ink); font: 400 17px/1.55 Saira, system-ui, sans-serif; }
+      a { color: inherit; }
+      :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+      h1, h2, h3 { font-family: 'Saira Condensed', sans-serif; font-weight: 800; font-style: italic; text-transform: uppercase; letter-spacing: 0.005em; line-height: 0.9; }
+    </style>
+  </head>
+  <body>
+    <a class="saltar" href="#musica">Saltar al contenido</a>
+
+    <!-- The stage: the page's only picture, fixed behind everything. The scroll chooses the frame (src/scripts/prototipo.ts). -->
+    <div class="escena" aria-hidden="true">
+      {paradas.map(([id, n]) => (
+        <img class="cubre parada" data-id={id} src={`/prototipo/parada-${n}.webp`} alt="" width="960" height="540" hidden={n !== 1} loading={n === 1 ? undefined : 'lazy'} decoding="async" />
+      ))}
+      <video class="cubre" id="ruta" muted playsinline preload="auto" poster="/prototipo/ruta-f0.jpg" src="/prototipo/ruta.mp4"></video>
+      <video class="cubre" id="bucle" muted playsinline loop preload="auto" poster="/prototipo/bucle-f0.jpg" src="/prototipo/bucle.mp4"></video>
+    </div>
+
+    <header class="barra" data-placement="header">
+      <a class="logo" href="#inicio"><img src="/icon/mafiatumbada.webp" alt="La Mafia Tumbada, inicio" width="794" height="530" /></a>
+      <nav aria-label="Secciones">
+        <a href="#musica">Música</a><a href="#video">Videos</a><a href="#integrantes">La banda</a>
+      </nav>
+      <Boton href="#contacto">Contratar</Boton>
+    </header>
+
+    <main>
+      <section class="hero" id="inicio" aria-labelledby="h-inicio" data-placement="hero">
+        <div class="copia">
+          <h1 id="h-inicio">La Mafia <span>Tumbada</span></h1>
+          <p>Corridos tumbados desde Xalapa, Veracruz.</p>
+          <div class="acciones">
+            <Boton href={redes.spotify} lleno icono="play">Escuchar en Spotify</Boton>
+            <Boton href={redes.instagram} flecha={false}>Instagram</Boton>
+            <Boton href="#contacto">Contratar</Boton>
+          </div>
+        </div>
+      </section>
+
+      <div class="viaje" style="--f:191" aria-hidden="true"></div>
+
+      <section class="velo" id="musica" aria-labelledby="h-musica" data-placement="musica">
+        <h2 class="margen" id="h-musica">Música</h2>
+        <ul class="tira" role="list">
+          {releases.map((r) => (
+            <li>
+              <a class="lanz" href={r.href}>
+                <img src={r.cover} alt="" width="480" height="480" loading="lazy" decoding="async" />
+                <b>{r.title}</b>
+                <small>{r.subtitle}, en {r.label}</small>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div class="plat margen">
+          {plataformas.map((p) => <Boton href={p.h} flecha={false}>{p.n}</Boton>)}
+        </div>
+      </section>
+
+      <div class="viaje" style="--f:120" aria-hidden="true"></div>
+
+      <section class="velo margen" id="video" aria-labelledby="h-video" data-placement="video">
+        <h2 id="h-video">Videos</h2>
+        <ul class="vids" role="list">
+          {videos.map((v) => (
+            <li>
+              <a class="vid" href={`https://www.youtube.com/watch?v=${v.id}`}>
+                <img src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`} alt="" width="480" height="360" loading="lazy" decoding="async" />
+                <span><Icono nombre="play" />{v.t}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <h3 class="mas">Más en YouTube</h3>
+        <ul class="mas-lista" role="list">
+          {masVideos.map((v) => <li><a href={v.href}>{sinEmoji(v.title)}</a></li>)}
+        </ul>
+      </section>
+
+      <div class="viaje" style="--f:120" aria-hidden="true"></div>
+
+      <section class="lateral" id="integrantes" aria-labelledby="h-banda" data-placement="grupo">
+       <div class="columna">
+        <h2 id="h-banda">La banda</h2>
+        <ul class="banda" role="list">
+          {members.map((m) => (
+            <li class="m">
+              <img src={foto(m.image)} alt={m.name} width="1440" height="1081" loading="lazy" decoding="async" />
+              <div>
+                <h3>{m.name}</h3>
+                <p>{m.role}</p>
+                <a href={m.instagram}>@{usuario(m.instagram)}</a>
+              </div>
+            </li>
+          ))}
+          <li class="m sin-foto">
+            <div>
+              <h3>{manager.name}</h3>
+              <p>{manager.role}</p>
+              <a href={manager.instagram}>@{usuario(manager.instagram)}</a>
+            </div>
+          </li>
+        </ul>
+        <div class="pausa"><Boton id="pausa" icono="pausa" oculto discreto>Pausar video</Boton></div>
+       </div>
+      </section>
+
+      <div class="viaje gira" style="--f:288">
+        <section class="velo margen" id="gira" aria-labelledby="h-gira" data-placement="gira">
+          <h2 id="h-gira">Gira</h2>
+          <p class="gira-texto">Las próximas fechas salen primero en nuestro Instagram.</p>
+          <div class="plat">
+            <Boton href={redes.instagram} flecha={false}>Instagram</Boton>
+            <Boton href="https://www.youtube.com/watch?v=XxhXFo-hm-I" flecha={false}>En vivo: Plaza Lerdo, Xalapa</Boton>
+          </div>
+        </section>
+      </div>
+
+      <section class="contacto" id="contacto" aria-labelledby="h-contacto" data-placement="contratacion">
+        <div class="panel">
+          <h2 id="h-contacto">Contratación</h2>
+          <p>Canciones propias, covers con actitud y cuatro años de tarima.</p>
+          <Boton href={redes.whatsapp} lleno evento="whatsapp_contratacion">Escribir por WhatsApp</Boton>
+          {numero && <p class="numero">WhatsApp {numero}</p>}
+        </div>
+      </section>
+    </main>
+
+    <footer class="pie" data-placement="footer">
+      {pie.map((p) => <a href={p.h}>{p.n}</a>)}
+      <p>La Mafia Tumbada · Xalapa, Veracruz</p>
+    </footer>
+
+    <p class="hud" id="hud" hidden></p>
+
+    <script>
+      import { trackClicks } from '../lib/clickEvents'
+      import '../scripts/prototipo'
+      trackClicks(document)
+    </script>
+
+    <style>
+      .saltar { position: absolute; left: -999px; top: 16px; z-index: 9; min-height: 44px; display: inline-flex; align-items: center; padding: 0 12px; background: var(--gold); color: var(--bg); }
+      .saltar:focus { left: 16px; }
+      .margen { padding-inline: var(--gutter); }
+
+      .escena { position: fixed; inset: 0; z-index: 0; background: var(--bg); overflow: hidden; }
+      .cubre { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .escena.sin-video :is(#ruta, #bucle) { visibility: hidden; }
+      #ruta, #bucle { opacity: 0; transition: opacity 0.2s; }
+      #ruta.on, #bucle.on { opacity: 1; }
+      main, .pie { position: relative; z-index: 1; }
+
+      .barra { position: fixed; inset: 0 0 auto; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px var(--gutter); background: linear-gradient(rgb(0 0 0 / 0.8), transparent); }
+      .barra.solida { background: var(--bg); box-shadow: 0 1px 0 var(--line); }
+      .logo { display: inline-flex; min-height: 44px; align-items: center; }
+      .logo img { height: 44px; width: auto; }
+      .barra nav { display: flex; gap: 4px; }
+      .barra nav a { display: none; min-height: 44px; align-items: center; padding: 0 12px; text-decoration: none; color: var(--muted); font-weight: 600; }
+      .barra nav a:hover { color: var(--ink); }
+      @media (min-width: 900px) { .barra nav a { display: inline-flex; } }
+
+      .hero { min-height: 100svh; display: grid; align-items: end; }
+      .copia { padding: 0 var(--gutter) clamp(32px, 7vh, 80px); background: linear-gradient(transparent, var(--veil) 40%); }
+      .hero h1 { font-size: clamp(64px, 13vw, 200px); }
+      .hero h1 span { display: block; }
+      .hero p { font-size: clamp(18px, 1.6vw, 22px); margin: 14px 0 22px; max-width: 30ch; color: var(--muted); }
+      .acciones { display: flex; gap: 12px; flex-wrap: wrap; }
+
+      /* travel: the scene alone, so the move reads. Height = frames x 4 px (the pacing knob). */
+      .viaje { position: relative; height: calc(var(--f) * 4px); }
+      .viaje.gira { display: grid; align-items: center; }
+
+      .velo { background: var(--veil); padding-block: clamp(48px, 7vw, 96px); border-block: 1px solid var(--line); }
+      h2 { font-size: clamp(44px, 7vw, 96px); margin-bottom: 28px; }
+      :where(ul[role='list']) { list-style: none; padding: 0; }
+
+
+      .tira { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter); padding: 8px var(--gutter) 16px; scrollbar-color: var(--gold-deep) transparent; }
+      .tira li { flex: 0 0 clamp(210px, 22vw, 280px); scroll-snap-align: start; }
+      .lanz { display: block; text-decoration: none; }
+      .lanz img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--line); }
+      .lanz b { display: block; margin-top: 12px; font: italic 800 26px/1 'Saira Condensed', sans-serif; text-transform: uppercase; }
+      .lanz small { color: var(--muted); font-size: 15px; }
+      .lanz:hover b, .lanz:focus-visible b { color: var(--gold); }
+      .plat { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+
+      .vids { display: grid; gap: 18px; grid-template-columns: 1fr; }
+      @media (min-width: 900px) { .vids { grid-template-columns: 2fr 1fr 1fr; } .vids li:first-child { grid-row: span 2; } }
+      .vid { display: block; text-decoration: none; }
+      .vid img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; background: var(--line); }
+      .vid span { display: flex; gap: 10px; align-items: center; padding: 12px 0; font-weight: 600; }
+      .vid :global(.icono) { flex: none; width: 28px; height: 28px; color: var(--gold); }
+      .vid:hover span { color: var(--gold); }
+      .mas { font-size: 32px; margin: 40px 0 8px; }
+      .mas-lista { display: grid; gap: 0 32px; grid-template-columns: 1fr; max-width: 1100px; }
+      @media (min-width: 900px) { .mas-lista { grid-template-columns: 1fr 1fr; } }
+      .mas-lista a { display: flex; min-height: 44px; align-items: center; padding-block: 6px; color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line); }
+      .mas-lista a:hover { color: var(--gold); }
+
+      /* La banda: the loop is this section's picture, so the panel is a column and the cab stays visible beside it */
+      .lateral { padding-inline: var(--gutter); }
+      .columna { max-width: 560px; padding: clamp(24px, 4vw, 48px); background: var(--veil); }
+      .banda { display: grid; gap: 14px; }
+      .m { display: grid; grid-template-columns: 96px 1fr; gap: 16px; align-items: center; }
+      .m.sin-foto div { grid-column: 2; }
+      .m img { display: block; width: 96px; height: 120px; object-fit: cover; filter: saturate(0.75) contrast(1.05); }
+      .m h3 { font-size: 32px; }
+      .m p { color: var(--muted); }
+      .m a { display: inline-flex; min-height: 44px; align-items: center; color: var(--gold); }
+      .pausa { margin-top: 20px; }
+
+      .gira .velo { padding-block: clamp(32px, 5vw, 56px); }
+      .gira h2 { margin-bottom: 12px; }
+      .gira-texto { font-size: 20px; color: var(--muted); max-width: 40ch; }
+      .gira .plat { margin-top: 20px; }
+
+      .contacto { min-height: 100svh; display: grid; align-items: center; padding-inline: var(--gutter); }
+      .panel { max-width: 640px; padding: clamp(24px, 4vw, 48px); background: var(--veil); }
+      .panel > p { margin: 0 0 24px; font-size: 20px; color: var(--muted); }
+      .panel > .numero { margin: 20px 0 0; font-size: 17px; }
+
+      .pie { display: flex; flex-wrap: wrap; gap: 0 18px; padding: 32px var(--gutter); border-top: 1px solid var(--line); color: var(--muted); background: var(--bg); }
+      .pie a { display: inline-flex; min-height: 44px; align-items: center; }
+      .pie p { flex-basis: 100%; font-size: 15px; margin-top: 8px; }
+
+      .hud { position: fixed; left: 8px; bottom: 8px; z-index: 9; margin: 0; padding: 4px 8px; background: #000; color: var(--gold); font-size: 14px; }
+      @media (prefers-reduced-motion: reduce) { #ruta, #bucle { transition: none; } }
+    </style>
+  </body>
+</html>

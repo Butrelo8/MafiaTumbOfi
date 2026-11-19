@@ -1,0 +1,61 @@
+---
+// The opening (owner 2026-11-18 12:32, ported to the live home 2026-11-19): "MTO" is written while the page buffers, then
+// public/prototipo/apertura.mp4 (a camera descent from above the truck into the cab) plays once and fades into the live scene at
+// its first stop. Wired in src/scripts/apertura.ts. Written on cc/sitio-completo (3404349) for the video home; here the hand-off
+// waits for the live canvas (html[data-listo]) instead of the run's frame 0. Trace: DESIGN.md › Opening.
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
+const publico = (f: string) => existsSync(join(process.cwd(), 'public/prototipo', f))
+const hay = publico('apertura.mp4')
+const poster = publico('apertura-f0.jpg')
+---
+
+{hay && (
+  <>
+    <script is:inline>
+      // Before the first paint: reduced motion, a #anchor link, a measuring query (?f ?parada ?toma) or a return visit in this tab
+      // skips the opening (apertura.ts uses the same key).
+      try {
+        const q = new URLSearchParams(location.search)
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches || location.hash || q.has('f') || q.has('parada') || q.has('toma') || sessionStorage.getItem('mto-apertura')) document.documentElement.classList.add('sin-apertura')
+      } catch (e) {}
+    </script>
+    <noscript><style>.apertura { display: none }</style></noscript>
+    <div class="apertura" id="apertura" role="group" aria-label="Introducción">
+      <svg class="escritura" viewBox="-30 -708 1830 748" role="img" aria-label="MTO" focusable="false">
+        <g transform="skewX(-10)">
+        <path class="letra" style="--i:0" pathLength="1" d="M515 0V-487H507L426 0H284L204 -487H196V0H45V-688H285L355 -242H363L433 -688H668V0Z" />
+        <path class="letra" style="--i:1" pathLength="1" d="M847 0V-547H722V-688H1131V-547H1007V0Z" />
+        <path class="letra" style="--i:2" pathLength="1" d="M1173 -344Q1173 -500 1184 -567Q1195 -634 1240 -665Q1285 -696 1392 -696Q1499 -696 1544.5 -665Q1590 -634 1601 -567Q1612 -500 1612 -344Q1612 -188 1601 -121.5Q1590 -55 1544.5 -23.5Q1499 8 1392 8Q1285 8 1240 -23.5Q1195 -55 1184 -121.5Q1173 -188 1173 -344ZM1451 -344Q1451 -461 1448 -500Q1445 -539 1434.5 -549Q1424 -559 1392 -559Q1361 -559 1350.5 -549Q1340 -539 1337 -500Q1334 -461 1334 -344Q1334 -227 1337 -188Q1340 -149 1350.5 -139Q1361 -129 1392 -129Q1424 -129 1434.5 -139Q1445 -149 1448 -188Q1451 -227 1451 -344Z" />
+        </g>
+      </svg>
+      <video class="video" id="apertura-video" muted playsinline preload="auto" aria-hidden="true" data-src="/prototipo/apertura.mp4" data-poster={poster ? '/prototipo/apertura-f0.jpg' : undefined}></video>
+      <button type="button" class="saltar-apertura" id="apertura-saltar">Saltar</button>
+    </div>
+    <script>
+      import '../scripts/apertura'
+    </script>
+  </>
+)}
+
+<style is:global>
+  .apertura { --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1); position: fixed; inset: 0; z-index: 30; background: var(--bg); display: grid; place-items: center; transition: opacity 0.5s var(--ease-out); }
+  .apertura.se-va { opacity: 0; pointer-events: none; }
+  .sin-apertura .apertura { display: none; }
+  .escritura { width: min(72vw, 560px); height: auto; overflow: visible; transition: opacity 0.3s var(--ease-out); }
+  .apertura.con-video .escritura { opacity: 0; }
+  /* stroke-dashoffset and fill-opacity on three paths, drawn once, 2 s (references.md › realfood) */
+  .letra { fill: var(--gold); fill-opacity: 0; stroke: var(--gold); stroke-width: 12; stroke-linejoin: miter; stroke-dasharray: 1; stroke-dashoffset: 1;
+    animation: escribe 0.7s var(--ease-out) calc(var(--i) * 0.45s) forwards, rellena 0.5s var(--ease-out) 1.6s forwards; }
+  @keyframes escribe { to { stroke-dashoffset: 0; } }
+  @keyframes rellena { to { fill-opacity: 1; } }
+  .apertura .video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+  .apertura.con-video .video { opacity: 1; }
+  .saltar-apertura { position: absolute; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); min-height: 44px; min-width: 44px; padding: 0 18px;
+    border: 0; border-radius: 999px; background: var(--panel); color: var(--muted); font: 600 15px/1 'Archivo', system-ui, sans-serif; cursor: pointer; }
+  .saltar-apertura:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+  /* the page's own controls come in once the opening leaves; the scene itself does not change */
+  html.entra nav { animation: entra 0.5s var(--ease-out, ease-out) both; }
+  @keyframes entra { from { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .apertura { display: none; } }
+</style>
