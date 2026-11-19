@@ -292,3 +292,12 @@ Gate: `refs-check.py <this section> --sections bake,glare,cabina,llovizna,led,ro
 | rotulos | user: `docs/design/escenas-plan.md` §1 (section titles on green highway signs) and the NOM-034 row above (`portico`) | Each stop's own title on both title panels (ickdrone's portico_b and arco_c), from one atlas (`scripts/letreros-atlas.py`, Saira 600), swapped live only while no label is in view | B |
 | placa | button-states-and-icon-morphs · hover/press states, one reveal per control · `web/visuales-fichas/button-states-and-icon-morphs.md` | The member's name plate (name, role, Instagram in gold) next to the window that lowers; from the hood cameras it faces the camera, not the door | M |
 | destello | interacciones-que-responden · Web Audio horn, a mute toggle stored per visitor · `web/visuales-fichas/interacciones-que-responden.md#recipe` (proven) | Stop 6's plate click: two headlight flashes (lights at 3x, the lens glare 'fuerte'), the horn only with sound on, then `/wa`; matches collateral/028 (head-on headlights at bumper height) | B |
+
+## Live home `/` (2026-11-19)
+
+| section | library entry | borrow | cost |
+|---|---|---|---|
+| hero | landonorris.com · 3D scene that renders only while visible · `web/visuales.md#dissection-landonorris-com` | The live three.js road is the whole first screen; without WebGL2 a class swaps in the loop video (already built in `vivoSecciones.ts`) | B |
+| apertura | realfood · composition that appears piece by piece, drawn lines · `web/visuales-fichas/piramide-por-piezas.md` | The wordmark "MTO" (Saira Condensed 800 outlines, skewed 10°) is drawn as three strokes one after another, then filled gold; `pathLength=1` + `stroke-dashoffset`, CSS only | B |
+| apertura | arraisballet · smooth video hero, poster = first frame · `web/visuales.md#recipe-smooth-video-hero` | The opening video's first frame is its poster (`apertura-f0.jpg`); the hand-off to the scene is a fade once the canvas has its first frame | B |
+| apertura | teamusa · reduced-motion start, visible motion toggle · `web/visuales.md#dissection-sports-withgoogle-com-teamusa` | Reduced motion skips the writing and the video; a visible Saltar and Escape end it at any time; a return visit in the tab, or a `#anchor` link, skips it | B |
