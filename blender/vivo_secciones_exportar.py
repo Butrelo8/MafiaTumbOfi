@@ -41,6 +41,10 @@ QUITAR = {"k3_amp", "k3_bocina", "k3_cables", "k3_cerveza", "k3_cobijas", "k3_hi
 for o in [o for o in O if o.name.split(".")[0] in QUITAR]:
     for c in [o, *o.children_recursive]:
         c.hide_render = c.hide_viewport = True
+# scene 6's satin rosettes on both outside mirrors (props_placement.monos, P7): live they read as a ridged ball on a stick, and
+# they are no G63 part (owner 2026-11-19, 49.png)
+for o in [o for o in O if o.type == "MESH" and any(m and m.name.startswith("pp_satin") for m in o.data.materials)]:
+    o.hide_render = o.hide_viewport = True
 
 
 # the screen truck as built for scene 3: its cab (p3_*) plus the box, LED panels, frames and lettering that pantalla_3d.py
