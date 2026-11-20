@@ -60,6 +60,7 @@ const leer = async () => {
 }
 
 const esc = await leer()
+sinGigantes(esc)
 for (const n of esc.getRoot().listNodes()) if (REPARTO.test(n.getName())) n.traverse((x) => x.dispose())
 for (const a of esc.getRoot().listAnimations()) a.dispose()
 for (const e of esc.getRoot().listExtensionsUsed()) if (/transmission|clearcoat/.test(e.extensionName)) e.dispose()
@@ -125,6 +126,44 @@ async function calcas256(doc) {
     t.setImage(new Uint8Array(await sharp(Buffer.from(t.getImage())).resize(256, 256, { fit: 'inside', withoutEnlargement: true }).png().toBuffer())).setMimeType('image/png')
   }
   console.log('calcas256', ts.size)
+}
+
+/** The decimate leaves 1.15-1.5 m plastico triangles lying in the headliner's plane (z 2.165-2.19, cab_techo at 2.189): which
+ * of the two wins the depth test flips between exports (2026-11-19: a pale wedge at the top of stop 1). Rule, in Blender axes:
+ * a soup node (Material*), not the headliner or the paint, all three corners at z 2.16-2.20, centre in the cab ahead of the
+ * visors (x 1.0-2.45, y -0.3-0.75), an edge over 0.4 m. On the 2026-11-19 export: 8 faces, the headliner within 1.5 cm over
+ * 6-7 of 7 sample points of each (/mnt/e/tmp/mto-cabina-restos/scripts/gigantes.py).
+ * Also the old headrests' faces in the headliner material, which cabina_tripo.CABECERA_NO kept: cab_techo with all corners at
+ * z 1.90-2.03 inside the cabecera boxes (x 1.11-2.33, y 0.05-0.60); 3 faces, a pale line behind Diego at banda-hector
+ * (the real headliner sits at 2.19, its sides at 2.05+ by the doors: techo_bajo.py). */
+function sinGigantes(doc) {
+  const quitadas = []
+  for (const n of doc.getRoot().listNodes()) {
+    if (!n.getMesh() || !/^Material/.test(n.getName())) continue
+    const M = n.getWorldMatrix()
+    const blender = (a) => { const w = [0, 1, 2].map((r) => M[r] * a[0] + M[4 + r] * a[1] + M[8 + r] * a[2] + M[12 + r]); return [w[0], -w[2], w[1]] }
+    for (const p of n.getMesh().listPrimitives()) {
+      const ind = p.getIndices(), pos = p.getAttribute('POSITION')
+      const mat = p.getMaterial()?.getName() ?? '', techo = /cab_techo/.test(mat)
+      if (!ind || /pintura/.test(mat)) continue
+      const quedan = []
+      for (let t = 0; t < ind.getCount(); t += 3) {
+        const ix = [0, 1, 2].map((k) => ind.getScalar(t + k))
+        const P = ix.map((i) => blender(pos.getElement(i, [])))
+        const c = [0, 1, 2].map((k) => (P[0][k] + P[1][k] + P[2][k]) / 3)
+        const borde = Math.max(...[0, 1, 2].map((k) => Math.hypot(...[0, 1, 2].map((j) => P[k][j] - P[(k + 1) % 3][j]))))
+        const gigante = !techo && P.every((v) => v[2] >= 2.16 && v[2] <= 2.2) && c[0] >= 1.0 && c[0] <= 2.45 && c[1] >= -0.3 && c[1] <= 0.75 && borde > 0.4
+        const cabecera = techo && P.every((v) => v[2] >= 1.9 && v[2] <= 2.03) && c[0] >= 1.11 && c[0] <= 2.33 && c[1] >= 0.05 && c[1] <= 0.6
+        if (gigante || cabecera) {
+          quitadas.push(`${n.getName()} ${techo ? 'cab_techo ' : ''}${c.map((x) => x.toFixed(3)).join(',')} ${borde.toFixed(2)}`)
+          continue
+        }
+        quedan.push(...ix)
+      }
+      if (quedan.length < ind.getCount()) ind.setArray(new (ind.getArray().constructor)(quedan))
+    }
+  }
+  console.log('sinGigantes', quitadas.length, quitadas.join(' | '))
 }
 
 function esAncestro(a, n) { for (let p = n?.getParentNode(); p; p = p.getParentNode()) if (p === a) return true; return false }
