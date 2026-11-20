@@ -7,6 +7,8 @@ El sitio en vivo usa ahora tu `Mercedes-Benz_G63_AMG.blend` en lugar del 6x6. El
 1. Abre en Blender `E:\tmp\mto-g63-nuevo\colocar-g63-manos.blend` (es tu `colocar-g63.blend` de las 05:19 más los controles de abajo; tus cruces,
    tu pose y tus piezas del techo no se movieron, medido). La vista arranca en la cámara «Cabina» como la dejaste; en la línea de tiempo hay
    cinco marcas (Cabina y las cuatro tomas de la banda). Los pasos también están en la pestaña **Scripting** (texto LEEME).
+   Ojo: en tu archivo de las 05:19 la cámara «Cabina» quedó **afuera** del coche (5.40, 2.23, 2.47; a las 05:18 estaba en 1.47, 0.06, 1.54), y así
+   la dejé; para ver las manos dentro de la cabina usa las marcas de las cámaras `cam_<nombre>_asiento`. La reconstrucción no lee las cámaras de este archivo.
 2. Se pueden seleccionar: las cuatro cruces `posicion_manager`, `posicion_hector`, `posicion_alejandro`, `posicion_diego`, los controles de
    manos y codos, y las piezas del techo (abajo). Cada cruz mueve a su personaje entero, con sus manos (la botella de Héctor va con su mano).
 3. **G** mueve, **R** gira (Z para girar sobre el piso), no uses **S**. Teclea un número después (`G`, `Z`, `-0.05`, Enter).
