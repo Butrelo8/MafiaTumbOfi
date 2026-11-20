@@ -45,6 +45,18 @@ export async function arrancar() {
   if (!gl2 || q.has('respaldo')) return respaldo() // ?respaldo: the no-WebGL path on purpose (revisar under SwiftShader)
 
   const t0 = performance.now()
+  // the downloads start before the context and the environment map are built (~0.5 s of main thread at 390): the files travel
+  // meanwhile, and the Draco decoder (a wasm the loader would fetch only once escena.glb is whole) arrives with them
+  const draco = new DRACOLoader().setDecoderPath('/vivo/draco/')
+  draco.preload()
+  const loader = new GLTFLoader().setDRACOLoader(draco)
+  const cargar = (u: string) => loader.loadAsync(u)
+  const tex = new TextureLoader()
+  const textura = (u: string) => tex.loadAsync(u).then((t) => { t.colorSpace = SRGBColorSpace; t.anisotropy = 8; return t })
+  const descargas = Promise.all([
+    fetch('/vivo/vivo.json').then((r) => r.json() as Promise<Datos>), cargar('/vivo/escena.glb'),
+    ...['suelo', 'ancho', 'faros', 'arboles_der', 'arboles_izq'].map((n) => textura(`/vivo/${n}.webp`)),
+  ])
   const renderer = new WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: FIJO })
   let dpr = Math.min(devicePixelRatio, TELEFONO ? 1.25 : 1.5)
   renderer.setPixelRatio(dpr)
@@ -59,34 +71,25 @@ export async function arrancar() {
   scene.environmentIntensity = 0.12
   const cam = new PerspectiveCamera(40, 1, 0.03, 320) // the fog leaves e^-9 at 250 m
 
-  const draco = new DRACOLoader().setDecoderPath('/vivo/draco/')
-  const loader = new GLTFLoader().setDRACOLoader(draco)
-  const cargar = (u: string) => loader.loadAsync(u)
-  const tex = new TextureLoader()
-  const textura = (u: string) => tex.loadAsync(u).then((t) => { t.colorSpace = SRGBColorSpace; t.anisotropy = 8; return t })
-  const [d, escena, ...horno] = await Promise.all([
-    fetch('/vivo/vivo.json').then((r) => r.json() as Promise<Datos>), cargar('/vivo/escena.glb'),
-    ...['suelo', 'ancho', 'faros', 'arboles_der', 'arboles_izq'].map((n) => textura(`/vivo/${n}.webp`)),
-  ])
+  const [d, escena, ...horno] = await descargas
 
   // ---- truck, dressing, screen truck (escena.glb): held still, the truck sways
   const raiz = escena.scene
   scene.add(raiz)
   const camion = raiz.getObjectByName('camion')!
-  // GLTFLoader sanitizes names (rueda0.001 -> rueda0001), so match the prefix instead of vivo.json's exact names
   const pantalla = raiz.getObjectByName('pantalla_camion')!
   raiz.updateMatrixWorld(true)
-  const halladas: Object3D[] = []
-  raiz.traverse((o) => { if (/^rueda\d/i.test(o.name) && !/^rueda\d/i.test(o.parent?.name ?? '')) halladas.push(o) })
-  // spin about the hub: a separated wheel keeps the truck's origin, so each one hangs from a pivot at its own centre
-  const ruedas = halladas.map((r) => {
+  // the wheels and the roof rack with its load arrive after the first frame (camion_extras.glb, resto()); the wheels spin about
+  // the hub: a separated wheel keeps the truck's origin, so each one hangs from a pivot at its own centre
+  const ruedas: Object3D[] = []
+  const pivote = (r: Object3D) => {
     const piv = new Object3D()
     r.parent!.add(piv)
     piv.position.copy(r.parent!.worldToLocal(new Box3().setFromObject(r).getCenter(new Vector3())))
     piv.updateMatrixWorld()
     piv.attach(r)
     return piv
-  })
+  }
   const pantallaBase = pantalla.position.clone()
   vidrios(raiz)
 
@@ -239,7 +242,7 @@ export async function arrancar() {
   // ---- loop
   const medida = { frameMs: [] as number[], renderMs: [] as number[], ttff: 0, calls: 0, tris: 0, ir, video: false, cargado: false,
     fases: {} as Record<string, number>, dpr, telefono: TELEFONO, sondeo: '',
-    clips: [] as string[], ruedas: ruedas.length, pantallas, autos: 0, el: video, escena: scene, lamparas, cam, mira, // cam/mira: checks frame views that are not stops
+    clips: [] as string[], get ruedas() { return ruedas.length }, pantallas, autos: 0, el: video, escena: scene, lamparas, cam, mira, // cam/mira: checks frame views that are not stops
 
     estado: () => ({ cam: cam.position.toArray(), z: autos.map((a) => a.z), rueda: ruedas[0]?.rotation.x ?? 0, vias: vias.position.z, letrero: letreroVisto, sub, lamparas: lamparas.map((l) => l.intensity) }) }
   ;(window as unknown as { __vivo: typeof medida }).__vivo = medida
@@ -375,6 +378,26 @@ export async function arrancar() {
     for (const h of [...reparto.scene.children]) if (h !== enCamion) raiz.add(h)
     medida.clips = reparto.animations.map((c) => c.name)
     medida.fases.reparto = performance.now()
+
+    // the wheels and the roof rack, load and net: neither is on screen at stop 1 (0.68 MB off the first frame, TTFF cap 4 s). Same
+    // `camion` empty as reparto.glb. The rack group merges like the fringe; each wheel merges under its own pivot.
+    const extras = await cargar('/vivo/camion_extras.glb')
+    const xCamion = extras.scene.getObjectByName('camion')
+    if (xCamion) {
+      extras.scene.updateMatrixWorld(true)
+      const techo = new Group()
+      const nuevas: Object3D[] = []
+      for (const h of [...xCamion.children]) { if (/^rueda\d/i.test(h.name)) nuevas.push(h); else techo.add(h) }
+      xCamion.add(techo)
+      const pivs = nuevas.map(pivote)
+      rigidos.add(techo)
+      pivs.forEach((p) => rigidos.add(p))
+      for (const g of [techo, ...pivs]) fusionar(g, (o) => rigidos.has(o))
+      await listo(extras.scene) // built apart from the truck, shown only once its shaders are compiled
+      for (const h of [...xCamion.children]) camion.add(h)
+      ruedas.push(...pivs)
+    }
+    medida.fases.extras = performance.now()
 
     const [coches, portico, arco, atlas] = await Promise.all([
       Promise.all(['basic', 'high', 'short', 'taxi'].map((m) => cargar(`/vivo/coche_${m}.glb`))),

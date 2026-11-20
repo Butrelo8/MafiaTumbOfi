@@ -7,6 +7,8 @@
 //   simplifies the two meshes the exporter never decimated (the screen truck's cab, the strawberry), textures to 512.
 // reparto.glb: the four _v5 rigs and their clips, loaded after the first frame. The rigs riding the truck hang from an
 //   empty named `camion` that the page empties into the real one.
+// camion_extras.glb: the wheels (rueda*) and the roof rack with its load and net (rack_*, k3_*, carga_red), children of `camion`
+//   taken out of escena.glb: neither is on screen at stop 1, so the page loads them after the first frame (same empty).
 // mundo.glb: textures to 512.
 import { createRequire } from 'node:module'
 import { join } from 'node:path'
@@ -30,13 +32,19 @@ const SIMPLIFICAR = { p3_camion: 0.12, 'pp_fresa.001': 0.06 } // node name -> ra
 const nodo = (doc, n) => doc.getRoot().listNodes().find((x) => x.getName() === n)
 const tris = (doc) => doc.getRoot().listMeshes().flatMap((m) => m.listPrimitives()).reduce((a, p) => a + (p.getIndices()?.getCount() ?? 0) / 3, 0)
 
+// Draco bits for the first-frame file (the plugin's default is 14 position / 10 normal): its geometry is ~1.9 MB and at Fast 4G every
+// 100 KB is ~0.1 s of TTFF. 12 / 8 (2026-11-20): 2,014,156 -> 1,692,744 B; against 14 / 10 at 1440 the stops differ by mean 0.04-0.46 of 255,
+// 0.08-1.1 % of pixels over 8, only along edges and seams (positions snap to 5 m / 4096 = 1.2 mm; no triangle is removed).
+// QP / QN env: try other values (12 / 10 is 1,850,744 B).
+const CUANTIZAR = { quantizePosition: Number(process.env.QP ?? 12), quantizeNormal: Number(process.env.QN ?? 8) }
+
 async function terminar(doc, nombre) {
   // glass as the page draws it (vivoSecciones.ts vidrios(): same names, opacity 0.15), set here so dedup() can't merge it with an
   // opaque twin: vidrio_falso exports as plain white like k3_alu, and the merge kept k3_alu's name (windows opaque, 2026-11-19)
   for (const m of doc.getRoot().listMaterials()) if (/vidrio|mica|glass|pet/i.test(m.getName())) m.setAlphaMode('BLEND').setBaseColorFactor([...m.getBaseColorFactor().slice(0, 3), 0.15])
-  if (nombre === 'escena.glb') await aplanar(doc) // the truck's props only: the road's dark textures stay
+  if (nombre === 'escena.glb' || nombre === 'camion_extras.glb') await aplanar(doc) // the truck's props only: the road's dark textures stay
   if (nombre === 'escena.glb') await calcas256(doc)
-  await doc.transform(prune(), dedup(), textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [512, 512] }), draco({ method: 'edgebreaker' }))
+  await doc.transform(prune(), dedup(), textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [512, 512] }), draco({ method: 'edgebreaker', ...(nombre === 'escena.glb' ? CUANTIZAR : {}) }))
   await io.write(join(sal, nombre), doc)
   const r = doc.getRoot()
   console.log(nombre, `tris ${tris(doc) | 0}, nodes ${r.listNodes().length}, materials ${r.listMaterials().length}, clips ${r.listAnimations().map((a) => `${a.getName()}:${a.listChannels().length}`).join(' ')}`)
@@ -76,7 +84,26 @@ for (const [n, ratio] of Object.entries(SIMPLIFICAR)) {
   console.log('simplify', n, antes, '->', x.getMesh().listPrimitives().reduce((a, p) => a + p.getIndices().getCount() / 3, 0))
 }
 await esc.transform(weld())
+// the wheels and the roof rack, its load and net leave the first-frame file (2026-11-20: TTFF 4.57 s against the 4 s cap; neither is on
+// screen at stop 1). They are children of `camion`; the page adds them back from camion_extras.glb, as for reparto.glb.
+const EXTRAS = /^(rueda\d|rack_|k3_|carga_red)/
+const deExtras = (doc) => doc.getRoot().listNodes().filter((n) => n.getParentNode() === nodo(doc, 'camion') && EXTRAS.test(n.getName()))
+const extras = deExtras(esc)
+if (extras.length < 27) throw new Error(`camion_extras: only ${extras.length} nodes match, the rack or wheels were renamed`)
+for (const n of extras) n.traverse((x) => x.dispose())
 await terminar(esc, 'escena.glb')
+
+const ext = await leer()
+const camionE = nodo(ext, 'camion')
+const quedanE = new Set(deExtras(ext))
+for (const n of ext.getRoot().listNodes()) {
+  if (n === camionE || quedanE.has(n) || esAncestro(n, camionE) || [...quedanE].some((q) => esAncestro(q, n))) continue
+  n.dispose()
+}
+for (const a of ext.getRoot().listAnimations()) a.dispose()
+camionE.setMesh(null)
+await ext.transform(weld())
+await terminar(ext, 'camion_extras.glb')
 
 const rep = await leer()
 const camionR = nodo(rep, 'camion')
