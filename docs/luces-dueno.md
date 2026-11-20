@@ -1,5 +1,8 @@
 # Apagar o borrar luces del camión (G63)
 
+> **Obsoleto desde 2026-11-20:** estas luces son del G63 6x6 que se reemplazó. El coche nuevo no tiene objetos `luz_*`; sus faros DRL y
+> calaveras son materiales que brillan (ver `docs/g63-nuevo-dueno.md`). No edites `colocar-luces.blend`: ya no afecta al sitio.
+
 Cada luz del G63 es ahora su propio objeto `luz_*`, dentro de la colección **luces** (antes estaban fundidas en la malla del
 modelo). Lo que ocultes o borres en tu archivo queda fuera del sitio en vivo en la siguiente reconstrucción.
 

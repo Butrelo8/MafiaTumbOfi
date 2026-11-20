@@ -46,20 +46,38 @@ nuevos = [o for o in O if o not in antes]
 rigs = {n: next(o for o in nuevos if o.name.split(".")[0] == f"{n}_v5_rig") for n in NOMBRES}
 raiz_glb = next((o for o in nuevos if o.type == "EMPTY" and o.name.split(".")[0] == "camion"), None)
 bpy.context.view_layer.update()
+# The cast's pose is the OWNER's (blender/props/reparto_pose_dueno.json = blender/vivo_reparto_volcar.py's dump of his colocar-reparto-v3,
+# 2026-11-19), set bone by bone as vivo_secciones_exportar.poner_pose does, NOT the pose Blender's importer reads from reparto.glb: that
+# one differs from his for the manager, Héctor and Diego (heads 13 / 8 / 5 cm, hand bones up to 0.58 m; Alejandro is exact), so a dump
+# taken from it would not give back his pose. Rigid shift: g63_paradas.json `cast` (dy, dz).
+POSE = json.load(open(os.path.join(AQUI, "props", "reparto_pose_dueno.json"), encoding="utf8"))
+DESPL = Matrix.Translation((0.0, P["cast"]["dy"], P["cast"]["dz"]))
 pos = {}
 for n, r in rigs.items():
+    rj = POSE["rigs"][n]
+    r.animation_data_clear()
+    for c in list(r.constraints):
+        r.constraints.remove(c)
+    for b in r.pose.bones:
+        for c in list(b.constraints):
+            b.constraints.remove(c)
+        b.location, b.rotation_quaternion, b.rotation_euler, b.scale = (0, 0, 0), (1, 0, 0, 0), (0, 0, 0), (1, 1, 1)
+    r.parent = None
+    r.matrix_world = DESPL @ Matrix(rj["mundo"])
+    bpy.context.view_layer.update()
+    for b in sorted(r.pose.bones, key=lambda b: len(b.parent_recursive)):  # parents first
+        b.matrix = Matrix(rj["huesos"][b.name])
+        bpy.context.view_layer.update()
+    mw = r.matrix_world.copy()
     e = bpy.data.objects.new(f"posicion_{n}", None)
     sc.collection.objects.link(e)
     e.empty_display_type, e.empty_display_size = "PLAIN_AXES", 0.35
-    e.location = (r.matrix_world.translation.x, r.matrix_world.translation.y, 0.0)
+    e.location = (mw.translation.x, mw.translation.y, 0.0)
     bpy.context.view_layer.update()
-    mw = r.matrix_world.copy()
     r.parent = e
     r.matrix_parent_inverse = e.matrix_world.inverted()
     r.matrix_world = mw
     pos[n] = e
-    for c in r.children:  # the skin meshes keep following the rig
-        pass
 # the glb's own `camion` empty carried the rigs: it stays as an empty root (the car's `camion` is the real one)
 if raiz_glb:
     raiz_glb.name = "reparto_raiz"

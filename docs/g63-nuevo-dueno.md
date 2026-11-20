@@ -14,8 +14,10 @@ El sitio en vivo usa ahora tu `Mercedes-Benz_G63_AMG.blend` en lugar del 6x6. El
 5. `Ctrl+S`. Avísale al dron o a la nave nodriza: «leer reparto de `<ruta de tu archivo>`».
 
 ## Lo que pasa después
-`blender/vivo_reparto_volcar.py` lee tu archivo, el exportador viejo hornea al reparto en esa pose, `scripts/vivo-g63.sh` mete el coche
-nuevo y se sube un preview nuevo. Nada de esto toca producción.
+La pose del reparto en tu archivo es la tuya de `colocar-reparto-v3` (hueso por hueso, `blender/props/reparto_pose_dueno.json`), no la que Blender
+lee del `reparto.glb` (esa difiere de la tuya en el manager, Héctor y Diego). `blender/vivo_reparto_volcar.py` lee tu archivo (probado: sin mover
+nada devuelve tu pose con 0.0000 m de error y z -0.28), el exportador viejo hornea al reparto en esa pose (`VIVO_POSE`), `scripts/vivo-g63.sh`
+mete el coche nuevo y se sube un preview nuevo. Nada de esto toca producción.
 
 ## Lo que viene en el coche (cada pieza es un objeto, bórrala si no la quieres)
 | Objeto (en el archivo del coche `vivo-g63.blend`) | Qué es |

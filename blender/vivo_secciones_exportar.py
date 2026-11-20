@@ -168,7 +168,7 @@ def poner_pose(js):
         for c in [o, *o.children_recursive]:
             c.hide_render = True
     con = O.get("tripo_consola")
-    if con:
+    if con and "tripo_consola" in p["objetos"]:  # a dump from the new G63's placement file has no Tripo console (the car has its own)
         con.matrix_world = T @ Matrix(p["objetos"]["tripo_consola"]["mundo"])
     print("VIVO pose botella de", vis[0], "consola", bool(con), flush=True)
     bpy.context.view_layer.update()

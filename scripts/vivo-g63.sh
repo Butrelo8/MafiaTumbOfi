@@ -9,7 +9,8 @@
 #                       blender/props/g63_paradas.json `cast`), writes vivo.json
 # 6 vivo-optimizar.mjs  -> pub/*.glb, then copied to public/vivo/ with vivo.json
 # The crudo files (OLD=/mnt/e/tmp/mto-cabina-restos/vivo/crudo) come from the old exporter on the old montado; once the owner has placed
-# the cast in the new car's file (docs/g63-nuevo-dueno.md): blender/vivo_reparto_volcar.py on his file -> VIVO_POSE -> the old exporter
+# the cast in the new car's file (docs/g63-nuevo-dueno.md): blender/vivo_reparto_volcar.py on his file (round trip tested 2026-11-20: bones
+# identical to blender/props/reparto_pose_dueno.json, z -0.28) -> VIVO_POSE -> the old exporter
 # (docs/handoffs/2026-11-19-cabina-restos-luces.md "Rebuild") -> a new OLD crudo, set `cast` to 0 in g63_paradas.json, rerun step 5-6.
 # Each Blender step is one blender-run job; waits go through scripts/esperar.sh. Run this with run_in_background.
 set -euo pipefail
