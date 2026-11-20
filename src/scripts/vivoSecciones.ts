@@ -25,6 +25,8 @@ interface Datos {
   camaras: Parada[]; banda: Parada[]; camion: { min: V3; max: V3 }; cabina: { min: V3; max: V3 }; parabrisas: number
   periodo: number; velocidad: number; postes: V3[]; pantalla: V3[]; carriles: { mismo: number[]; contrario: number[] }
   faros: { pos: V3; mira: V3 }[]; ruedas: string[]
+  // the 6x6's values are the defaults; the 2026-11-20 G63 sets them (wheel radius, cab lamp heights, the cab occlusion box)
+  radio?: number; domoZ?: number; lamparasZ?: number; oclusion?: { min: V3; max: V3 }
 }
 
 const b2t = ([x, y, z]: V3) => new Vector3(x, z, -y) // Blender (Z up, +Y forward) -> three.js (Y up, -Z forward)
@@ -97,14 +99,14 @@ export async function arrancar() {
     camion.add(s, s.target)
   }
   const domo = new PointLight(0xffb070, 0.6, 2.5, 2)
-  domo.position.copy(local([1.72, 0.2, 2.05]))
+  domo.position.copy(local([1.72, 0.2, d.domoZ ?? 2.05]))
   camion.add(domo)
   // stop 4's cab lamps (Cycles: utileria.luz_costado 'cabina', moved 0.3 m in front of each face, owner 19:11; moved
   // again with the faces to the owner's placement 2026-11-19): live only while
   // stop 4 is the stop, faded with the move. Intensities in LAMPARAS (front row, rear row)
   const lamparas = [[1.33, 1.035], [2.08, 0.991], [1.33, -0.02], [2.111, -0.002]].map(([x, y], k) => {
     const l = new PointLight(0xffbf80, 0, 1.6, 2)
-    l.position.copy(local([x, y, 2.12]))
+    l.position.copy(local([x, y, d.lamparasZ ?? 2.12]))
     l.userData.base = LAMPARAS[k < 2 ? 0 : 1]
     camion.add(l)
     return l
@@ -154,7 +156,7 @@ export async function arrancar() {
   // where the approved Cycles build has none (owner 20:20): its own merged group under the truck, hidden only there
   const flecos = new Group()
   camion.add(flecos)
-  const flecoMats = /^pp_(terciopelo|fleco|oro_luz_1\.5)$/
+  const flecoMats = /^pp_(terciopelo|fleco|oro_luz_1\.5|franja|franja_letra)$/ // the banner across the header goes with the fringe (2026-11-20: at stop 4 it streaked across the manager's shot)
   const flecoPartes: Mesh[] = []
   camion.updateMatrixWorld(true)
   raiz.traverse((o) => { if (flecoMats.test(((o as Mesh).material as Material | undefined)?.name ?? '')) flecoPartes.push(o as Mesh) })
@@ -162,6 +164,7 @@ export async function arrancar() {
   rigidos.add(flecos)
   for (const g of rigidos) fusionar(g, (o) => rigidos.has(o))
   UNI_CABINA.uOcl.value = OCLUSION
+  if (d.oclusion) CAJA_CABINA.setFromPoints([b2t(d.oclusion.min), b2t(d.oclusion.max)]) // in place: the uniforms hold its min / max
   ocluirCabina(raiz)
 
   // ---- camera moves
@@ -261,7 +264,7 @@ export async function arrancar() {
     // world and wheels
     const z = (tiempo * d.velocidad) % d.periodo
     vias.position.z = z
-    for (const r of ruedas) r.rotation.x -= vivo ? (dt * d.velocidad) / 0.45 : 0
+    for (const r of ruedas) r.rotation.x -= vivo ? (dt * d.velocidad) / (d.radio ?? 0.45) : 0
     if (vivo) {
       camion.rotation.z = 0.004 * Math.sin(tiempo * 1.9) + 0.002 * Math.sin(tiempo * 4.3)
       camion.rotation.x = 0.0025 * Math.sin(tiempo * 1.3 + 1)
