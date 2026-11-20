@@ -1,0 +1,5 @@
+Mercedes-Benz_G63_AMG.blend, supplied by the owner (Downloads, 2026-11-20). No licence, author or credit text is inside the file
+(no text blocks, no custom properties besides the GTA-mod `dff` import tags). Its packed images point at three other model packs
+("MERCEDES-BENZ G-Class AMG SUV 5d. 6.3 AMG'19", "BRABUS MERCEDES-BENZ S-CLASS W 223 AMG LINE", "MERCEDES-BENZ AMG GT Liftback 63 S")
+and at a Telegram download: author and terms unknown. The owner accepted the risk for public previews (2026-11-20, via cricketship)
+and asked for no credits line for it. Do not redistribute the .blend; keep it untracked (blender/assets is git-ignored).
