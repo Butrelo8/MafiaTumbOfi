@@ -301,3 +301,10 @@ Gate: `refs-check.py <this section> --sections bake,glare,cabina,llovizna,led,ro
 | apertura | realfood · composition that appears piece by piece, drawn lines · `web/visuales-fichas/piramide-por-piezas.md` | The wordmark "MTO" (Saira Condensed 800 outlines, skewed 10°) is drawn as three strokes one after another, then filled gold; `pathLength=1` + `stroke-dashoffset`, CSS only | B |
 | apertura | arraisballet · smooth video hero, poster = first frame · `web/visuales.md#recipe-smooth-video-hero` | The opening video's first frame is its poster (`apertura-f0.jpg`); the hand-off to the scene is a fade once the canvas has its first frame | B |
 | apertura | teamusa · reduced-motion start, visible motion toggle · `web/visuales.md#dissection-sports-withgoogle-com-teamusa` | Reduced motion skips the writing and the video; a visible Saltar and Escape end it at any time; a return visit in the tab, or a `#anchor` link, skips it | B |
+
+## New G63 and the roof rack (2026-11-20)
+
+| section | reference | match / change on purpose | cost |
+|---|---|---|---|
+| caja (stop 2) | owner refs `8.png`, `9.png`, `10.png`: the "G-Wagen Basic Carrier Bars, Three Crossbars" for the W463A (g-wagenaccessories.com) | Matched: three silver aero crossbars across the roof, black plastic feet with a rounded block, a lock cylinder on the outer face and a clamp plate on the gutter rail, spaced front / middle / back (`blender/g63_rack.py`). Changed: no Mercedes star on the feet (owner), bars 58 x 34 mm so they read from the Caja camera 6 m away, and the band's own load (instrument cases, the donut, the alien) under a net | M |
+| caja (stop 2) | user: no library entry for a roof tie-down. Three variants compared in one still (`/mnt/e/tmp/mto-g63-nuevo/stills/var-*.png`): square net (7 mm rope, 22 cm cells), ratchet straps, diagonal wire | Net kept: it is the only one that reads as holding the whole load at 6 m and stays 4,800 triangles; the straps read as handles on the cases, the wire lattice shimmers | B |
