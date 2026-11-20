@@ -14,6 +14,9 @@ const { chromium } = require(process.env.PW)
 const [url, out, vertice] = process.argv.slice(2)
 const punto = vertice ? vertice.split(',').map(Number) : null
 const SOLO_DERIVA = process.env.SOLO_DERIVA === '1'
+// VISTAS=parada1,parada2 and ANCHOS=1440 limit the run (iterating on one view should not shoot all 44)
+const SOLO_VISTAS = process.env.VISTAS ? new Set(process.env.VISTAS.split(',')) : null
+const ANCHOS = process.env.ANCHOS ? process.env.ANCHOS.split(',').map(Number) : [1440, 390]
 mkdirSync(out, { recursive: true })
 const SIZES = { 390: { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true }, 1440: { viewport: { width: 1440, height: 900 } } }
 // Blender axes (Z up, the truck faces +Y); [query, camera, look-at] (null camera = the stop's own)
@@ -33,6 +36,9 @@ const VISTAS = {
   asiento_der_lado: ['parada=3&toma=3', [2.10, 1.25, 2.02], [2.11, 0.4, 1.4]],
   tablero: ['parada=3&toma=3', [1.72, 0.35, 1.75], [1.72, 1.2, 1.45]],
   techo: ['parada=1', [1.72, -1.2, 4.6], [1.72, 0.8, 2.1]],
+  // the new G63's roof rack with the band's load under its net (2026-11-20), from behind and above, and from the front quarter
+  techo_carga: ['parada=1', [0.2, -3.6, 3.7], [1.72, -0.25, 2.3]],
+  techo_carga_frente: ['parada=1', [3.2, 3.4, 3.5], [1.72, -0.25, 2.3]],
 }
 const res = { url, errores: [], calls: {}, deriva: null }
 
@@ -47,8 +53,9 @@ async function abrir(w, q) {
 }
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME, args: ['--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required'] })
-for (const w of SOLO_DERIVA ? [] : [1440, 390]) {
+for (const w of SOLO_DERIVA ? [] : ANCHOS) {
   for (const [nombre, [q, pos, mira]] of Object.entries(VISTAS)) {
+    if (SOLO_VISTAS && !SOLO_VISTAS.has(nombre)) continue
     const { ctx, page } = await abrir(w, `f=0&sinpantalla&${q}`)
     await page.locator('nav, h1, #creditos, header, .apertura').evaluateAll((els) => els.forEach((e) => (e.style.visibility = 'hidden')))
     if (pos) await page.evaluate(([p, m]) => { const v = window.__vivo; v.cam.position.set(p[0], p[2], -p[1]); v.mira.set(m[0], m[2], -m[1]) }, [pos, mira])
