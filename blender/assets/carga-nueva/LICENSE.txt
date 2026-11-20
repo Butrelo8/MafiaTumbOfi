@@ -1,0 +1,4 @@
+Roof load models (2026-11-20), downloaded by the owner into C:\Users\black\Downloads and prepared by blender/carga_preparar.py:
+  flight case 3d model.glb, guitar case 3d model.glb (Tripo exports), Bag_FBX.zip (Bag.FBX + Substance TGAs), BackPack_Blend.zip (mesh only, no textures
+  in the zip) with the maps from max_physical.zip (Backpack.max is not readable in Blender; only its textures/ were used).
+No licence or author file was found in any of the packages. The owner takes the asset risk for MTO (non-commercial showcase). Models and textures stay out of git.

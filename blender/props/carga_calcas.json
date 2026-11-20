@@ -1,0 +1,17 @@
+{
+  "_nota": "Calcas r1 (blender/props/calcas-r1, 2026-11-15) sobre la carga del techo, en ejes locales de cada pieza (centrada, sin girar). cara: +x -x +y -y +z -z; u, v: metros desde el centro de la cara, a la derecha y arriba vistos de frente; giro: grados; esc: escala del tamaño de la calca.",
+  "maleta_a": [
+    {"id": "r1-slogan", "cara": "+y", "u": 0.0, "v": 0.0},
+    {"id": "r1-x-holo", "cara": "+x", "u": 0.0, "v": 0.0},
+    {"id": "r1-gallo", "cara": "-x", "u": 0.0, "v": 0.0}
+  ],
+  "maleta_b": [
+    {"id": "r1-arriba", "cara": "-y", "u": 0.0, "v": 0.0},
+    {"id": "r1-corazon", "cara": "+x", "u": 0.0, "v": 0.0},
+    {"id": "r1-placa", "cara": "-x", "u": 0.0, "v": 0.0}
+  ],
+  "guitarra_a": [{"id": "r1-bubu", "cara": "+z", "u": 0.12, "v": 0.0}],
+  "guitarra_b": [{"id": "r1-placa", "cara": "+z", "u": -0.12, "v": 0.0}],
+  "bolsa": [{"id": "r1-x-holo", "cara": "-y", "u": 0.0, "v": 0.02, "esc": 0.8}],
+  "mochila": [{"id": "r1-corazon", "cara": "-y", "u": 0.0, "v": 0.0, "esc": 0.8}]
+}
