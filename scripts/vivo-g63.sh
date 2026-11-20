@@ -10,7 +10,7 @@
 # 6 vivo-optimizar.mjs  -> pub/*.glb, then copied to public/vivo/ with vivo.json
 # The crudo files (OLD=/mnt/e/tmp/mto-cabina-restos/vivo/crudo) come from the old exporter on the old montado; once the owner has placed
 # the cast in the new car's file (docs/g63-nuevo-dueno.md): blender/vivo_reparto_volcar.py on his file (round trip tested 2026-11-20: bones
-# identical to blender/props/reparto_pose_dueno.json, z -0.28) -> VIVO_POSE -> the old exporter
+# identical to blender/props/reparto_pose_dueno.json, z -0.28) -> VIVO_POSE -> the old exporter (the dump also carries his hand-control arms and `props`; give VOLCADO=<same dump> to step 2 so the load and the net follow his techo_* handles)
 # (docs/handoffs/2026-11-19-cabina-restos-luces.md "Rebuild") -> a new OLD crudo, set `cast` to 0 in g63_paradas.json, rerun step 5-6.
 # Each Blender step is one blender-run job; waits go through scripts/esperar.sh. Run this with run_in_background.
 set -euo pipefail
@@ -23,7 +23,8 @@ B=/mnt/e/Blender/blender.exe
 run() { ~/.claude/scripts/blender-run $B -b "$(wslpath -w "$1")" --python-exit-code 1 --python "$(wslpath -w "blender/$2")" -- "${@:3}"; }
 mkdir -p "$D"
 run blender/assets/g63-nuevo/g63.blend g63_nuevo.py "$(wslpath -w "$D/g63-listo.blend")" > "$D/1-listo.log" 2>&1
-run "$D/g63-listo.blend" g63_rack.py "$(wslpath -w "$D/g63-rack.blend")" "$(wslpath -w "$PROPS")" red > "$D/2-rack.log" 2>&1
+# VOLCADO=<dump of the owner's placement file>: the roof load goes where his techo_* handles left it and the net is laid over it
+run "$D/g63-listo.blend" g63_rack.py "$(wslpath -w "$D/g63-rack.blend")" "$(wslpath -w "$PROPS")" red ${VOLCADO:+"$(wslpath -w "$VOLCADO")"} > "$D/2-rack.log" 2>&1
 run "$D/g63-rack.blend" vivo_g63_montar.py "$(wslpath -w "$D/vivo-g63.blend")" "$(wslpath -w "$PROPS")" > "$D/3-montar.log" 2>&1
 run "$D/vivo-g63.blend" vivo_g63_exportar.py "$(wslpath -w "$D/coche.glb")" > "$D/4-exportar.log" 2>&1
 bun scripts/vivo-g63-unir.mjs "$OLD" "$D/coche.glb" "$D/vivo-g63-datos.json" "$D/crudo" > "$D/5-unir.log" 2>&1

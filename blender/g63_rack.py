@@ -7,14 +7,19 @@ silver-and-black, three bars. Changed on purpose: no Mercedes star on the feet (
 read from the Caja camera 7 m away, and the load is the band's: instrument cases, the donut, the alien, tied with a net.
 
   ~/.claude/scripts/blender-run /mnt/e/Blender/blender.exe -b <g63-listo.blend> --python-exit-code 1 --python blender/g63_rack.py \
-    -- <out .blend (Windows)> <props glb (Windows): the live escena.glb that holds the k3_* props> [variante: red|correas|cable|todas]
+    -- <out .blend (Windows)> <props glb (Windows): the live escena.glb that holds the k3_* props> [variante: red|correas|cable|todas] \
+       [volcado .json (Windows): vivo_reparto_volcar.py's dump of the owner's placement file]
+
+With the dump the load goes where he left it (`props`: the world matrix of each k3_* object, as moved by his techo_* handles) instead of the
+best-guess plan, and the net is laid over that load. blender/g63_red_ajustar.py does the same net on an existing .blend (scratch checks).
 """
 import bpy, bmesh, math, os, sys, json
 from mathutils import Matrix, Vector
 
-SAL = sys.argv[sys.argv.index("--") + 1]
-PROPS = sys.argv[sys.argv.index("--") + 2]
-VARIANTE = sys.argv[sys.argv.index("--") + 3] if len(sys.argv) > sys.argv.index("--") + 3 else "red"
+_ARGS = sys.argv[sys.argv.index("--") + 1:]
+SAL, PROPS = _ARGS[0], _ARGS[1]
+VARIANTE = _ARGS[2] if len(_ARGS) > 2 else "red"
+VOLCADO = _ARGS[3] if len(_ARGS) > 3 else None
 O = bpy.data.objects
 sc = bpy.context.scene
 
@@ -216,6 +221,22 @@ def colocar_carga(T, ys, z_barra, props):
     return cajas
 
 
+def colocar_volcado(props, js):
+    """The load as the owner placed it: each k3_* object takes the world matrix of his dump (the dump's truck mapped onto this one).
+    Returns the load's boxes (world AABBs) for the net, like colocar_carga."""
+    p = json.load(open(js, encoding="utf8"))
+    cam = O["camion"]
+    T = cam.matrix_world @ Matrix(p["camion"]).inverted()
+    cajas = {}
+    for nombre, o in props.items():
+        o.matrix_world = T @ Matrix(p["props"][nombre]["mundo"])
+        o.parent = cam
+        o.matrix_parent_inverse = cam.matrix_world.inverted()
+        bpy.context.view_layer.update()
+        cajas[nombre] = caja_vert(o)
+    return cajas
+
+
 def hexcuerda(bm, pts, r, lados=6):
     """Tube along a polyline (hexagonal section)."""
     anillos = []
@@ -301,7 +322,7 @@ if __name__ == "__main__":
     ys, z_barra, piezas = rack(T)
     print("G63 RACK barras y", [round(y, 3) for y in ys], "z", round(z_barra, 3), "piezas", len(piezas), flush=True)
     props = traer_props(PROPS)
-    cajas = colocar_carga(T, ys, z_barra, props)
+    cajas = colocar_volcado(props, VOLCADO) if VOLCADO else colocar_carga(T, ys, z_barra, props)
     for k, (a, b) in cajas.items():
         print("G63 RACK caja", k, [round(v, 3) for v in a], [round(v, 3) for v in b], flush=True)
     for v in (("red", "correas", "cable") if VARIANTE == "todas" else (VARIANTE,)):

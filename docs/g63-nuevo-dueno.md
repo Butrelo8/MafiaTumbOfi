@@ -4,14 +4,37 @@ El sitio en vivo usa ahora tu `Mercedes-Benz_G63_AMG.blend` en lugar del 6x6. El
 (la tuya de antes, bajada 0.28 m para que las cabezas con gorra entren bajo el techo). La colocación final es tuya.
 
 ## Pasos
-1. Abre en Blender `E:\tmp\mto-g63-nuevo\colocar-g63.blend`. La vista arranca en la cámara «Cabina»; en la línea de tiempo hay cinco
-   marcas (Cabina y las cuatro tomas de la banda). Los pasos también están en la pestaña **Scripting** (texto LEEME).
-2. Solo se pueden seleccionar cuatro cruces: `posicion_manager`, `posicion_hector`, `posicion_alejandro`, `posicion_diego`.
-   Cada cruz mueve a su personaje entero (la botella de Héctor va con Héctor).
+1. Abre en Blender `E:\tmp\mto-g63-nuevo\colocar-g63-manos.blend` (es tu `colocar-g63.blend` de las 05:19 más los controles de abajo; tus cruces,
+   tu pose y tus piezas del techo no se movieron, medido). La vista arranca en la cámara «Cabina» como la dejaste; en la línea de tiempo hay
+   cinco marcas (Cabina y las cuatro tomas de la banda). Los pasos también están en la pestaña **Scripting** (texto LEEME).
+2. Se pueden seleccionar: las cuatro cruces `posicion_manager`, `posicion_hector`, `posicion_alejandro`, `posicion_diego`, los controles de
+   manos y codos, y las piezas del techo (abajo). Cada cruz mueve a su personaje entero, con sus manos (la botella de Héctor va con su mano).
 3. **G** mueve, **R** gira (Z para girar sobre el piso), no uses **S**. Teclea un número después (`G`, `Z`, `-0.05`, Enter).
    Clic derecho o Esc cancela.
 4. Revisa cada cámara (Numpad 0 y las flechas de la línea de tiempo): que nadie atraviese el techo, el asiento ni la puerta.
 5. `Ctrl+S`. Avísale al dron o a la nave nodriza: «leer reparto de `<ruta de tu archivo>`».
+
+## Manos (dentro de la cabina)
+Cada personaje tiene cuatro controles, dos por mano (`izq` y `der` son la izquierda y la derecha **del personaje**, no las tuyas):
+
+| Control | Forma | Qué hace |
+|---|---|---|
+| `mano_izq_<nombre>`, `mano_der_<nombre>` (`mano_izq_hector`, …) | flechas en la muñeca | **G** mueve la mano y el brazo la sigue; **R** gira la mano |
+| `codo_izq_<nombre>`, `codo_der_<nombre>` | bolita cerca del codo | hacia dónde apunta el codo: súbela, bájala o ábrela |
+
+- Los controles cuelgan de la cruz del personaje: si mueves la cruz, las manos van con él.
+- Los dedos conservan tu pose. **Agarre** (opcional): selecciona la mano, abajo a la derecha Propiedades > pestaña Objeto > Propiedades
+  personalizadas > `agarre` (0 = tu pose, 1 = puño; los 4 dedos y el pulgar). Las manos del modelo son tipo manopla, así que cierra como manopla.
+- El brazo no se estira: si pones la mano más lejos de lo que llega, el brazo queda recto y la mano no alcanza el control. Acércala.
+- La botella de Héctor cuelga del control de su mano derecha (`mano_der_hector`): se mueve con ella.
+- No toques **S** en nada, ni borres controles. Los huesos del brazo no se seleccionan; todo se hace con los controles.
+
+## Cosas del techo
+Cada pieza tiene su cruz, en su centro: `techo_bajo`, `techo_docerola`, `techo_requinto`, `techo_teclado`, `techo_tarola`, `techo_dona`, `techo_alien`
+(con su nombre visible). **G** mueve, **R** gira, sin **S**. La red `carga_red` no se puede seleccionar y **no sigue a las piezas** mientras acomodas
+(en Blender se ve vieja): se vuelve a tender sola sobre donde las dejes cuando se reconstruye (`scripts/vivo-g63.sh` con `VOLCADO=<tu volcado>`,
+o `blender/g63_red_ajustar.py` sobre tu archivo). Si quieres verla bien mientras acomodas, escóndela con el ojo del Outliner (`carga_red`);
+la red solo cubre el área entre las barras: una pieza que saques de ahí queda sin red.
 
 ## Lo que pasa después
 La pose del reparto en tu archivo es la tuya de `colocar-reparto-v3` (hueso por hueso, `blender/props/reparto_pose_dueno.json`). Si abres el
@@ -19,7 +42,12 @@ La pose del reparto en tu archivo es la tuya de `colocar-reparto-v3` (hueso por 
 silenciada y activa nada más el de Alejandro; el archivo y la página tienen tu pose exacta (0.0000 m en los cuatro, medido). Para verla en Blender,
 asigna la acción de cada uno como activa. `blender/vivo_reparto_volcar.py` lee tu archivo (probado: sin mover
 nada devuelve tu pose con 0.0000 m de error y z -0.28), el exportador viejo hornea al reparto en esa pose (`VIVO_POSE`), `scripts/vivo-g63.sh`
-mete el coche nuevo y se sube un preview nuevo. Nada de esto toca producción.
+mete el coche nuevo y se sube un preview nuevo. Nada de esto toca producción. El volcado ahora también lleva las manos y los brazos tal como
+quedan con tus controles (cada hueso evaluado), y la posición de cada pieza del techo (`props`): el coche se reconstruye con las piezas donde
+las dejes y la red tendida encima.
+
+Qué se tocó en el archivo de manos: a los huesos del brazo y antebrazo se les alargó la cola hasta el hueso siguiente (el importador los dejó
+con un hueco de ~2 cm y Blender no resuelve IK así); la cabeza, la orientación y la pose de los huesos quedan iguales.
 
 ## Lo que viene en el coche (cada pieza es un objeto, bórrala si no la quieres)
 | Objeto (en el archivo del coche `vivo-g63.blend`) | Qué es |
