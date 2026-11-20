@@ -28,6 +28,11 @@ const VISTAS = {
   manco_pies: ['parada=3&toma=3', [1.78, 1.02, 1.5], [1.3, 0.8, 1.13]],
   hector_botella: ['parada=3&toma=3', [2.45, 1.3, 1.95], [2.15, 0.87, 1.57]],
   cabina_atras: ['parada=3&toma=3', [1.72, -0.2, 2.05], [1.72, 0.9, 1.35]],
+  // the cab close-ups for the old-seat leftovers and the console / dash clipping (owner 2026-11-19), and the roof from above
+  asiento_izq_lado: ['parada=3&toma=3', [1.30, 1.25, 2.02], [1.33, 0.4, 1.4]],
+  asiento_der_lado: ['parada=3&toma=3', [2.10, 1.25, 2.02], [2.11, 0.4, 1.4]],
+  tablero: ['parada=3&toma=3', [1.72, 0.35, 1.75], [1.72, 1.2, 1.45]],
+  techo: ['parada=1', [1.72, -1.2, 4.6], [1.72, 0.8, 2.1]],
 }
 const res = { url, errores: [], calls: {}, deriva: null }
 

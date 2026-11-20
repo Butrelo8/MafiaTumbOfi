@@ -392,9 +392,12 @@ def camion():
         m = mat(nombre, tinte, rough)  # lightly tinted glass: the cast has to be seen through it
         m.node_tree.nodes["Principled BSDF"].inputs["Transmission Weight"].default_value = 1.0
         mats[nombre] = m
+    lamparas_g63 = []  # the model's lamp meshes: luces_g63.separar cuts them into one object per fixture
     for o in meshes:
         o.data.transform(M)
         viejo = o.data.materials[0].name.split(".")[0]
+        if viejo in ("Light_Col", "Material__544", "Material__470"):  # every lamp, the tail lenses, the lens glass
+            lamparas_g63.append(o)
         if viejo == "Light_Col":  # one material for every lamp, split by where it sits (owner 2026-11-18: every G63 lamp lit, at its
             # real position; until then all but the headlights were chrome, and the chrome over the tail clusters hid their red)
             G = luces_g63._mats()
@@ -419,7 +422,8 @@ def camion():
     bpy.context.scene.collection.objects.link(camion_e)
     for o in [*meshes, *ruedas]:
         o.parent = camion_e
-    luces_g63.malla(camion_e, MUNDO["carril_x"])  # every lamp's lens at its real position (blender/luces_g63.py)
+    lentes = luces_g63.malla(camion_e, MUNDO["carril_x"])  # every lamp's lens at its real position (blender/luces_g63.py)
+    luces_g63.separar(lamparas_g63 + [lentes], camion_e, MUNDO["carril_x"])  # one object per lamp, luz_* (owner 2026-11-19)
     parrilla_g63.parrilla(camion_e, MUNDO["carril_x"])  # the AMG 6x6 grille over the model's Brabus one (blender/parrilla_g63.py)
     body = max(meshes, key=lambda o: len(o.data.polygons))
     print("RADIO", radio, "RUEDAS", [(round(r.location.x, 2), round(r.location.y, 2)) for r in ruedas])

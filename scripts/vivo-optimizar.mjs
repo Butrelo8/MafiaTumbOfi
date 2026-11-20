@@ -35,6 +35,7 @@ async function terminar(doc, nombre) {
   // opaque twin: vidrio_falso exports as plain white like k3_alu, and the merge kept k3_alu's name (windows opaque, 2026-11-19)
   for (const m of doc.getRoot().listMaterials()) if (/vidrio|mica|glass|pet/i.test(m.getName())) m.setAlphaMode('BLEND').setBaseColorFactor([...m.getBaseColorFactor().slice(0, 3), 0.15])
   if (nombre === 'escena.glb') await aplanar(doc) // the truck's props only: the road's dark textures stay
+  if (nombre === 'escena.glb') await calcas256(doc)
   await doc.transform(prune(), dedup(), textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [512, 512] }), draco({ method: 'edgebreaker' }))
   await io.write(join(sal, nombre), doc)
   const r = doc.getRoot()
@@ -112,6 +113,18 @@ async function aplanar(doc) {
     m.setBaseColorTexture(null).setNormalTexture(null).setMetallicRoughnessTexture(null).setOcclusionTexture(null)
     console.log('aplanar', m.getName(), s.map((c) => c.mean.toFixed(0)).join(','))
   }
+}
+
+/** The stickers' art (c3_* materials, 22 textures, 214 KB at 512) to fit 256: they sat 136 KB on escena.glb, the first-frame file,
+ * and TTFF reached 3.99 s against the 4 s cap (2026-11-19). PNG keeps the alpha; textureCompress then makes it webp. */
+async function calcas256(doc) {
+  const ts = new Set(doc.getRoot().listMaterials().filter((m) => /^c3_/.test(m.getName())).map((m) => m.getBaseColorTexture()).filter(Boolean))
+  for (const t of ts) {
+    const ajenos = t.listParents().filter((p) => p.propertyType === 'Material' && !/^c3_/.test(p.getName()))
+    if (ajenos.length) { console.log('calcas256 skip (shared)', t.getName(), ajenos.map((m) => m.getName()).join(',')); continue }
+    t.setImage(new Uint8Array(await sharp(Buffer.from(t.getImage())).resize(256, 256, { fit: 'inside', withoutEnlargement: true }).png().toBuffer())).setMimeType('image/png')
+  }
+  console.log('calcas256', ts.size)
 }
 
 function esAncestro(a, n) { for (let p = n?.getParentNode(); p; p = p.getParentNode()) if (p === a) return true; return false }

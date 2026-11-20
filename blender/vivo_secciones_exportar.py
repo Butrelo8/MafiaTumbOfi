@@ -20,7 +20,7 @@ from mathutils import Matrix, Vector
 argv = sys.argv[sys.argv.index("--") + 1:]
 OUT, JS = argv[0], argv[1]
 TRUCK = int(argv[2]) if len(argv) > 2 else 150000
-FIG = int(argv[3]) if len(argv) > 3 else 40000
+FIG = int(argv[3]) if len(argv) > 3 else 150000  # 40 k until 2026-11-19: faceted faces live (owner 1.webp; cricketship: as many as the faces need)
 TEX = int(argv[4]) if len(argv) > 4 else 1024
 NFR = 240  # one world period (192 m at 0.8 m/frame) = the stand-ins' NLA (80 f) x 3; the cast's clip window
 d = json.load(open(JS, encoding="utf8"))
@@ -45,6 +45,12 @@ for o in [o for o in O if o.name.split(".")[0] in QUITAR]:
 # they are no G63 part (owner 2026-11-19, 49.png)
 for o in [o for o in O if o.type == "MESH" and any(m and m.name.startswith("pp_satin") for m in o.data.materials)]:
     o.hide_render = o.hide_viewport = True
+# the lamps the owner turned off in his .blend (blender/luces_leer.py -> props/luces.json; docs/luces-dueno.md)
+_LUCES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "props", "luces.json")
+_fuera = set(json.load(open(_LUCES, encoding="utf8"))["fuera"]) if os.path.exists(_LUCES) else set()
+for o in [o for o in O if o.name.split(".")[0] in _fuera]:
+    o.hide_render = o.hide_viewport = True
+print("VIVO luces fuera", sorted(_fuera), flush=True)
 
 
 # the screen truck as built for scene 3: its cab (p3_*) plus the box, LED panels, frames and lettering that pantalla_3d.py
@@ -172,6 +178,11 @@ POSE = os.environ.get("VIVO_POSE")
 if POSE:
     poner_pose(POSE)
     NFR = 2  # a static pose: a two-frame clip keeps the page's one-mixer-per-rig path
+    # the montado cut the old stack around the console at its build position; the owner's matrix moves it 0.3 m forward and
+    # 20 deg nose-up, into the centre stack under the dash screen (1,266 old faces inside it, 545 through it): cut again here
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import cabina_tripo
+    cabina_tripo.borrar_viejos(O["camion"], [O[n] for n in ("tripo_asiento_izq", "tripo_asiento_der", "tripo_consola") if n in O])
 sc.frame_start, sc.frame_end = 0, NFR
 for rig in RIGS:
     bpy.ops.object.select_all(action="DESELECT")
@@ -206,15 +217,69 @@ LAMPARA = ("faros", "calaveras", "mica", "g63_", "parrilla_", "u_ambar")
 # the Tripo console and roof pod come from Tripo at their live budget (face_limit): at the common ratio the 49 k console became
 # 4.6 k tris of shreds (owner 48.png). Only when already light: the old 49 k tripo3 console still takes the common ratio
 LIGEROS = ("tripo_consola", "u_consola_techo")
+# the Tripo seats (48 k tris each) took the common ratio too and shipped at 4.7 k tris of facets (owner 2026-11-19 18:29,
+# Banda/Diego: "seat backs read as shredded facets"): each gets its own share, on top of the truck's budget
+ASIENTOS = ("tripo_asiento_izq", "tripo_asiento_der")
+ASIENTO = 9000
+asientos = [o for o in escena if o.type == "MESH" and o.name in ASIENTOS]
+for o in asientos:
+    o.modifiers.new("dec", "DECIMATE").ratio = min(1.0, ASIENTO / tris(o))
+    print("VIVO asiento", o.name, tris(o), "->", ASIENTO, flush=True)
+    # their normal map was baked for the 48 k mesh; on the decimated one, without tangents, the page shades it per triangle
+    for m in o.data.materials:
+        for l in [l for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED" for l in n.inputs["Normal"].links]:
+            m.node_tree.links.remove(l)
 pesados = [o for o in escena if o.type == "MESH" and o not in FIGS and not any(m.type == "ARMATURE" for m in o.modifiers)
            and not any(m and m.name.startswith(LAMPARA) for m in o.data.materials)
-           and not (o.name.startswith(LIGEROS) and tris(o) <= 8000)]
+           and not (o.name.startswith(LIGEROS) and tris(o) <= 8000) and o not in asientos]
 total = sum(tris(o) for o in pesados)
 r = min(1.0, TRUCK / total * 0.97)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import vivo_normales
+# the G63's soup: welded first, or the roof falls into big triangles; the roof paint (Material3.004) takes 3x its share and the
+# six wheels 0.6x at the same total; the sharp edges are marked after the decimate (marked before, the tailgate smeared).
+# Sobel edges against the full mesh, 6 outside views (/mnt/e/tmp/mto-cabina-restos/techo3): F1 0.928 (weld, sharp before)
+# -> 0.948 (Material3.004 x3, sharp after), spurious edge px 15,460 -> 7,252; the wheels' 0.6 gives the roll bar its share back
+MAS = {"Material3.004": 3.0, **{f"rueda{i}": 0.6 for i in range(6)}}
+sopa = [o for o in pesados if tris(o) > 300 and o.name.startswith(("Material", "rueda"))]
+rs = vivo_normales.razones(sopa, r, MAS)
 for o in pesados:
     if tris(o) > 300:
-        o.modifiers.new("dec", "DECIMATE").ratio = r
-print("VIVO camion tris", total, "ratio", round(r, 4), flush=True)
+        if o in sopa:
+            vivo_normales.soldar(o, marcar=False)  # (blender/vivo_normales.py)
+        o.modifiers.new("dec", "DECIMATE").ratio = rs.get(o, r)
+        if o in sopa:
+            vivo_normales.afilar(o)
+print("VIVO camion tris", total, "ratio", round(r, 4), "soldadas", {o.name: round(rs[o], 4) for o in sopa if rs[o] != r}, flush=True)
+# the stickers (calca3: the front art, the white backing on back faces, mixed by Backfacing) shipped as their backing: the glTF
+# exporter took the backing's flat white with the art's alpha (owner 2026-11-19 18:29, Caja: "white smudge blobs" on the
+# tailgate). The front shader goes straight to the output
+frente = []
+for m in bpy.data.materials:
+    sal = m.node_tree and next((n for n in m.node_tree.nodes if n.type == "OUTPUT_MATERIAL" and n.is_active_output), None)
+    mix = sal and sal.inputs["Surface"].links and sal.inputs["Surface"].links[0].from_node
+    if mix and mix.type == "MIX_SHADER" and mix.inputs[0].links and mix.inputs[0].links[0].from_socket.name == "Backfacing":
+        m.node_tree.links.new(mix.inputs[1].links[0].from_socket, sal.inputs["Surface"])
+        frente.append(m.name)
+print("VIVO calcas de frente", len(frente), sorted(frente), flush=True)
+# the roof pod (caja5 consola_techo, hung from the headliner) at 0.6 of its height, its top kept on the roof: the two front
+# reading-lamp lenses show past it at stop 1 (owner 2026-11-19 18:58, via cricketship: "squash it, let's see how it looks")
+pods = [o for o in O if o.name.startswith("u_consola_techo") and not o.hide_render
+        and not (o.parent and o.parent.name.startswith("u_consola_techo"))]
+if pods:
+    arriba = max((w @ Vector(c)).z for o in pods for p in [o, *o.children_recursive] if p.type == "MESH"
+                 for w in [p.matrix_world] for c in p.bound_box)
+    aplastar = Matrix.Translation((0, 0, arriba)) @ Matrix.Diagonal((1, 1, 0.6, 1)) @ Matrix.Translation((0, 0, -arriba))
+    for o in pods:
+        o.matrix_world = aplastar @ o.matrix_world
+    print("VIVO consola de techo x0.6 en z", [o.name for o in pods], "techo z %.3f" % arriba, flush=True)
+# the tail lamps lie 1.7 mm behind the dark surround (Material3.001) that takes the common decimate while they keep their
+# mesh: its re-cut triangles came through the red (owner 18:29: "the red tail lamps look smeared"). They stand out 5 mm
+for o in [o for o in O if o.name.startswith("luz_calavera")]:
+    M = o.matrix_world.copy()
+    M.translation.y -= 0.005
+    o.matrix_world = M
+    print("VIVO calavera", o.name, "y -5 mm", flush=True)
 for im in bpy.data.images:
     if im.size[0] > TEX or im.size[1] > TEX:
         k = TEX / max(im.size)
@@ -347,4 +412,15 @@ datos["camaras"][3] = datos["banda"][0]
 # A 0.42 m leg straight out to the left (away from the body; the screen truck's side stays 0.92 m off) -> 2.77 / 3.05 m
 datos["camaras"][2]["salida"] = [-0.2, -1.9, 2.0]
 json.dump(datos, open(os.path.join(OUT, "vivo.json"), "w", encoding="utf8"), indent=1)
+# CABINA_CHOQUES=<prefix>: old cab faces against the new cab parts, as shipped (owner's console matrix), without and with the
+# common decimate (blender/cabina_choques.py) -> <prefix>-entero.json, <prefix>-diezmado.json
+if os.environ.get("CABINA_CHOQUES"):
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import cabina_choques
+    decs = [m for o in O if o.type == "MESH" for m in o.modifiers if m.name == "dec"]
+    for etiqueta, activo in (("entero", False), ("diezmado", True)):
+        for m in decs:
+            m.show_viewport = activo
+        r_ = cabina_choques.medir(os.path.join(OUT, "vivo.json"), etiqueta)
+        json.dump(r_, open(os.environ["CABINA_CHOQUES"] + f"-{etiqueta}.json", "w", encoding="utf8"), indent=1)
 print("VIVO listo", flush=True)

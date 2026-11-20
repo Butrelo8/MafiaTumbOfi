@@ -58,7 +58,7 @@ total = sum(tris(o) for o in camion)
 print("CAMION_TRIS", total, len(camion))
 r = min(1.0, TRUCK / total * 0.97)
 for o in camion:
-    if tris(o) > 200 and o.name not in ("luces_g63", "parrilla_g63"):  # lamp lenses, grille bars: small, would fall apart
+    if tris(o) > 200 and o.name not in ("luces_g63", "parrilla_g63") and not o.name.startswith("luz_"):  # lamp lenses, grille bars: small, would fall apart
         o.modifiers.new("dec", "DECIMATE").ratio = r
 for o in FIGS:
     n = tris(o)

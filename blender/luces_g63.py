@@ -163,3 +163,122 @@ def malla(parent, cx=1.72, interior=True):
     bpy.context.scene.collection.objects.link(o)
     o.parent = parent
     return o
+
+
+# --- every lamp as its own object (owner 2026-11-19 16:56: "the lights out of the G63 model where they're fused in, as their own
+# objects"). The model's lamp meshes (Light_Col remapped by escena.py, the tail lenses Material__544, the lens glass Material__470)
+# and this file's luces_g63 are cut into one object per fixture, named by role and side (izq = x < CX, the driver's side), never
+# by order: luz_faro_izq holds the projector, the LED ring and the headlight glass. Materials stay as they were (the exporter's
+# lamp exemption and ruta.py's flash key on them). Light_Col's roof-pocket backs (plastico) stay in the body: not lamps.
+LADOS = ("faro", "tira", "parachoques", "calavera", "trasera_baja", "aleta", "lateral", "espejo", "techo", "cabina_lectura",
+         "cabina_lectura_tras", "ambiente_puerta", "ambiente_puerta_tras", "cuadro", "volante")
+LUCES = tuple(f"luz_{r}_{l}" for r in LADOS for l in ("izq", "der")) + ("luz_cabina_domo", "luz_cabina_pantalla",
+                                                                        "luz_ambiente_tablero")
+NO_LAMPARA = ("plastico",)
+
+
+def fijacion(c, mat, cx):
+    """The fixture an island of lamp faces belongs to, from its centre c (truck frame at rest) and material. Boxes from the
+    island dump of 2026-11-19 (vivo-montado.blend: 4 meshes, 365 islands)."""
+    x, y, z = c
+    lado = "izq" if x < cx else "der"
+    if y < -2.8:  # the bed's rear face: tail clusters, and the small lamps under them (z 0.74-0.80)
+        return ("trasera_baja_" if z < 0.85 else "calavera_") + lado
+    if y > 2.6:  # the nose: bumper lamps (z 0.65-0.68), the LED strip under each headlight (z 1.03-1.05), the headlight
+        if z < 0.75:
+            return "parachoques_" + lado
+        return ("tira_" if z < 1.07 and mat != "mica" else "faro_") + lado
+    if 2.3 < y < 2.5:
+        return "aleta_" + lado  # turn-signal pod on each front wing's top
+    if x < 0.95 or x > 2.5:  # outside the body's flanks: the mirror's turn signal (z 1.6) and the flank marker (z 1.28)
+        return ("espejo_" if z > 1.5 else "lateral_") + lado
+    if z > 2.1:  # headliner: the roof pockets' lens glass (y 1.08-1.14), the overhead reading lamps (y 0.8), rear lamps, dome
+        if y > 1.0:
+            return "techo_" + lado
+        if y > 0.5:
+            return "cabina_lectura_" + lado
+        return "cabina_lectura_tras_" + lado if y < -0.3 else "cabina_domo"
+    if mat == "g63_ambiente":
+        if y > 1.0:
+            return "ambiente_tablero"
+        return ("ambiente_puerta_tras_" if y < 0 else "ambiente_puerta_") + lado
+    if y > 1.1 and abs(x - cx) < 0.15:
+        return "cabina_pantalla"  # the COMAND screen's glow
+    cuadro = "izq" if x < 1.335 else "der"  # the two gauges, either side of the cluster's centre
+    if 1.1 < y < 1.25:
+        return "cuadro_" + cuadro  # each gauge's glow disc and its glass
+    if 0.85 < y < 1.0:
+        return "volante_" + cuadro  # Light_Col faces on the wheel's spokes, amber since the 2026-11-18 split
+    return None
+
+
+def separar(fuentes, padre, cx=1.72):
+    """Moves every lamp face of `fuentes` (meshes) into one object per fixture (LUCES), parented to `padre`. Returns them."""
+    import numpy as np
+    partes = {}  # name -> [verts, faces, materials, smooth]
+    for o in fuentes:
+        me = o.data
+        W = o.matrix_world
+        v = np.array([W @ x.co for x in me.vertices]).reshape(-1, 3)
+        raiz = list(range(len(me.vertices)))  # union-find over shared vertices: the islands
+
+        def r(i):
+            while raiz[i] != i:
+                raiz[i] = raiz[raiz[i]]
+                i = raiz[i]
+            return i
+        for p in me.polygons:
+            a = r(p.vertices[0])
+            for b in p.vertices[1:]:
+                raiz[r(b)] = a
+        islas = {}
+        for p in me.polygons:
+            islas.setdefault(r(p.vertices[0]), []).append(p)
+        mats = [m.name.split(".")[0] if m else "" for m in me.materials]
+        fuera = []
+        for ps in islas.values():
+            for mi in {p.material_index for p in ps}:
+                if mats[mi] in NO_LAMPARA:
+                    continue
+                caras = [p for p in ps if p.material_index == mi]
+                c = v[[i for p in caras for i in p.vertices]].mean(0)
+                n = fijacion(c, mats[mi], cx)
+                assert n and "luz_" + n in LUCES, f"lamp island of {o.name} ({mats[mi]}) at {c.round(3)}: no fixture"
+                vs, fs, ms, ss = partes.setdefault("luz_" + n, [[], [], [], []])
+                for p in caras:
+                    k = len(vs)
+                    vs.extend(v[list(p.vertices)].tolist())
+                    fs.append(list(range(k, k + len(p.vertices))))
+                    ms.append(me.materials[mi])
+                    ss.append(p.use_smooth)
+                fuera += [p.index for p in caras]
+        if fuera:
+            bm = bmesh.new()
+            bm.from_mesh(me)
+            bm.faces.ensure_lookup_table()
+            bmesh.ops.delete(bm, geom=[bm.faces[i] for i in fuera], context="FACES")
+            bm.to_mesh(me)
+            bm.free()
+    out = []
+    for n in sorted(partes):
+        vs, fs, ms, ss = partes[n]
+        me = bpy.data.meshes.new(n)
+        me.from_pydata(vs, [], fs)
+        lista = list(dict.fromkeys(ms))
+        for m in lista:
+            me.materials.append(m)
+        for p, m, s in zip(me.polygons, ms, ss):
+            p.material_index, p.use_smooth = lista.index(m), s
+        me.validate()
+        bm = bmesh.new()  # the faces were cut apart per polygon: weld each fixture's coincident corners back
+        bm.from_mesh(me)
+        bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
+        bm.to_mesh(me)
+        bm.free()
+        o = bpy.data.objects.new(n, me)
+        bpy.context.scene.collection.objects.link(o)
+        o.parent = padre
+        o.matrix_parent_inverse = padre.matrix_world.inverted()
+        out.append(o)
+    print("LUCES separadas", len(out), {o.name: len(o.data.polygons) for o in out}, flush=True)
+    return out
