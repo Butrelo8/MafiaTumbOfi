@@ -32,11 +32,14 @@ Cada personaje tiene cuatro controles, dos por mano (`izq` y `der` son la izquie
 - No toques **S** en nada, ni borres controles. Los huesos del brazo no se seleccionan; todo se hace con los controles.
 
 ## Cosas del techo
-Cada pieza tiene su cruz, en su centro: `techo_bajo`, `techo_docerola`, `techo_requinto`, `techo_teclado`, `techo_tarola`, `techo_dona`, `techo_alien`
-(con su nombre visible). **G** mueve, **R** gira, sin **S**. La red `carga_red` no se puede seleccionar y **no sigue a las piezas** mientras acomodas
-(en Blender se ve vieja): se vuelve a tender sola sobre donde las dejes cuando se reconstruye (`scripts/vivo-g63.sh` con `VOLCADO=<tu volcado>`,
-o `blender/g63_red_ajustar.py` sobre tu archivo). Si quieres verla bien mientras acomodas, escóndela con el ojo del Outliner (`carga_red`);
-la red solo cubre el área entre las barras: una pieza que saques de ahí queda sin red.
+La carga nueva (2026-11-20, archivo `colocar-g63-carga.blend`): dos maletas de vuelo (cada una con sus calcas), dos estuches de guitarra, una bolsa y una
+mochila, más la dona y el alien. Cada pieza tiene su cruz, en su centro: `techo_maleta_a`, `techo_maleta_b`, `techo_guitarra_a`, `techo_guitarra_b`,
+`techo_bolsa`, `techo_mochila`, `techo_dona`, `techo_alien` (con su nombre visible). **G** mueve, **R** gira, sin **S**. Las calcas (el atlas de las siete
+de `blender/props/calcas-r1`) van pegadas a cada pieza y viajan con su cruz. La red `carga_red` cubre todo menos el alien; el alien va aparte, con sus dos
+correas `carga_red_alien`, por encima de la red. Ninguna de las dos se puede seleccionar y **no siguen a las piezas** mientras acomodas (en Blender se ven
+viejas): se vuelven a tender solas sobre donde las dejes cuando se reconstruye (`scripts/vivo-g63.sh` con `VOLCADO=<tu volcado>`, o
+`blender/g63_red_ajustar.py` sobre tu archivo). Si quieres verlas bien mientras acomodas, escóndelas con el ojo del Outliner; la red solo cubre el área
+entre las barras: una pieza que saques de ahí queda sin red.
 
 ## Lo que pasa después
 La pose del reparto en tu archivo es la tuya de `colocar-reparto-v3` (hueso por hueso, `blender/props/reparto_pose_dueno.json`). Si abres el
@@ -55,9 +58,9 @@ con un hueco de ~2 cm y Blender no resuelve IK así); la cabeza, la orientación
 | Objeto (en el archivo del coche `vivo-g63.blend`) | Qué es |
 |---|---|
 | `rack_barra0-2`, `rack_pie*` | Las tres barras de aluminio y sus pies de plástico negro (sin estrella) |
-| `k3_bajo`, `k3_docerola`, `k3_requinto`, `k3_teclado`, `k3_tarola` | Los estuches de instrumentos |
-| `k3_dona`, `k3_alien` | La dona y el alien, acostado de cabeza hacia adelante |
-| `carga_red` | La red que los sujeta (cuerda de 7 mm, celdas de 22 cm) |
+| `k3_maleta_a/b`, `k3_guitarra_a/b`, `k3_bolsa`, `k3_mochila` | La carga nueva del techo, con sus calcas |
+| `k3_dona`, `k3_alien` | La dona y el alien, acostado de cabeza hacia adelante, sobre la red |
+| `carga_red`, `carga_red_alien` | La red que sujeta todo menos el alien (cuerda de 7 mm, celdas de 22 cm) y las dos correas del alien |
 | `vest_flecos` | Los flecos, las placas de terciopelo y la franja «MAFIA TUMBADA» del parabrisas |
 | `vest_fresa`, `vest_banderin` | La fresa y el banderín |
 | `vest_emblema`, `vest_placa` | El emblema MT (cofre) y la placa de Veracruz (defensa) |

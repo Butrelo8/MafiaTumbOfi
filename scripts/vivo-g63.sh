@@ -2,7 +2,7 @@
 # Live scene with the owner's new G63 (2026-11-20): the whole chain from the .blend to public/vivo/, run as one.
 #   scripts/vivo-g63.sh [out dir = /mnt/e/tmp/mto-g63-nuevo]
 # 1 g63_nuevo.py   blender/assets/g63-nuevo/g63.blend -> g63-listo.blend   (scale, wheels, web materials; ~1 min)
-# 2 g63_rack.py    + roof rack, the band's load, the net                      (-> g63-rack.blend)
+# 2 g63_rack.py    + roof rack, the new load (g63_carga.py), the net and the alien's straps (-> g63-rack.blend)
 # 3 vivo_g63_montar.py  + cab dressing, headlamps, wheel radius              (-> vivo-g63.blend, -datos.json)
 # 4 vivo_g63_exportar.py  -> coche.glb (uncompressed)
 # 5 vivo-g63-unir.mjs   swaps it into the exporter's crudo files (cast, screen truck, cerros stay; the cast moves by
@@ -16,15 +16,16 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 D=${1:-/mnt/e/tmp/mto-g63-nuevo}
-OLD=${OLD:-/mnt/e/tmp/mto-cabina-restos/vivo/crudo}
+OLD=${OLD:-/mnt/e/tmp/mto-props-nuevos/crudo-reparto}  # the cast bake with his 07:15 dump (set `cast` to 0 in g63_paradas.json)
+VOLCADO=${VOLCADO:-/mnt/e/tmp/mto-g63-nuevo/volcado-carga.json}  # his placement + the new load (colocar-g63-carga.blend)
 PROPS=${PROPS:-/mnt/e/tmp/mto-cab-consola-luces/pub0/escena.glb}  # a live escena.glb: the k3_* props and the dressing come from it
 export GT=${GT:-/home/black/projects/scratch-blender-skills}
 B=/mnt/e/Blender/blender.exe
 run() { ~/.claude/scripts/blender-run $B -b "$(wslpath -w "$1")" --python-exit-code 1 --python "$(wslpath -w "blender/$2")" -- "${@:3}"; }
 mkdir -p "$D"
-run blender/assets/g63-nuevo/g63.blend g63_nuevo.py "$(wslpath -w "$D/g63-listo.blend")" > "$D/1-listo.log" 2>&1
-# VOLCADO=<dump of the owner's placement file>: the roof load goes where his techo_* handles left it and the net is laid over it
-run "$D/g63-listo.blend" g63_rack.py "$(wslpath -w "$D/g63-rack.blend")" "$(wslpath -w "$PROPS")" red ${VOLCADO:+"$(wslpath -w "$VOLCADO")"} > "$D/2-rack.log" 2>&1
+[ "${SALTAR1:-}" = 1 ] || run blender/assets/g63-nuevo/g63.blend g63_nuevo.py "$(wslpath -w "$D/g63-listo.blend")" > "$D/1-listo.log" 2>&1  # SALTAR1=1: reuse $D/g63-listo.blend (the source .blend is git-ignored)
+# VOLCADO: the dump of the owner's placement file: the roof load goes where his techo_* handles left it and the net is laid over it
+run "$D/g63-listo.blend" g63_rack.py "$(wslpath -w "$D/g63-rack.blend")" "$(wslpath -w "$PROPS")" "$(wslpath -w "$VOLCADO")" > "$D/2-rack.log" 2>&1
 run "$D/g63-rack.blend" vivo_g63_montar.py "$(wslpath -w "$D/vivo-g63.blend")" "$(wslpath -w "$PROPS")" > "$D/3-montar.log" 2>&1
 run "$D/vivo-g63.blend" vivo_g63_exportar.py "$(wslpath -w "$D/coche.glb")" > "$D/4-exportar.log" 2>&1
 bun scripts/vivo-g63-unir.mjs "$OLD" "$D/coche.glb" "$D/vivo-g63-datos.json" "$D/crudo" > "$D/5-unir.log" 2>&1

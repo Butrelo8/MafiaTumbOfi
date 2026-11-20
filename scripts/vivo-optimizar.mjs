@@ -42,9 +42,15 @@ async function terminar(doc, nombre) {
   // glass as the page draws it (vivoSecciones.ts vidrios(): same names, opacity 0.15), set here so dedup() can't merge it with an
   // opaque twin: vidrio_falso exports as plain white like k3_alu, and the merge kept k3_alu's name (windows opaque, 2026-11-19)
   for (const m of doc.getRoot().listMaterials()) if (/vidrio|mica|glass|pet/i.test(m.getName())) m.setAlphaMode('BLEND').setBaseColorFactor([...m.getBaseColorFactor().slice(0, 3), 0.15])
+  // the roof load's sticker atlas (calcas_atlas, one material for every decal): cut at alpha 0.5 as Blender's dithered mode draws it, set before
+  // aplanar() so a mostly transparent (black) atlas is not taken for a near-black flat colour
+  for (const m of doc.getRoot().listMaterials()) if (/^calcas_atlas/.test(m.getName())) m.setAlphaMode('MASK').setAlphaCutoff(0.5)
   if (nombre === 'escena.glb' || nombre === 'camion_extras.glb') await aplanar(doc) // the truck's props only: the road's dark textures stay
   if (nombre === 'escena.glb') await calcas256(doc)
-  await doc.transform(prune(), dedup(), textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [512, 512] }), draco({ method: 'edgebreaker', ...(nombre === 'escena.glb' ? CUANTIZAR : {}) }))
+  const atlas = await atlas1024(doc)
+  await doc.transform(prune(), dedup(), textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [512, 512] }))
+  for (const [t, webp] of atlas) t.setImage(webp).setMimeType('image/webp') // the pass above took it to 512: put the 1024 back
+  await doc.transform(draco({ method: 'edgebreaker', ...(nombre === 'escena.glb' ? CUANTIZAR : {}) }))
   await io.write(join(sal, nombre), doc)
   const r = doc.getRoot()
   console.log(nombre, `tris ${tris(doc) | 0}, nodes ${r.listNodes().length}, materials ${r.listMaterials().length}, clips ${r.listAnimations().map((a) => `${a.getName()}:${a.listChannels().length}`).join(' ')}`)
@@ -141,6 +147,15 @@ async function aplanar(doc) {
     m.setBaseColorTexture(null).setNormalTexture(null).setMetallicRoughnessTexture(null).setOcclusionTexture(null)
     console.log('aplanar', m.getName(), s.map((c) => c.mean.toFixed(0)).join(','))
   }
+}
+
+/** The roof load's sticker atlas stays at 1024 (seven stickers in one texture: at 512 the 6 px gutters and the thin text of r1-slogan blur):
+ * returns [[texture, webp bytes at 1024]] for textureCompress's 512 resize to be undone afterwards. */
+async function atlas1024(doc) {
+  const ts = new Set(doc.getRoot().listMaterials().filter((m) => /^calcas_atlas/.test(m.getName())).map((m) => m.getBaseColorTexture()).filter(Boolean))
+  const sal = []
+  for (const t of ts) sal.push([t, new Uint8Array(await sharp(Buffer.from(t.getImage())).resize(1024, 1024, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 80 }).toBuffer())])
+  return sal
 }
 
 /** The stickers' art (c3_* materials, 22 textures, 214 KB at 512) to fit 256: they sat 136 KB on escena.glb, the first-frame file,

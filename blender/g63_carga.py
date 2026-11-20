@@ -65,8 +65,8 @@ def traer():
             o = crudos[pieza].copy()
             o.data = crudos[pieza].data.copy()   # single-user: Mesh.transform compounds once per user
             sc.collection.objects.link(o)
-        pendientes.append((nombre, o, esc))
-    for nombre, o, esc in pendientes:
+        pendientes.append((nombre, pieza, o, esc))
+    for nombre, pieza, o, esc in pendientes:
         o.data.transform(Matrix.Scale(esc, 4))
         o.name = o.data.name = "k3_" + nombre
         if pieza == "guitarra":   # the downloaded gig bag is white: the stickers' white die-cut border would vanish on it, so each one gets a colour
@@ -77,6 +77,8 @@ def traer():
         o.rotation_mode = "XYZ"
         o.location = (0, 0, 0)
         salida[o.name] = o
+    for k in ("a", "b"):   # the colouring above once never ran (it tested a stale loop variable): the build stops if a guitar case is not coloured
+        assert salida["k3_guitarra_" + k].data.materials[0].name == "guitarra_" + k, "guitar case " + k + " lost its colour"
     return salida
 
 

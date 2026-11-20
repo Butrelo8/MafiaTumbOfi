@@ -1,6 +1,6 @@
 {
-  "nota": "Stop cameras, cab boxes and cast shift for the new G63 (2026-11-20). Blender axes. The cast shift moves the owner's old placement (blender/props, vivo_reparto_volcar) onto the new seats until he places it in the new car's file (docs/g63-nuevo-dueno.md).",
-  "cast": {"dy": 0.0, "dz": -0.28},
+  "nota": "Stop cameras, cab boxes and cast shift for the new G63 (2026-11-20). Blender axes. The cast shift moves the owner's old placement (blender/props, vivo_reparto_volcar) onto the new seats until he places it in the new car's file (docs/g63-nuevo-dueno.md). He placed it 2026-11-20 07:15: the cast shift is 0 and the crudo comes from that dump.",
+  "cast": {"dy": 0.0, "dz": 0.0},
   "camaras": [
     {"pos": [1.72, -0.75, 1.60], "mira": [1.72, 6.0, 1.30], "lens": 20.0},
     {"pos": [0.7, -4.6, 3.5], "mira": [1.72, -0.2, 2.3], "lens": 32.0},
