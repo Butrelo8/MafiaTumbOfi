@@ -16,6 +16,7 @@ const SIZES = { 390: { viewport: { width: 390, height: 844 }, deviceScaleFactor:
 const res = { url, frames: {}, checks: {}, ttff4g: null }
 const pct = (a) => { const s = a.slice(10).sort((x, y) => x - y); return (p) => (s.length ? +s[Math.min(s.length - 1, Math.floor(p * s.length))].toFixed(2) : null) }
 const errores = []
+const SOLO_TTFF = process.env.SOLO_TTFF === '1' // only block 3 (TTFF and bytes): a run takes ~1 min instead of ~10; list SOLO_TTFF in WSLENV
 
 async function abrir(w, q = '') {
   const ctx = await browser.newContext(SIZES[w])
@@ -39,7 +40,7 @@ async function tiempos(page, nombre) {
 }
 
 // 1) behaviour at 1440: nav clicks, keys, traffic, wheels, video
-{
+if (!SOLO_TTFF) {
   const { ctx, page } = await abrir(1440)
   await page.waitForTimeout(2500)
   const c = res.checks
@@ -98,7 +99,7 @@ async function tiempos(page, nombre) {
 }
 
 // 2) frame times, video playing and paused, 1440 x1 and 390 CPU x4
-for (const w of [1440, 390]) {
+for (const w of SOLO_TTFF ? [] : [1440, 390]) {
   const { ctx, page } = await abrir(w)
   const cdp = await ctx.newCDPSession(page)
   if (w === 390) await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
@@ -141,7 +142,7 @@ for (const w of [1440, 390]) {
 }
 
 // 4) stills for the sheet: frozen (?f=0), screen panel flat (?sinpantalla), 960x540
-for (let i = 0; i < 6; i++) {
+for (let i = 0; i < (SOLO_TTFF ? 0 : 6); i++) {
   const { ctx, page } = await abrir(960, `?f=0&sinpantalla&parada=${i}`)
   await page.waitForTimeout(1500)
   await page.locator('nav, h1, #creditos').evaluateAll((els) => els.forEach((e) => (e.style.visibility = 'hidden')))
