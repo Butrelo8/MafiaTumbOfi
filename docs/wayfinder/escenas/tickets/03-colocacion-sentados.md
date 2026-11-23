@@ -1,12 +1,12 @@
 ---
 title: The owner saves the seated placement file
 type: task
-status: open
+status: closed
 assignee:
 gate: owner
 blocked_by: []
-closed_as:
-gist:
+closed_as: decided
+gist: owner #70: the owner places the cast and saves the file
 ---
 
 ## Question
@@ -23,3 +23,7 @@ the seat lowering (`blender/g63_asientos_aplicar.py`) and the solver (`--tope=20
 ## Done-check
 
 The file path and its save time are in the Resolution, and the file exists.
+
+## Resolution
+
+owner #70: the owner places the cast and saves the file

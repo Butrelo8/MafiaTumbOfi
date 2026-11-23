@@ -75,6 +75,7 @@ Read a branch's handoff with `git show <branch>:<path>`. Merge is the close (way
 
 - [Page first on the live site, the intro never blocks reading](tickets/01-pagina-primero.md): The h1 and the nav are readable and usable from the first paint (h1 readable 17.5 s → 0.2 s on a throttled phone); the intro is a background layer and the heavy files load after first paint.
 - [The manager's head and the steering wheel after the seats were lowered](tickets/02-volante-manager.md): owner #69: raise the front seats less (0.15 m instead of 0.20)
+- [The owner saves the seated placement file](tickets/03-colocacion-sentados.md): owner #70: the owner places the cast and saves the file
 
 ## Not yet specified
 
