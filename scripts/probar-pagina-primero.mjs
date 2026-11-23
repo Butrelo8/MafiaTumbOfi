@@ -45,9 +45,9 @@ const entradas = await page.evaluate(() => ({ ...window.__p, scrollY: scrollY, a
 // keyboard: Tab from the top lands on the nav buttons (the opening's own Saltar may come first; it is one stop)
 const tabs = []
 for (let i = 0; i < 4; i++) { await page.keyboard.press('Tab'); tabs.push(await page.evaluate(() => { const a = document.activeElement; return a ? (a.id || a.className || a.tagName) : null })) }
-// a tap on a nav button is taken and the opening steps aside
+// a tap on a nav button is taken and the opening steps aside; the camera follows only if the scene has loaded by then (its handlers attach after the GLB)
 await page.tap('#p-caja')
-await page.waitForTimeout(900)
+await page.waitForFunction(() => !document.getElementById('apertura'), null, { timeout: 8000 }).catch(() => {}) // the opening steps aside (the canvas may take up to 3 s)
 const despues = await page.evaluate(() => ({ aperturaSigue: !!document.getElementById('apertura'), actual: document.querySelector('#escenas [aria-current="true"]')?.id }))
 const res = { url, antes, entradas, tabs, despues }
 if (out) writeFileSync(out, JSON.stringify(res, null, 1))

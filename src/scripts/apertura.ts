@@ -81,7 +81,8 @@ if (el && video && !html.classList.contains('sin-apertura')) {
   })
 
   saltar?.addEventListener('click', terminar)
-  document.getElementById('escenas')?.addEventListener('click', terminar) // the visitor went for the page: the opening steps aside
-  document.getElementById('banda')?.addEventListener('click', terminar)
+  // the visitor went for the page: the opening steps aside, onto the canvas once it has drawn (up to ESCENA_MAX), as every other exit does
+  document.getElementById('escenas')?.addEventListener('click', empalmar)
+  document.getElementById('banda')?.addEventListener('click', empalmar)
   addEventListener('keydown', (e) => { if (e.key === 'Escape') terminar() })
 }

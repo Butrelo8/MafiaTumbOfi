@@ -67,11 +67,16 @@ At FCP + 500 ms, same phone conditions, intro still playing:
 | topmost element over the h1 and two nav buttons is the control itself | no (the overlay) | yes |
 | Tab order from the top | Saltar, body, Saltar, body (nav unreachable) | Saltar, Cabina, Caja, Pantalla |
 | wheel and touch drag reach the document, none cancelled | 1 wheel, 4 touchmove, 0 cancelled | same |
-| a tap on `#p-caja` | waited for the intro to end (Playwright retried until the overlay left) | taken at once; the intro steps aside; `aria-current` moves to Caja |
+| a tap on `#p-caja` | waited for the intro to end (Playwright retried until the overlay left) | taken at once; the intro steps aside (onto the canvas, up to 3 s); `aria-current` moves to Caja once the scene has loaded |
 
 The home has nothing to scroll: `html, body { overflow: hidden }`, the scene is fixed and the nav moves the camera (owner's design,
 `index.astro`). `scrollHeight - innerHeight` is 0 on both builds, so "scrolls" here means the events are not blocked or cancelled, which
 they are not. There is no section text on this page; the readable content is the h1, the nav and the credits line.
+
+**Known gap.** The nav buttons are live from the first paint, but the camera handlers attach only after `escena.glb` has loaded
+(`vivoSecciones.ts:217`, after `await descargas`). A tap before that ends the intro but does not move the camera: in one probe run, with
+the tap about 3 s in and the scene not yet loaded, `aria-current` stayed on Cabina. Before this change the nav was inert, so the tap was
+impossible. A fix (remember the first tap and apply it when the scene is ready) is a behaviour change, so it is left to the owner.
 
 ## 3. The look
 
@@ -88,9 +93,16 @@ The full-GL runs of `medir-inicio.mjs` were not usable for stills here: under so
 
 ## 4. Field LCP
 
-Not available. The repo has no RUM source: `/e` (Analytics Engine `mto_events`) records page views and clicks only, no timings. The 22 s
-figure in the map note came from outside the repo. To close this item, someone has to read the field LCP p75 seven days after the deploy
+Not available. The repo has no RUM source: `/e` (Analytics Engine `mto_events`) records page views and clicks only, no timings. I did not
+find where the 22 s figure in the map note comes from (grep of the mothership docs and `docs/handoffs` found nothing). To close this item, someone has to read the field LCP p75 seven days after the deploy
 (CrUX or Cloudflare Web Analytics, if either is on for mafiatumbada.com), or add an LCP field to `/e`.
+
+## ## Production check (2026-11-23 13:07 GMT, read-only `curl`)
+
+`https://mafiatumbada.com/` serves the live home, but `/vivo/escena.glb` and `/vivo/draco/draco_decoder.wasm` return **404** (`/vivo/vivo.json`
+and `/prototipo/apertura.mp4` are 200). The GLBs are gitignored, so the CI build from `main` has none: the live scene cannot load there,
+visitors get the poster and the nav's camera does nothing. The lab numbers above use the GLBs copied in, so they describe the page as intended, not as
+served today.
 
 ## Checks
 
@@ -99,6 +111,6 @@ bun test            # 150 pass, 0 fail
 bun run build       # ok
 ! grep -n 'inert = true' src/scripts/apertura.ts   # no match
 python3 -I ~/projects/visual-lab/web/scripts/slop-check.py src   # exit 1: 4 FAIL, all in /anterior and MemberCard (old pages, untouched); pill-button REVIEW at Apertura.astro:34 is the existing Saltar
-revisar.sh "http://127.0.0.1:4602/?respaldo"   # 390 + 1440: overflow 0, tap 0 under 44 px, fixed-over-text 0 covered, contrast 0, CLS 0.000/0.001, weight 2.43 MB; one FAIL, motion-spec (the existing stroke-dashoffset writing, DESIGN.md › Opening)
+revisar.sh "http://127.0.0.1:4602/?respaldo"   # 390 + 1440: overflow 0, tap 0 under 44 px, fixed-over-text 0 covered, contrast 0, CLS 0.000/0.001, weight 2.43 MB; one FAIL, motion-spec (the existing stroke-dashoffset writing, DESIGN.md › Opening); the before build (:4601) gives the same FAIL, all other rows pass
 refs-check.py docs/design/references.md --sections apertura-carga   # section-has-row, path-exists, row-complete, ficha-measured PASS; row-cites-library FAIL on 16 older prop rows (same on main, not from this change)
 ```

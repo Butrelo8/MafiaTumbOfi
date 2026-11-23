@@ -57,7 +57,7 @@ test -s docs/wayfinder/escenas/assets/01-lcp.md && grep -qi 'LCP' docs/wayfinder
 Shipped on `cc/chefskisdrone` (one commit; no push, no deploy). Evidence: `docs/wayfinder/escenas/assets/01-lcp.md`.
 
 - **What changed.** `apertura.ts` no longer sets `inert` and no longer waits to be seen: the layer is z 2 under the h1 and the nav
-  with `pointer-events: none` (Saltar keeps its own), the `entra` nav fade is gone, a nav click ends the intro, and
+  with `pointer-events: none` (Saltar keeps its own), the `entra` nav fade is gone, a nav click ends the intro (through `empalmar`, onto the canvas), and
   `apertura.mp4` gets its `src` after first paint. `index.astro` imports the three.js scene (`vivoSecciones`, a 638 KB chunk) with
   `import()` after first paint. The shared helper is `src/lib/trasPintar.ts`. The writing, clip, fade, scene and the skips (reduced
   motion, `#anchor`, `?f`, `?parada`, `?toma`, return visit) are untouched.
@@ -65,8 +65,9 @@ Shipped on `cc/chefskisdrone` (one commit; no push, no deploy). Evidence: `docs/
   17,501 → 217 ms; browser LCP 228 → 232 ms (it is the h1 text on both: Chrome counts text under an opaque overlay, so LCP alone could not
   show this fix and I could not reproduce the 22 s field figure); TTFF 7,893 → 7,705 ms (not slower). Scroll/focus: nav reachable by Tab and
   tap at first paint + 500 ms, wheel and touch not cancelled; the page has nothing to scroll by design.
-- **Open.** Field LCP p75 seven days after deploy: no RUM source in the repo (`/e` has no timings). The ticket's wording "section text"
+- **Open.** A tap on a nav button before the scene has loaded ends the intro but does not move the camera (handlers attach after `escena.glb`). Field LCP p75 seven days after deploy: no RUM source in the repo (`/e` has no timings). The ticket's wording "section text"
   and "scrollable" does not match this home (a fixed scene driven by the nav); recorded in the evidence file.
 - **Found on the way (not changed).** `public/vivo/*.glb` and `public/vivo/draco/` are gitignored, so a build from a clean `main`
   checkout (the GitHub Action) contains no `escena.glb`; whoever deploys production must have them. Worth confirming how production gets
-  them. `docs/design/references.md` fails `refs-check` `row-cites-library` on 16 older prop rows, identical on `main`.
+  them. Checked by `curl` on 2026-11-23: production returns 404 for `/vivo/escena.glb` and the Draco decoder, so the live scene does not load there today.
+  `docs/design/references.md` fails `refs-check` `row-cites-library` on 16 older prop rows, identical on `main`.
