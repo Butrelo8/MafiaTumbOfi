@@ -18,7 +18,7 @@ seated-pose solver, the hip and leg controls, Diego's wrist twist bones, and the
 2. Run the whole `scripts/vivo-g63.sh` chain. The handoff warns that `g63-listo`, `g63-rack` and `vivo-g63` were not
    redone.
 3. Fix the seatbelt (Mesh.261), which does not lower with the seats.
-4. Redo the stop cameras that follow the cast, such as Diego's stop-4 shot cropping his head
+4. Redo the stop cameras that follow the cast, such as Diego's stop-4 shot cropping the top of Diego's head
    (`docs/handoffs/2026-11-20-g63-nuevo-rack.md`).
 5. Upload to the `vivo` preview alias, then go to `main` with the owner's OK to merge.
 

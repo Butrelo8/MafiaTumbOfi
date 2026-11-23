@@ -12,7 +12,7 @@ gist:
 ## Question
 
 Pending 1 of `docs/handoffs/2026-11-20-sentados-3.md` (`git show cc/deaddrone:docs/handoffs/2026-11-20-sentados-3.md`)
-waits for the owner. He saves his placement in the seated placement file, a copy of `colocar-g63-sentados.blend`. Then
+waits for the owner, who saves the placement in the seated placement file, a copy of `colocar-g63-sentados.blend`. Then
 the seat lowering (`blender/g63_asientos_aplicar.py`) and the solver (`--tope=20,20,25,45`) run on it, in ticket 04.
 
 ## Options
