@@ -105,3 +105,8 @@ Findings go to: general method -> visual-lab (report `gotchas:` lines, they land
 site-specific notes -> this repo's `docs/`. Every discovery goes in the report as a `gotchas:` line
 (`symptom -> what worked`, one per line).
 <!-- mpaf:produccion-visual:end -->
+
+## Production, deploy and measurement
+- Production deploys from `main`, automatically on push (`.github/workflows/deploy.yml`); `npx wrangler deploy` from a clean `main` also works. The local checkout often sits on a drone branch: don't deploy from it.
+- `/e` counts page views, clicks and unique visitors into Analytics Engine `mto_events` (binding `MTO_EVENTS`); bots/drones and `?nolog=1` devices excluded. Contract: `~/projects/cronjobs/docs/site-events.md`.
+- Worker tests: `bun test` (plain `node --test` also loads the bun-only .ts tests and fails).
