@@ -73,6 +73,9 @@ Read a branch's handoff with `git show <branch>:<path>`. Merge is the close (way
 
 ## Decisions so far
 
+- [Page first on the live site, the intro never blocks reading](tickets/01-pagina-primero.md): The h1 and the nav are readable and usable from the first paint (h1 readable 17.5 s → 0.2 s on a throttled phone); the intro is a background layer and the heavy files load after first paint.
+- [The manager's head and the steering wheel after the seats were lowered](tickets/02-volante-manager.md): owner #69: raise the front seats less (0.15 m instead of 0.20)
+
 ## Not yet specified
 
 - The sticker art itself (our own illustration plus each platform's unaltered glyph, plan v2 §2). It is graduated when

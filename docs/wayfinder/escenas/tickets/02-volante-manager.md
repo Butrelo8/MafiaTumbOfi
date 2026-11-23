@@ -1,12 +1,12 @@
 ---
 title: The manager's head and the steering wheel after the seats were lowered
 type: grilling
-status: open
+status: closed
 assignee:
 gate: owner
 blocked_by: []
-closed_as:
-gist:
+closed_as: decided
+gist: owner #69: raise the front seats less (0.15 m instead of 0.20)
 ---
 
 ## Question
@@ -29,3 +29,7 @@ Héctor's head also touches the dashboard (1.7 cm). The owner picks the fix.
 ## Done-check
 
 The owner's answer is recorded in the Resolution, with the life-os decision id if it came from the phone.
+
+## Resolution
+
+owner #69: raise the front seats less (0.15 m instead of 0.20)
