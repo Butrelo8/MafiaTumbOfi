@@ -216,9 +216,10 @@ const usuario = (url: string) => url.replace(/\/$/, '').split('/').pop()
     <p class="hud" id="hud" hidden></p>
 
     <script>
-      import { trackClicks } from '../lib/clickEvents'
+      import { trackClicks, trackPageview } from '../lib/clickEvents'
       import '../scripts/prototipo'
       trackClicks(document)
+      trackPageview(document)
     </script>
 
     <style>
