@@ -24,10 +24,10 @@ interface Props {
 const { title, description, canonicalUrl, robots } = Astro.props
 
 const navItems = [
-  { href: '/anterior/', label: 'Inicio' },
-  { href: '/anterior/#musica', label: 'Música' },
-  { href: '/anterior/#grupo', label: 'Integrantes' },
-  { href: '/anterior/#contratacion', label: 'Contrataciones' },
+  { href: '/', label: 'Inicio' },
+  { href: '/#musica', label: 'Música' },
+  { href: '/#grupo', label: 'Integrantes' },
+  { href: '/#contratacion', label: 'Contrataciones' },
 ]
 
 const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN)
@@ -87,7 +87,7 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
 
     <!-- ─── HEADER ──────────────────────────────────────────── -->
     <header class="site-header" id="site-header" data-placement="header">
-      <a href="/anterior/" class="header-mark" aria-label="Mafia Tumbada — Inicio">
+      <a href="/" class="header-mark" aria-label="Mafia Tumbada — Inicio">
         <span class="gold-text" aria-hidden="true">M</span>
         <svg class="header-mark-bolt" viewBox="0 0 46 86" aria-hidden="true" focusable="false">
           <path d="M28 2L6 48h14L16 84l24-48H26L28 2z" fill="currentColor" />
@@ -182,7 +182,7 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
             <a href={bandSocialUrls.youtube} target="_blank" rel="noopener noreferrer">YouTube</a>
           </nav>
 
-          <a href="/anterior/#contratacion" class="menu-cta">
+          <a href="/#contratacion" class="menu-cta">
             <span class="menu-cta-eyebrow">Contrataciones</span>
             <span class="menu-cta-label">Contrátanos<em>.</em></span>
           </a>
@@ -204,6 +204,9 @@ const plausibleDataDomain = normalizePlausibleDataDomain(import.meta.env.PUBLIC_
       import { trackClicks, trackPageview } from '../lib/clickEvents'
       trackClicks(document)
       trackPageview(document)
+      // Off when PUBLIC_SENTRY_DSN is unset: Vite folds the branch away and the SDK is not bundled.
+      const sentryDsn = import.meta.env.PUBLIC_SENTRY_DSN
+      if (sentryDsn) import('@sentry/browser').then((Sentry) => Sentry.init({ dsn: sentryDsn }))
 
       const zoomDialog = document.getElementById('zoom-dialog') as HTMLDialogElement
       const zoomImg = document.getElementById('zoom-dialog-img') as HTMLImageElement
