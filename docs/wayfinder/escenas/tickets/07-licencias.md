@@ -1,12 +1,12 @@
 ---
 title: Licences for the manager's figure and the Tripo terms
 type: grilling
-status: open
+status: closed
 assignee:
 gate: owner
 blocked_by: []
-closed_as:
-gist:
+closed_as: decided
+gist: owner #71: keep the risk until go-live; owner accepts it for production
 ---
 
 ## Question
@@ -33,3 +33,7 @@ The G63 also has no licence on file. The owner accepted that risk for public pre
 
 The owner's answer is recorded, along with the updated `docs/licencias/tripo-figuras.md`, or a note saying why it
 did not change.
+
+## Resolution
+
+owner #71: keep the risk until go-live; owner accepts it for production
