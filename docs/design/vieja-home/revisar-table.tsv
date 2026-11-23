@@ -1,0 +1,21 @@
+check	value	threshold	result	where
+fixed-over-text-390	0 covered	0	pass	no fixed element covers text
+motion-frames	0 animations held	evidence	info	motion-0.png, motion-mid.png, motion-end.png
+motion-spec	1 animations, 0 off spec	props transform/opacity/translate/scale/rotate; no bands given	pass	none
+motion-scope	CSS transitions/animations and element.animate() only		info	rAF/JS-driven animations (framer layout, springs) are not seen: use recordVideo
+overflow-390	0 elements, scrollWidth 390	0, <= 390	pass	none
+tap-390	0 targets	0 under 44 px	pass	none
+contrast-390	0 elements	0	pass	none
+cls-390	0.000	<= 0.1	pass	layout-shift sum without recent input
+img-upscaled-390	6 upscaled	0 images below rendered width x DPR	FAIL	besos.webp 300 < 420 px; hqdefault.jpg 480 < 716 px; hqdefault.jpg 480 < 716 px; hqdefault.jpg 480 < 716 px; hqdefault.jpg 480 < 716 px; hqdefault.jpg 480 < 716 px
+weight-390	1.20 MB	<= 3 MB	pass	encoded bytes until idle, cache off
+lcp-bytes-390	text	<= 200 KB	pass	SPAN (text LCP)
+poster	2 videos, 0 without poster, 0 over 200 KB	every video has a poster <= LCP cap	pass	poster attribute and its bytes
+fixed-over-text-1440	0 covered	0	pass	no fixed element covers text
+overflow-1440	0 elements, scrollWidth 1440	0, <= 1440	pass	none
+contrast-1440	0 elements	0	pass	none
+glyphs	0 of 120 chars missing	0	pass	every char is in its font
+cls-1440	0.032	<= 0.1	pass	layout-shift sum without recent input
+img-upscaled-1440	2 upscaled	0 images below rendered width x DPR	FAIL	parada-1.webp 960 < 1440 px; hqdefault.jpg 480 < 644 px
+reduce-autoplay	0 videos playing	0	pass	reducedMotion: reduce at 390, after load
+motion	0 infinite animations, 0 videos playing	0 with reduced motion	pass	prefers-reduced-motion: reduce at 390

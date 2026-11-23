@@ -5,3 +5,5 @@
 /booking           /#contacto   301
 /booking/gracias   /                301
 /booking/*         /                301
+/anterior-home   /   301
+/anterior-home/  /   301

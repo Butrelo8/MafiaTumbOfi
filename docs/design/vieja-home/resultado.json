@@ -1,0 +1,250 @@
+{
+ "390": {
+  "responses": [
+   [
+    200,
+    "http://127.0.0.1:4421/?utm_source=ig&utm_medium=bio"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/base.DQgInNdQ.css"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/index.Bs_rG3C7.css"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/prototipo/parada-1.webp"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/icon/mafiatumbada.webp"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/index.astro_astro_type_script_index_0_lang.DyVnAFHH.js"
+   ],
+   [
+    206,
+    "http://127.0.0.1:4421/prototipo/ruta.mp4"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/prototipo/ruta-f0.jpg"
+   ],
+   [
+    206,
+    "http://127.0.0.1:4421/prototipo/bucle.mp4"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/prototipo/bucle-f0.jpg"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/saira-latin-400-normal.6Q3FbzbH.woff2"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/saira-latin-600-normal.DYxBFP1f.woff2"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/preload-helper.CVfkMyKi.js"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/clickEvents.CYbWtmXP.js"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/saira-condensed-latin-800-normal.Pyk8ZVcZ.woff2"
+   ],
+   [
+    204,
+    "http://127.0.0.1:4421/e"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/music/lv.webp"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/music/putifresa.webp"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/music/besos.webp"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/music/tal-vez.webp"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/music/la-bubu.webp"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/index.sWVIVptw.js"
+   ],
+   [
+    206,
+    "http://127.0.0.1:4421/prototipo/ruta.mp4"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/wa/5212283538827?text=Hola%20Mafia%20Tumbada%2C%20quiero%20informaci%C3%B3n%20para%20contratarlos.%20Mi%20evento%20es%20el%20%5Bfecha%5D%20en%20%5Bciudad%5D."
+   ]
+  ],
+  "failed": [
+   [
+    "http://127.0.0.1:4421/prototipo/ruta.mp4",
+    "net::ERR_ABORTED"
+   ]
+  ],
+  "beacons": [
+   "{\"t\":\"pv\",\"p\":\"/\",\"nd\":1,\"nm\":1,\"us\":\"ig\",\"um\":\"bio\"}",
+   "{\"t\":\"click\",\"id\":\"wa_click:contratacion\",\"p\":\"/\"}"
+  ],
+  "glb": [],
+  "title": "La Mafia Tumbada · Corridos tumbados desde Xalapa",
+  "robots": null,
+  "canonical": "https://mafiatumbada.com/",
+  "ld": true,
+  "og": 16,
+  "pv": 1,
+  "clickBeacons": [
+   "{\"t\":\"click\",\"id\":\"wa_click:contratacion\",\"p\":\"/\"}"
+  ]
+ },
+ "1440": {
+  "responses": [
+   [
+    200,
+    "http://127.0.0.1:4421/?utm_source=ig&utm_medium=bio"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/base.DQgInNdQ.css"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/index.Bs_rG3C7.css"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/prototipo/parada-1.webp"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/icon/mafiatumbada.webp"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/index.astro_astro_type_script_index_0_lang.DyVnAFHH.js"
+   ],
+   [
+    206,
+    "http://127.0.0.1:4421/prototipo/ruta.mp4"
+   ],
+   [
+    206,
+    "http://127.0.0.1:4421/prototipo/bucle.mp4"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/prototipo/ruta-f0.jpg"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/prototipo/bucle-f0.jpg"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/saira-latin-400-normal.6Q3FbzbH.woff2"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/saira-latin-600-normal.DYxBFP1f.woff2"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/preload-helper.CVfkMyKi.js"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/clickEvents.CYbWtmXP.js"
+   ],
+   [
+    204,
+    "http://127.0.0.1:4421/e"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/saira-condensed-latin-800-normal.Pyk8ZVcZ.woff2"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/music/putifresa.webp"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/music/lv.webp"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/music/besos.webp"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/_astro/index.sWVIVptw.js"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/music/tal-vez.webp"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/music/la-bubu.webp"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/music/no-te-he-olvidado.webp"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/music/sd.webp"
+   ],
+   [
+    206,
+    "http://127.0.0.1:4421/prototipo/ruta.mp4"
+   ],
+   [
+    200,
+    "http://127.0.0.1:4421/wa/5212283538827?text=Hola%20Mafia%20Tumbada%2C%20quiero%20informaci%C3%B3n%20para%20contratarlos.%20Mi%20evento%20es%20el%20%5Bfecha%5D%20en%20%5Bciudad%5D."
+   ]
+  ],
+  "failed": [
+   [
+    "http://127.0.0.1:4421/prototipo/ruta.mp4",
+    "net::ERR_ABORTED"
+   ]
+  ],
+  "beacons": [
+   "{\"t\":\"pv\",\"p\":\"/\",\"nd\":1,\"nm\":1,\"us\":\"ig\",\"um\":\"bio\"}",
+   "{\"t\":\"click\",\"id\":\"wa_click:contratacion\",\"p\":\"/\"}"
+  ],
+  "glb": [],
+  "title": "La Mafia Tumbada · Corridos tumbados desde Xalapa",
+  "robots": null,
+  "canonical": "https://mafiatumbada.com/",
+  "ld": true,
+  "og": 16,
+  "pv": 1,
+  "clickBeacons": [
+   "{\"t\":\"click\",\"id\":\"wa_click:contratacion\",\"p\":\"/\"}"
+  ]
+ }
+}
