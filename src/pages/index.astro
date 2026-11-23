@@ -61,10 +61,11 @@ const paradas = [
   <p id="creditos">Modelos: «Mitsubishi Fuso Canter» de Raed Almaharmah (CC BY 4.0, modificado),
     autos low-poly de Quaternius (CC0).</p>
   <script>
-    import { arrancar } from '../scripts/vivoSecciones'
     import { trackPageview } from '../lib/clickEvents'
+    import { trasPintar } from '../lib/trasPintar'
     trackPageview(document)
-    arrancar()
+    // three.js, the GLBs and the textures download after the first paint, so the h1 and the nav come first (page-first rule)
+    trasPintar(() => import('../scripts/vivoSecciones').then((m) => m.arrancar()))
   </script>
 </body>
 </html>

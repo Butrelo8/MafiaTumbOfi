@@ -1,0 +1,171 @@
+{
+ "url": "http://127.0.0.1:4602/",
+ "runs": [
+  {
+   "lcp": [
+    {
+     "t": 388,
+     "tag": "H1",
+     "id": "",
+     "url": "",
+     "size": 3708
+    }
+   ],
+   "h1Legible": 232,
+   "ttff": 7443,
+   "fcp": 388,
+   "inicio": {
+    "js": 93,
+    "escenaGlb": 1523,
+    "aperturaMp4": 434,
+    "pantallaMp4": 13087,
+    "poster": 93
+   },
+   "lcpFinal": {
+    "t": 388,
+    "tag": "H1",
+    "id": "",
+    "url": "",
+    "size": 3708
+   },
+   "ahora": 20287,
+   "errores": []
+  },
+  {
+   "lcp": [
+    {
+     "t": 236,
+     "tag": "H1",
+     "id": "",
+     "url": "",
+     "size": 3708
+    }
+   ],
+   "h1Legible": 217,
+   "ttff": 7734,
+   "fcp": 236,
+   "inicio": {
+    "js": 90,
+    "escenaGlb": 722,
+    "aperturaMp4": 335,
+    "pantallaMp4": 13378,
+    "poster": 90
+   },
+   "lcpFinal": {
+    "t": 236,
+    "tag": "H1",
+    "id": "",
+    "url": "",
+    "size": 3708
+   },
+   "ahora": 20147,
+   "errores": []
+  },
+  {
+   "lcp": [
+    {
+     "t": 232,
+     "tag": "H1",
+     "id": "",
+     "url": "",
+     "size": 3708
+    }
+   ],
+   "h1Legible": 217,
+   "ttff": 7929,
+   "fcp": 232,
+   "inicio": {
+    "js": 94,
+    "escenaGlb": 728,
+    "aperturaMp4": 337,
+    "pantallaMp4": 17034,
+    "poster": 94
+   },
+   "lcpFinal": {
+    "t": 232,
+    "tag": "H1",
+    "id": "",
+    "url": "",
+    "size": 3708
+   },
+   "ahora": 20256,
+   "errores": []
+  },
+  {
+   "lcp": [
+    {
+     "t": 224,
+     "tag": "H1",
+     "id": "",
+     "url": "",
+     "size": 3708
+    }
+   ],
+   "h1Legible": 211,
+   "ttff": 7705,
+   "fcp": 224,
+   "inicio": {
+    "js": 89,
+    "escenaGlb": 715,
+    "aperturaMp4": 327,
+    "pantallaMp4": 25260,
+    "poster": 89
+   },
+   "lcpFinal": {
+    "t": 224,
+    "tag": "H1",
+    "id": "",
+    "url": "",
+    "size": 3708
+   },
+   "ahora": 27778,
+   "errores": []
+  },
+  {
+   "lcp": [
+    {
+     "t": 224,
+     "tag": "H1",
+     "id": "",
+     "url": "",
+     "size": 3708
+    }
+   ],
+   "h1Legible": 210,
+   "ttff": 7623,
+   "fcp": 224,
+   "inicio": {
+    "js": 91,
+    "escenaGlb": 712,
+    "aperturaMp4": 346,
+    "pantallaMp4": 25240,
+    "poster": 91
+   },
+   "lcpFinal": {
+    "t": 224,
+    "tag": "H1",
+    "id": "",
+    "url": "",
+    "size": 3708
+   },
+   "ahora": 30364,
+   "errores": []
+  }
+ ],
+ "condiciones": {
+  "viewport": "390x844 @2x",
+  "cpu": "4x",
+  "red": "Fast 4G 9 Mbps / 1.5 Mbps / 60 ms",
+  "ua": "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36",
+  "navegador": "157.0.8103.50"
+ },
+ "mediana": {
+  "lcp": 232,
+  "fcp": 232,
+  "h1Legible": 217,
+  "ttff": 7705
+ },
+ "elementoLcp": [
+  "H1# "
+ ]
+}

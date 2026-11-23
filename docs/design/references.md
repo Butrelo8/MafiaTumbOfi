@@ -308,3 +308,15 @@ Gate: `refs-check.py <this section> --sections bake,glare,cabina,llovizna,led,ro
 |---|---|---|---|
 | caja (stop 2) | owner refs `8.png`, `9.png`, `10.png`: the "G-Wagen Basic Carrier Bars, Three Crossbars" for the W463A (g-wagenaccessories.com) | Matched: three silver aero crossbars across the roof, black plastic feet with a rounded block, a lock cylinder on the outer face and a clamp plate on the gutter rail, spaced front / middle / back (`blender/g63_rack.py`). Changed: no Mercedes star on the feet (owner), bars 58 x 34 mm so they read from the Caja camera 6 m away, and the band's own load (instrument cases, the donut, the alien) under a net | M |
 | caja (stop 2) | user: no library entry for a roof tie-down. Three variants compared in one still (`/mnt/e/tmp/mto-g63-nuevo/stills/var-*.png`): square net (7 mm rope, 22 cm cells), ratchet straps, diagonal wire | Net kept: it is the only one that reads as holding the whole load at 6 m and stays 4,800 triangles; the straps read as handles on the cases, the wire lattice shimmers | B |
+
+## Page-first opening (2026-11-23, wayfinder `escenas` ticket 01; owner rule 06:16)
+
+The look does not change (same writing, clip, fade, scene); only the order things load in and the layering. Rows below are the
+library's evidence for that order. Gate: `python3 -I ~/projects/visual-lab/web/scripts/refs-check.py docs/design/references.md --sections apertura-carga`
+
+| section | library entry | borrow | cost |
+|---|---|---|---|
+| apertura-carga | cuberto.com · the H1 stays the LCP, the phone gets no video bytes at load · `web/site-reading-fichas/cuberto-com.md#speed-and-weight-lab-numbers` | The h1 and the nav paint first and stay readable and usable; `apertura.mp4`, three.js and the GLBs start only after the first paint (`src/lib/trasPintar.ts`) | B |
+| apertura-carga | henriheymans.com · a "Click to enter" gate, no H1, no content in the fold · `web/site-reading-fichas/henriheymans-com.md#look` | The trap to avoid: the intro never gates the page; no `inert`, no pointer-blocking layer, and a nav click ends the intro | B |
+| apertura-carga | coastveracruz.com · a 10 MB hero gave 8.1 s mobile LCP · `web/site-reading-fichas/coastveracruz-com.md#look` | The clip (0.69 MB) is not fetched in the first paint's queue and the scene's GLBs do not share the pipe with the h1 | B |
+| apertura-carga | arraisballet · smooth video hero, poster = first frame · `web/visuales.md#recipe-smooth-video-hero` | Unchanged: the clip's first frame is its poster (`apertura-f0.jpg`); the hand-off to the scene is the same 500 ms fade once the canvas has its first frame | B |

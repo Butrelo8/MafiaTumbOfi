@@ -1,7 +1,8 @@
 ---
-// The opening (owner 2026-11-18 12:32, ported to the live home 2026-11-19): "MTO" is written while the page buffers, then
+// The opening (owner 2026-11-18 12:32, ported to the live home 2026-11-19): "MTO" is written from the first paint, then
 // public/prototipo/apertura.mp4 (a camera descent from above the truck into the cab) plays once and fades into the live scene at
-// its first stop. Wired in src/scripts/apertura.ts. Written on cc/sitio-completo (3404349) for the video home; here the hand-off
+// its first stop. Since 2026-11-23 it is a background layer under the h1 and the nav, never an overlay that blocks them.
+// Wired in src/scripts/apertura.ts. Written on cc/sitio-completo (3404349) for the video home; here the hand-off
 // waits for the live canvas (html[data-listo]) instead of the run's frame 0. Trace: DESIGN.md › Opening.
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
@@ -39,8 +40,8 @@ const poster = publico('apertura-f0.jpg')
 )}
 
 <style is:global>
-  .apertura { --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1); position: fixed; inset: 0; z-index: 30; background: var(--bg); display: grid; place-items: center; transition: opacity 0.5s var(--ease-out); }
-  .apertura.se-va { opacity: 0; pointer-events: none; }
+  .apertura { --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1); position: fixed; inset: 0; z-index: 2; /* the h1 and the nav (z 2, later in the DOM) paint over it */ background: var(--bg); display: grid; place-items: center; pointer-events: none; transition: opacity 0.5s var(--ease-out); }
+  .apertura.se-va { opacity: 0; }
   .sin-apertura .apertura { display: none; }
   .escritura { width: min(72vw, 560px); height: auto; overflow: visible; transition: opacity 0.3s var(--ease-out); }
   .apertura.con-video .escritura { opacity: 0; }
@@ -51,11 +52,8 @@ const poster = publico('apertura-f0.jpg')
   @keyframes rellena { to { fill-opacity: 1; } }
   .apertura .video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
   .apertura.con-video .video { opacity: 1; }
-  .saltar-apertura { position: absolute; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); min-height: 44px; min-width: 44px; padding: 0 18px;
+  .saltar-apertura { position: absolute; right: 16px; bottom: calc(max(16px, env(safe-area-inset-bottom)) + 60px); /* above the nav row */ pointer-events: auto; min-height: 44px; min-width: 44px; padding: 0 18px;
     border: 0; border-radius: 999px; background: var(--panel); color: var(--muted); font: 600 15px/1 'Archivo', system-ui, sans-serif; cursor: pointer; }
   .saltar-apertura:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
-  /* the page's own controls come in once the opening leaves; the scene itself does not change */
-  html.entra nav { animation: entra 0.5s var(--ease-out, ease-out) both; }
-  @keyframes entra { from { opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .apertura { display: none; } }
 </style>

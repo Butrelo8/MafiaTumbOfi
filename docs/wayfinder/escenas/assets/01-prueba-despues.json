@@ -1,0 +1,41 @@
+{
+ "url": "http://127.0.0.1:4602/",
+ "antes": {
+  "apertura": true,
+  "scrollable": 0,
+  "inert": false,
+  "tapa": [
+   [
+    "h1",
+    true
+   ],
+   [
+    "#p-cabina",
+    true
+   ],
+   [
+    "#p-placa",
+    true
+   ]
+  ]
+ },
+ "entradas": {
+  "wheel": 1,
+  "wheelCancelado": 0,
+  "touchmove": 4,
+  "touchmoveCancelado": 0,
+  "fcp": 356,
+  "scrollY": 0,
+  "aperturaSigue": true
+ },
+ "tabs": [
+  "apertura-saltar",
+  "p-cabina",
+  "p-caja",
+  "p-pantalla"
+ ],
+ "despues": {
+  "aperturaSigue": false,
+  "actual": "p-caja"
+ }
+}
