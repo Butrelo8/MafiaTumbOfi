@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { bandSocialUrls } from '../../research/contenido/socials'
-import { classifyLink, clickId, nologCookie, visitFlags } from './clickEvents'
+import { classifyLink, clickId, nologCookie, sourceFields, visitFlags } from './clickEvents'
 
 const host = 'mafiatumbada.com'
 
@@ -57,5 +57,22 @@ describe('visitFlags', () => {
   test('a storage that throws sends nothing extra', () => {
     const boom = { getItem: () => { throw new Error('denied') }, setItem: () => { throw new Error('denied') } }
     expect(visitFlags(boom)).toEqual({})
+  })
+})
+
+describe('sourceFields', () => {
+  test('referrer host without www, lowercased; UTMs trimmed, lowercased and capped at 64', () => {
+    expect(sourceFields('https://WWW.Instagram.com/p/x?y=1', host, '?utm_source=%20IG%20&utm_medium=Social&utm_campaign=' + 'a'.repeat(70))).toEqual({
+      r: 'instagram.com',
+      us: 'ig',
+      um: 'social',
+      uc: 'a'.repeat(64),
+    })
+  })
+  test('empty, same-host (with or without www) and malformed referrers are omitted, as are missing UTMs', () => {
+    expect(sourceFields('', host, '')).toEqual({})
+    expect(sourceFields('https://www.mafiatumbada.com/', host, '')).toEqual({})
+    expect(sourceFields('https://mafiatumbada.com/x', host, '?utm_source=')).toEqual({})
+    expect(sourceFields('not a url', host, '?foo=1')).toEqual({})
   })
 })

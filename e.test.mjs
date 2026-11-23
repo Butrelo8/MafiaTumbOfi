@@ -5,9 +5,12 @@ import { e } from './e.js'
 
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Instagram 300.0'
 const ae = () => { const rows = []; return { rows, writeDataPoint: (r) => rows.push(r) } }
-const post = (body, { ua = UA, origin, cookie, method = 'POST', env } = {}) =>
-  e(new Request('https://mafiatumbada.com/e', { method, body: typeof body === 'string' ? body : JSON.stringify(body),
-    headers: { ...(ua ? { 'User-Agent': ua } : {}), ...(origin ? { Origin: origin } : {}), ...(cookie ? { Cookie: cookie } : {}) } }), env)
+const post = (body, { ua = UA, origin, cookie, method = 'POST', env, cf } = {}) => {
+  const req = new Request('https://mafiatumbada.com/e', { method, body: typeof body === 'string' ? body : JSON.stringify(body),
+    headers: { ...(ua ? { 'User-Agent': ua } : {}), ...(origin ? { Origin: origin } : {}), ...(cookie ? { Cookie: cookie } : {}) } })
+  if (cf) Object.defineProperty(req, 'cf', { value: cf })
+  return e(req, env)
+}
 
 test('a click writes one row: event, net, page, placement and nothing else', async () => {
   const env = { MTO_EVENTS: ae() }
@@ -40,7 +43,7 @@ test('contract: a page view and a click write t, path, id, a count of 1 and no u
   assert.equal((await post({ t: 'pv', p: '/anterior-home', ip: '1.2.3.4' }, { env })).status, 204)
   assert.equal((await post({ t: 'click', id: 'follow_click:spotify:hero', p: '/' }, { env })).status, 204)
   assert.deepEqual(env.MTO_EVENTS.rows, [
-    { indexes: ['pv'], blobs: ['pv', '/anterior-home', ''], doubles: [1, 0, 0] },
+    { indexes: ['pv'], blobs: ['pv', '/anterior-home', '', '', '', '', '', '', '', ''], doubles: [1, 0, 0] },
     { indexes: ['click'], blobs: ['click', '/', 'follow_click:spotify:hero'], doubles: [1, 0, 0] },
   ])
 })
@@ -90,4 +93,34 @@ test('unique flags: bots and nolog are dropped even with nd and nm', async () =>
   await post({ t: 'pv', p: '/', nd: 1, nm: 1 }, { ua: 'HeadlessChrome', env })
   await post({ t: 'pv', p: '/', nd: 1, nm: 1 }, { cookie: 'nolog=1', env })
   assert.equal(env.MTO_EVENTS.rows.length, 0)
+})
+
+const CF = { country: 'MX', region: 'Veracruz', city: 'Boca del Río', ip: '1.2.3.4' }
+
+test('sources: a pv with referrer, all UTMs and cf appends 7 blobs in order; the IP is never written', async () => {
+  const env = { MTO_EVENTS: ae() }
+  await post({ t: 'pv', p: '/', r: 'instagram.com', us: 'ig', um: 'social', uc: 'lanzamiento-1' }, { env, cf: CF })
+  assert.deepEqual(env.MTO_EVENTS.rows, [{ indexes: ['pv'], blobs: ['pv', '/', '', 'instagram.com', 'ig', 'social', 'lanzamiento-1', 'MX', 'Veracruz', 'Boca del Río'], doubles: [1, 0, 0] }])
+  assert.ok(!JSON.stringify(env.MTO_EVENTS.rows).includes('1.2.3.4'))
+})
+
+test('sources: missing fields and a missing cf give empty strings', async () => {
+  const env = { MTO_EVENTS: ae() }
+  await post({ t: 'pv', p: '/' }, { env })
+  await post({ t: 'pv', p: '/', r: '' }, { env, cf: { country: 'US' } })
+  assert.deepEqual(env.MTO_EVENTS.rows.map((r) => r.blobs.slice(3)), [['', '', '', '', '', '', ''], ['', '', '', '', 'US', '', '']])
+})
+
+test('sources: values are trimmed and lowercased; over-long, non-string or junk ones are dropped, never a 400 and the pv still counts', async () => {
+  const env = { MTO_EVENTS: ae() }
+  await post({ t: 'pv', p: '/', r: ' L.Facebook.com ', us: ' IG ' }, { env })
+  const res = await post({ t: 'pv', p: '/', r: 'x'.repeat(65), us: '<script>', um: 5, uc: 'a b' }, { env })
+  assert.equal(res.status, 204)
+  assert.deepEqual(env.MTO_EVENTS.rows.map((r) => r.blobs.slice(3, 7)), [['l.facebook.com', 'ig', '', ''], ['', '', '', '']])
+})
+
+test('sources: a click ignores referrer, UTMs and cf and keeps the old layout', async () => {
+  const env = { MTO_EVENTS: ae() }
+  await post({ t: 'click', id: 'wa_click', p: '/', r: 'instagram.com', us: 'ig' }, { env, cf: CF })
+  assert.deepEqual(env.MTO_EVENTS.rows, [{ indexes: ['click'], blobs: ['click', '/', 'wa_click'], doubles: [1, 0, 0] }])
 })

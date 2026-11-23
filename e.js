@@ -2,6 +2,7 @@
 // Two body shapes, nothing else is stored (no IP, no user agent, no country, no cookie value):
 //  - contract (all sites): {"t":"pv","p":"/path"} or {"t":"click","id":"<button-id>","p":"/path"}
 //    Row: index1 = t; blob1 = t, blob2 = p, blob3 = id or "", double1 = 1, double2 = nd, double3 = nm.
+//    pv rows append 7 blobs: referrer host, utm_source, utm_medium, utm_campaign (from r, us, um, uc), then request.cf country, region, city (never the IP).
 //    nd / nm (pv only) are 1 when the page says it is this device's first visit of the day / month (kept in its localStorage as two
 //    dates, no id): unique visitors per day = sum(double2), per month = sum(double3), over t = 'pv'. Anything but 1 counts as 0.
 //  - legacy clicks: {event, net, page, placement}. Row: index1 = event; blob1 = event, blob2 = net, blob3 = page, blob4 = placement.
@@ -17,14 +18,21 @@ const EVENTS = new Set(['wa_click', 'contact_click', 'follow_click'])
 const NETS = new Set(['spotify', 'instagram', 'youtube', 'tiktok', 'facebook', 'apple_music'])
 const PLACEMENT = /^[a-z_]{1,20}$/
 const PAGE = /^\/[a-z0-9\-/]{0,60}$/
+const SOURCE = /^[a-z0-9._-]{1,64}$/
 const CLICK_ID = /^[a-z0-9_:\-]{1,60}$/
 
 function record(env, event, { net = '', page = '/', placement = '' } = {}) {
   env.MTO_EVENTS?.writeDataPoint({ indexes: [event], blobs: [event, net, page, placement] })
 }
 
-function recordContract(env, t, p, id, nd, nm) {
-  env.MTO_EVENTS?.writeDataPoint({ indexes: [t], blobs: [t, p, id], doubles: [1, nd, nm] })
+function recordContract(env, t, p, id, nd, nm, extra = []) {
+  env.MTO_EVENTS?.writeDataPoint({ indexes: [t], blobs: [t, p, id, ...extra], doubles: [1, nd, nm] })
+}
+
+// pv sources: r (referrer host), us/um/uc (utm_*): string, trimmed, lowercased, 1-64 of [a-z0-9._-], else '' (the pv still counts).
+function source(v) {
+  const s = typeof v === 'string' ? v.trim().toLowerCase() : ''
+  return SOURCE.test(s) ? s : ''
 }
 
 export async function e(request, env) {
@@ -46,7 +54,9 @@ export async function e(request, env) {
     if (typeof d.p === 'string' && PAGE.test(d.p) &&
       ((d.t === 'pv' && id === '') || (d.t === 'click' && CLICK_ID.test(id)))) {
       const pv = d.t === 'pv'
-      recordContract(env, d.t, d.p, id, pv && d.nd === 1 ? 1 : 0, pv && d.nm === 1 ? 1 : 0)
+      const cf = request.cf || {}
+      const extra = pv ? [source(d.r), source(d.us), source(d.um), source(d.uc), cf.country || '', cf.region || '', cf.city || ''] : []
+      recordContract(env, d.t, d.p, id, pv && d.nd === 1 ? 1 : 0, pv && d.nm === 1 ? 1 : 0, extra)
     }
     return new Response(null, { status: 204 })
   }

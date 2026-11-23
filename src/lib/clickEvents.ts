@@ -70,6 +70,22 @@ export function visitFlags(storage: Pick<Storage, 'getItem' | 'setItem'>, now: D
   return flags
 }
 
+/** Where a visit came from, for the pv beacon: referrer host (no www, not our own) and utm_source/medium/campaign (trimmed, lowercased, max 64). Empty ones are omitted. */
+export function sourceFields(referrer: string, pageHost: string, search: string): { r?: string; us?: string; um?: string; uc?: string } {
+  const clean = (v: string | null) => (v ?? '').trim().toLowerCase().slice(0, 64)
+  const www = (h: string) => h.toLowerCase().replace(/^www\./, '')
+  let r = ''
+  try { r = www(new URL(referrer).hostname) } catch {}
+  const q = new URLSearchParams(search)
+  const out: { r?: string; us?: string; um?: string; uc?: string } = {}
+  if (r && r !== www(pageHost)) out.r = r
+  for (const [key, param] of [['us', 'utm_source'], ['um', 'utm_medium'], ['uc', 'utm_campaign']] as const) {
+    const v = clean(q.get(param))
+    if (v) out[key] = v
+  }
+  return out
+}
+
 /** One page view per load. A ?nolog flag updates the opt-out cookie; the owner's own visit with ?nolog=1 is not sent. */
 export function trackPageview(doc: Document, endpoint = '/e'): void {
   const cookie = nologCookie(location.search)
@@ -77,7 +93,7 @@ export function trackPageview(doc: Document, endpoint = '/e'): void {
   if (new URLSearchParams(location.search).get('nolog') === '1') return
   let flags = {}
   try { flags = visitFlags(localStorage) } catch {}
-  beacon(endpoint, { t: 'pv', p: location.pathname, ...flags })
+  beacon(endpoint, { t: 'pv', p: location.pathname, ...flags, ...sourceFields(doc.referrer, location.host, location.search) })
 }
 
 export function trackClicks(doc: Document, endpoint = '/e'): void {
