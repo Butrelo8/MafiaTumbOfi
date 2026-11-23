@@ -2,8 +2,9 @@
 // bytes=0-1 antes de reproducir un <video> y sin 206 se niega; el hero queda en opacity 0
 // (se revela con `loadeddata`) y la portada se ve vacía. El rango se resuelve aquí.
 // Solo corre para /video/*, /prototipo/* (la ruta y el bucle de la escena son <video> con rango), /vivo/*.mp4 (la pantalla de /vivo-secciones, VideoTexture), /wa/* (toques de WhatsApp, wa.js) y /e (eventos de clic, e.js) (run_worker_first en wrangler.jsonc); el resto lo sirven los assets.
-// ponytail: carga el archivo completo en memoria. El hero pesa 10 MB contra un límite de 128 MB;
-// si entra un video grande, pasarlo a R2.
+// El rango se recorta del stream (se saltan los bytes previos y se cancela el origen al terminar el rango):
+// ni memoria ni CPU crecen con el tamaño del archivo y los primeros bytes salen de inmediato.
+// Sin Content-Length en el origen cae a cargar el archivo completo.
 import { wa } from './wa.js'
 import { e } from './e.js'
 
@@ -25,14 +26,15 @@ export default {
     const range = /^bytes=(\d*)-(\d*)$/.exec((request.headers.get('Range') || '').trim())
     if (!range) return new Response(response.body, { status: 200, headers })
 
-    const body = await response.arrayBuffer()
-    const size = body.byteLength
+    const known = Number(response.headers.get('Content-Length'))
+    const buffered = known > 0 ? null : await response.arrayBuffer()
+    const size = buffered ? buffered.byteLength : known
     const [, from, to] = range
     const start = from === '' ? size - Number(to) : Number(from)
     const end = from === '' || to === '' ? size - 1 : Number(to)
     const last = Math.min(end, size - 1)
 
-    if (from === '' && to === '') return new Response(body, { status: 200, headers })
+    if (from === '' && to === '') return new Response(buffered ?? response.body, { status: 200, headers })
     if (start < 0 || start >= size || start > last) {
       headers.set('Content-Range', `bytes */${size}`)
       return new Response(null, { status: 416, headers })
@@ -40,6 +42,20 @@ export default {
 
     headers.set('Content-Range', `bytes ${start}-${last}/${size}`)
     headers.set('Content-Length', String(last - start + 1))
-    return new Response(body.slice(start, last + 1), { status: 206, headers })
+    return new Response(buffered ? buffered.slice(start, last + 1) : slice(response.body, start, last - start + 1), { status: 206, headers })
   },
+}
+
+// Un stream de `length` bytes que empieza `start` bytes dentro de `body`; al completarlos cierra la salida y cancela el origen.
+function slice(body, start, length) {
+  let skip = start, left = length
+  return body.pipeThrough(new TransformStream({
+    transform(chunk, controller) {
+      if (skip >= chunk.byteLength) { skip -= chunk.byteLength; return }
+      const part = chunk.subarray(skip, skip + left)
+      skip = 0; left -= part.byteLength
+      controller.enqueue(part)
+      if (left <= 0) controller.terminate()
+    },
+  }))
 }
